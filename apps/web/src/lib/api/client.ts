@@ -1,6 +1,16 @@
 import type { ApiResponse } from '@bookquest/shared';
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api/v1';
+// Fail loudly at load time rather than silently falling back — a wrong base
+// URL surfaces as confusing network errors far from this file otherwise.
+function readBaseUrl(): string {
+  const value = import.meta.env.VITE_API_URL;
+  if (!value) {
+    throw new Error('VITE_API_URL is not set. Add it to the repo-root .env (see .env.example).');
+  }
+  return value;
+}
+
+const BASE_URL = readBaseUrl();
 
 /**
  * Thrown for any non-successful response. It carries the per-field messages
