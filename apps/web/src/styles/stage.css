@@ -85,7 +85,13 @@
 /* ── Layout ───────────────────────────────────────────────────────── */
 
 /* The Home screen's own shell. Two of the ported breakpoints tune it, so it
-   travels with the stage rather than living in the component layer. */
+   travels with the stage rather than living in the component layer.
+
+   `.view--home` and `.home` are layout only. Despite the name prefix they are
+   NOT part of the `.view` / `.is-on` / `.is-entering` route-transition system,
+   which this stylesheet deliberately does not port — do not delete them as
+   transition leftovers. `.view--home` gives the screen its height and, at
+   ≥900px, the clearance that keeps the CTA out from under the fixed tab bar. */
 .view--home {
   min-height: 100dvh;
 }
@@ -675,7 +681,8 @@
     padding-bottom: clamp(2rem, 6vh, 4rem);
   }
 
-  /* Keep the stage clear of the fixed desktop tab bar */
+  /* Keep the stage clear of the fixed desktop tab bar. Layout, not a route
+     transition — see the note on `.view--home` above. */
   .view--home {
     padding-bottom: 4rem;
   }
