@@ -1,4 +1,5 @@
 import type { ApiResponse } from '@bookquest/shared';
+import { clearToken, readToken } from '@/lib/auth/tokenStore';
 
 // Fail loudly at load time rather than silently falling back — a wrong base
 // URL surfaces as confusing network errors far from this file otherwise.
@@ -11,6 +12,9 @@ function readBaseUrl(): string {
 }
 
 const BASE_URL = readBaseUrl();
+
+/** The login exchange is what we would retry *with*, so its own 401 is final. */
+const LOGIN_PATH = '/auth/telegram';
 
 /**
  * Thrown for any non-successful response. It carries the per-field messages
@@ -34,17 +38,49 @@ interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown;
 }
 
-export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+/**
+ * Signs in again from the Telegram bridge and resolves to a fresh token, or to
+ * null when there is nothing to sign in with.
+ */
+type Reauthenticate = () => Promise<string | null>;
+
+let reauthenticate: Reauthenticate | null = null;
+
+/**
+ * The auth layer hands this in at boot. It cannot be imported directly: the
+ * auth layer already imports this module, so the dependency has to point one
+ * way and the re-login has to arrive from outside.
+ */
+export function registerReauthenticate(fn: Reauthenticate): void {
+  reauthenticate = fn;
+}
+
+function send(path: string, options: RequestOptions, token: string | null): Promise<Response> {
   const { body, headers, ...rest } = options;
 
-  const response = await fetch(`${BASE_URL}${path}`, {
+  return fetch(`${BASE_URL}${path}`, {
     ...rest,
     headers: {
       ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      ...(token === null ? {} : { Authorization: `Bearer ${token}` }),
       ...headers
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) })
   });
+}
+
+export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  let response = await send(path, options, readToken());
+
+  // A 401 means the stored token is dead, whatever it looked like. Drop it and
+  // try the sign-in exchange exactly once, then replay. Never a loop: a second
+  // 401 with a token minted seconds ago is a broken session layer, not a stale
+  // token, and the caller should see the error.
+  if (response.status === 401 && path !== LOGIN_PATH) {
+    clearToken();
+    const token = reauthenticate === null ? null : await reauthenticate();
+    if (token !== null) response = await send(path, options, token);
+  }
 
   const payload = (await response.json().catch(() => null)) as ApiResponse<T> | null;
 
