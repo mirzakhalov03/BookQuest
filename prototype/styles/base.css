@@ -1,0 +1,122 @@
+/* ============================================================
+   Reset, ground, atmosphere, view system
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: var(--t-md);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  position: relative;
+}
+
+h1, h2, h3, p, dl, dd { margin: 0; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+input  { font: inherit; color: inherit; }
+svg { display: block; }
+a { color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ── Atmosphere ────────────────────────────────────────────────
+   Three fixed layers behind every view:
+   1. page ruling — the faint horizontal lines of a set text block
+   2. wash        — warm light pooling toward the upper centre
+   3. grain       — paper tooth, kept subtle enough to read as texture */
+
+.atmos { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+.atmos__rules {
+  position: absolute; inset: -10%;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(232, 223, 210, 0.07) 0 1px,
+    transparent 1px 34px
+  );
+  -webkit-mask-image: radial-gradient(ellipse 62% 55% at 50% 42%, transparent 12%, #000 78%);
+  mask-image: radial-gradient(ellipse 62% 55% at 50% 42%, transparent 12%, #000 78%);
+  opacity: 0.7;
+}
+
+.atmos__wash {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(70% 48% at 50% 6%,  rgba(240, 160, 60, 0.16), transparent 68%),
+    radial-gradient(48% 38% at 50% 34%, rgba(226, 99, 42, 0.13),  transparent 72%),
+    radial-gradient(120% 90% at 50% 108%, rgba(10, 7, 5, 0.92), transparent 60%),
+    linear-gradient(180deg, #17120D 0%, var(--ink) 38%, var(--void) 100%);
+}
+
+.atmos__grain {
+  position: absolute; inset: 0;
+  opacity: 0.30;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* ── View system ─────────────────────────────────────────────── */
+
+.view {
+  position: relative;
+  z-index: 1;
+  display: none;
+  min-height: 100dvh;
+  flex-direction: column;
+}
+.view.is-on { display: flex; }
+
+.view.is-entering { animation: view-in var(--mid) var(--ease-out) both; }
+.view.is-leaving  {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  animation: view-out 260ms var(--ease-soft) both;
+  pointer-events: none;
+}
+
+@keyframes view-in  { from { opacity: 0; transform: translateY(14px); } }
+@keyframes view-out { to   { opacity: 0; transform: translateY(-10px); } }
+
+/* ── Shared editorial pieces ─────────────────────────────────── */
+
+.tag {
+  font-size: var(--t-micro);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--taupe);
+  margin: 0;
+}
+
+.lede {
+  font-size: var(--t-md);
+  line-height: 1.66;
+  color: var(--paper-dim);
+  max-width: 34ch;
+}
+
+.hr-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rule-gold) 22%, var(--rule-gold) 78%, transparent);
+}
+
+/* ── Reduced motion ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

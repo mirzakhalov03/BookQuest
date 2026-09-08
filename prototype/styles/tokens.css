@@ -1,0 +1,77 @@
+/* ============================================================
+   BookQuest — design tokens
+   Everything visual is declared once, here. Views only compose.
+   ============================================================ */
+
+:root {
+  /* ── Colour ────────────────────────────────────────────────
+     Warm brown-blacks, not tinted greys. The ground should feel
+     like unlit paper stock, never like a neutral UI surface.   */
+  --void:        #0A0705;   /* deepest ground, page vignette   */
+  --ink:         #14100C;   /* base surface                    */
+  --ash:         #211B15;   /* raised surface, inputs          */
+  --ash-hi:      #2C241C;   /* hover / focus surface           */
+
+  --paper:       #E8DFD2;   /* primary text — warm off-white   */
+  --paper-dim:   #C4B7A6;   /* secondary text                  */
+  --taupe:       #9A8C7C;   /* labels, captions                */
+  --taupe-dim:   #7E7263;   /* hairlines on dark, quiet meta   */
+
+  --ember:       #E2632A;   /* the one loud colour             */
+  --ember-deep:  #A83F16;   /* pressed / shadowed ember        */
+  --amber:       #F0A03C;   /* light, glow, spotlight warmth   */
+  --gold:        #C8A24A;   /* used sparingly: rules, winners  */
+  --gold-soft:   #E3C77E;   /* gold text at small sizes        */
+
+  --rule:        rgba(232, 223, 210, 0.10);
+  --rule-strong: rgba(232, 223, 210, 0.20);
+  --rule-gold:   rgba(200, 162, 74, 0.28);
+
+  /* ── Type ─────────────────────────────────────────────────
+     One family, two widths. Archivo's width axis does the work
+     a second typeface would normally do: display type runs wide
+     and heavy, body type runs normal. Nothing else changes.    */
+  --display: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --sans:    "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --wide:      118%;   /* width axis for display type   */
+  --wide-tight: 108%;  /* width axis for large numerals */
+
+  --t-hero:  clamp(3.1rem, 12.5vw, 8.5rem);
+  --t-xl:    clamp(2.2rem, 7vw, 3.4rem);
+  --t-lg:    clamp(1.5rem, 4.4vw, 2.1rem);
+  --t-md:    1.0625rem;
+  --t-sm:    0.875rem;
+  --t-xs:    0.75rem;
+  --t-micro: 0.6875rem;
+
+  --track-label: 0.16em;   /* the only place letterspacing is used */
+
+  /* ── Space ── */
+  --s1: 0.25rem;  --s2: 0.5rem;   --s3: 0.75rem;  --s4: 1rem;
+  --s5: 1.5rem;   --s6: 2rem;     --s7: 3rem;     --s8: 4.5rem;
+
+  /* ── Motion ── */
+  --ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.32, 0.72, 0.22, 1);
+  --fast: 180ms;
+  --mid:  420ms;
+  --slow: 900ms;
+
+  /* ── Book geometry (overridden per breakpoint) ── */
+  --book-w: clamp(138px, 43vw, 190px);
+  --book-h: calc(var(--book-w) * 1.47);
+  --book-d: clamp(24px, 6.5vw, 32px);
+  --book-tilt: 27deg;   /* positive turns the cover right, showing the spine */
+
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --tabbar-h: 4.25rem;
+}
+
+@media (min-width: 900px) {
+  :root {
+    --book-w: clamp(210px, 16vw, 262px);
+    --book-d: clamp(36px, 2.9vw, 46px);
+    --book-tilt: 29deg;
+  }
+}

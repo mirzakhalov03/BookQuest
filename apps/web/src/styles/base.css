@@ -1,0 +1,64 @@
+/**
+ * Everything here is either a token that Tailwind cannot express as a utility,
+ * or a rule that must apply globally. Component styling belongs in components.
+ */
+
+:root {
+  --rule: rgb(232 223 210 / 0.1);
+  --rule-strong: rgb(232 223 210 / 0.2);
+  --rule-gold: rgb(200 162 74 / 0.28);
+
+  /* Display type runs wide; body type runs normal width. */
+  --wide: 118%;
+  --wide-tight: 108%;
+
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --tabbar-h: 4.25rem;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Display type: the wide, heavy end of the Archivo width axis. */
+.type-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-stretch: var(--wide);
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+}
+
+/* Small uppercase label, used for stage captions and field labels. */
+.type-label {
+  font-size: 0.6875rem;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-taupe);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

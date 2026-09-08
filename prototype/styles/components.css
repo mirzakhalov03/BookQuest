@@ -1,0 +1,291 @@
+/* ============================================================
+   Components — buttons, fields, tabs, toast, prototype panel
+   ============================================================ */
+
+/* ── Button ───────────────────────────────────────────────────
+   A solid block of ember with a warm bloom under it. No pill,
+   no gradient, no border. It is the only filled surface in the
+   whole interface, which is what makes it read as the action. */
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7em;
+  min-height: 3.25rem;
+  padding: 0 1.6rem;
+  border-radius: 3px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  transition: transform var(--fast) var(--ease-soft),
+              background-color var(--fast) linear,
+              box-shadow var(--fast) linear;
+}
+
+.btn--primary {
+  background: var(--ember);
+  color: #170F09;
+  box-shadow:
+    0 0 0 1px rgba(255, 190, 120, 0.22) inset,
+    0 10px 30px -14px rgba(226, 99, 42, 0.7),
+    0 2px 0 0 var(--ember-deep);
+}
+.btn--primary:hover { background: #EC6E33; }
+.btn--primary:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 0 0 1px rgba(255, 190, 120, 0.18) inset,
+    0 4px 16px -10px rgba(226, 99, 42, 0.7),
+    0 0 0 0 var(--ember-deep);
+}
+.btn--wide { width: min(100%, 22rem); }
+
+.btn__arrow {
+  width: 22px; height: 11px;
+  fill: none; stroke: currentColor;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  transition: transform var(--fast) var(--ease-soft);
+}
+.btn:hover .btn__arrow  { transform: translateX(3px); }
+.btn:active .btn__arrow { transform: translateX(1px); }
+
+.btn[disabled] { opacity: 0.5; pointer-events: none; }
+
+/* Gold variant — reserved for finished quests and winner moments */
+.btn--gold {
+  background: var(--gold);
+  box-shadow:
+    0 0 0 1px rgba(255, 233, 178, 0.25) inset,
+    0 10px 34px -12px rgba(200, 162, 74, 0.8),
+    0 2px 0 0 #8A6C25;
+}
+.btn--gold:hover { background: #D5AF57; }
+
+/* ── Field ────────────────────────────────────────────────────
+   Ruled fields, not boxes. The rule is the paper line the name
+   is written on; it lights up when the pen is there.            */
+
+.field { display: grid; gap: 0.4rem; }
+
+.field__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s4);
+}
+
+.field__label {
+  font-size: var(--t-micro);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+.field__input {
+  width: 100%;
+  height: 3.25rem;
+  padding: 0 0.15rem;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--rule-strong);
+  border-radius: 0;
+  font-family: var(--sans);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--paper);
+  transition: border-color var(--fast) linear, background-color var(--fast) linear;
+}
+.field__input::placeholder { color: var(--taupe); font-weight: 400; font-size: 1rem; }
+.field__input:focus {
+  outline: none;
+  border-bottom-color: var(--ember);
+  background: linear-gradient(180deg, transparent 60%, rgba(226, 99, 42, 0.07));
+}
+
+.field__msg {
+  min-height: 1.15rem;
+  margin: 0;
+  font-size: var(--t-sm);
+  line-height: 1.35;
+  color: var(--taupe);
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity var(--fast) linear, transform var(--fast) var(--ease-out);
+}
+.field.is-bad  .field__msg { opacity: 1; transform: none; color: #E9976A; }
+.field.is-good .field__msg { opacity: 1; transform: none; color: var(--gold-soft); }
+.field.is-bad  .field__input { border-bottom-color: #B2532A; }
+.field.is-good .field__input { border-bottom-color: var(--rule-gold); }
+
+.field.is-shaking .field__input { animation: nudge 320ms var(--ease-soft); }
+@keyframes nudge {
+  20% { transform: translateX(-4px); } 45% { transform: translateX(3px); }
+  70% { transform: translateX(-2px); } 100% { transform: none; }
+}
+
+/* ── Switch (Telegram / Phone) — bookmark tabs ────────────────── */
+
+.switch { display: flex; gap: 1.1rem; }
+
+.switch__opt {
+  position: relative;
+  padding: 0.35rem 0 0.45rem;
+  font-size: var(--t-sm);
+  color: var(--taupe);
+  transition: color var(--fast) linear;
+}
+.switch__opt::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 2px;
+  background: var(--ember);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 240ms var(--ease-out);
+}
+.switch__opt:hover { color: var(--paper-dim); }
+.switch__opt.is-on { color: var(--paper); }
+.switch__opt.is-on::after { transform: scaleX(1); }
+
+/* ── Bottom navigation ────────────────────────────────────────
+   The active item gets a bookmark notch, not a filled pill.     */
+
+.tabbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: stretch;
+  height: calc(var(--tabbar-h) + var(--safe-b));
+  padding-bottom: var(--safe-b);
+  border-top: 1px solid var(--rule);
+  background: linear-gradient(180deg, rgba(20, 16, 12, 0.72), rgba(10, 7, 5, 0.94));
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+}
+
+.tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: var(--t-micro);
+  letter-spacing: 0.04em;
+  color: var(--taupe);
+  transition: color var(--fast) linear;
+}
+.tab__icon {
+  width: 22px; height: 22px;
+  fill: none; stroke: currentColor;
+  stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round;
+}
+.tab:hover { color: var(--paper-dim); }
+
+.tab.is-on { color: var(--ember); }
+.tab.is-on::before {
+  content: "";
+  position: absolute; top: 0; left: 50%;
+  width: 26px; height: 7px;
+  transform: translateX(-50%);
+  background: var(--ember);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 62%, 0 100%);
+}
+.tab.is-on::after {
+  content: "";
+  position: absolute; top: 0; left: 50%;
+  width: 92px; height: 42px;
+  transform: translateX(-50%);
+  background: radial-gradient(60% 100% at 50% 0%, rgba(226, 99, 42, 0.24), transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Toast ────────────────────────────────────────────────────── */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tabbar-h) + var(--safe-b) + 1rem);
+  z-index: 20;
+  margin: 0;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: rgba(33, 27, 21, 0.94);
+  backdrop-filter: blur(10px);
+  font-size: var(--t-sm);
+  color: var(--paper-dim);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  pointer-events: none;
+  transition: opacity 200ms linear, transform 220ms var(--ease-out);
+}
+.toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ── Prototype controls ───────────────────────────────────────── */
+
+.proto {
+  position: fixed;
+  left: 0.9rem;
+  bottom: calc(var(--tabbar-h) + var(--safe-b) + 0.9rem);
+  z-index: 30;
+  font-size: var(--t-micro);
+}
+body[data-view="register"] .proto,
+body[data-view="success"]  .proto { bottom: calc(var(--safe-b) + 0.9rem); }
+
+.proto__pin {
+  display: flex; align-items: center; gap: 0.45rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  color: var(--taupe-dim);
+  letter-spacing: 0.08em;
+  background: rgba(10, 7, 5, 0.6);
+  opacity: 0.38;
+  transition: opacity var(--fast) linear, color var(--fast) linear;
+}
+.proto__pin:hover, .proto__pin[aria-expanded="true"] { opacity: 1; color: var(--paper-dim); }
+.proto__dot { width: 5px; height: 5px; border-radius: 50%; background: var(--ember); }
+
+.proto__panel {
+  position: absolute; left: 0; bottom: calc(100% + 0.5rem);
+  width: 12.5rem;
+  padding: 0.55rem;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: rgba(20, 16, 12, 0.96);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.9);
+  animation: view-in 200ms var(--ease-out) both;
+}
+.proto__group {
+  margin: 0.5rem 0 0.25rem;
+  padding: 0 0.4rem;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--taupe-dim);
+}
+.proto__group:first-child { margin-top: 0.15rem; }
+
+.proto__opt {
+  display: block; width: 100%;
+  padding: 0.4rem;
+  border-radius: 3px;
+  text-align: left;
+  font-size: var(--t-xs);
+  color: var(--paper-dim);
+}
+.proto__opt:hover { background: var(--ash); }
+.proto__opt.is-on { color: var(--amber); }
+
+.proto__hint {
+  margin: 0.5rem 0.4rem 0.15rem;
+  color: var(--taupe-dim);
+  opacity: 0.7;
+}

@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BookQuest</title>
+<meta name="theme-color" content="#14100C">
+<meta name="description" content="BookQuest — an annual reading competition. Read the book, beat the deadline, take the quiz.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/components.css">
+<link rel="stylesheet" href="styles/register.css">
+<link rel="stylesheet" href="styles/home.css">
+</head>
+
+<body class="bq" data-view="register" data-state="unregistered">
+
+<!-- ── Atmosphere: shared across every view ─────────────────────────── -->
+<div class="atmos" aria-hidden="true">
+  <div class="atmos__rules"></div>
+  <div class="atmos__wash"></div>
+  <div class="atmos__grain"></div>
+</div>
+
+<!-- ══ VIEW 1 · REGISTRATION ════════════════════════════════════════ -->
+<section class="view view--register" id="view-register" aria-label="Registration">
+  <div class="titlepage">
+
+    <p class="edition">
+      <span class="edition__mark">IV</span>
+      <span>Fourth annual reading competition</span>
+    </p>
+
+    <h1 class="titlepage__title">Enter<br>the&nbsp;quest</h1>
+
+    <p class="lede">
+      One book, one deadline, one quiz. Read before the clock runs out, then answer
+      faster and better than everyone else. Everyone who finishes gets a certificate.
+    </p>
+
+    <form class="form" id="register-form" novalidate>
+
+      <div class="field" data-field="name">
+        <label class="field__label" for="fullname">Full name</label>
+        <input class="field__input" id="fullname" name="fullname" type="text"
+               autocomplete="name" spellcheck="false"
+               placeholder="Sofia Karimova" aria-describedby="fullname-msg">
+        <p class="field__msg" id="fullname-msg" role="status"></p>
+      </div>
+
+      <div class="field" data-field="contact">
+        <div class="field__head">
+          <label class="field__label" for="contact">How we reach you</label>
+          <div class="switch" role="tablist" aria-label="Contact method">
+            <button class="switch__opt is-on" type="button" role="tab"
+                    aria-selected="true" data-mode="telegram">Telegram</button>
+            <button class="switch__opt" type="button" role="tab"
+                    aria-selected="false" data-mode="phone">Phone</button>
+          </div>
+        </div>
+        <input class="field__input" id="contact" name="contact" type="text"
+               inputmode="text" autocomplete="off" spellcheck="false"
+               placeholder="@your_username" aria-describedby="contact-msg">
+        <p class="field__msg" id="contact-msg" role="status"></p>
+      </div>
+
+      <button class="btn btn--primary" type="submit" id="register-submit">
+        <span>Claim your place</span>
+        <svg class="btn__arrow" viewBox="0 0 24 12" aria-hidden="true">
+          <path d="M0 6h21M16 1l5 5-5 5"/>
+        </svg>
+      </button>
+
+      <p class="form__note">No password, no email. Your participant number is your key.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ══ VIEW 2 · REGISTRATION SUCCESS ════════════════════════════════ -->
+<section class="view view--success" id="view-success" aria-label="Registration complete">
+  <div class="success">
+    <div class="success__beam" aria-hidden="true"></div>
+
+    <p class="success__hail">You're in.</p>
+
+    <p class="success__caption">Your participant number</p>
+    <p class="success__id" id="participant-id" aria-label="Participant number 3047"></p>
+
+    <p class="success__keep">
+      Keep this number. It identifies you on the leaderboard, on your quiz sheet
+      and on your certificate.
+    </p>
+
+    <button class="btn btn--primary" type="button" id="to-home">
+      <span>Enter BookQuest</span>
+      <svg class="btn__arrow" viewBox="0 0 24 12" aria-hidden="true">
+        <path d="M0 6h21M16 1l5 5-5 5"/>
+      </svg>
+    </button>
+  </div>
+</section>
+
+<!-- ══ VIEW 3 · HOME ═══════════════════════════════════════════════ -->
+<section class="view view--home" id="view-home" aria-label="Home">
+
+  <header class="topbar">
+    <div class="wordmark">
+      <span class="wordmark__name">BookQuest</span>
+      <span class="wordmark__year">2026</span>
+    </div>
+    <a class="weblink" href="#" data-noop>Open on web <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <main class="home">
+
+    <!-- ── The stage ── -->
+    <div class="stage">
+
+      <div class="stage__aside stage__aside--left">
+        <p class="tag">On the stage</p>
+        <h2 class="booktitle" id="book-title">The Alchemist</h2>
+        <p class="byline" id="book-author">Paulo Coelho</p>
+      </div>
+
+      <div class="stage__center">
+        <div class="spotlight" aria-hidden="true">
+          <div class="spotlight__cone"></div>
+          <div class="spotlight__pool"></div>
+          <div class="spotlight__ring"></div>
+        </div>
+
+        <div class="motes" aria-hidden="true"></div>
+
+        <div class="bookwrap">
+          <div class="book" id="book" role="img"
+               aria-label="The Alchemist by Paulo Coelho, standing on a lit podium">
+            <div class="book__face book__cover">
+              <div class="cover">
+                <div class="cover__frame"></div>
+                <div class="cover__sun"><span class="cover__rays"></span><span class="cover__disc"></span></div>
+                <div class="cover__dune"></div>
+                <p class="cover__title">The<br>Alchemist</p>
+                <p class="cover__author">Paulo Coelho</p>
+                <div class="cover__sheen"></div>
+              </div>
+            </div>
+            <div class="book__face book__spine">
+              <span class="book__spinetext">The Alchemist</span>
+            </div>
+            <div class="book__face book__edge"></div>
+            <div class="book__face book__top"></div>
+            <div class="book__face book__back"></div>
+          </div>
+          <div class="book__contact" aria-hidden="true"></div>
+        </div>
+
+        <div class="podium" aria-hidden="true">
+          <div class="podium__top"></div>
+          <div class="podium__body"></div>
+          <div class="podium__cast"></div>
+        </div>
+      </div>
+
+      <div class="stage__aside stage__aside--right">
+        <dl class="facts">
+          <div class="facts__row"><dt>Pages</dt><dd>197</dd></div>
+          <div class="facts__row"><dt>Quiz opens</dt><dd>21 Sep, 18:00</dd></div>
+          <div class="facts__row"><dt>Readers in</dt><dd>1,204</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <!-- ── The clock ── -->
+    <section class="clock" aria-label="Time remaining">
+      <p class="clock__label" id="clock-label">Reading deadline</p>
+
+      <div class="clock__row" id="clock-row">
+        <div class="unit" data-unit="days">
+          <span class="unit__value" data-slot></span>
+          <span class="unit__name">Days</span>
+        </div>
+        <div class="unit" data-unit="hours">
+          <span class="unit__value" data-slot></span>
+          <span class="unit__name">Hours</span>
+        </div>
+        <div class="unit" data-unit="minutes">
+          <span class="unit__value" data-slot></span>
+          <span class="unit__name">Minutes</span>
+        </div>
+        <div class="unit" data-unit="seconds">
+          <span class="unit__value" data-slot></span>
+          <span class="unit__name">Seconds</span>
+        </div>
+      </div>
+
+      <p class="clock__date" id="clock-date">20 September 2026, 23:59</p>
+    </section>
+
+    <!-- ── The act ── -->
+    <div class="act">
+      <button class="btn btn--primary btn--wide" type="button" id="cta">
+        <span id="cta-label">Go to the book</span>
+        <svg class="btn__arrow" viewBox="0 0 24 12" aria-hidden="true">
+          <path d="M0 6h21M16 1l5 5-5 5"/>
+        </svg>
+      </button>
+      <p class="act__sub" id="cta-sub">You're participant 3047</p>
+    </div>
+  </main>
+
+  <!-- ── Bottom navigation ── -->
+  <nav class="tabbar" aria-label="Sections">
+    <button class="tab is-on" type="button" aria-current="page">
+      <svg class="tab__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="10" r="5"/><path d="M4 19h16"/></svg>
+      <span>Stage</span>
+    </button>
+    <button class="tab" type="button" data-locked>
+      <svg class="tab__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16H6z"/><path d="M9 4v16"/></svg>
+      <span>Book</span>
+    </button>
+    <button class="tab" type="button" data-locked>
+      <svg class="tab__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h10M5 18h6"/></svg>
+      <span>Quests</span>
+    </button>
+    <button class="tab" type="button" data-locked>
+      <svg class="tab__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V14M12 20V6M19 20v-9"/></svg>
+      <span>Results</span>
+    </button>
+    <button class="tab" type="button" data-locked>
+      <svg class="tab__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v16l-5-4-5 4z"/></svg>
+      <span>You</span>
+    </button>
+  </nav>
+</section>
+
+<!-- ── Toast ─────────────────────────────────────────────────────── -->
+<p class="toast" id="toast" role="status" aria-live="polite"></p>
+
+<!-- ── Prototype controls (deliberately quiet) ────────────────────── -->
+<div class="proto" id="proto">
+  <button class="proto__pin" type="button" id="proto-pin" aria-expanded="false"
+          aria-controls="proto-panel" title="Prototype states (S)">
+    <span class="proto__dot"></span><span>prototype</span>
+  </button>
+
+  <div class="proto__panel" id="proto-panel" hidden>
+    <p class="proto__group">View</p>
+    <button class="proto__opt" type="button" data-view-go="register">Registration</button>
+    <button class="proto__opt" type="button" data-view-go="home">Home</button>
+
+    <p class="proto__group">Home state</p>
+    <button class="proto__opt" type="button" data-state-go="unregistered">Not registered</button>
+    <button class="proto__opt" type="button" data-state-go="reading">Reading period</button>
+    <button class="proto__opt" type="button" data-state-go="quiz">Quiz live</button>
+    <button class="proto__opt" type="button" data-state-go="finished">Quiz finished</button>
+
+    <p class="proto__hint">S toggles this panel</p>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/validate.js"></script>
+<script src="js/countdown.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

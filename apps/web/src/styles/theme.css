@@ -1,0 +1,65 @@
+@import 'tailwindcss';
+
+/**
+ * The BookQuest design system, ported from the prototype.
+ *
+ * Everything declared in @theme becomes a Tailwind utility as well as a CSS
+ * variable — `--color-ember` gives you `bg-ember`, `text-ember`, `border-ember`
+ * and `var(--color-ember)`. One definition, both ways of using it.
+ */
+@theme {
+  /* Ground — warm brown-blacks, deliberately not neutral greys */
+  --color-void: #0a0705;
+  --color-ink: #14100c;
+  --color-ash: #211b15;
+  --color-ash-hi: #2c241c;
+
+  /* Text */
+  --color-paper: #e8dfd2;
+  --color-paper-dim: #c4b7a6;
+  --color-taupe: #9a8c7c;
+  --color-taupe-dim: #7e7263;
+
+  /* Light */
+  --color-ember: #e2632a;
+  --color-ember-deep: #a83f16;
+  --color-amber: #f0a03c;
+
+  /* Used sparingly: winners, hairlines, the participant number */
+  --color-gold: #c8a24a;
+  --color-gold-soft: #e3c77e;
+
+  /* One family, two widths */
+  --font-display: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-sans: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  --tracking-label: 0.16em;
+
+  --ease-out-quest: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.32, 0.72, 0.22, 1);
+
+  --animate-float: float 8s ease-in-out infinite;
+  --animate-breathe: breathe 7.5s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.82;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.035);
+  }
+}
