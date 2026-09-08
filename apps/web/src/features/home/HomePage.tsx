@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useCurrentQuest } from './api/useCurrentQuest';
 import { useCountdown } from '@/hooks/useCountdown';
 import { LoadingState } from '@/components/feedback/LoadingState';
@@ -9,7 +10,14 @@ import { ErrorState } from '@/components/feedback/ErrorState';
  */
 export function HomePage() {
   const { data: quest, isPending, error, refetch } = useCurrentQuest();
-  const time = useCountdown(quest ? new Date(quest.readingDeadline) : null);
+  // Memoised on the ISO string, not recreated every render — a fresh Date
+  // instance each render would change useCountdown's effect dependency every
+  // time, re-firing the effect and looping (setTime -> render -> new Date -> ...).
+  const deadline = useMemo(
+    () => (quest ? new Date(quest.readingDeadline) : null),
+    [quest?.readingDeadline]
+  );
+  const time = useCountdown(deadline);
 
   if (isPending) return <LoadingState label="Setting the stage…" />;
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
