@@ -45,6 +45,18 @@ body {
   line-height: 0.92;
 }
 
+/* One numeral in a fixed cell. Digits have different natural widths, so a
+   ticking countdown reflows on every second unless each numeral is given the
+   same box. 0.62em fits Archivo's figures at 108% width, and holds for the
+   four-digit participant number too. */
+.type-numeral {
+  display: inline-block;
+  width: 0.62em;
+  text-align: center;
+  font-stretch: var(--wide-tight);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Small uppercase label, used for stage captions and field labels. */
 .type-label {
   font-size: 0.6875rem;
