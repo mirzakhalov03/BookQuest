@@ -1,16 +1,18 @@
 import { useCurrentQuest } from './api/useCurrentQuest';
 import { useCountdown } from '@/hooks/useCountdown';
+import { LoadingState } from '@/components/feedback/LoadingState';
+import { ErrorState } from '@/components/feedback/ErrorState';
 
 /**
  * Stub. The finished composition lives in /prototype/index.html — the 3D book
  * stage, spotlight, podium and countdown are ported into components here.
  */
 export function HomePage() {
-  const { data: quest, isPending, error } = useCurrentQuest();
+  const { data: quest, isPending, error, refetch } = useCurrentQuest();
   const time = useCountdown(quest ? new Date(quest.readingDeadline) : null);
 
-  if (isPending) return <p className="type-label p-6">Setting the stage…</p>;
-  if (error) return <p className="p-6 text-paper-dim">{error.message}</p>;
+  if (isPending) return <LoadingState label="Setting the stage…" />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8 p-6 text-center">
