@@ -1,10 +1,10 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
-import { registerReauthenticate } from '@/lib/api/client';
+import { ApiRequestError, registerReauthenticate } from '@/lib/api/client';
 import { fetchMe, loginWithTelegram, reauthenticate } from '@/lib/auth/authApi';
 import { readToken } from '@/lib/auth/tokenStore';
-import { AuthContext, authKeys } from '@/lib/auth/useAuth';
+import { SessionResolvedContext, authKeys } from '@/lib/auth/useAuth';
 import { BootSplash } from './BootSplash';
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -27,9 +27,16 @@ async function resolveSession(): Promise<void> {
     try {
       await queryClient.fetchQuery({ queryKey: authKeys.me(), queryFn: fetchMe });
       return;
-    } catch {
+    } catch (error) {
       // Don't leave the failure cached under the key a later sign-in writes to.
       queryClient.removeQueries({ queryKey: authKeys.all });
+
+      // A 401 has already cost this boot its one exchange: the client cleared
+      // the token, ran the sign-in itself and replayed. Falling through to
+      // branch 2 would spend a second one against a rate-limited endpoint for
+      // an answer we just got. Any other failure — a 500, the network — never
+      // reached the exchange, so branch 2 is still worth trying.
+      if (error instanceof ApiRequestError && error.status === 401) return;
     }
   }
 
@@ -77,5 +84,5 @@ function AuthProvider({ children }: { children: ReactNode }) {
 
   if (!resolved) return <BootSplash />;
 
-  return <AuthContext value={true}>{children}</AuthContext>;
+  return <SessionResolvedContext value={true}>{children}</SessionResolvedContext>;
 }

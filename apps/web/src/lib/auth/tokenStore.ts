@@ -51,7 +51,11 @@ export function readToken(): string | null {
     return null;
   }
 
-  if (!stored.token || Date.parse(stored.expiresAt) <= Date.now()) {
+  // An unparseable expiry is NaN, and every comparison against NaN is false —
+  // so without the explicit check a corrupted date would defeat the expiry test
+  // rather than fail it. Treat anything we cannot read as already gone.
+  const expiresAt = Date.parse(stored.expiresAt);
+  if (!stored.token || Number.isNaN(expiresAt) || expiresAt <= Date.now()) {
     clearToken();
     return null;
   }

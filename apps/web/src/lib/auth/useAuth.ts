@@ -28,7 +28,7 @@ export interface Auth {
  * real job is to make "useAuth outside the provider" fail loudly instead of
  * quietly reporting a signed-out user.
  */
-export const AuthContext = createContext(false);
+export const SessionResolvedContext = createContext(false);
 
 /**
  * The one way to ask who is using the app.
@@ -39,7 +39,7 @@ export const AuthContext = createContext(false);
  * holds the answer.
  */
 export function useAuth(): Auth {
-  const resolved = useContext(AuthContext);
+  const resolved = useContext(SessionResolvedContext);
   if (!resolved) {
     throw new Error('useAuth was called outside <AuthProvider>. Mount it in app/providers.tsx.');
   }
@@ -85,6 +85,9 @@ export function useAuth(): Auth {
 
 function resolveStatus(user: SessionUser | null, isFetching: boolean): AuthStatus {
   if (user) return 'authenticated';
+  // A background refetch keeps `data`, so this can only be a first fetch into an
+  // empty cache — which today only the boot does, behind the splash. It stays so
+  // that a later remove-and-refetch cannot report a signed-in user as signed out.
   if (isFetching) return 'loading';
   // `initData`, not `window.Telegram`, is the test: index.html loads Telegram's
   // script everywhere, so the object exists in a plain browser too and only the
