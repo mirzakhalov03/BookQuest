@@ -13,9 +13,9 @@ import { create } from 'zustand';
  * hard reload always does, so "nothing here" and "should redirect" stay the
  * same fact.
  *
- * Not persisted, and not folded into `session.store.ts` (which is): this is
- * a single hand-off between two screens in one page load, not a value worth
- * surviving a reload at all — `SuccessScreen` reads it once and clears it.
+ * Deliberately not persisted: this is a single hand-off between two screens
+ * in one page load, not a value worth surviving a reload at all —
+ * `SuccessScreen` reads it once and clears it.
  */
 interface RevealHandoffState {
   number: number | null;

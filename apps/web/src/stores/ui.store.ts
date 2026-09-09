@@ -17,9 +17,9 @@ let dismissTimer: ReturnType<typeof setTimeout> | undefined;
 /**
  * Cross-tree, ephemeral state (spec §5): a screen deep in the tree fires a
  * toast, the shell renders it, and neither should have to know about the
- * other beyond this store. Unlike session.store.ts, this is not persisted —
- * a message surviving a reload would be confusing, not helpful, and the one
- * thing worth keeping is "what to show right now."
+ * other beyond this store. Not persisted — a message surviving a reload
+ * would be confusing, not helpful, and the one thing worth keeping is "what
+ * to show right now."
  */
 export const useUiStore = create<UiState>()((set) => ({
   toastMessage: null,

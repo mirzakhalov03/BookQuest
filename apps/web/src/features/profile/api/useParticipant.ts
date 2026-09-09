@@ -2,18 +2,18 @@ import { useQuery } from '@tanstack/react-query';
 import type { Participant } from '@bookquest/shared';
 import { api } from '@/lib/api/client';
 
-/** Exact shape from spec §5. */
-export const participantKeys = {
+// Not exported: nothing outside this file invalidates or reads the self-view
+// by key, and `byNumber` — the one entry that would have let something else
+// key a lookup by participant number — never had a caller at all.
+const participantKeys = {
   all: ['participants'] as const,
-  me: () => [...participantKeys.all, 'me'] as const,
-  byNumber: (n: number) => [...participantKeys.all, n] as const
+  me: () => [...participantKeys.all, 'me'] as const
 };
 
 /**
- * The self-view — the only response that includes `contact` (spec, contract).
- * `session.store.ts`'s number is a first-paint hint only; this query is the
- * one source of truth for it (spec §5), and nothing on this screen is gated
- * on the store.
+ * The self-view — the only response that includes `contact` (spec, contract),
+ * and the one source of truth for the signed-in participant's number
+ * (spec §5).
  */
 export function useParticipant() {
   return useQuery({
