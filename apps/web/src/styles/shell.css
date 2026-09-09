@@ -1,0 +1,200 @@
+/**
+ * The shell — atmosphere, the route transition, the tab bar and the screen box.
+ *
+ * Ported from `prototype/styles/base.css` (atmosphere, view system) and
+ * `prototype/styles/components.css` (bottom navigation). It is hand-written CSS
+ * for the same reason `stage.css` is: masks, clip-paths and layered radial
+ * gradients have nowhere legible to live as arbitrary-value utilities.
+ *
+ * `stage.css` recomposes `.tabbar` and `.tab` at ≥900px and says so — that
+ * override is part of the stage, this is the base it overrides. Load order in
+ * `index.css` (shell before stage) is what makes that work; both are unlayered,
+ * so source order decides.
+ */
+
+/* ── Atmosphere ────────────────────────────────────────────────────
+   Three fixed layers behind every screen:
+   1. rules — the faint horizontal lines of a set text block
+   2. wash  — warm light pooling toward the upper centre
+   3. grain — paper tooth, kept subtle enough to read as texture
+
+   The wash alone is a gradient; it is the rules and the grain that make it
+   read as paper under a lamp rather than as a dark background.               */
+
+.atmos {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.atmos__rules {
+  position: absolute;
+  inset: -10%;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(232 223 210 / 0.07) 0 1px,
+    transparent 1px 34px
+  );
+  /* The ruling is faded out of the middle so it never competes with the book. */
+  -webkit-mask-image: radial-gradient(ellipse 62% 55% at 50% 42%, transparent 12%, #000 78%);
+  mask-image: radial-gradient(ellipse 62% 55% at 50% 42%, transparent 12%, #000 78%);
+  opacity: 0.7;
+}
+
+.atmos__wash {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(70% 48% at 50% 6%, rgb(240 160 60 / 0.16), transparent 68%),
+    radial-gradient(48% 38% at 50% 34%, rgb(226 99 42 / 0.13), transparent 72%),
+    radial-gradient(120% 90% at 50% 108%, rgb(10 7 5 / 0.92), transparent 60%),
+    linear-gradient(180deg, #17120d 0%, var(--color-ink) 38%, var(--color-void) 100%);
+}
+
+.atmos__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* ── Route transition ──────────────────────────────────────────────
+   The prototype keeps every view in the DOM and toggles `.is-on` /
+   `.is-entering` / `.is-leaving`. React Router mounts one route at a time, so
+   the class the prototype toggles is simply always on here — same `view-in`
+   keyframe (declared once, in `stage.css`), same `--mid` 420ms, same easing.
+
+   The prototype's `.is-leaving` half is deliberately not ported: it needs the
+   outgoing view still mounted, which would mean holding the previous route in
+   memory for 260ms to buy a cross-fade nobody asked for. Enter-only reads the
+   same on a 420ms curve. `prefers-reduced-motion` in `base.css` covers it.
+
+   `backwards`, where the prototype writes `both`: the prototype strips
+   `.is-entering` once the animation is over, so its forwards fill never
+   survives. Ours is a permanent class, and a forwards fill would leave an
+   identity `transform` on the wrapper for good — enough, per spec, to make it
+   the containing block for any `position: fixed` a screen puts inside it. Same
+   animation, without the trap.                                              */
+
+.view {
+  animation: view-in 420ms var(--ease-out-quest) backwards;
+}
+
+/* ── The screen box ────────────────────────────────────────────────
+   Consistent padding, a reading measure, and the clearance under the tab bar.
+   This is the only place that knows `--tabbar-h` and `--safe-b` (spec §4).
+
+   In `@layer components` so a screen that needs a different measure — a
+   leaderboard, an admin table — can say so with a Tailwind utility. Unlayered
+   rules beat every Tailwind layer, which would make `max-w-*` silently do
+   nothing here.                                                              */
+
+@layer components {
+  .screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 46rem;
+    margin-inline: auto;
+    /* Matches the prototype's `.home` padding. The bottom edge carries the
+       safe area because on a phone the tab bar's own `--safe-b` padding is
+       inside the bar: content stops above the bar, the bar stops above the
+       home indicator. */
+    padding: clamp(1rem, 3vh, 2rem) clamp(1.2rem, 5vw, 3rem)
+      calc(clamp(1.6rem, 4vh, 3rem) + var(--safe-b));
+  }
+
+  @media (min-width: 900px) {
+    /* Desktop turns the tab bar into a floating pill (see `stage.css`), so it
+       leaves the flow and stops reserving its own height. Here the screen has
+       to reserve it, or the last line scrolls under the pill. */
+    .screen {
+      padding-bottom: calc(var(--tabbar-h) + var(--safe-b) + 1.5rem);
+    }
+  }
+}
+
+/* ── Bottom navigation ─────────────────────────────────────────────
+   The active item gets a bookmark notch, not a filled pill.
+
+   Sticky, not fixed: it holds its place at the end of the flow, so the last
+   line of a scrolling screen lands above it instead of under it, and the
+   safe-area padding lives in the bar rather than in every screen.            */
+
+.tabbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: stretch;
+  height: calc(var(--tabbar-h) + var(--safe-b));
+  padding-bottom: var(--safe-b);
+  border-top: 1px solid var(--rule);
+  background: linear-gradient(180deg, rgb(20 16 12 / 0.72), rgb(10 7 5 / 0.94));
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+}
+
+.tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--color-taupe);
+  /* The prototype's tabs are buttons; ours are links, because the URL is the
+     state (spec §5). This is the whole difference that costs. */
+  text-decoration: none;
+  transition: color 180ms linear;
+}
+
+.tab__icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tab:hover {
+  color: var(--color-paper-dim);
+}
+
+.tab.is-on {
+  color: var(--color-ember);
+}
+
+/* The bookmark notch, hanging off the top rule of the bar. */
+.tab.is-on::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 26px;
+  height: 7px;
+  transform: translateX(-50%);
+  background: var(--color-ember);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 62%, 0 100%);
+}
+
+/* …and the light it casts back down into the bar. */
+.tab.is-on::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 92px;
+  height: 42px;
+  transform: translateX(-50%);
+  background: radial-gradient(60% 100% at 50% 0%, rgb(226 99 42 / 0.24), transparent 70%);
+  pointer-events: none;
+}

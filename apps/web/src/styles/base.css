@@ -26,6 +26,9 @@ body {
   background: var(--color-ink);
   color: var(--color-paper);
   font-family: var(--font-sans);
+  /* The prototype's measure. Tailwind's preflight leaves body at 1.5, which
+     tightens every paragraph in the app by a hair against the design. */
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
