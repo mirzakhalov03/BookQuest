@@ -1,10 +1,10 @@
-import { useCurrentQuest } from '@/features/home/api/useCurrentQuest';
+import { useCurrentQuest } from '@/lib/api/quest';
 import { BookHero } from '@/components/BookHero';
 import { Screen } from '@/components/layout/Screen';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
-import { ApiRequestError } from '@/lib/api/client';
+import { isNotFound } from '@/lib/api/client';
 import { ResourceList } from './components/ResourceList';
 
 /**
@@ -24,7 +24,7 @@ export function BookPage() {
   if (error) {
     // Same "between editions" condition Home handles, met by the same query —
     // an invitation to come back, not a failure to retry (spec, plan Phase 3).
-    if (error instanceof ApiRequestError && error.status === 404 && error.code === 'not_found') {
+    if (isNotFound(error)) {
       return (
         <Screen>
           <EmptyState title={error.message} body="Check back once the next edition opens." />

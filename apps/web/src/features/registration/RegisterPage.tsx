@@ -5,9 +5,9 @@ import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { Button } from '@/components/ui/Button';
-import { ApiRequestError } from '@/lib/api/client';
+import { isNotFound } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/useAuth';
-import { useCurrentQuest } from '@/features/home/api/useCurrentQuest';
+import { useCurrentQuest } from '@/lib/api/quest';
 import { EditionMark } from './components/EditionMark';
 import { RegistrationForm } from './components/RegistrationForm';
 
@@ -29,7 +29,7 @@ export function RegisterPage() {
   if (error) {
     // Between editions there is no quest to register for, and no form that
     // could submit anything even if it rendered.
-    if (error instanceof ApiRequestError && error.status === 404 && error.code === 'not_found') {
+    if (isNotFound(error)) {
       return (
         <Screen>
           <EmptyState title={error.message} body="Check back once the next edition opens." />

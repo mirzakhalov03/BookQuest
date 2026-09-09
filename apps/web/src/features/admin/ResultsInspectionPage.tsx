@@ -5,7 +5,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { Rule } from '@/components/ui/Rule';
 import { ResultsPodium } from '@/components/ResultsPodium';
 import { LeaderboardRow } from '@/components/LeaderboardRow';
-import { ApiRequestError } from '@/lib/api/client';
+import { isNotFound } from '@/lib/api/client';
 import { formatLongDate } from '@/lib/format';
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton';
 import { useAdminResultsInspection } from './api/useAdminResultsInspection';
@@ -39,11 +39,7 @@ export function ResultsInspectionPage() {
   if (results.error) {
     if (isForbidden(results.error)) return <ForbiddenState error={results.error} />;
 
-    if (
-      results.error instanceof ApiRequestError &&
-      results.error.status === 404 &&
-      results.error.code === 'not_found'
-    ) {
+    if (isNotFound(results.error)) {
       return (
         <EmptyState
           title={results.error.message}

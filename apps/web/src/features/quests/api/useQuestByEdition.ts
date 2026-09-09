@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { Quest } from '@bookquest/shared';
 import { api } from '@/lib/api/client';
-import { questArchiveKeys } from './useQuestArchive';
+import { questArchiveKeys } from '@/lib/api/quest';
 
 /**
  * One edition, by the number people say out loud — not a database id

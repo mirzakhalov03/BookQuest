@@ -1,23 +1,16 @@
 import { useMemo } from 'react';
-import { useCurrentQuest } from '@/features/home/api/useCurrentQuest';
+import { useCurrentQuest } from '@/lib/api/quest';
 import { Screen } from '@/components/layout/Screen';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { Countdown } from '@/components/ui/Countdown';
 import { Rule } from '@/components/ui/Rule';
-import { ApiRequestError } from '@/lib/api/client';
+import { isNotFound } from '@/lib/api/client';
 import { formatLongDate } from '@/lib/format';
 import { useQuestResults } from './api/useQuestResults';
 import { ResultsPodium } from '@/components/ResultsPodium';
 import { LeaderboardRow } from '@/components/LeaderboardRow';
-
-/** A 404 the API means literally: "not found" covers both "no quest running"
- * and "results not published yet" — the frontend tells them apart by asking
- * which query answered it, not by the message text. */
-function isNotFound(error: unknown): error is ApiRequestError {
-  return error instanceof ApiRequestError && error.status === 404 && error.code === 'not_found';
-}
 
 /**
  * `/results` — public (spec §3), and one of the screens read-only web mode

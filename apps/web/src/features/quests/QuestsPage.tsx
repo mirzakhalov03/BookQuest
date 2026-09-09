@@ -3,7 +3,7 @@ import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { Button } from '@/components/ui/Button';
-import { useQuestArchive } from './api/useQuestArchive';
+import { useQuestArchive } from '@/lib/api/quest';
 import { QuestSummaryCard } from './components/QuestSummaryCard';
 
 /**

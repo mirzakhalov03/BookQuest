@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Quest, UpdateQuestPayload } from '@bookquest/shared';
 import { api } from '@/lib/api/client';
-import { questKeys } from '@/features/home/api/useCurrentQuest';
+import { questKeys } from '@/lib/api/quest';
 import { adminKeys } from './adminKeys';
 
 /**

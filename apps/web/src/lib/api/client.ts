@@ -34,6 +34,19 @@ export class ApiRequestError extends Error {
   }
 }
 
+/**
+ * The one 404 shape the frontend treats as "not yet" rather than a failure —
+ * no quest running between editions, a quiz nobody has sat, results not
+ * published. Every screen that meets it wants the same invitation framing
+ * instead of `ErrorState`'s retry, so this is the one place that says what
+ * counts, rather than nine call sites each spelling out the same three
+ * checks (the analogous `isForbidden` already lives next to its one caller's
+ * shape, `features/admin/components/ForbiddenState.tsx`).
+ */
+export function isNotFound(error: unknown): error is ApiRequestError {
+  return error instanceof ApiRequestError && error.status === 404 && error.code === 'not_found';
+}
+
 interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown;
 }

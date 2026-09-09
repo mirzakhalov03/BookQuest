@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { Quest } from '@bookquest/shared';
-import { useCurrentQuest } from './api/useCurrentQuest';
+import { useCurrentQuest } from '@/lib/api/quest';
 import { BookStage } from './components/BookStage';
 import { StageAside } from './components/StageAside';
 import { QuestAction } from './components/QuestAction';
@@ -10,7 +10,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { Screen } from '@/components/layout/Screen';
 import { TopBar } from '@/components/layout/TopBar';
-import { ApiRequestError } from '@/lib/api/client';
+import { isNotFound } from '@/lib/api/client';
 import { formatLongDate } from '@/lib/format';
 
 /**
@@ -36,7 +36,7 @@ export function HomePage() {
   if (error) {
     // A quest-free gap between editions is a normal condition, not a failure
     // (spec, plan Phase 3) — it gets the invitation, not the retry button.
-    if (error instanceof ApiRequestError && error.status === 404 && error.code === 'not_found') {
+    if (isNotFound(error)) {
       return (
         <Screen>
           <EmptyState title={error.message} body="Check back once the next edition opens." />

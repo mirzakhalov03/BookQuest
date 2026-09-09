@@ -1,13 +1,13 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { findQuestDateIssues } from '@bookquest/shared';
 import type { Quest } from '@bookquest/shared';
-import { useCurrentQuest } from '@/features/home/api/useCurrentQuest';
+import { useCurrentQuest } from '@/lib/api/quest';
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState, FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { Button } from '@/components/ui/Button';
-import { ApiRequestError } from '@/lib/api/client';
+import { ApiRequestError, isNotFound } from '@/lib/api/client';
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton';
 import { useUiStore } from '@/stores/ui.store';
 import { useUpdateQuest } from './api/useUpdateQuest';
@@ -37,7 +37,7 @@ export function QuestEditorPage() {
   if (quest.error) {
     if (isForbidden(quest.error)) return <ForbiddenState error={quest.error} />;
 
-    if (quest.error instanceof ApiRequestError && quest.error.status === 404 && quest.error.code === 'not_found') {
+    if (isNotFound(quest.error)) {
       return (
         <EmptyState
           title={quest.error.message}

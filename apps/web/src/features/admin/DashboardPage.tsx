@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import type { Quest } from '@bookquest/shared';
-import { useCurrentQuest } from '@/features/home/api/useCurrentQuest';
+import { useCurrentQuest } from '@/lib/api/quest';
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
-import { ApiRequestError } from '@/lib/api/client';
+import { isNotFound } from '@/lib/api/client';
 import { useCountdown } from '@/hooks/useCountdown';
 import { formatCount, formatLongDate } from '@/lib/format';
 import { useAdminStats } from './api/useAdminStats';
@@ -45,7 +45,7 @@ export function DashboardPage() {
   if (error) {
     if (isForbidden(error)) return <ForbiddenState error={error} />;
 
-    if (error instanceof ApiRequestError && error.status === 404 && error.code === 'not_found') {
+    if (isNotFound(error)) {
       return (
         <EmptyState
           title={error.message}
