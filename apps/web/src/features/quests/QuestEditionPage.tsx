@@ -60,7 +60,7 @@ export function QuestEditionPage() {
     // that resolves itself on retry, so it gets the invitation back to the
     // archive rather than an ErrorState's "try again" (spec §4: an invitation,
     // not an apology). Anything else is a real failure and keeps its retry.
-    if (error instanceof ApiRequestError && error.status === 404) {
+    if (error instanceof ApiRequestError && error.status === 404 && error.code === 'not_found') {
       return (
         <Screen>
           <EmptyState title={error.message} body="Browse every edition from the archive instead." action={BACK_TO_ARCHIVE} />
