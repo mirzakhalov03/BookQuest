@@ -34,7 +34,7 @@ export function Certificate({ data }: { data: CertificateData }) {
         {/* `/me`'s one heading — nothing else on the profile screen is
             marked up as one. `.certificate__name`'s look comes from the
             class, not the tag. */}
-        <h1 className="certificate__name type-display">{data.fullName}</h1>
+        <h2 className="certificate__name type-display">{data.fullName}</h2>
         <p className="certificate__body">
           {data.rank === null
             ? 'completed BookQuest, reading '

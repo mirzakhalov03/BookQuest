@@ -66,6 +66,7 @@ export function ResultsInspectionPage() {
       {leaderboard.length === 0 ? (
         <EmptyState
           title="No one finished the quiz"
+        titleAs="h2"
           body="The results are in, but nobody submitted an attempt this year."
           className="flex-1"
         />

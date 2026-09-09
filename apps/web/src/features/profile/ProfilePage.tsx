@@ -71,7 +71,7 @@ function ProfileHeader({ participant }: { participant: Participant }) {
     <header className="flex flex-col gap-2">
       <p className="type-label">Your number</p>
       <ParticipantNumeral value={participant.number} className="type-display text-5xl text-gold" />
-      <p className="type-display text-2xl text-paper">{participant.fullName}</p>
+      <h1 className="type-display m-0 text-2xl text-paper">{participant.fullName}</h1>
       <p className="text-sm text-taupe">
         {CONTACT_LABELS[participant.contact.method]} · {participant.contact.value}
       </p>

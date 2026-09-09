@@ -93,11 +93,12 @@ function Body({
     return hasQuery ? (
       <EmptyState
         title="No one matches that search"
+        titleAs="h2"
         body="Try a different name or number."
         className="flex-1"
       />
     ) : (
-      <EmptyState title="No one has registered yet" className="flex-1" />
+      <EmptyState title="No one has registered yet" titleAs="h2" className="flex-1" />
     );
   }
 

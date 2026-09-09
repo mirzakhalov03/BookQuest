@@ -23,6 +23,7 @@ export function ResourceList({ resources }: ResourceListProps) {
     return (
       <EmptyState
         title="Nowhere to read it yet"
+        titleAs="h2"
         body="The organisers haven't linked a copy for this edition. Check back closer to the deadline."
       />
     );

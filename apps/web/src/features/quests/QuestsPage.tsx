@@ -41,6 +41,7 @@ export function QuestsPage() {
       {editions.length === 0 ? (
         <EmptyState
           title="Nothing archived yet"
+        titleAs="h2"
           body="Every past edition's book, winner and finishing count will collect here once one closes."
         />
       ) : (
