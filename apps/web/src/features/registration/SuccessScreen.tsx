@@ -37,10 +37,16 @@ export function SuccessScreen() {
       <div className="success">
         <div className="success__beam" aria-hidden="true" />
 
-        <p className="success__hail">You&rsquo;re in.</p>
+        {/* `/register/success`'s one heading — `.success__hail`'s look comes
+            from the class, not the tag. */}
+        <h1 className="success__hail">You&rsquo;re in.</h1>
 
         <p className="success__caption">Your participant number</p>
-        <p className="success__id" aria-label={`Participant number ${number}`}>
+        {/* `role="img"` names the whole number, same as `ParticipantNumeral`
+            and `Book3D` — ARIA prohibits naming a bare `role=paragraph`
+            element, so several AT combinations would announce nothing here
+            otherwise: every digit below is individually `aria-hidden`. */}
+        <p className="success__id" role="img" aria-label={`Participant number ${number}`}>
           {digits.map((digit, index) => (
             // `.type-numeral` (base.css) fixes each digit's cell width so a
             // four-digit number doesn't reflow as digits land one at a time.

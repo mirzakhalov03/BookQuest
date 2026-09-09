@@ -21,7 +21,12 @@ export function ParticipantNumeral({ value, className = '' }: ParticipantNumeral
   const digits = formatParticipantNumber(value).split('');
 
   return (
-    <span className={className} aria-label={`Participant ${value}`}>
+    // `role="img"` names the whole number, the same fix `Book3D` already
+    // uses (`stage.css`/`Book3D.tsx`): ARIA prohibits naming a bare
+    // `role=generic` element, so an `aria-label` on a plain `<span>` is
+    // dropped by several AT combinations and the digits underneath, each
+    // individually `aria-hidden`, announce nothing.
+    <span role="img" className={className} aria-label={`Participant ${value}`}>
       {digits.map((digit, index) => (
         <span key={index} className="type-numeral" aria-hidden="true">
           {digit}
