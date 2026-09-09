@@ -192,11 +192,21 @@
    the certificate alone, not the whole profile screen underneath it.       */
 
 @media print {
-  body * {
+  /* Scoped to a page that actually has a certificate — this stylesheet is
+     global (`index.css` loads it everywhere), and an unscoped `body *` blanks
+     every other screen's print output too: printing `/`, `/book`, `/quests`
+     or `/results` produced an empty page, same defect class as the `.podium`
+     collision this codebase already fixed once. */
+  body:has(.certificate-print) * {
     visibility: hidden;
   }
-  .certificate-print,
-  .certificate-print * {
+  /* `body:has(.certificate-print)` on the reveal too, not just `.certificate-print`
+     alone — `:has()` carries its argument's specificity, so the hide rule
+     above outranks a bare `.certificate-print` and the certificate would stay
+     hidden along with everything else. Matching the qualifier keeps this
+     rule's specificity above it. */
+  body:has(.certificate-print) .certificate-print,
+  body:has(.certificate-print) .certificate-print * {
     visibility: visible;
   }
   /* Absolute against `AppLayout`'s <main> (both are `position: relative`,

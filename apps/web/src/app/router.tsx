@@ -85,10 +85,28 @@ export const router = createBrowserRouter([
             ]
           }
         ]
-      }
+      },
+
+      // Anything else. Without this, an unmatched path — a typo, a stale
+      // bookmark — raised React Router's own `ErrorResponse`, which
+      // `RouteErrorBoundary` had no special case for, so `ErrorState`'s
+      // fallback told a mistyped URL to "check your connection" — a network
+      // apology for a page that simply doesn't exist.
+      { path: '*', element: <NotFoundPage /> }
     ]
   }
 ]);
+
+function NotFoundPage() {
+  return (
+    <Screen>
+      <EmptyState
+        title="Nothing here"
+        body="That page doesn't exist. Check the address, or head back to the stage."
+      />
+    </Screen>
+  );
+}
 
 /**
  * A destination the tab bar can already reach and the screen behind it cannot

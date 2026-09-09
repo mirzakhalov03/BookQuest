@@ -60,7 +60,20 @@ let booting: Promise<void> | null = null;
 function bootSession(): Promise<void> {
   // client.ts cannot import the auth layer without a cycle, so the auth layer
   // hands it the re-login it needs — in place before the first request goes out.
-  registerReauthenticate(reauthenticate);
+  //
+  // Wrapped rather than passed straight through: `client.ts` clears the dead
+  // token on a 401 but has no reason to know about React Query, so a refused
+  // re-login (`token === null`) would otherwise leave `authKeys.me` cached
+  // with the old `SessionUser` — `useAuth().status` reads 'authenticated'
+  // forever, guards keep admitting a session that no longer exists, and every
+  // later request spends its own failed exchange rediscovering that. Evicting
+  // the cache here, behind the same seam, keeps that decision on this side of
+  // the boundary instead of importing `queryClient` into `client.ts`.
+  registerReauthenticate(async () => {
+    const token = await reauthenticate();
+    if (token === null) queryClient.removeQueries({ queryKey: authKeys.all });
+    return token;
+  });
   booting ??= resolveSession();
   return booting;
 }
