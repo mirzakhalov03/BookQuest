@@ -1,0 +1,215 @@
+/**
+ * Results, the leaderboard, the profile and the certificate — none of this
+ * exists in the prototype, so unlike `stage.css`/`register.css` there is
+ * nothing here to port. It restates the same tokens and hand-written-CSS
+ * rationale (grid math and a print stylesheet have nowhere legible to live
+ * as Tailwind utilities) rather than inventing a second design language.
+ */
+
+/* ── Podium ──────────────────────────────────────────────────────────────
+   `order` does the 2nd–1st–3rd arrangement, keyed off each place's own
+   `data-rank` — the DOM stays in the API's rank order (spec §4 rule 4), only
+   the paint order changes. Flexbox rather than grid specifically so this
+   still centres correctly with one or two places, not just three.          */
+
+.podium {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(0.5rem, 3vw, 1rem);
+}
+
+.podium__place {
+  flex: 1 1 8rem;
+  max-width: 11rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.25rem 0.75rem 1.1rem;
+  border: 1px solid var(--rule-gold);
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgb(200 162 74 / 0.1), transparent 70%);
+  text-align: center;
+}
+
+.podium__place[data-rank='2'] {
+  order: 1;
+}
+.podium__place[data-rank='1'] {
+  order: 2;
+  padding-top: 2rem;
+  border-color: var(--color-gold);
+  background: linear-gradient(180deg, rgb(200 162 74 / 0.24), transparent 75%);
+  box-shadow:
+    0 0 0 1px rgb(200 162 74 / 0.35) inset,
+    0 18px 36px -20px rgb(200 162 74 / 0.55);
+}
+.podium__place[data-rank='3'] {
+  order: 3;
+}
+
+.podium__rank {
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--color-gold);
+}
+.podium__place[data-rank='1'] .podium__rank {
+  font-size: 2.25rem;
+}
+
+.podium__name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-paper);
+}
+
+.podium__number {
+  font-size: 0.75rem;
+  color: var(--color-gold-soft);
+}
+
+.podium__meta {
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  color: var(--color-taupe-dim);
+}
+
+/* ── Leaderboard ─────────────────────────────────────────────────────────
+   Four grid columns, not five: rank, number, name, "score · duration"
+   sharing one cell. A fifth column is the one that overflows a 390px
+   screen (spec §9's testing note).                                        */
+
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: 1.75rem auto 1fr auto;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding-block: 0.65rem;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.875rem;
+}
+.leaderboard-row:last-child {
+  border-bottom: none;
+}
+
+.leaderboard-row__rank {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-taupe);
+}
+
+.leaderboard-row__number {
+  color: var(--color-gold);
+}
+
+.leaderboard-row__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-paper-dim);
+}
+
+.leaderboard-row__meta {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--color-taupe-dim);
+}
+
+/* ── Certificate ─────────────────────────────────────────────────────────
+   Same tokens, wide-Archivo display type and gold rules as everywhere else
+   (plan Phase 5) — the certificate is a different document, not a different
+   product.                                                                 */
+
+.certificate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: clamp(1.75rem, 6vw, 3rem) clamp(1.25rem, 5vw, 2.5rem);
+  border: 1px solid var(--rule-gold);
+  /* A solid colour first, the gradient over it — on screen this is
+     indistinguishable from a transparent gradient over the page's own ink
+     background, but print strips backgrounds by default (see @media print
+     below), and a certificate that falls back to bare white paper takes its
+     light-on-dark text down with it. */
+  background-color: var(--color-ink);
+  background-image: linear-gradient(180deg, rgb(200 162 74 / 0.07), transparent 60%);
+  text-align: center;
+}
+
+.certificate__eyebrow {
+  color: var(--color-gold);
+}
+
+.certificate__kind {
+  color: var(--color-taupe);
+}
+
+.certificate__name {
+  max-width: 24ch;
+  font-size: clamp(1.6rem, 6vw, 2.75rem);
+  color: var(--color-paper);
+}
+
+.certificate__body {
+  max-width: 38ch;
+  color: var(--color-paper-dim);
+}
+.certificate__body em {
+  color: var(--color-gold-soft);
+  font-style: normal;
+}
+
+.certificate__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-taupe-dim);
+}
+
+/* ── Saving the certificate ──────────────────────────────────────────────
+   TBD-3's resolution: client-rendered, saved through the browser's own print
+   dialog rather than a new dependency. Printing hides everything on the page
+   except `.certificate-print` and its contents, so "Save as PDF" produces
+   the certificate alone, not the whole profile screen underneath it.       */
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .certificate-print,
+  .certificate-print * {
+    visibility: visible;
+  }
+  .certificate-print {
+    position: absolute;
+    inset: 0;
+    padding: 2rem;
+  }
+  .no-print {
+    display: none !important;
+  }
+
+  /* Most browsers default "print background graphics" off, which would
+     strip `.certificate`'s ink background and its gold rules along with it
+     — a light-on-dark design printed with no dark. This is the standard
+     override, not a workaround for a bug: it tells the browser this
+     background is content, not decoration, so the certificate prints the
+     way it looks on screen regardless of that setting. */
+  .certificate {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

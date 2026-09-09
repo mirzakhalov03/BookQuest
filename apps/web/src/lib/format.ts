@@ -55,6 +55,26 @@ export function formatParticipantNumber(value: number): string {
   return String(value);
 }
 
+/**
+ * "4m 12s" — a quiz duration: the leaderboard's tiebreaker column, and the
+ * one place a stopwatch reading needs turning into words. `Intl` has no
+ * stable duration formatter across the runtimes this ships to, so this is a
+ * plain function like the rest of the file rather than a fourth `Intl`
+ * instance. Hours only appear if the run actually took one — nothing here
+ * assumes a quiz stays under sixty minutes.
+ */
+export function formatDuration(durationMs: number): string {
+  const totalSeconds = Math.round(durationMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const paddedSeconds = String(seconds).padStart(2, '0');
+
+  return hours > 0
+    ? `${hours}h ${String(minutes).padStart(2, '0')}m ${paddedSeconds}s`
+    : `${minutes}m ${paddedSeconds}s`;
+}
+
 const ROMAN_TABLE: ReadonlyArray<readonly [number, string]> = [
   [1000, 'M'],
   [900, 'CM'],
@@ -114,20 +134,14 @@ const ORDINAL_WORDS = [
 ];
 
 /**
- * "Fourth" for 4, "21st" past twenty. The edition mark's other half — "Fourth
- * annual reading competition" — also derives from `quest.edition` rather than
- * being written once and forgotten. Spelling out every future edition
- * ("One hundred and third") is a job for a real number-to-words library,
- * which spec §10 rules out for a label this small; twenty spelled-out words
- * covers this competition for the next two decades, and a numeral ordinal
- * past that ("21st annual…") still reads as correct English indefinitely.
+ * "1st", "2nd", "3rd", "41st" — a bare ordinal, no spelled-out words. This is
+ * the certificate's rank line: "Forty-seventh" is an odd thing for a reading
+ * competition to print, unlike the edition mark below, where the spelled-out
+ * form is the whole point.
  */
-export function formatOrdinalEdition(edition: number): string {
-  const word = edition >= 1 ? ORDINAL_WORDS[edition] : undefined;
-  if (word) return word;
-
-  const lastTwo = edition % 100;
-  const lastDigit = edition % 10;
+export function formatOrdinal(value: number): string {
+  const lastTwo = value % 100;
+  const lastDigit = value % 10;
   const suffix =
     lastTwo >= 11 && lastTwo <= 13
       ? 'th'
@@ -138,5 +152,19 @@ export function formatOrdinalEdition(edition: number): string {
           : lastDigit === 3
             ? 'rd'
             : 'th';
-  return `${edition}${suffix}`;
+  return `${value}${suffix}`;
+}
+
+/**
+ * "Fourth" for 4, "21st" past twenty. The edition mark's other half — "Fourth
+ * annual reading competition" — also derives from `quest.edition` rather than
+ * being written once and forgotten. Spelling out every future edition
+ * ("One hundred and third") is a job for a real number-to-words library,
+ * which spec §10 rules out for a label this small; twenty spelled-out words
+ * covers this competition for the next two decades, and a numeral ordinal
+ * past that ("21st annual…") still reads as correct English indefinitely.
+ */
+export function formatOrdinalEdition(edition: number): string {
+  const word = edition >= 1 ? ORDINAL_WORDS[edition] : undefined;
+  return word ?? formatOrdinal(edition);
 }

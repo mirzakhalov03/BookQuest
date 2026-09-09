@@ -8,6 +8,8 @@ import { SuccessScreen } from '@/features/registration/SuccessScreen';
 import { BookPage } from '@/features/book/BookPage';
 import { QuestsPage } from '@/features/quests/QuestsPage';
 import { QuestEditionPage } from '@/features/quests/QuestEditionPage';
+import { ResultsPage } from '@/features/results/ResultsPage';
+import { ProfilePage } from '@/features/profile/ProfilePage';
 import { RequireAdmin, RequireAuth } from '@/lib/auth/guards';
 import { RouteErrorBoundary } from './RouteErrorBoundary';
 
@@ -28,35 +30,14 @@ export const router = createBrowserRouter([
       { path: '/quests', element: <QuestsPage /> },
       { path: '/quests/:edition', element: <QuestEditionPage /> },
 
-      // Every tab has to lead somewhere from the commit that adds the tab bar,
-      // so this one stands in until its screen lands. Delete the route's
-      // element, not the route.
-      {
-        path: '/results',
-        element: (
-          <ComingNext
-            title="Results"
-            body="The podium and the full leaderboard, once the quiz has closed and the marks are in. This screen is coming next."
-          />
-        )
-      },
+      { path: '/results', element: <ResultsPage /> },
 
       // The session-only tree. Its screens mount as `children` of this route,
       // so they inherit the guard by position and nobody has to remember it.
       {
         path: '/me',
         element: <RequireAuth />,
-        children: [
-          {
-            index: true,
-            element: (
-              <ComingNext
-                title="You"
-                body="Your participant number, the name on your certificate, and the certificate itself once the quiz is marked. This screen is coming next."
-              />
-            )
-          }
-        ]
+        children: [{ index: true, element: <ProfilePage /> }]
       },
 
       // Reserved per the route table (spec §3): "Enter the quiz" already
