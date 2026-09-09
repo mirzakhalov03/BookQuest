@@ -10,14 +10,16 @@ import { formatCount, formatOrdinalEdition, formatParticipantNumber } from '@/li
  * one drawn cover scales down instead of a second copy being drawn.
  *
  * `height` is set explicitly too, not left to `.cover-box`'s `var(--book-h)`.
- * `--book-h: calc(var(--book-w) * 1.47)` is declared once, on `:root`, and a
- * descendant that overrides `--book-w` does not make Chromium re-resolve that
- * inherited `--book-h` against its own value — measured via getComputedStyle:
- * the override reached `width` (which reads `--book-w` directly on this same
- * element) but `height` kept resolving against `:root`'s `--book-w`, so the
- * thumbnail came out full stage-book height on a shrunk width. Overriding
- * `height` directly, in real px/rem rather than through the derived variable,
- * sidesteps the chain entirely.
+ * `--book-h: calc(var(--book-w) * 1.47)` is declared once, on `:root`, and
+ * custom properties are substituted at computed-value time on the element
+ * that declares them — a descendant inherits `--book-h` already resolved
+ * against `:root`'s `--book-w`, so overriding `--book-w` alone here changes
+ * nothing about it. This is spec behaviour, not a Chromium quirk. Confirmed
+ * via getComputedStyle: the override reached `width` (which reads `--book-w`
+ * directly on this same element) but `height` kept resolving against
+ * `:root`'s `--book-w`, so the thumbnail came out full stage-book height on a
+ * shrunk width. Redeclaring `--book-h` in this same scope would re-derive it;
+ * overriding `height` directly, in real px/rem, sidesteps the chain entirely.
  */
 const THUMB_W_REM = 3.5;
 const THUMB_STYLE = {
