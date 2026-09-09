@@ -6,8 +6,9 @@ import { ErrorState, FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
 import { Rule } from '@/components/ui/Rule';
 import { Button } from '@/components/ui/Button';
 import { ParticipantNumeral } from '@/components/ui/ParticipantNumeral';
-import { useQuestArchive } from '@/features/quests/api/useQuestArchive';
-import { ApiRequestError } from '@/lib/api/client';
+import { useQuestArchive } from '@/lib/api/quest';
+import { ApiRequestError, isNotFound } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/useAuth';
 import { formatOrdinalEdition } from '@/lib/format';
 import { useParticipant } from './api/useParticipant';
 import { useCertificate } from './api/useCertificate';
@@ -18,10 +19,6 @@ const CONTACT_LABELS: Record<Participant['contact']['method'], string> = {
   phone: 'Phone'
 };
 
-function isNotFound(error: unknown): error is ApiRequestError {
-  return error instanceof ApiRequestError && error.status === 404 && error.code === 'not_found';
-}
-
 /**
  * `/me` — session-only, mounted under `<RequireAuth>` in the router, so a
  * signed-in participant is the only thing this ever has to render for
@@ -31,6 +28,7 @@ function isNotFound(error: unknown): error is ApiRequestError {
  * Telegram back button.
  */
 export function ProfilePage() {
+  const { isAdmin } = useAuth();
   const participant = useParticipant();
 
   if (participant.isPending) return <LoadingState label="Finding your number…" />;
@@ -52,6 +50,18 @@ export function ProfilePage() {
       <ProfileHeader participant={participant.data} />
       <QuestHistory />
       <CertificateSection />
+      {/* The Mini App sheet has no address bar, so `/admin` — four screens
+          behind a route guard — was otherwise impossible to reach in the
+          product's primary runtime (`useAuth().isAdmin` had no consumer that
+          actually changed presentation, despite its own doc comment). A link
+          here, rather than a sixth tab, because admin is a role an account
+          has, not a sixth thing the product does — TabBar's five destinations
+          stay exactly the design's five. */}
+      {isAdmin && (
+        <Link to="/admin" className="type-label self-start text-amber hover:text-paper-dim">
+          Admin dashboard
+        </Link>
+      )}
     </Screen>
   );
 }
