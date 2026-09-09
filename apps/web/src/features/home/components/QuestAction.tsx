@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 import type { Quest } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
+import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { useAuth } from '@/lib/auth/useAuth';
 import { haptic } from '@/lib/telegram';
 import { formatCount, formatParticipantNumber } from '@/lib/format';
@@ -124,28 +125,5 @@ function PrimaryButton({
       <span>{children}</span>
       <ArrowIcon />
     </Button>
-  );
-}
-
-/**
- * The prototype's `.btn__arrow` — width 22/height 11, stroking outward on
- * hover and settling back on press. `Button` doesn't carry the prototype's
- * `.btn` classes (it's rebuilt in Tailwind), so the arrow's own sizing and
- * motion are expressed the same way the rest of `components/ui/` does it:
- * arbitrary values against the shared easing token, not a ported selector.
- */
-function ArrowIcon() {
-  return (
-    <svg
-      className="h-[11px] w-[22px] shrink-0 stroke-current transition-transform duration-[180ms] ease-[var(--ease-soft)] group-hover:translate-x-[3px] group-active:translate-x-px"
-      viewBox="0 0 24 12"
-      fill="none"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M0 6h21M16 1l5 5-5 5" />
-    </svg>
   );
 }

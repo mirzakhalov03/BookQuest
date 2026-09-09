@@ -54,3 +54,89 @@ export function formatCount(value: number): string {
 export function formatParticipantNumber(value: number): string {
   return String(value);
 }
+
+const ROMAN_TABLE: ReadonlyArray<readonly [number, string]> = [
+  [1000, 'M'],
+  [900, 'CM'],
+  [500, 'D'],
+  [400, 'CD'],
+  [100, 'C'],
+  [90, 'XC'],
+  [50, 'L'],
+  [40, 'XL'],
+  [10, 'X'],
+  [9, 'IX'],
+  [5, 'V'],
+  [4, 'IV'],
+  [1, 'I']
+];
+
+/**
+ * "IV" for 4 — the edition mark. `quest.edition` is a plain backend integer
+ * (spec §11); the title page shows it as a roman numeral, so it is converted
+ * here rather than left for the component to know how. A lookup table beats
+ * a dependency for a competition that will not run its four-thousandth year.
+ */
+export function toRomanNumeral(edition: number): string {
+  let remaining = edition;
+  let result = '';
+  for (const [amount, numeral] of ROMAN_TABLE) {
+    while (remaining >= amount) {
+      result += numeral;
+      remaining -= amount;
+    }
+  }
+  return result;
+}
+
+const ORDINAL_WORDS = [
+  'Zeroth',
+  'First',
+  'Second',
+  'Third',
+  'Fourth',
+  'Fifth',
+  'Sixth',
+  'Seventh',
+  'Eighth',
+  'Ninth',
+  'Tenth',
+  'Eleventh',
+  'Twelfth',
+  'Thirteenth',
+  'Fourteenth',
+  'Fifteenth',
+  'Sixteenth',
+  'Seventeenth',
+  'Eighteenth',
+  'Nineteenth',
+  'Twentieth'
+];
+
+/**
+ * "Fourth" for 4, "21st" past twenty. The edition mark's other half — "Fourth
+ * annual reading competition" — also derives from `quest.edition` rather than
+ * being written once and forgotten. Spelling out every future edition
+ * ("One hundred and third") is a job for a real number-to-words library,
+ * which spec §10 rules out for a label this small; twenty spelled-out words
+ * covers this competition for the next two decades, and a numeral ordinal
+ * past that ("21st annual…") still reads as correct English indefinitely.
+ */
+export function formatOrdinalEdition(edition: number): string {
+  const word = edition >= 1 ? ORDINAL_WORDS[edition] : undefined;
+  if (word) return word;
+
+  const lastTwo = edition % 100;
+  const lastDigit = edition % 10;
+  const suffix =
+    lastTwo >= 11 && lastTwo <= 13
+      ? 'th'
+      : lastDigit === 1
+        ? 'st'
+        : lastDigit === 2
+          ? 'nd'
+          : lastDigit === 3
+            ? 'rd'
+            : 'th';
+  return `${edition}${suffix}`;
+}

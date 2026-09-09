@@ -5,8 +5,10 @@ import { ApiRequestError } from '@/lib/api/client';
 // conventions), so it is safe to show verbatim. Anything that isn't an
 // ApiRequestError — a network failure, a timeout — never went through that
 // contract and has no product-written message, so it gets a plain one instead
-// of whatever the browser or fetch happened to say.
-const FALLBACK_MESSAGE = "Couldn't reach BookQuest. Check your connection and try again.";
+// of whatever the browser or fetch happened to say. Exported so any other
+// screen that catches a non-`ApiRequestError` failure (the registration form,
+// for one) says the same thing rather than inventing its own wording.
+export const FALLBACK_MESSAGE = "Couldn't reach BookQuest. Check your connection and try again.";
 
 interface ErrorStateProps {
   /** Whatever a query, mutation or router error handed back. */

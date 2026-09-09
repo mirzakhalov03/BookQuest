@@ -4,6 +4,7 @@ import { Screen } from '@/components/layout/Screen';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { HomePage } from '@/features/home/HomePage';
 import { RegisterPage } from '@/features/registration/RegisterPage';
+import { SuccessScreen } from '@/features/registration/SuccessScreen';
 import { RequireAdmin, RequireAuth } from '@/lib/auth/guards';
 import { RouteErrorBoundary } from './RouteErrorBoundary';
 
@@ -18,6 +19,7 @@ export const router = createBrowserRouter([
       // Public.
       { path: '/', element: <HomePage /> },
       { path: '/register', element: <RegisterPage /> },
+      { path: '/register/success', element: <SuccessScreen /> },
 
       // Every tab has to lead somewhere from the commit that adds the tab bar,
       // so these three stand in until their screens land. Delete the route's
