@@ -378,6 +378,21 @@
     repeating-linear-gradient(180deg, #dccfba 0 1px, #bcac92 1px 2px, #cdc0a8 2px 3px);
 }
 
+/* Not ported — the prototype never shows a cover outside the 3D stage. A flat
+   mount for `BookCover` on `/book` and `/quests/:edition`, and shrunk further
+   (via a local `--book-w` override) for an archive card's thumbnail. Same
+   radius and shadow as `.book__cover` above, minus the 3D transform it has no
+   perspective to sit inside. */
+.cover-box {
+  position: relative;
+  flex-shrink: 0;
+  width: var(--book-w);
+  height: var(--book-h);
+  border-radius: 1px 4px 4px 1px;
+  overflow: hidden;
+  box-shadow: 0 22px 50px -18px rgba(0, 0, 0, 0.9);
+}
+
 /* ── The cover artwork ────────────────────────────────────────────── */
 
 /* Everything on the cover is sized from `--book-w`, so the artwork scales

@@ -5,6 +5,9 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { HomePage } from '@/features/home/HomePage';
 import { RegisterPage } from '@/features/registration/RegisterPage';
 import { SuccessScreen } from '@/features/registration/SuccessScreen';
+import { BookPage } from '@/features/book/BookPage';
+import { QuestsPage } from '@/features/quests/QuestsPage';
+import { QuestEditionPage } from '@/features/quests/QuestEditionPage';
 import { RequireAdmin, RequireAuth } from '@/lib/auth/guards';
 import { RouteErrorBoundary } from './RouteErrorBoundary';
 
@@ -21,27 +24,13 @@ export const router = createBrowserRouter([
       { path: '/register', element: <RegisterPage /> },
       { path: '/register/success', element: <SuccessScreen /> },
 
+      { path: '/book', element: <BookPage /> },
+      { path: '/quests', element: <QuestsPage /> },
+      { path: '/quests/:edition', element: <QuestEditionPage /> },
+
       // Every tab has to lead somewhere from the commit that adds the tab bar,
-      // so these three stand in until their screens land. Delete the route's
+      // so this one stands in until its screen lands. Delete the route's
       // element, not the route.
-      {
-        path: '/book',
-        element: (
-          <ComingNext
-            title="The book"
-            body="What we're reading this year, how long it is, and every place you can read or listen to it. This screen is coming next."
-          />
-        )
-      },
-      {
-        path: '/quests',
-        element: (
-          <ComingNext
-            title="Past quests"
-            body="Every edition before this one — its book, its winners, and how many people finished. This screen is coming next."
-          />
-        )
-      },
       {
         path: '/results',
         element: (
