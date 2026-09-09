@@ -35,6 +35,12 @@
 
   --tracking-label: 0.16em;
 
+  /* The prototype's body measure (`--t-md` in tokens.css) is 17px; Tailwind
+     preflight's default `text-base` is 16px. This one token closes that gap
+     for both the CSS variable and the `text-base` utility — the rest of the
+     scale is untouched and stays exactly as ported. */
+  --text-base: 1.0625rem;
+
   --ease-out-quest: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft: cubic-bezier(0.32, 0.72, 0.22, 1);
 
