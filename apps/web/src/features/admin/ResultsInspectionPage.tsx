@@ -60,13 +60,15 @@ export function ResultsInspectionPage() {
     <AdminScreen className="max-w-3xl">
       <header className="flex flex-col gap-1">
         <p className="type-label">Results</p>
-        <h1 className="type-display text-3xl text-paper">Published {formatLongDate(publishedAt)}</h1>
+        <h1 className="type-display text-3xl text-paper">
+          Published {formatLongDate(publishedAt)}
+        </h1>
       </header>
 
       {leaderboard.length === 0 ? (
         <EmptyState
           title="No one finished the quiz"
-        titleAs="h2"
+          titleAs="h2"
           body="The results are in, but nobody submitted an attempt this year."
           className="flex-1"
         />

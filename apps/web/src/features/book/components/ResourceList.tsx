@@ -51,7 +51,10 @@ export function ResourceList({ resources }: ResourceListProps) {
           >
             <ResourceIcon kind={resource.kind} />
             <span className="flex-1">{resource.label}</span>
-            <span aria-hidden="true" className="text-taupe transition-colors group-hover:text-paper-dim">
+            <span
+              aria-hidden="true"
+              className="text-taupe transition-colors group-hover:text-paper-dim"
+            >
               ↗
             </span>
           </a>
