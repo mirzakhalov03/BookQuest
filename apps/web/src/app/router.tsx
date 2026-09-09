@@ -68,6 +68,27 @@ export const router = createBrowserRouter([
         ]
       },
 
+      // Reserved per the route table (spec §3): "Enter the quiz" already
+      // navigates here and fires its haptic, but question delivery, timing
+      // and submission are a separate plan (Phase 6) — not built against an
+      // imagined API. Session-gated like `/me`, since a quiz is only ever
+      // something a signed-in participant sits.
+      {
+        path: '/quiz',
+        element: <RequireAuth />,
+        children: [
+          {
+            index: true,
+            element: (
+              <ComingNext
+                title="The quiz"
+                body="One attempt, the clock running, speed counts as much as accuracy. This screen is coming next."
+              />
+            )
+          }
+        ]
+      },
+
       // The admin tree, same shape: /admin/* children hang off this one.
       { path: '/admin', element: <RequireAdmin /> }
     ]
