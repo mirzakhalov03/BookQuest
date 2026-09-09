@@ -109,6 +109,28 @@ export function toRomanNumeral(edition: number): string {
   return result;
 }
 
+/**
+ * "2026-09-20T18:59" — feeds an `<input type="datetime-local">`, the admin
+ * quest editor's date fields. That input has no timezone of its own; the
+ * browser shows and edits whatever digits it's given as the visitor's own
+ * wall clock. So this reads the value's *local* components (not
+ * `toISOString`, which would show the admin UTC digits and silently shift
+ * every date by their timezone offset the moment they touched one). Reading
+ * the field back is the plain reverse: `new Date(value)` on a string with no
+ * timezone suffix is interpreted in the same local zone, which is exactly
+ * what puts the right instant back on the wire.
+ */
+export function toDateTimeLocalInput(value: string): string {
+  const date = new Date(value);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const y = date.getFullYear();
+  const m = pad(date.getMonth() + 1);
+  const d = pad(date.getDate());
+  const h = pad(date.getHours());
+  const min = pad(date.getMinutes());
+  return `${y}-${m}-${d}T${h}:${min}`;
+}
+
 const ORDINAL_WORDS = [
   'Zeroth',
   'First',

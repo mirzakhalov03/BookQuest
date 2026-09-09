@@ -9,8 +9,8 @@ import { Rule } from '@/components/ui/Rule';
 import { ApiRequestError } from '@/lib/api/client';
 import { formatLongDate } from '@/lib/format';
 import { useQuestResults } from './api/useQuestResults';
-import { Podium } from './components/Podium';
-import { LeaderboardRow } from './components/LeaderboardRow';
+import { ResultsPodium } from '@/components/ResultsPodium';
+import { LeaderboardRow } from '@/components/LeaderboardRow';
 
 /** A 404 the API means literally: "not found" covers both "no quest running"
  * and "results not published yet" — the frontend tells them apart by asking
@@ -63,7 +63,7 @@ export function ResultsPage() {
         <h1 className="type-display text-3xl text-paper">Published {formatLongDate(publishedAt)}</h1>
       </header>
 
-      <Podium entries={podium} />
+      <ResultsPodium entries={podium} />
 
       <section className="flex flex-col gap-1">
         <p className="type-label">Full leaderboard</p>

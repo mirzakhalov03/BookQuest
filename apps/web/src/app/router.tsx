@@ -10,6 +10,11 @@ import { QuestsPage } from '@/features/quests/QuestsPage';
 import { QuestEditionPage } from '@/features/quests/QuestEditionPage';
 import { ResultsPage } from '@/features/results/ResultsPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
+import { AdminLayout } from '@/layouts/AdminLayout';
+import { DashboardPage } from '@/features/admin/DashboardPage';
+import { ParticipantsPage } from '@/features/admin/ParticipantsPage';
+import { QuestEditorPage } from '@/features/admin/QuestEditorPage';
+import { ResultsInspectionPage } from '@/features/admin/ResultsInspectionPage';
 import { RequireAdmin, RequireAuth } from '@/lib/auth/guards';
 import { RouteErrorBoundary } from './RouteErrorBoundary';
 
@@ -62,7 +67,25 @@ export const router = createBrowserRouter([
       },
 
       // The admin tree, same shape: /admin/* children hang off this one.
-      { path: '/admin', element: <RequireAdmin /> }
+      // `RequireAdmin` is the guard (UX only — see its own doc comment);
+      // `AdminLayout` is the shell every admin screen shares underneath it.
+      // Both are layout routes, so a screen added here inherits the guard
+      // and the nav by position, same as `/me`.
+      {
+        path: '/admin',
+        element: <RequireAdmin />,
+        children: [
+          {
+            element: <AdminLayout />,
+            children: [
+              { index: true, element: <DashboardPage /> },
+              { path: 'participants', element: <ParticipantsPage /> },
+              { path: 'quest', element: <QuestEditorPage /> },
+              { path: 'results', element: <ResultsInspectionPage /> }
+            ]
+          }
+        ]
+      }
     ]
   }
 ]);

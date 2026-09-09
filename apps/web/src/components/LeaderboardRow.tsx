@@ -7,6 +7,11 @@ import { formatDuration } from '@/lib/format';
  * frontend renders the server's ranking, it never derives one (spec §4 rule
  * 4). Score and duration share a cell rather than each getting a grid column
  * of their own: four columns hold on a 390px screen, five don't.
+ *
+ * Promoted here from `features/results/` — the admin results inspection
+ * reads the exact same `QuestResults` shape and needs the exact same row,
+ * so it reuses this rather than a feature importing another feature's
+ * internals (spec §4 rule 1).
  */
 export function LeaderboardRow({ entry }: { entry: ResultEntry }) {
   return (

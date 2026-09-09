@@ -7,7 +7,8 @@ import { Toast } from '@/components/ui/Toast';
  * bottom navigation under it.
  *
  * Toast is mounted here because it is a single, app-wide element (spec §4) —
- * whatever screen fires one, this is where it renders.
+ * whatever screen fires one, this is where it renders, admin included:
+ * `AdminLayout` nests inside this one rather than duplicating the shell.
  *
  * There is no TopBar here on purpose. The wordmark carries `quest.year`, and
  * putting it in the layout would either hardcode the year or make every route
@@ -16,6 +17,11 @@ import { Toast } from '@/components/ui/Toast';
  */
 export function AppLayout() {
   const { pathname } = useLocation();
+  // The admin area gets a top nav instead (`AdminLayout`) — plan Phase 4's
+  // "tables instead of a stage" means no bottom tab bar to a stage that
+  // isn't there. Path-gated rather than a second layout root so `/admin/*`
+  // keeps the one atmosphere and the one Toast every other route gets.
+  const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
 
   return (
     <div className="relative flex min-h-dvh flex-col">
@@ -31,7 +37,7 @@ export function AppLayout() {
         </div>
       </main>
 
-      <TabBar />
+      {!isAdminRoute && <TabBar />}
       <Toast />
     </div>
   );

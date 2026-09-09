@@ -101,5 +101,9 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
 
 export const api = {
   get: <T>(path: string) => request<T>(path),
-  post: <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body })
+  post: <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body }),
+  // The admin quest editor is the first caller: `strictObject().partial()` on
+  // the server means a partial body is the contract, not a shortcut, so this
+  // sends exactly what the caller builds — no merging happens here.
+  patch: <T>(path: string, body: unknown) => request<T>(path, { method: 'PATCH', body })
 };
