@@ -26,6 +26,9 @@ body {
   background: var(--color-ink);
   color: var(--color-paper);
   font-family: var(--font-sans);
+  /* The prototype's measure. Tailwind's preflight leaves body at 1.5, which
+     tightens every paragraph in the app by a hair against the design. */
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -36,21 +39,40 @@ body {
   border-radius: 2px;
 }
 
-/* Display type: the wide, heavy end of the Archivo width axis. */
-.type-display {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-stretch: var(--wide);
-  letter-spacing: -0.03em;
-  line-height: 0.92;
-}
+/* In `@layer components`, same reason `shell.css`'s `.screen` is (see its
+   comment): unlayered, these would outrank every Tailwind utility regardless
+   of specificity or source order, and a paired utility like `text-amber` or
+   `hover:text-paper-dim` would silently do nothing wherever these classes
+   are also present. */
+@layer components {
+  /* Display type: the wide, heavy end of the Archivo width axis. */
+  .type-display {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-stretch: var(--wide);
+    letter-spacing: -0.03em;
+    line-height: 0.92;
+  }
 
-/* Small uppercase label, used for stage captions and field labels. */
-.type-label {
-  font-size: 0.6875rem;
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  color: var(--color-taupe);
+  /* One numeral in a fixed cell. Digits have different natural widths, so a
+     ticking countdown reflows on every second unless each numeral is given
+     the same box. 0.62em fits Archivo's figures at 108% width, and holds for
+     the four-digit participant number too. */
+  .type-numeral {
+    display: inline-block;
+    width: 0.62em;
+    text-align: center;
+    font-stretch: var(--wide-tight);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Small uppercase label, used for stage captions and field labels. */
+  .type-label {
+    font-size: 0.6875rem;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-taupe);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

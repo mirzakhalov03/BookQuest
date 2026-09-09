@@ -35,6 +35,12 @@
 
   --tracking-label: 0.16em;
 
+  /* The prototype's body measure (`--t-md` in tokens.css) is 17px; Tailwind
+     preflight's default `text-base` is 16px. This one token closes that gap
+     for both the CSS variable and the `text-base` utility — the rest of the
+     scale is untouched and stays exactly as ported. */
+  --text-base: 1.0625rem;
+
   --ease-out-quest: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft: cubic-bezier(0.32, 0.72, 0.22, 1);
 
@@ -61,5 +67,22 @@
   50% {
     opacity: 1;
     transform: scale(1.035);
+  }
+}
+
+/* The Field primitive's one-shot shake on a rejected value. Not a Tailwind
+   utility — a multi-step transform keyframe has nowhere to live as one. */
+@keyframes nudge {
+  20% {
+    transform: translateX(-4px);
+  }
+  45% {
+    transform: translateX(3px);
+  }
+  70% {
+    transform: translateX(-2px);
+  }
+  100% {
+    transform: none;
   }
 }

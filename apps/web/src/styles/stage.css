@@ -1,0 +1,834 @@
+/**
+ * The stage — ported from `prototype/styles/home.css`, verbatim.
+ *
+ * This is the Home screen's composition: a book standing on a lit podium under
+ * a spotlight, dust drifting through the beam, a countdown beneath it. It stays
+ * hand-written CSS rather than Tailwind utilities because the geometry is
+ * `calc()` on custom properties inside multi-part `transform`s, which arbitrary
+ * -value syntax cannot express legibly (FRONTEND-SPEC §4).
+ *
+ * The prototype is the source of truth. Anything here that looks wrong is
+ * almost certainly load-bearing — the three comments marked TRAP say which.
+ * Colours that map to a palette token use the token; the book, podium and
+ * spotlight materials keep their literals because they are pigments, not
+ * palette (see the task report for the full list).
+ */
+
+/* ── Book geometry ─────────────────────────────────────────────────
+   Four custom properties drive every face. Nothing else in the book
+   carries a hard-coded dimension, which is why the desktop override
+   below is three lines. Keep it that way.                            */
+
+:root {
+  --book-w: clamp(138px, 43vw, 190px);
+  --book-h: calc(var(--book-w) * 1.47);
+  --book-d: clamp(24px, 6.5vw, 32px);
+
+  /* TRAP 1. The tilt is POSITIVE. It turns the cover to the right, which
+     brings the spine into view. Negate it and you expose the fore-edge,
+     hide the spine, and the book flattens into a rectangle. */
+  --book-tilt: 27deg;
+}
+
+/* The stage's parts fade up in sequence once the screen settles. The route
+   transitions (a later task) animate on the same curve and will share this
+   keyframe rather than declaring a second one. */
+@keyframes view-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* ── Topbar ───────────────────────────────────────────────────────── */
+
+.topbar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(1rem, 3vh, 1.6rem) clamp(1.2rem, 5vw, 3rem) 0;
+}
+
+.wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+.wordmark__name {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  font-stretch: 112%;
+  letter-spacing: -0.01em;
+  color: var(--color-paper);
+}
+.wordmark__year {
+  font-size: 0.6875rem;
+  letter-spacing: var(--tracking-label);
+  color: var(--color-gold);
+}
+
+.weblink {
+  font-size: 0.75rem;
+  color: var(--color-taupe);
+  text-decoration: none;
+  padding: 0.4rem 0;
+  transition: color 180ms linear;
+}
+.weblink:hover {
+  color: var(--color-paper-dim);
+}
+
+/* ── Layout ───────────────────────────────────────────────────────── */
+
+/* The Home screen's own shell. Two of the ported breakpoints tune it, so it
+   travels with the stage rather than living in the component layer.
+
+   `.view--home` and `.home` are layout only. Despite the name prefix they are
+   NOT part of the `.view` / `.is-on` / `.is-entering` route-transition system,
+   which this stylesheet deliberately does not port — do not delete them as
+   transition leftovers. `.view--home` gives the screen its height and, at
+   ≥900px, the clearance that keeps the CTA out from under the fixed tab bar. */
+.view--home {
+  min-height: 100dvh;
+}
+
+.home {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.6rem, 4vh, 3rem);
+  padding: clamp(1rem, 3vh, 2rem) clamp(1.2rem, 5vw, 3rem) clamp(1.6rem, 4vh, 3rem);
+}
+
+/* ── The stage ────────────────────────────────────────────────────── */
+
+.stage {
+  overflow-x: clip;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  width: 100%;
+}
+
+/* Below 900px there is only the book: the asides are desktop furniture. */
+.stage__aside--right {
+  display: none;
+}
+
+.stage__aside--left {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  text-align: center;
+  animation: view-in 700ms var(--ease-out-quest) 700ms both;
+}
+
+/* Small uppercase caption. Says the same thing as `.type-label`, restated so
+   the stage's classes stand on their own the way the prototype's do. */
+.tag {
+  margin: 0;
+  font-size: 0.6875rem;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-taupe);
+}
+
+.booktitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4.4vw, 2.1rem);
+  font-weight: 600;
+  font-stretch: var(--wide);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--color-paper);
+  margin-top: 0.35rem;
+}
+.byline {
+  font-size: 0.875rem;
+  color: var(--color-taupe);
+}
+
+/* `isolate` keeps the book's negative-z contact shadow inside the stage
+   instead of punching through the page background. */
+.stage__center {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  isolation: isolate;
+}
+
+/* ── Spotlight ────────────────────────────────────────────────────── */
+
+.spotlight {
+  position: absolute;
+  inset: -18% -40% -8%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* The cone and the pool centre themselves with the `translate` property, not
+   with `transform`. `breathe` (theme.css) animates `transform: scale()`, and a
+   `transform: translateX(-50%)` here would be overwritten by it and throw both
+   layers half a width to the right. `translate` composes ahead of `transform`,
+   so the pair reads exactly as the prototype's `translateX(-50%) scale()`. */
+.spotlight__cone {
+  position: absolute;
+  top: -6%;
+  left: 50%;
+  width: 78%;
+  height: 104%;
+  translate: -50%;
+  background: linear-gradient(
+    180deg,
+    rgba(240, 160, 60, 0.2),
+    rgba(240, 160, 60, 0.05) 58%,
+    transparent 86%
+  );
+  clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+  filter: blur(26px);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 26%);
+  mask-image: linear-gradient(180deg, transparent, #000 26%);
+  animation: breathe 7.5s ease-in-out infinite;
+}
+
+.spotlight__pool {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  width: 88%;
+  height: 34%;
+  translate: -50%;
+  background: radial-gradient(closest-side, rgba(240, 160, 60, 0.28), transparent 76%);
+  filter: blur(10px);
+  animation: breathe 7.5s ease-in-out 0.4s infinite;
+}
+
+/* A single thin ring on the floor — the edge of the lit circle */
+.spotlight__ring {
+  position: absolute;
+  left: 50%;
+  bottom: 5%;
+  width: 54%;
+  aspect-ratio: 3.2 / 1;
+  transform: translateX(-50%);
+  border: 1px solid var(--rule-gold);
+  border-radius: 50%;
+  opacity: 0.34;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 45%);
+  mask-image: linear-gradient(180deg, transparent, #000 45%);
+}
+
+/* ── Dust motes ───────────────────────────────────────────────────── */
+
+.motes {
+  position: absolute;
+  inset: -10% 0 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.mote {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(240, 200, 150, 0.85);
+  opacity: 0;
+  animation: drift linear infinite;
+}
+@keyframes drift {
+  0% {
+    opacity: 0;
+    transform: translateY(0) translateX(0);
+  }
+  18% {
+    opacity: 0.55;
+  }
+  70% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-120px) translateX(14px);
+  }
+}
+
+/* ── The book ─────────────────────────────────────────────────────── */
+
+.bookwrap {
+  position: relative;
+  z-index: 2;
+  perspective: 1500px;
+  perspective-origin: 50% 40%;
+  animation: float 8s ease-in-out 1.5s infinite;
+}
+
+.book {
+  position: relative;
+  width: var(--book-w);
+  height: var(--book-h);
+  transform-style: preserve-3d;
+  transform: rotateY(var(--book-tilt)) rotateX(4deg);
+  animation: book-enter 1.5s var(--ease-out-quest) 120ms both;
+}
+/* Swings in from nearly edge-on, so the first thing you see is that it is
+   an object with depth. */
+@keyframes book-enter {
+  from {
+    opacity: 0;
+    transform: rotateY(64deg) rotateX(4deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotateY(var(--book-tilt)) rotateX(4deg) scale(1);
+  }
+}
+
+.book__face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  backface-visibility: hidden;
+}
+
+.book__cover,
+.book__back {
+  width: 100%;
+  height: 100%;
+}
+
+.book__cover {
+  transform: translateZ(calc(var(--book-d) / 2));
+  border-radius: 1px 4px 4px 1px;
+  overflow: hidden;
+  /* Two declarations, as the prototype has them: the drop shadow wins and the
+     inset highlight is dead. Kept as a move, not a fix — removing the first
+     line changes nothing, so it is left where its author put it. */
+  box-shadow: inset 1px 0 0 rgba(255, 214, 164, 0.3);
+  box-shadow: 0 22px 50px -18px rgba(0, 0, 0, 0.9);
+}
+
+.book__back {
+  transform: translateZ(calc(var(--book-d) / -2)) rotateY(180deg);
+  border-radius: 4px 1px 1px 4px;
+  background: linear-gradient(200deg, #4a1608, #2a0d05);
+}
+
+/* TRAP 2. The spine faces the spotlight, so it is BRIGHTER than the cover.
+   The first gradient lifts it toward the light at its outer edge; swap it for
+   a darkening one and the spine reads as shadow and the book loses its depth. */
+.book__spine {
+  width: var(--book-d);
+  height: 100%;
+  transform-origin: left center;
+  transform: rotateY(-90deg) translateX(calc(var(--book-d) / -2));
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.45) 0%,
+      rgba(255, 205, 150, 0.1) 55%,
+      rgba(255, 214, 164, 0.2) 100%
+    ),
+    linear-gradient(180deg, #a33f1d, #78290f 58%, #571b0a);
+  box-shadow: inset -1px 0 0 rgba(255, 214, 164, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px 0 0 3px;
+}
+.book__spinetext {
+  display: none; /* only legible once the spine is wide enough */
+  writing-mode: vertical-rl;
+  font-family: var(--font-sans);
+  font-size: calc(var(--book-d) * 0.26);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(240, 220, 190, 0.82);
+  white-space: nowrap;
+}
+
+/* Fore-edge and head: stacked paper */
+.book__edge {
+  left: auto;
+  right: 0;
+  width: var(--book-d);
+  height: 100%;
+  transform-origin: right center;
+  transform: rotateY(90deg) translateX(calc(var(--book-d) / 2));
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.34), transparent 40%),
+    repeating-linear-gradient(90deg, #d8cbb6 0 1px, #b9a98f 1px 2px, #c9bca4 2px 3px);
+}
+
+.book__top {
+  width: 100%;
+  height: var(--book-d);
+  transform-origin: center top;
+  transform: rotateX(90deg) translateY(calc(var(--book-d) / -2));
+  background:
+    linear-gradient(180deg, rgba(255, 220, 170, 0.28), transparent 70%),
+    repeating-linear-gradient(180deg, #dccfba 0 1px, #bcac92 1px 2px, #cdc0a8 2px 3px);
+}
+
+/* Not ported — the prototype never shows a cover outside the 3D stage. A flat
+   mount for `BookCover` on `/book` and `/quests/:edition`, and shrunk further
+   (via a local `--book-w` override) for an archive card's thumbnail. Same
+   radius and shadow as `.book__cover` above, minus the 3D transform it has no
+   perspective to sit inside. */
+.cover-box {
+  position: relative;
+  flex-shrink: 0;
+  width: var(--book-w);
+  height: var(--book-h);
+  border-radius: 1px 4px 4px 1px;
+  overflow: hidden;
+  box-shadow: 0 22px 50px -18px rgba(0, 0, 0, 0.9);
+}
+
+/* ── The cover artwork ────────────────────────────────────────────── */
+
+/* Everything on the cover is sized from `--book-w`, so the artwork scales
+   with the object instead of needing its own breakpoint. */
+.cover {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: calc(var(--book-w) * 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background:
+    radial-gradient(120% 80% at 12% 4%, rgba(255, 170, 90, 0.2), transparent 58%),
+    linear-gradient(158deg, #8c3115 0%, #5e1f0e 52%, #3b1207 100%);
+}
+
+/* Not in the prototype — it never has a real cover to show. Added for the app,
+   where `book.coverUrl` can be a photograph: fills the same box the drawn
+   illustration does, so the two are interchangeable from the face's point of
+   view. */
+.cover__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover__frame {
+  position: absolute;
+  inset: calc(var(--book-w) * 0.055);
+  border: 1px solid rgba(200, 162, 74, 0.34);
+}
+
+.cover__sun {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--book-w) * 0.3);
+  width: calc(var(--book-w) * 0.46);
+  height: calc(var(--book-w) * 0.46);
+  transform: translateX(-50%);
+}
+.cover__rays,
+.cover__disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.cover__rays {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(226, 190, 120, 0.85) 0deg 1.2deg,
+    transparent 1.2deg 12deg
+  );
+  -webkit-mask-image: radial-gradient(circle, transparent 44%, #000 50%, #000 82%, transparent 96%);
+  mask-image: radial-gradient(circle, transparent 44%, #000 50%, #000 82%, transparent 96%);
+  opacity: 0.75;
+}
+.cover__disc {
+  inset: 26%;
+  background: radial-gradient(circle at 38% 32%, #f6d89a, #c8a24a 62%, #8a6425);
+  box-shadow: 0 0 22px rgba(240, 190, 110, 0.35);
+}
+
+/* An abstract horizon — desert, read as a curve, not a picture */
+.cover__dune {
+  position: absolute;
+  left: -18%;
+  right: -18%;
+  bottom: calc(var(--book-w) * 0.3);
+  height: calc(var(--book-w) * 0.42);
+  border-radius: 50% 50% 0 0;
+  background: linear-gradient(180deg, rgba(58, 17, 7, 0.9), rgba(38, 11, 5, 1));
+  border-top: 1px solid rgba(200, 162, 74, 0.3);
+}
+
+.cover__title {
+  position: relative;
+  margin: 0 0 calc(var(--book-w) * 0.045);
+  font-family: var(--font-display);
+  font-size: calc(var(--book-w) * 0.132);
+  font-weight: 600;
+  font-stretch: 110%;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  color: #f2e3cb;
+}
+.cover__author {
+  position: relative;
+  margin: 0;
+  font-size: calc(var(--book-w) * 0.052);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: rgba(226, 200, 160, 0.72);
+}
+
+/* The gloss that sells it as a printed board: light at the hinge, dark at the
+   fore-edge, in the same direction as the spotlight. */
+.cover__sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    102deg,
+    rgba(255, 236, 202, 0.17) 0%,
+    transparent 26%,
+    transparent 62%,
+    rgba(0, 0, 0, 0.46) 100%
+  );
+  pointer-events: none;
+}
+
+/* ── Contact shadow + podium ──────────────────────────────────────── */
+
+/* Negative z-index puts this behind the book but still inside `.stage__center`,
+   which is why that element is an isolated stacking context. */
+.book__contact {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  width: 118%;
+  height: 30px;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.85), transparent 76%);
+  filter: blur(9px);
+  z-index: -1;
+}
+
+.podium {
+  position: relative;
+  z-index: 1;
+  width: calc(var(--book-w) * 1.5);
+  /* Negative margin tucks the podium under the book so the two touch. */
+  margin-top: calc(var(--book-w) * -0.17);
+  animation: view-in 900ms var(--ease-out-quest) 400ms both;
+}
+.podium__top {
+  height: calc(var(--book-w) * 0.3);
+  border-radius: 50%;
+  background:
+    radial-gradient(56% 64% at 50% 22%, rgba(255, 178, 106, 0.22), transparent 58%),
+    linear-gradient(180deg, #241a12, #150f0a);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 190, 130, 0.22),
+    inset 0 -14px 22px -14px rgba(255, 170, 100, 0.3),
+    0 0 50px -10px rgba(226, 99, 42, 0.22);
+}
+.podium__body {
+  height: calc(var(--book-w) * 0.075);
+  margin: calc(var(--book-w) * -0.15) auto 0;
+  width: 94%;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  background: linear-gradient(180deg, #1d160f, #100b07);
+}
+.podium__cast {
+  position: absolute;
+  left: 50%;
+  top: 70%;
+  width: 150%;
+  height: calc(var(--book-w) * 0.5);
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(226, 99, 42, 0.16), transparent 74%);
+  filter: blur(14px);
+}
+
+/* ── The clock ────────────────────────────────────────────────────── */
+
+.clock {
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  animation: view-in 700ms var(--ease-out-quest) 900ms both;
+}
+
+.clock__label {
+  margin: 0;
+  font-size: 0.6875rem;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-amber);
+}
+
+.clock__row {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.unit {
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+  /* TRAP 3. Below 900px the four units share the row equally and are allowed
+     to shrink past their content. Drop either declaration and the row
+     overflows a narrow viewport — invisible on a resized desktop window,
+     because headless Chrome will not go below 500px wide. Check at 390px. */
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.55rem 0.3rem 0.6rem;
+}
+.unit + .unit {
+  border-left: 1px solid var(--rule);
+}
+
+.unit__value {
+  display: flex;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 12.5vw, 4.2rem);
+  font-weight: 600;
+  font-stretch: var(--wide-tight);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-paper);
+  font-variant-numeric: tabular-nums;
+}
+.unit__name {
+  font-size: 0.6875rem;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-taupe);
+}
+
+/* Seconds carry the ember — the one part of the page that is alive */
+.unit[data-unit='seconds'] .unit__value {
+  color: var(--color-ember);
+}
+
+/* One numeral, one cell. `.type-numeral` in base.css is this same cell under
+   the name the app's components use; `.digit` stays because the tick hangs off
+   it and the prototype's markup names it. */
+.digit {
+  display: inline-block;
+  width: 0.62em; /* holds its cell whatever the numeral */
+  text-align: center;
+}
+.digit.is-tick {
+  animation: tick 260ms var(--ease-out-quest);
+}
+@keyframes tick {
+  from {
+    opacity: 0.45;
+    transform: translateY(0.12em);
+    filter: blur(1px);
+  }
+}
+
+.clock__date {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-taupe);
+}
+
+/* ── The act ──────────────────────────────────────────────────────── */
+
+.act {
+  display: grid;
+  justify-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  animation: view-in 700ms var(--ease-out-quest) 1.05s both;
+}
+.act__sub {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-taupe);
+}
+
+/* ── State skins ──────────────────────────────────────────────────────
+   One attribute on the Home root recolours the whole screen. `data-phase`
+   carries `QuestPhase` from @bookquest/shared: upcoming | reading | quiz |
+   finished. `upcoming` and `reading` wear the default treatment above and so
+   need no rules; the prototype's `unregistered` is a registration state, not
+   a phase, and is handled in the component layer.                        */
+
+[data-phase='quiz'] .unit[data-unit='seconds'] .unit__value {
+  color: var(--color-amber);
+}
+[data-phase='quiz'] .clock__label {
+  color: var(--color-ember);
+}
+
+/* Finished: the whole clock goes gold. The quest is a trophy now, not a timer. */
+[data-phase='finished'] .unit__value,
+[data-phase='finished'] .unit[data-unit='seconds'] .unit__value {
+  color: var(--color-gold);
+}
+[data-phase='finished'] .clock__label {
+  color: var(--color-gold-soft);
+}
+[data-phase='finished'] .clock__row {
+  border-color: var(--rule-gold);
+}
+[data-phase='finished'] .unit + .unit {
+  border-left-color: var(--rule-gold);
+}
+
+/* ── Desktop composition ──────────────────────────────────────────── */
+
+@media (min-width: 900px) {
+  /* The whole desktop book is these three lines — see the note at the top. */
+  :root {
+    --book-w: clamp(210px, 16vw, 262px);
+    --book-d: clamp(36px, 2.9vw, 46px);
+    --book-tilt: 29deg; /* still positive — see TRAP 1 */
+  }
+
+  .home {
+    gap: clamp(2rem, 5vh, 3.4rem);
+    padding-bottom: clamp(2rem, 6vh, 4rem);
+  }
+
+  /* Keep the stage clear of the fixed desktop tab bar. Layout, not a route
+     transition — see the note on `.view--home` above. */
+  .view--home {
+    padding-bottom: 4rem;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    column-gap: clamp(2rem, 6vw, 5.5rem);
+    max-width: 1180px;
+  }
+
+  .book__spinetext {
+    display: block;
+  }
+
+  .stage__aside--left {
+    justify-items: end;
+    text-align: right;
+    justify-self: end;
+    max-width: 20rem;
+  }
+  .booktitle {
+    font-size: clamp(2rem, 3.4vw, 2.9rem);
+  }
+
+  .stage__aside--right {
+    display: block;
+    justify-self: start;
+    max-width: 20rem;
+    animation: view-in 700ms var(--ease-out-quest) 820ms both;
+  }
+  .facts {
+    margin: 0;
+    display: grid;
+    gap: 0.1rem;
+  }
+  .facts__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .facts__row:first-child {
+    border-top: 1px solid var(--rule);
+  }
+  .facts dt {
+    font-size: 0.6875rem;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-taupe-dim);
+  }
+  .facts dd {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-paper-dim);
+  }
+
+  /* With room to spare the clock stops being a ruled table and becomes four
+     freestanding numbers — so the rules go and the units size to content. */
+  .clock__row {
+    border: 0;
+    width: auto;
+  }
+  .unit {
+    flex: 0 0 auto; /* the counterpart to TRAP 3 */
+    padding: 0 clamp(1.4rem, 3vw, 2.6rem);
+  }
+  .unit__value {
+    font-size: clamp(3.6rem, 6vw, 5.6rem);
+  }
+
+  /* On desktop the tab bar is a quiet marker of what is coming,
+     not the primary navigation — so it stops filling the width.
+     Its base styling belongs to the TabBar component; only this
+     recomposition is part of the stage. */
+  .tabbar {
+    position: fixed;
+    left: 50%;
+    bottom: 1.4rem;
+    width: auto;
+    height: auto;
+    transform: translateX(-50%);
+    gap: 0.25rem;
+    padding: 0.35rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: rgba(20, 16, 12, 0.7);
+  }
+  .tab {
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+  }
+  .tab span {
+    font-size: 0.6875rem;
+  }
+  .tab.is-on::before {
+    top: -0.35rem;
+  }
+  .tab.is-on::after {
+    display: none;
+  }
+}
+
+/* Short viewports (most phones in the Telegram web view) tighten up
+   rather than pushing the action below the fold. */
+@media (max-width: 899px) and (max-height: 760px) {
+  :root {
+    --book-w: clamp(118px, 34vw, 156px);
+  }
+  .home {
+    gap: 1.1rem;
+  }
+  .unit__value {
+    font-size: clamp(2.2rem, 11vw, 3.4rem);
+  }
+}

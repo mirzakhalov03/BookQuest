@@ -1,20 +1,20 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Participant, RegisterParticipantInput } from '@bookquest/shared';
 import { api } from '@/lib/api/client';
-import { questKeys } from '@/features/home/api/useCurrentQuest';
-import { useSessionStore } from '@/stores/session.store';
+import { questKeys } from '@/lib/api/quest';
+import { authKeys } from '@/lib/auth/useAuth';
 
 export function useRegister() {
   const queryClient = useQueryClient();
-  const setParticipant = useSessionStore((state) => state.setParticipant);
 
   return useMutation({
     mutationFn: (input: RegisterParticipantInput) =>
       api.post<Participant>('/participants', input),
-    onSuccess: (participant) => {
-      setParticipant({ number: participant.number, fullName: participant.fullName });
-      // The reader count on the Home stage just changed.
+    onSuccess: () => {
+      // The reader count on the Home stage just changed, and so did
+      // `user.participant` on the auth session — both are stale until refetched.
       void queryClient.invalidateQueries({ queryKey: questKeys.current() });
+      void queryClient.invalidateQueries({ queryKey: authKeys.me() });
     }
   });
 }

@@ -5,19 +5,17 @@ export interface TimeLeft {
   hours: number;
   minutes: number;
   seconds: number;
-  isOver: boolean;
 }
 
 function remaining(target: Date | null): TimeLeft {
-  if (!target) return { days: 0, hours: 0, minutes: 0, seconds: 0, isOver: true };
+  if (!target) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
   const ms = Math.max(0, target.getTime() - Date.now());
   return {
     days: Math.floor(ms / 86_400_000),
     hours: Math.floor(ms / 3_600_000) % 24,
     minutes: Math.floor(ms / 60_000) % 60,
-    seconds: Math.floor(ms / 1000) % 60,
-    isOver: ms === 0
+    seconds: Math.floor(ms / 1000) % 60
   };
 }
 

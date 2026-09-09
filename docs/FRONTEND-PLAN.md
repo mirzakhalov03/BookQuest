@@ -26,6 +26,14 @@ retry policy, and the feature-first folder layout.
 3. **ESLint** — `pnpm lint` delegates to a turbo `lint` task that no workspace defines. Either add
    `eslint` + `typescript-eslint` + `eslint-plugin-react-hooks`, or drop the script. A no-op script
    that looks like a check is worse than no script.
+   **Resolution (Task 1):** dropped. `typescript-eslint` does not support TypeScript 7.0 — every
+   entry point (`typescript-eslint`, `@typescript-eslint/parser`, `@typescript-eslint/eslint-plugin`)
+   hard-throws at import when it resolves a `typescript` peer with major version ≥ 7, and this repo
+   is pinned to `typescript@7.0.2`. A scoped `pnpm.overrides` (`parent>child` selectors) to give the
+   ESLint toolchain a side-by-side `typescript@6.0.3` was tried and does not work: pnpm rewrites the
+   declared peer range but still resolves to the one physical `typescript` already in the graph, so
+   the same throw happens. Tracked upstream at typescript-eslint#10940. Revisit once that lands, or
+   the repo moves off pinning `typescript-eslint` against the same compiler line as the app.
 4. **`prototype/` must keep building nothing.** It has no build step and must stay that way — it is
    the visual reference, opened directly in a browser. Do not fold it into the Vite app.
 

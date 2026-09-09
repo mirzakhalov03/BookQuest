@@ -2,7 +2,7 @@
   "name": "bookquest",
   "private": true,
   "version": "0.1.0",
-  "description": "BookQuest \u2014 an annual reading competition, delivered as a Telegram Mini App and a web app.",
+  "description": "BookQuest — an annual reading competition, delivered as a Telegram Mini App and a web app.",
   "engines": {
     "node": ">=22"
   },

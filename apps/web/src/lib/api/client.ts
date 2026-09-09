@@ -1,6 +1,20 @@
 import type { ApiResponse } from '@bookquest/shared';
+import { clearToken, readToken } from '@/lib/auth/tokenStore';
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api/v1';
+// Fail loudly at load time rather than silently falling back — a wrong base
+// URL surfaces as confusing network errors far from this file otherwise.
+function readBaseUrl(): string {
+  const value = import.meta.env.VITE_API_URL;
+  if (!value) {
+    throw new Error('VITE_API_URL is not set. Add it to the repo-root .env (see .env.example).');
+  }
+  return value;
+}
+
+const BASE_URL = readBaseUrl();
+
+/** The login exchange is what we would retry *with*, so its own 401 is final. */
+const LOGIN_PATH = '/auth/telegram';
 
 /**
  * Thrown for any non-successful response. It carries the per-field messages
@@ -20,21 +34,66 @@ export class ApiRequestError extends Error {
   }
 }
 
+/**
+ * The one 404 shape the frontend treats as "not yet" rather than a failure —
+ * no quest running between editions, a quiz nobody has sat, results not
+ * published. Every screen that meets it wants the same invitation framing
+ * instead of `ErrorState`'s retry, so this is the one place that says what
+ * counts, rather than nine call sites each spelling out the same three
+ * checks (the analogous `isForbidden` already lives next to its one caller's
+ * shape, `features/admin/components/ForbiddenState.tsx`).
+ */
+export function isNotFound(error: unknown): error is ApiRequestError {
+  return error instanceof ApiRequestError && error.status === 404 && error.code === 'not_found';
+}
+
 interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown;
 }
 
-export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+/**
+ * Signs in again from the Telegram bridge and resolves to a fresh token, or to
+ * null when there is nothing to sign in with.
+ */
+type Reauthenticate = () => Promise<string | null>;
+
+let reauthenticate: Reauthenticate | null = null;
+
+/**
+ * The auth layer hands this in at boot. It cannot be imported directly: the
+ * auth layer already imports this module, so the dependency has to point one
+ * way and the re-login has to arrive from outside.
+ */
+export function registerReauthenticate(fn: Reauthenticate): void {
+  reauthenticate = fn;
+}
+
+function send(path: string, options: RequestOptions, token: string | null): Promise<Response> {
   const { body, headers, ...rest } = options;
 
-  const response = await fetch(`${BASE_URL}${path}`, {
+  return fetch(`${BASE_URL}${path}`, {
     ...rest,
     headers: {
       ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      ...(token === null ? {} : { Authorization: `Bearer ${token}` }),
       ...headers
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) })
   });
+}
+
+export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  let response = await send(path, options, readToken());
+
+  // A 401 means the stored token is dead, whatever it looked like. Drop it and
+  // try the sign-in exchange exactly once, then replay. Never a loop: a second
+  // 401 with a token minted seconds ago is a broken session layer, not a stale
+  // token, and the caller should see the error.
+  if (response.status === 401 && path !== LOGIN_PATH) {
+    clearToken();
+    const token = reauthenticate === null ? null : await reauthenticate();
+    if (token !== null) response = await send(path, options, token);
+  }
 
   const payload = (await response.json().catch(() => null)) as ApiResponse<T> | null;
 
@@ -55,5 +114,9 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
 
 export const api = {
   get: <T>(path: string) => request<T>(path),
-  post: <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body })
+  post: <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body }),
+  // The admin quest editor is the first caller: `strictObject().partial()` on
+  // the server means a partial body is the contract, not a shortcut, so this
+  // sends exactly what the caller builds — no merging happens here.
+  patch: <T>(path: string, body: unknown) => request<T>(path, { method: 'PATCH', body })
 };
