@@ -7,12 +7,19 @@
  */
 
 /* ── Podium ──────────────────────────────────────────────────────────────
+   Namespaced `.results-podium` — `features/home/components/Podium.tsx`
+   already owns the bare `.podium` class (the book's lit pedestal, styled in
+   `stage.css`, a verbatim port of the prototype). Class selectors are equal
+   specificity, so whichever stylesheet loads later would otherwise win on
+   the shared name; this collided with Home's pedestal in review and the fix
+   is a namespace, not a load-order trick.
+
    `order` does the 2nd–1st–3rd arrangement, keyed off each place's own
    `data-rank` — the DOM stays in the API's rank order (spec §4 rule 4), only
    the paint order changes. Flexbox rather than grid specifically so this
    still centres correctly with one or two places, not just three.          */
 
-.podium {
+.results-podium {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -20,7 +27,7 @@
   gap: clamp(0.5rem, 3vw, 1rem);
 }
 
-.podium__place {
+.results-podium__place {
   flex: 1 1 8rem;
   max-width: 11rem;
   min-width: 0;
@@ -35,10 +42,10 @@
   text-align: center;
 }
 
-.podium__place[data-rank='2'] {
+.results-podium__place[data-rank='2'] {
   order: 1;
 }
-.podium__place[data-rank='1'] {
+.results-podium__place[data-rank='1'] {
   order: 2;
   padding-top: 2rem;
   border-color: var(--color-gold);
@@ -47,20 +54,20 @@
     0 0 0 1px rgb(200 162 74 / 0.35) inset,
     0 18px 36px -20px rgb(200 162 74 / 0.55);
 }
-.podium__place[data-rank='3'] {
+.results-podium__place[data-rank='3'] {
   order: 3;
 }
 
-.podium__rank {
+.results-podium__rank {
   font-size: 1.6rem;
   line-height: 1;
   color: var(--color-gold);
 }
-.podium__place[data-rank='1'] .podium__rank {
+.results-podium__place[data-rank='1'] .results-podium__rank {
   font-size: 2.25rem;
 }
 
-.podium__name {
+.results-podium__name {
   max-width: 100%;
   overflow: hidden;
   font-size: 0.8125rem;
@@ -69,12 +76,12 @@
   color: var(--color-paper);
 }
 
-.podium__number {
+.results-podium__number {
   font-size: 0.75rem;
   color: var(--color-gold-soft);
 }
 
-.podium__meta {
+.results-podium__meta {
   font-size: 0.6875rem;
   letter-spacing: 0.02em;
   color: var(--color-taupe-dim);
@@ -115,7 +122,6 @@
 }
 
 .leaderboard-row__meta {
-  flex-shrink: 0;
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -193,6 +199,11 @@
   .certificate-print * {
     visibility: visible;
   }
+  /* Absolute against `AppLayout`'s <main> (both are `position: relative`,
+     so that's the containing block, not the page root) — fine at the
+     certificate's real size, which is one page. An absolutely positioned
+     box doesn't paginate: if this content ever grows past a single printed
+     page, this needs to become a normal flow element instead. */
   .certificate-print {
     position: absolute;
     inset: 0;

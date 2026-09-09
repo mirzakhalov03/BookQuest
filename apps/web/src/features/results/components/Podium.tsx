@@ -22,13 +22,13 @@ export function Podium({ entries }: PodiumProps) {
   if (entries.length === 0) return null;
 
   return (
-    <div className="podium">
+    <div className="results-podium">
       {entries.map((entry) => (
-        <div key={entry.number} className="podium__place" data-rank={entry.rank}>
-          <p className="podium__rank type-display">{entry.rank}</p>
-          <p className="podium__name">{entry.fullName}</p>
-          <ParticipantNumeral value={entry.number} className="podium__number" />
-          <p className="podium__meta">
+        <div key={entry.number} className="results-podium__place" data-rank={entry.rank}>
+          <p className="results-podium__rank type-display">{entry.rank}</p>
+          <p className="results-podium__name">{entry.fullName}</p>
+          <ParticipantNumeral value={entry.number} className="results-podium__number" />
+          <p className="results-podium__meta">
             {entry.score}/{entry.total} · {formatDuration(entry.durationMs)}
           </p>
         </div>
