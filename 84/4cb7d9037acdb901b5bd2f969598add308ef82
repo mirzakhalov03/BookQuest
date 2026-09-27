@@ -1,0 +1,21 @@
+packages/shared/src/schemas/index.ts
+  s_b9054a8c969982::t_334b95a0ccc6e0 10
+packages/shared/src/schemas/notification.ts
+  s_b9054a8c969982::t_e5e7e80bfa9462 1-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "844cb7d9037acdb901b5bd2f969598add308ef82",
+  "prompts": {},
+  "sessions": {
+    "s_b9054a8c969982": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d96f27d6-b95b-444e-a602-ceff94102460",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
