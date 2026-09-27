@@ -1,0 +1,21 @@
+apps/web/src/lib/auth/TelegramLoginWidget.tsx
+  s_08b1ea8380223a::t_ee9130904fd038 1-74
+apps/web/src/lib/auth/guards.tsx
+  s_08b1ea8380223a::t_5fb486447214fc 5,51-52,54-55,57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "71c427e81cc5aecfb1817d1c38162fc9c6bef185",
+  "prompts": {},
+  "sessions": {
+    "s_08b1ea8380223a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0d30c08e-170d-4cde-a183-9fd8012728e3",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
