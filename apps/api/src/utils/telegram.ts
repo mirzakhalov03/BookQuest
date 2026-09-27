@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { z } from 'zod';
+import type { TelegramWidgetAuthPayload } from '@bookquest/shared';
 import { env } from '../config/env.js';
 
 export interface TelegramProfile {
@@ -97,6 +98,52 @@ export function verifyInitData(initData: string, now: Date = new Date()): InitDa
       username: user.data.username ?? null,
       photoUrl: user.data.photo_url ?? null,
       languageCode: user.data.language_code ?? null
+    }
+  };
+}
+
+/**
+ * Verifies Telegram's Login Widget callback — structurally the same check as
+ * `verifyInitData` (data-check string, HMAC, constant-time compare,
+ * freshness), but the two are not interchangeable: the widget's secret is
+ * `SHA256(bot_token)`, where the Mini App's is
+ * `HMAC_SHA256(key: "WebAppData", data: bot_token)`. Using one to verify the
+ * other's payload always fails, by design — they're different Telegram
+ * products.
+ */
+export function verifyLoginWidget(
+  payload: TelegramWidgetAuthPayload,
+  now: Date = new Date()
+): InitDataResult {
+  const { hash, ...fields } = payload;
+
+  const dataCheckString = Object.entries(fields)
+    .filter(([, value]) => value !== undefined)
+    .map(([key, value]) => `${key}=${String(value)}`)
+    .sort()
+    .join('\n');
+
+  const secret = crypto.createHash('sha256').update(env.TELEGRAM_BOT_TOKEN).digest();
+  const expected = crypto.createHmac('sha256', secret).update(dataCheckString).digest('hex');
+
+  if (!constantTimeEquals(expected, hash)) return { ok: false, reason: 'hash mismatch' };
+
+  const authDate = new Date(payload.auth_date * 1000);
+  const ageSeconds = (now.getTime() - authDate.getTime()) / 1000;
+  if (ageSeconds > env.AUTH_INIT_DATA_MAX_AGE_SECONDS) {
+    return { ok: false, reason: 'stale auth_date' };
+  }
+
+  return {
+    ok: true,
+    authDate,
+    profile: {
+      telegramUserId: String(payload.id),
+      firstName: payload.first_name,
+      lastName: payload.last_name ?? null,
+      username: payload.username ?? null,
+      photoUrl: payload.photo_url ?? null,
+      languageCode: null
     }
   };
 }
