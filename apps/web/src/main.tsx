@@ -6,6 +6,10 @@ import './styles/index.css';
 
 initTelegram();
 
+if ('serviceWorker' in navigator) {
+  void navigator.serviceWorker.register('/sw.js');
+}
+
 /**
  * `import.meta.env` is replaced at build time, so with the flag unset this
  * whole branch — and the mock module behind it — is dropped from the bundle.
