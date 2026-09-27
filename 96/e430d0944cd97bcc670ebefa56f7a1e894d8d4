@@ -1,0 +1,19 @@
+apps/api/src/utils/telegram.ts
+  s_75dcf40a9c2fa2::t_3ce2ad11b2ed0d 3,105-150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "96e430d0944cd97bcc670ebefa56f7a1e894d8d4",
+  "prompts": {},
+  "sessions": {
+    "s_75dcf40a9c2fa2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2de1b23f-1a9d-43f1-97d5-0b36cf9f40da",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
