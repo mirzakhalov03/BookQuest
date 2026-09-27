@@ -38,7 +38,6 @@ export const router = createBrowserRouter([
       { path: '/quests/:edition', element: <QuestEditionPage /> },
 
       { path: '/results', element: <ResultsPage /> },
-      { path: '/notifications', element: <NotificationsPage /> },
 
       // The session-only tree. Its screens mount as `children` of this route,
       // so they inherit the guard by position and nobody has to remember it.
@@ -46,6 +45,15 @@ export const router = createBrowserRouter([
         path: '/me',
         element: <RequireAuth />,
         children: [{ index: true, element: <ProfilePage /> }]
+      },
+
+      // A notification is always someone's own — there is no session-less
+      // version of this screen the way `/results` has one, so it gets the
+      // same guard as `/me` rather than the earlier draft's public route.
+      {
+        path: '/notifications',
+        element: <RequireAuth />,
+        children: [{ index: true, element: <NotificationsPage /> }]
       },
 
       // Reserved per the route table (spec §3): "Enter the quiz" already

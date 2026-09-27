@@ -4,6 +4,10 @@ import { useSendBroadcast } from './api/useSendBroadcast';
 
 export function BroadcastPage() {
   const [message, setMessage] = useState('');
+  // A second, deliberate tap before the one action here that can't be undone
+  // (spec-scale: "hundreds" of real DMs) — reset the moment the message
+  // changes, so confirming stays tied to the text actually being sent.
+  const [confirming, setConfirming] = useState(false);
   const sendBroadcast = useSendBroadcast();
 
   return (
@@ -14,26 +18,55 @@ export function BroadcastPage() {
         onSubmit={(event) => {
           event.preventDefault();
           if (!message.trim()) return;
+
+          if (!confirming) {
+            setConfirming(true);
+            return;
+          }
+
           sendBroadcast.mutate(
             { message },
             { onSuccess: () => setMessage('') }
           );
+          setConfirming(false);
         }}
       >
         <textarea
           className="min-h-32 rounded-[3px] border border-[color:var(--rule)] bg-[color:var(--color-ash)] p-3 text-paper"
           value={message}
-          onChange={(event) => setMessage(event.target.value)}
+          onChange={(event) => {
+            setMessage(event.target.value);
+            setConfirming(false);
+          }}
           maxLength={1000}
           placeholder="Quiz opens tomorrow at 6pm!"
         />
-        <button
-          type="submit"
-          disabled={sendBroadcast.isPending || !message.trim()}
-          className="rounded-[3px] bg-ember px-4 py-2 text-paper disabled:opacity-50"
-        >
-          {sendBroadcast.isPending ? 'Sending…' : 'Send to everyone'}
-        </button>
+        {confirming ? (
+          <div className="flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={sendBroadcast.isPending}
+              className="rounded-[3px] bg-ember px-4 py-2 text-paper disabled:opacity-50"
+            >
+              {sendBroadcast.isPending ? 'Sending…' : 'Confirm: send to everyone'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirming(false)}
+              className="text-sm text-taupe"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            type="submit"
+            disabled={!message.trim()}
+            className="rounded-[3px] bg-ember px-4 py-2 text-paper disabled:opacity-50"
+          >
+            Send to everyone
+          </button>
+        )}
         {sendBroadcast.isSuccess && (
           <p className="text-sm text-taupe">
             Sent to {sendBroadcast.data.recipientCount} people.

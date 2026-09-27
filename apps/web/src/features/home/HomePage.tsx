@@ -36,17 +36,26 @@ export function HomePage() {
   if (error) {
     // A quest-free gap between editions is a normal condition, not a failure
     // (spec, plan Phase 3) — it gets the invitation, not the retry button.
+    // Still carries `TopBar` (no year — there is no current quest to read one
+    // from): between editions is exactly when an admin broadcast is likeliest,
+    // and the bell is otherwise unreachable from this branch.
     if (isNotFound(error)) {
       return (
-        <Screen>
-          <EmptyState title={error.message} body="Check back once the next edition opens." />
-        </Screen>
+        <>
+          <TopBar />
+          <Screen>
+            <EmptyState title={error.message} body="Check back once the next edition opens." />
+          </Screen>
+        </>
       );
     }
     return (
-      <Screen>
-        <ErrorState error={error} onRetry={() => refetch()} />
-      </Screen>
+      <>
+        <TopBar />
+        <Screen>
+          <ErrorState error={error} onRetry={() => refetch()} />
+        </Screen>
+      </>
     );
   }
 

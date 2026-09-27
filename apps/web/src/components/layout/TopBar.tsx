@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router';
 import { isInsideTelegram, openExternalLink } from '@/lib/telegram';
+import { readToken } from '@/lib/auth/tokenStore';
 import { useNotifications } from '@/features/notifications/api/useNotifications';
 
 interface TopBarProps {
@@ -36,12 +37,18 @@ export function TopBar({ year }: TopBarProps) {
 
 /**
  * The tab bar is design-locked to the prototype's five destinations (spec) —
- * this is where Notifications actually surfaces instead: the one chrome
- * element already present on every screen.
+ * this is where Notifications actually surfaces instead. `TopBar` is
+ * currently mounted by `HomePage` only (all three of its branches, so this
+ * reaches someone between editions too, not just the success state) — a
+ * placement judgment call, not a spec requirement; see that plan's own note.
  */
 function NotificationsBell() {
   const notifications = useNotifications();
   const unreadCount = notifications.data?.filter((n) => !n.readAt).length ?? 0;
+
+  // Nothing to show a visitor who has no session to fetch a feed for — same
+  // gate `useNotifications` puts on the request itself.
+  if (readToken() === null) return null;
 
   return (
     <NavLink to="/notifications" aria-label="Notifications" className="relative">

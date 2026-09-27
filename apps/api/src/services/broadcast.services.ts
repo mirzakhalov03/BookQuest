@@ -26,18 +26,25 @@ export async function sendBroadcast(message: string, createdBy: UserDocument): P
     recipientCount: recipients.length
   });
 
-  for (const recipient of recipients) {
-    await NotificationModel.create({
-      user: recipient._id,
-      kind: 'broadcast',
-      title: 'BookQuest',
-      body: message,
-      broadcast: broadcast._id
-    });
+  // All Notification rows exist before any DM is attempted: the in-app feed
+  // is all-or-nothing for this broadcast, never partial. A DM's own failure
+  // (see sendTelegramMessage) still can't touch a row that already exists.
+  if (recipients.length > 0) {
+    await NotificationModel.insertMany(
+      recipients.map((recipient) => ({
+        user: recipient._id,
+        kind: 'broadcast' as const,
+        title: 'BookQuest',
+        body: message,
+        broadcast: broadcast._id
+      }))
+    );
+  }
 
+  for (const recipient of recipients) {
     // Failure here is logged inside sendTelegramMessage and otherwise
-    // ignored — the Notification row above already exists regardless, so
-    // this person still sees it in the Mini App even if the DM didn't land.
+    // ignored — this recipient's Notification row already exists regardless
+    // of whether the DM itself landed.
     await sendTelegramMessage(recipient.telegramUserId, message);
     await sleep(35);
   }
