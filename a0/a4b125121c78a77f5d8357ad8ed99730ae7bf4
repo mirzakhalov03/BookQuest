@@ -1,0 +1,33 @@
+apps/api/src/routes/notification.routes.ts
+  s_b9054a8c969982::t_de3304ed3da2c2 4-5,10-15
+apps/api/src/services/broadcast.services.ts
+  s_b9054a8c969982::t_75a989b6065fb5 29-42,44,46-47
+apps/api/src/validators/notification.validators.ts
+  s_b9054a8c969982::t_47f22628780f1d 1-5
+apps/web/src/app/router.tsx
+  s_b9054a8c969982::t_a023ccfe95fed6 50-58
+apps/web/src/components/layout/TopBar.tsx
+  s_b9054a8c969982::t_ea00a2729b7c13 3,40-43,49-52
+apps/web/src/features/admin/BroadcastPage.tsx
+  s_b9054a8c969982::t_d063636e501201 7-10,21-26,31,37-40,44-69
+apps/web/src/features/home/HomePage.tsx
+  s_b9054a8c969982::t_c6b69d7bd55821 39-41,44-49,53-58
+apps/web/src/features/notifications/api/useNotifications.ts
+  s_b9054a8c969982::t_35a99aa1304207 4,10-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "a0a4b125121c78a77f5d8357ad8ed99730ae7bf4",
+  "prompts": {},
+  "sessions": {
+    "s_b9054a8c969982": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d96f27d6-b95b-444e-a602-ceff94102460",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
