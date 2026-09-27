@@ -1,0 +1,31 @@
+.env.example
+  s_08b1ea8380223a::t_57e40a1c0c8b53 54-57
+apps/web/src/app/providers.tsx
+  s_08b1ea8380223a::t_37718b88d434ab 53-54
+apps/web/src/features/home/components/QuestAction.tsx
+  s_08b1ea8380223a::t_d8c220e624f257 7,81-82,86-87
+apps/web/src/features/registration/RegisterPage.tsx
+  s_08b1ea8380223a::t_d1b9a746714dd2 10,70-74,104,106-107,109
+apps/web/src/lib/auth/TelegramLoginWidget.tsx
+  s_08b1ea8380223a::t_56b310cb6b3cb0 3,9,15-16,27,31,35-41,51,61,69-79
+apps/web/src/lib/auth/authApi.ts
+  s_08b1ea8380223a::t_13b3c9602a8e01 15-19
+apps/web/src/lib/auth/useAuth.ts
+  s_08b1ea8380223a::t_0a769e3235d875 87-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "028f15eb8a8852f25d2ad0c880cfc67624537383",
+  "prompts": {},
+  "sessions": {
+    "s_08b1ea8380223a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0d30c08e-170d-4cde-a183-9fd8012728e3",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
