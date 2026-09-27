@@ -9,6 +9,7 @@ import { BookPage } from '@/features/book/BookPage';
 import { QuestsPage } from '@/features/quests/QuestsPage';
 import { QuestEditionPage } from '@/features/quests/QuestEditionPage';
 import { ResultsPage } from '@/features/results/ResultsPage';
+import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import { DashboardPage } from '@/features/admin/DashboardPage';
@@ -36,6 +37,7 @@ export const router = createBrowserRouter([
       { path: '/quests/:edition', element: <QuestEditionPage /> },
 
       { path: '/results', element: <ResultsPage /> },
+      { path: '/notifications', element: <NotificationsPage /> },
 
       // The session-only tree. Its screens mount as `children` of this route,
       // so they inherit the guard by position and nobody has to remember it.

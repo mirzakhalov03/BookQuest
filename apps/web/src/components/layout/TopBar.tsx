@@ -1,4 +1,6 @@
+import { NavLink } from 'react-router';
 import { isInsideTelegram, openExternalLink } from '@/lib/telegram';
+import { useNotifications } from '@/features/notifications/api/useNotifications';
 
 interface TopBarProps {
   /**
@@ -24,8 +26,32 @@ export function TopBar({ year }: TopBarProps) {
         <span className="wordmark__name">BookQuest</span>
         {year !== undefined && <span className="wordmark__year">{year}</span>}
       </div>
-      <WebLink />
+      <div className="flex items-center gap-3">
+        <NotificationsBell />
+        <WebLink />
+      </div>
     </header>
+  );
+}
+
+/**
+ * The tab bar is design-locked to the prototype's five destinations (spec) —
+ * this is where Notifications actually surfaces instead: the one chrome
+ * element already present on every screen.
+ */
+function NotificationsBell() {
+  const notifications = useNotifications();
+  const unreadCount = notifications.data?.filter((n) => !n.readAt).length ?? 0;
+
+  return (
+    <NavLink to="/notifications" aria-label="Notifications" className="relative">
+      <span aria-hidden="true">🔔</span>
+      {unreadCount > 0 && (
+        <span className="absolute -right-1 -top-1 rounded-full bg-ember px-1 text-xs text-paper">
+          {unreadCount}
+        </span>
+      )}
+    </NavLink>
   );
 }
 
