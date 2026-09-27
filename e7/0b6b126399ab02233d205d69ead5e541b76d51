@@ -1,0 +1,23 @@
+docs/superpowers/plans/2026-09-27-bot-wiring-and-start.md
+  s_04208b9bba22eb::t_552d8692ba369d 1-989
+docs/superpowers/plans/2026-09-27-broadcast-and-notifications.md
+  s_04208b9bba22eb::t_7761a6239a4972 1-926
+docs/superpowers/plans/2026-09-27-web-auth-and-pwa.md
+  s_04208b9bba22eb::t_de40be7b4fb268 1-758
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "e70b6b126399ab02233d205d69ead5e541b76d51",
+  "prompts": {},
+  "sessions": {
+    "s_04208b9bba22eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1547e32e-56f1-48c2-aaba-e2c2735d877b",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
