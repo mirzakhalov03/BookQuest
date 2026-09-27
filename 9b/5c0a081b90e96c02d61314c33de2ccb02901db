@@ -1,0 +1,19 @@
+apps/api/src/utils/telegram-send.ts
+  s_b9054a8c969982::t_cf14e6ac1b2ea1 11-16,18-20,22-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "9b5c0a081b90e96c02d61314c33de2ccb02901db",
+  "prompts": {},
+  "sessions": {
+    "s_b9054a8c969982": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d96f27d6-b95b-444e-a602-ceff94102460",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
