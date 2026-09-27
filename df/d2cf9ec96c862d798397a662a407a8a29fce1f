@@ -1,0 +1,21 @@
+.env.example
+  s_08b1ea8380223a::t_3b967084e6c007 51-54
+apps/web/src/lib/auth/authApi.ts
+  s_08b1ea8380223a::t_725c7a460b7c6d 1,48-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "dfd2cf9ec96c862d798397a662a407a8a29fce1f",
+  "prompts": {},
+  "sessions": {
+    "s_08b1ea8380223a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0d30c08e-170d-4cde-a183-9fd8012728e3",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
