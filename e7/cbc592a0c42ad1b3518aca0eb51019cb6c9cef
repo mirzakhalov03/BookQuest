@@ -1,0 +1,27 @@
+apps/api/src/controllers/admin/broadcast.controllers.ts
+  s_b9054a8c969982::t_2f8c3649b6ea6a 1-12
+apps/api/src/routes/admin/broadcast.routes.ts
+  s_b9054a8c969982::t_50dd45e36a76f3 1-8
+apps/api/src/routes/admin/index.ts
+  s_b9054a8c969982::t_41479604e1b218 6,17
+apps/api/src/services/broadcast.services.ts
+  s_b9054a8c969982::t_c75a915b2eecf4 1-51
+apps/api/src/validators/admin.validators.ts
+  s_b9054a8c969982::t_f0bf0a0b4ee094 2,18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "e7cbc592a0c42ad1b3518aca0eb51019cb6c9cef",
+  "prompts": {},
+  "sessions": {
+    "s_b9054a8c969982": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d96f27d6-b95b-444e-a602-ceff94102460",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
