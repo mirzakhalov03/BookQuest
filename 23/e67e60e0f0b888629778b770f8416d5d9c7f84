@@ -1,0 +1,25 @@
+apps/api/src/controllers/bot.controllers.ts
+  s_04208b9bba22eb::t_3b242b6d42fd2e 1-11
+apps/api/src/routes/bot.routes.ts
+  s_04208b9bba22eb::t_b8a01ca6abffa3 1-9
+apps/api/src/routes/index.ts
+  s_04208b9bba22eb::t_b233c3f8f2ab7a 6,18
+apps/api/src/validators/bot.validators.ts
+  s_04208b9bba22eb::t_c3c9f326f7948b 1-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "23e67e60e0f0b888629778b770f8416d5d9c7f84",
+  "prompts": {},
+  "sessions": {
+    "s_04208b9bba22eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1547e32e-56f1-48c2-aaba-e2c2735d877b",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
