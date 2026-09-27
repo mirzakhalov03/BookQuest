@@ -1,0 +1,25 @@
+apps/web/src/app/router.tsx
+  s_b9054a8c969982::t_639b7157ec3a19 19,87-88
+apps/web/src/features/admin/BroadcastPage.tsx
+  s_b9054a8c969982::t_d1ef5b91de6207 1-48
+apps/web/src/features/admin/api/useSendBroadcast.ts
+  s_b9054a8c969982::t_c2203f7308e047 1-9
+apps/web/src/layouts/AdminLayout.tsx
+  s_b9054a8c969982::t_1885640d0c5393 17-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "98f1076fd18461bae7b0dded7e4b2dad3c058561",
+  "prompts": {},
+  "sessions": {
+    "s_b9054a8c969982": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d96f27d6-b95b-444e-a602-ceff94102460",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
