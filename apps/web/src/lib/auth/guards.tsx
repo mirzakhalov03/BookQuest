@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { Navigate, Outlet } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from './useAuth';
+import { TelegramLoginWidget } from './TelegramLoginWidget';
 
 /**
  * Route guards — **UX, not security.**
@@ -45,15 +46,15 @@ export function RequireAdmin() {
   return <Outlet />;
 }
 
-/** Read-only web: there is no bridge here, so there is nothing to sign in with. */
 function ContinueInTelegram() {
   return (
-    <Panel label="Read-only">
-      <h1 className="type-display text-4xl">Continue in Telegram</h1>
+    <Panel label="Sign in">
+      <h1 className="type-display text-4xl">Sign in with Telegram</h1>
       <p className="max-w-[34ch] text-paper-dim">
-        This part of BookQuest needs to know who you are, and only the Telegram Mini App can say.
-        Everything else — the book, the deadline, past quests — is here on the web.
+        BookQuest uses your Telegram account to identify you — no password to
+        remember.
       </p>
+      <TelegramLoginWidget />
     </Panel>
   );
 }
