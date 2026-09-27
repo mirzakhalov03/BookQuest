@@ -1,0 +1,27 @@
+pnpm-lock.yaml
+  s_04208b9bba22eb::t_4601d658cf00af 73-100,531-533,747-750,767-775,883-886,1215-1218,1231-1239,1259-1262,1367-1369,1377-1380,1446-1450,1463-1465,1542-1544,1553-1555,1811-1812,1955-1958,1982-1990,2094-2095,2378-2379,2388-2391,2406-2407,2546-2549,2554-2555,2637-2650,2662-2663,2732-2733,2741-2745
+apps/bot/package.json
+  s_04208b9bba22eb::t_f8548b582efc58 1-26
+apps/bot/src/config/env.ts
+  s_04208b9bba22eb::t_84e90ad02dfd5c 1-37
+apps/bot/src/config/logger.ts
+  s_04208b9bba22eb::t_764552efd278c0 1-7
+apps/bot/tsconfig.json
+  s_04208b9bba22eb::t_3a75d4e2ada637 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "00207ca2101d0d81524e89cb19d32ea18c93adef",
+  "prompts": {},
+  "sessions": {
+    "s_04208b9bba22eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1547e32e-56f1-48c2-aaba-e2c2735d877b",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
