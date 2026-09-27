@@ -14,7 +14,8 @@ const TABS: Tab[] = [
   { to: '/admin', label: 'Dashboard' },
   { to: '/admin/participants', label: 'Participants' },
   { to: '/admin/quest', label: 'Quest' },
-  { to: '/admin/results', label: 'Results' }
+  { to: '/admin/results', label: 'Results' },
+  { to: '/admin/broadcast', label: 'Broadcast' }
 ];
 
 /**

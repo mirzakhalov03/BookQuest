@@ -16,6 +16,7 @@ import { DashboardPage } from '@/features/admin/DashboardPage';
 import { ParticipantsPage } from '@/features/admin/ParticipantsPage';
 import { QuestEditorPage } from '@/features/admin/QuestEditorPage';
 import { ResultsInspectionPage } from '@/features/admin/ResultsInspectionPage';
+import { BroadcastPage } from '@/features/admin/BroadcastPage';
 import { RequireAdmin, RequireAuth } from '@/lib/auth/guards';
 import { RouteErrorBoundary } from './RouteErrorBoundary';
 
@@ -83,7 +84,8 @@ export const router = createBrowserRouter([
               { index: true, element: <DashboardPage /> },
               { path: 'participants', element: <ParticipantsPage /> },
               { path: 'quest', element: <QuestEditorPage /> },
-              { path: 'results', element: <ResultsInspectionPage /> }
+              { path: 'results', element: <ResultsInspectionPage /> },
+              { path: 'broadcast', element: <BroadcastPage /> }
             ]
           }
         ]
