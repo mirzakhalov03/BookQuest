@@ -1,0 +1,25 @@
+apps/api/src/controllers/notification.controllers.ts
+  s_b9054a8c969982::t_a1eb828313bc95 1-14
+apps/api/src/routes/index.ts
+  s_b9054a8c969982::t_48894d237ba6e7 7,20
+apps/api/src/routes/notification.routes.ts
+  s_b9054a8c969982::t_33209c1b0b03e1 1-8
+apps/api/src/services/notification.services.ts
+  s_b9054a8c969982::t_15b89a5088afe0 1-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "2ce878871ec8afa7dde5e7d507b7b5bdea4c586d",
+  "prompts": {},
+  "sessions": {
+    "s_b9054a8c969982": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d96f27d6-b95b-444e-a602-ceff94102460",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
