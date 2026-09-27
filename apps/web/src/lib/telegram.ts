@@ -42,6 +42,9 @@ interface TelegramWebApp {
   themeParams: Record<string, string>;
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
+  requestFullscreen?: () => void;
+  isFullscreen?: boolean;
+  enableClosingConfirmation?: () => void;
   openLink?: (url: string) => void;
   /**
    * Present, and deliberately unused. `MainButton` docks a button into
@@ -83,6 +86,14 @@ export function initTelegram(): void {
 
   webApp.ready();
   webApp.expand();
+  // Newer clients support a real fullscreen request; expand() above is the
+  // fallback every client understands. There is no feature-detection beyond
+  // "does the method exist" — older clients simply don't have it.
+  webApp.requestFullscreen?.();
+  // The platform's actual ceiling for "hard to dismiss": Telegram has no API
+  // to block the swipe-down/back-gesture close, only to ask for confirmation
+  // before it happens.
+  webApp.enableClosingConfirmation?.();
   webApp.setHeaderColor?.('#14100C');
   webApp.setBackgroundColor?.('#14100C');
 }
