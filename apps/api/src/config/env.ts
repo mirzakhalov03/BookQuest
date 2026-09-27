@@ -18,6 +18,10 @@ const envSchema = z.object({
      authenticate anybody, so it refuses to start rather than pretending. */
   TELEGRAM_BOT_TOKEN: z.string().min(1, 'TELEGRAM_BOT_TOKEN is required (BotFather token)'),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
+  /** Shared secret only `apps/bot` holds. It authenticates the bot process
+      itself, not a person — there is no Telegram initData to verify for a
+      service call. Generate with: openssl rand -hex 32 */
+  BOT_SERVICE_TOKEN: z.string().min(32, 'BOT_SERVICE_TOKEN must be at least 32 characters'),
   JWT_EXPIRES_IN_DAYS: z.coerce.number().int().positive().max(90).default(7),
   /** How long a signed initData string stays usable — the replay window. */
   AUTH_INIT_DATA_MAX_AGE_SECONDS: z.coerce.number().int().positive().default(3600),
