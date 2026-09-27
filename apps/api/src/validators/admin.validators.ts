@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createQuestSchema, updateQuestSchema } from '@bookquest/shared';
+import { createQuestSchema, updateQuestSchema, createBroadcastSchema } from '@bookquest/shared';
 
 const objectId = z.string().regex(/^[0-9a-f]{24}$/i, 'That is not a valid id.');
 
@@ -15,3 +15,4 @@ export const adminParticipantQuery = z.object({
 
 export const createQuestBody = createQuestSchema;
 export const updateQuestBody = updateQuestSchema;
+export const createBroadcastBody = createBroadcastSchema;
