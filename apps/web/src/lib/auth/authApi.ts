@@ -1,4 +1,4 @@
-import type { Session, SessionUser } from '@bookquest/shared';
+import type { Session, SessionUser, TelegramWidgetAuthPayload } from '@bookquest/shared';
 import { api } from '@/lib/api/client';
 import { getInitData } from '@/lib/telegram';
 import { storeToken } from './tokenStore';
@@ -44,4 +44,17 @@ export function reauthenticate(): Promise<string | null> {
     });
 
   return inFlight;
+}
+
+/**
+ * The standalone web app's sign-in — Telegram's Login Widget calls back with
+ * this shape (see `TelegramLoginWidget.tsx`), and the API verifies it with
+ * `verifyLoginWidget`, a different check than the Mini App's `initData`.
+ * Unlike `loginWithTelegram`, this always has something to send — there is
+ * no "outside Telegram" case here, the widget IS the outside-Telegram case.
+ */
+export async function loginWithWidget(payload: TelegramWidgetAuthPayload): Promise<Session> {
+  const session = await api.post<Session>('/auth/telegram-widget', payload);
+  storeToken(session);
+  return session;
 }
