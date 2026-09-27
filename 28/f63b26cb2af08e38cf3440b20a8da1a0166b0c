@@ -1,0 +1,23 @@
+apps/bot/src/bot.ts
+  s_04208b9bba22eb::t_b318521d0e1a14 1-37
+apps/bot/src/handlers/fallback.ts
+  s_04208b9bba22eb::t_d46b3ab6945d24 1-14
+apps/bot/src/handlers/start.ts
+  s_04208b9bba22eb::t_d6bb20185c7560 1-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "28f63b26cb2af08e38cf3440b20a8da1a0166b0c",
+  "prompts": {},
+  "sessions": {
+    "s_04208b9bba22eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1547e32e-56f1-48c2-aaba-e2c2735d877b",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
