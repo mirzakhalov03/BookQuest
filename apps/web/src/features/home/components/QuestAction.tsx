@@ -4,6 +4,7 @@ import type { Quest } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { useAuth } from '@/lib/auth/useAuth';
+import { TelegramLoginWidget } from '@/lib/auth/TelegramLoginWidget';
 import { haptic } from '@/lib/telegram';
 import { formatCount, formatParticipantNumber } from '@/lib/format';
 
@@ -77,13 +78,13 @@ export function QuestAction({ quest }: QuestActionProps) {
   }
 
   // Not registered, registration still open. On the open web there is no
-  // session to register with, so offer the honest next step instead of a
-  // button that can only fail (spec §7).
+  // Mini App session yet — offer the standalone Login Widget (Phase 3)
+  // instead of a button that can only fail (spec §7).
   if (status === 'unavailable') {
     return (
       <Act>
-        <p className="type-label text-amber">Continue in Telegram</p>
-        <p className="act__sub">Open BookQuest inside Telegram to claim a place.</p>
+        <p className="act__sub">Sign in with Telegram to claim a place</p>
+        <TelegramLoginWidget />
       </Act>
     );
   }

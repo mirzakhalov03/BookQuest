@@ -12,10 +12,11 @@ import { storeToken } from './tokenStore';
 export const fetchMe = (): Promise<SessionUser> => api.get<SessionUser>('/auth/me');
 
 /**
- * The only place a session is created. Resolves to null outside Telegram,
- * where there is no `initData` to exchange — that is read-only mode, not a
- * failure. A rejected exchange throws, because the caller decides what a
- * refused sign-in means.
+ * The Mini App's sign-in. Resolves to null outside Telegram, where there is
+ * no `initData` to exchange — that is not a failure; the caller (`useAuth`)
+ * falls back to `status: 'unavailable'`, which the standalone web answers
+ * with `loginWithWidget` instead, not a dead end. A rejected exchange
+ * throws, because the caller decides what a refused sign-in means.
  */
 export async function loginWithTelegram(): Promise<Session | null> {
   const initData = getInitData();

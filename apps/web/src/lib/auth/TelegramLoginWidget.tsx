@@ -1,25 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import type { TelegramWidgetAuthPayload } from '@bookquest/shared';
 import { authKeys } from './useAuth';
 import { loginWithWidget } from './authApi';
 
 declare global {
   interface Window {
-    onTelegramAuth?: (user: TelegramWidgetUser) => void;
+    onTelegramAuth?: (user: TelegramWidgetAuthPayload) => void;
   }
 }
 
-interface TelegramWidgetUser {
-  id: number;
-  first_name: string;
-  last_name?: string;
-  username?: string;
-  photo_url?: string;
-  auth_date: number;
-  hash: string;
-}
-
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME;
+
+type WidgetState = 'idle' | 'signing-in' | 'error' | 'script-failed';
 
 /**
  * Telegram's Login Widget is a `<script>` tag Telegram's own servers render
@@ -31,18 +24,21 @@ const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME;
 export function TelegramLoginWidget() {
   const containerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
-  const [scriptFailed, setScriptFailed] = useState(false);
+  const [state, setState] = useState<WidgetState>('idle');
 
   useEffect(() => {
     if (!BOT_USERNAME) {
-      setScriptFailed(true);
+      setState('script-failed');
       return;
     }
 
-    window.onTelegramAuth = (user: TelegramWidgetUser) => {
-      void loginWithWidget(user).then((session) => {
-        queryClient.setQueryData(authKeys.me(), session.user);
-      });
+    window.onTelegramAuth = (user: TelegramWidgetAuthPayload) => {
+      setState('signing-in');
+      void loginWithWidget(user)
+        .then((session) => {
+          queryClient.setQueryData(authKeys.me(), session.user);
+        })
+        .catch(() => setState('error'));
     };
 
     const script = document.createElement('script');
@@ -52,7 +48,7 @@ export function TelegramLoginWidget() {
     script.setAttribute('data-onauth', 'onTelegramAuth(user)');
     script.setAttribute('data-request-access', 'write');
     script.async = true;
-    script.onerror = () => setScriptFailed(true);
+    script.onerror = () => setState('script-failed');
 
     containerRef.current?.appendChild(script);
 
@@ -62,7 +58,7 @@ export function TelegramLoginWidget() {
     };
   }, [queryClient]);
 
-  if (scriptFailed) {
+  if (state === 'script-failed') {
     return (
       <p className="text-sm text-ember">
         Telegram sign-in didn't load. Check your connection and reload the page.
@@ -70,5 +66,15 @@ export function TelegramLoginWidget() {
     );
   }
 
-  return <div ref={containerRef} />;
+  return (
+    <div className="grid gap-2">
+      <div ref={containerRef} />
+      {state === 'signing-in' && <p className="text-sm text-paper-dim">Signing in…</p>}
+      {state === 'error' && (
+        <p className="text-sm text-ember">
+          Telegram confirmed you, but we couldn't sign you in. Try the button again.
+        </p>
+      )}
+    </div>
+  );
 }

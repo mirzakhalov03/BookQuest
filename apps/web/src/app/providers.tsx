@@ -50,7 +50,8 @@ async function resolveSession(): Promise<void> {
     // public screens down over a sign-in nobody asked for yet.
   }
 
-  // 3. No token, no bridge: read-only web. There is nothing to resolve.
+  // 3. No token, no Mini App bridge: nothing to resolve at boot — the
+  //    standalone web's Login Widget creates a session later, on demand.
 }
 
 // StrictMode runs effects twice in development, and a remount would run this

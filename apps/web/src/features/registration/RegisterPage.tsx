@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { isNotFound } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/useAuth';
+import { TelegramLoginWidget } from '@/lib/auth/TelegramLoginWidget';
 import { useCurrentQuest } from '@/lib/api/quest';
 import { EditionMark } from './components/EditionMark';
 import { RegistrationForm } from './components/RegistrationForm';
@@ -66,10 +67,11 @@ export function RegisterPage() {
 }
 
 /**
- * The endpoint requires a session, and read-only web mode never has one
- * (spec §7) — so the form is replaced, not shown and left to 401. `anonymous`
- * (inside Telegram, but the sign-in exchange failed) gets the actual fix —
- * retry — rather than being told to do the thing it's already doing.
+ * The endpoint requires a session, so the form is replaced, not shown and
+ * left to 401. `anonymous` (inside Telegram, but the sign-in exchange
+ * failed) gets the actual fix — retry — rather than being told to do the
+ * thing it's already doing. `unavailable` (no Mini App session) gets the
+ * standalone Login Widget (Phase 3) instead of a dead end.
  */
 function NoSessionNote({ status }: { status: 'loading' | 'anonymous' | 'unavailable' }) {
   const { signIn } = useAuth();
@@ -99,11 +101,12 @@ function NoSessionNote({ status }: { status: 'loading' | 'anonymous' | 'unavaila
 
   return (
     <div className="grid gap-3">
-      <p className="type-label text-amber">Continue in Telegram</p>
+      <p className="type-label text-amber">Sign in with Telegram</p>
       <p className="max-w-[30rem] text-paper-dim">
-        Open BookQuest inside Telegram to claim a place — that&rsquo;s how the quiz and certificate
-        find you.
+        BookQuest uses your Telegram account to identify you — that&rsquo;s how the quiz and
+        certificate find you.
       </p>
+      <TelegramLoginWidget />
     </div>
   );
 }

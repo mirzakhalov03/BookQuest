@@ -84,8 +84,9 @@ function resolveStatus(user: SessionUser | null, isFetching: boolean): AuthStatu
   if (isFetching) return 'loading';
   // `initData`, not `window.Telegram`, is the test: index.html loads Telegram's
   // script everywhere, so the object exists in a plain browser too and only the
-  // signed payload tells the two apart. Nothing to sign in with is the open web,
-  // read-only by design (spec §7); inside Telegram the same absence means the
-  // sign-in failed, which is recoverable.
+  // signed payload tells the two apart. No `initData` is `unavailable` — the
+  // open web, which now answers with the Login Widget (Phase 3) rather than a
+  // dead end; inside Telegram the same absence means the sign-in failed
+  // (`anonymous`), which is recoverable by retrying instead.
   return getInitData() === null ? 'unavailable' : 'anonymous';
 }
