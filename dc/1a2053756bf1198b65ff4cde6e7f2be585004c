@@ -1,0 +1,25 @@
+apps/web/index.html
+  s_08b1ea8380223a::t_85745099dc35d5 7-9
+apps/web/public/manifest.webmanifest
+  s_08b1ea8380223a::t_451cc7cbcf1a3f 1-12
+apps/web/public/sw.js
+  s_08b1ea8380223a::t_3e536455959faf 1-6
+apps/web/src/main.tsx
+  s_08b1ea8380223a::t_71da8444a625a9 9-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "dc1a2053756bf1198b65ff4cde6e7f2be585004c",
+  "prompts": {},
+  "sessions": {
+    "s_08b1ea8380223a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0d30c08e-170d-4cde-a183-9fd8012728e3",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
