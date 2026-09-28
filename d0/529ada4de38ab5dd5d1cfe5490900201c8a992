@@ -1,0 +1,23 @@
+apps/api/package.json
+  s_ef567437deda14::t_8dbef4a67d1753 16,26
+pnpm-lock.yaml
+  s_ef567437deda14::t_e326b53b0af3cf 26-28,57-59,570-572,768-771,1244-1247,1257-1260,1852-1855,1991-1995,2418-2419,2424-2425
+apps/api/src/services/user.services.ts
+  s_ef567437deda14::t_c7339837ed2816 1,5-7,37-88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "d0529ada4de38ab5dd5d1cfe5490900201c8a992",
+  "prompts": {},
+  "sessions": {
+    "s_ef567437deda14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "86aad487-bde6-4a31-9839-6d8b92f80ed6",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
