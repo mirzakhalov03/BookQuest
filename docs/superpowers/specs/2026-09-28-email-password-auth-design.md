@@ -22,12 +22,23 @@ password account is a manual fix for now.
 `apps/api/src/models/user.model.ts` — a `User` currently *must* have a
 `telegramUserId`. That stops being true:
 
-- `telegramUserId`: `required: true, unique: true` → `required: false`, sparse
-  unique index (sparse so many users can have `null` without colliding)
-- `email`: new, `String, default: null`, sparse unique index, stored
-  lowercased/trimmed
-- `passwordHash`: new, `String, default: null, select: false` — excluded from
-  normal queries so it never accidentally serializes into a response
+- `telegramUserId`: `required: true, unique: true` → `required: false`, no
+  `default`, unique index with `partialFilterExpression: { telegramUserId: {
+  $type: 'string' } }`. **Not `sparse`** — a sparse index only excludes a
+  *missing* field, and still indexes an explicit `null`, so a `default: null`
+  field would let the first two users with no Telegram id collide on that
+  shared `null`. A partial filter excludes anything that isn't actually a
+  string, `null` included.
+- `email`: new, `String` (no `default`), lowercased/trimmed, same
+  partial-unique-index treatment as `telegramUserId`.
+- `passwordHash`: new, `String, select: false` (no `default`) — excluded from
+  normal queries so it never accidentally serializes into a response.
+- Any database that already has the old (non-partial) `telegramUserId` index
+  needs it replaced, not just augmented — MongoDB won't silently swap an
+  index's options under the same auto-generated name, and Mongoose's default
+  background index build reports that as an event, not a thrown error, so it
+  fails silently. `connectToDatabase` calls `UserModel.syncIndexes()` on
+  every boot so any environment self-heals.
 
 A user must have `telegramUserId` OR (`email` AND `passwordHash`). Mongoose
 schema validation doesn't express "either/or" across fields cleanly, so this
