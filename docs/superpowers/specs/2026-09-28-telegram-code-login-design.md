@@ -83,7 +83,7 @@ The schemas `telegramCodeRequestSchema` and `telegramCodeVerifySchema`, plus the
 
 ### Files
 
-- `models/login-code.model.ts`: `{ user: ObjectId (ref User, indexed), codeHash: string, attempts: number (default 0), expiresAt: Date }`, with a TTL index on `expiresAt` (`expireAfterSeconds: 0`) and `timestamps: true`. `createdAt` drives the resend cooldown.
+- `models/login-code.model.ts`: `{ user, codeHash, attempts, validUntil (10 min), consumedAt, requestIp, expiresAt (24h purge) }`, with a TTL index on `expiresAt` and `timestamps: true`. Rows outlive the code: they're the per-user history the budgets count over. *(Revised after final review — see below.)*
 - `services/login-code.services.ts`: `resolveLoginIdentifier`, `requestLoginCode`, `verifyLoginCode`.
 - `controllers/auth.controllers.ts`: two thin handlers.
 - `validators/auth.validators.ts`: re-exports the two shared schemas.
@@ -101,20 +101,26 @@ The schemas `telegramCodeRequestSchema` and `telegramCodeVerifySchema`, plus the
 
 ### Request
 
-1. Resolve the user (above).
-2. If the user has a `LoginCode` with `createdAt` less than 60s ago → `429` "Wait a minute before asking for another code."
-3. Delete the user's existing codes (one active code per user).
-4. `code = crypto.randomInt(0, 1_000_000)` zero-padded to 6 digits; store `codeHash = HMAC-SHA256(LOGIN_CODE_SECRET, code)` and `expiresAt = now + 10 min`.
-5. Send through `sendTelegramMessage`: *"Your BookQuest login code: 482913. It expires in 10 minutes. If you didn't ask for this, ignore this message."*
-6. If the send returns `false` → delete the code, then `422` "We couldn't reach your Telegram. Open @\<bot\> in Telegram, tap Start, then try again."
-7. Return `{ challengeId: loginCode.id, sentTo }`. `sentTo` is the masked username (`@jav…`), or "your Telegram" when the user has none.
+1. Resolve the user (above). For @usernames, `User.username` (set by Telegram) is checked first; free-text quest contacts are only a fallback.
+2. Per-user budgets (these bound brute force, not the per-code cap):
+   - 15 or more failed guesses across the user's codes in 24h → `429` "Too many attempts on this account. Try again tomorrow, or open BookQuest in Telegram."
+   - 5 or more codes sent in the last hour → `429` "Too many codes sent to this account. Try again in an hour."
+3. A code requested by the same user **and the same IP** in the last 60s → `429` "Wait a minute before asking for another code."
+4. Earlier codes stay valid. A challenge id only reaches whoever asked for it, so retiring old codes would only let a stranger cancel yours.
+5. `code = crypto.randomInt(0, 1_000_000)` zero-padded to 6 digits; store `codeHash = HMAC-SHA256(LOGIN_CODE_SECRET, code)`, `validUntil = now + 10 min`, `expiresAt = now + 24h`.
+6. Send through `sendTelegramMessage`. If it returns `false` → delete the row (nothing was delivered), then `422`.
+7. Return `{ challengeId, sentTo }`.
 
 ### Verify
 
-1. Find the `LoginCode` by `challengeId`, also checking `expiresAt > now` (the TTL sweep can lag by up to about a minute). Missing or expired → `410` "That code expired. Send a new one."
-2. Compare with `crypto.timingSafeEqual` on the HMAC digests.
-3. Wrong: `$inc attempts`. If attempts reaches 5, delete it → `410` (same message). Otherwise `400 { fields: { code: "That code isn't right — N tries left." } }`.
-4. Right: delete it (single use), then `issueSession(user)`.
+1. Atomically increment `attempts` on the row where `validUntil > now`, `consumedAt` is null and `attempts < 5`. No row → `410` "That code expired. Send a new one."
+2. More than 15 failures in 24h for the user → `429` (same message as above).
+3. Wrong code: the row is kept. If attempts reached 5 → `410`; otherwise `400 { fields: { code } }` with the tries left.
+4. Right code: set `consumedAt` atomically (only if still null), then `issueSession(user)`. Two parallel right guesses produce one session.
+
+### Revision note (final review)
+
+The first version deleted a code after 5 wrong tries and keyed the cooldown on the code's `createdAt`. Using up a code therefore reset the cooldown, leaving brute force bounded only by the per-IP rate limit. It also cancelled a user's live code on every new request, which let anyone lock them out. The per-user budgets, kept rows and per-IP cooldown above replace that.
 
 ## 4. Error states
 
