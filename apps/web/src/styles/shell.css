@@ -108,6 +108,12 @@
       calc(clamp(1.6rem, 4vh, 3rem) + var(--safe-b));
   }
 
+  /* A screen header that runs edge to edge: `.screen`'s side/top padding, negated. */
+  .screen-bleed {
+    margin-inline: calc(clamp(1.2rem, 5vw, 3rem) * -1);
+    margin-top: calc(clamp(1rem, 3vh, 2rem) * -1);
+  }
+
   @media (min-width: 900px) {
     /* Desktop turns the tab bar into a floating pill (see `stage.css`), so it
        leaves the flow and stops reserving its own height. Here the screen has

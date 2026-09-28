@@ -128,7 +128,7 @@ function NoSessionNote({ status }: { status: 'loading' | 'anonymous' | 'unavaila
       </div>
       <div className="grid gap-3">
         <p className="type-label text-amber">Or use a phone number</p>
-        <PhoneAuthForm />
+        <PhoneAuthForm mode="login" />
       </div>
     </div>
   );

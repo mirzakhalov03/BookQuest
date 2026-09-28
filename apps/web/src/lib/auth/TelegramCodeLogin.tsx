@@ -101,7 +101,7 @@ export function TelegramCodeLogin() {
           onChange={(event) => setIdentifier({ value: event.target.value })}
         />
         {/* Not Field's message slot — that's invisible in the neutral state. */}
-        <p className="form__note">We'll send a code to your Telegram.</p>
+        <p className="form__note -mt-[1.2rem]">We'll send a code to your Telegram.</p>
         <Button type="submit" className="group mt-[0.3rem]" disabled={busy}>
           <span>{busy ? 'Sending…' : 'Send code'}</span>
           <ArrowIcon />

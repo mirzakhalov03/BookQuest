@@ -2,8 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { Navigate, Outlet } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from './useAuth';
-import { TelegramLoginWidget } from './TelegramLoginWidget';
-import { PhoneAuthForm } from './PhoneAuthForm';
+import { AuthScreen } from './AuthScreen';
 
 /**
  * Route guards — **UX, not security.**
@@ -31,7 +30,7 @@ export function RequireAuth() {
     case 'anonymous':
       return <SignInAgain />;
     case 'unavailable':
-      return <ContinueInTelegram />;
+      return <AuthScreen />;
   }
 }
 
@@ -45,27 +44,6 @@ export function RequireAdmin() {
   if (!isAdmin) return <Navigate to="/" replace />;
 
   return <Outlet />;
-}
-
-function ContinueInTelegram() {
-  return (
-    <Panel label="Sign in">
-      <h1 className="type-display text-4xl">Sign in</h1>
-      <div className="grid gap-6">
-        <div className="grid gap-3">
-          <p className="type-label text-amber">Sign in with Telegram</p>
-          <p className="max-w-[30rem] text-paper-dim">
-            Fastest way in — Telegram is also how the quiz and certificate find you.
-          </p>
-          <TelegramLoginWidget />
-        </div>
-        <div className="grid gap-3">
-          <p className="type-label text-amber">Or use a phone number</p>
-          <PhoneAuthForm />
-        </div>
-      </div>
-    </Panel>
-  );
 }
 
 /** Inside Telegram, but the exchange was refused. Offer the one thing that helps. */

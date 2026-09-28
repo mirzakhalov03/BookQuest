@@ -122,7 +122,8 @@
   .lede {
     grid-area: lede;
   }
-  .form {
+  /* Scoped: `.form` also lives outside the title page (e.g. `AuthScreen`). */
+  .titlepage .form {
     grid-area: form;
     padding-left: clamp(3rem, 6vw, 5rem);
     border-left: 1px solid var(--rule);
@@ -262,4 +263,40 @@
   line-height: 1.6;
   color: var(--color-paper-dim);
   animation: view-in 560ms var(--ease-out-quest) 1.25s both;
+}
+
+/* ── Hero banner — the lamp from the atmosphere, brought to the front ── */
+
+.hero-banner {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+  padding: clamp(3.5rem, 11vh, 5.5rem) 1.5rem clamp(2.5rem, 7vh, 3.5rem);
+  text-align: center;
+  border-bottom: 1px solid var(--rule-gold);
+  background:
+    radial-gradient(60% 90% at 50% 0%, rgb(240 160 60 / 0.34), transparent 70%),
+    radial-gradient(70% 80% at 15% 100%, rgb(226 99 42 / 0.28), transparent 70%),
+    radial-gradient(55% 70% at 90% 90%, rgb(200 162 74 / 0.2), transparent 70%),
+    linear-gradient(180deg, var(--color-ash-hi), var(--color-ash));
+}
+
+/* Same paper tooth as the page behind, so the hero reads as lit, not pasted on. */
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(180deg, rgb(232 223 210 / 0.035) 0 1px, transparent 1px 28px);
+  pointer-events: none;
+}
+
+.hero-banner__title {
+  position: relative;
+  margin: 0;
+  font-size: clamp(2.3rem, 9vw, 3.4rem);
+  color: var(--color-paper);
+  text-wrap: balance;
+  animation: title-rise 720ms var(--ease-out-quest) both;
 }
