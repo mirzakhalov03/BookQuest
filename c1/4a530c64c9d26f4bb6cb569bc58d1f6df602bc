@@ -1,0 +1,19 @@
+.gitignore
+  s_ef567437deda14::t_9c3a7f8b253c3a 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "c14a530c64c9d26f4bb6cb569bc58d1f6df602bc",
+  "prompts": {},
+  "sessions": {
+    "s_ef567437deda14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "86aad487-bde6-4a31-9839-6d8b92f80ed6",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
