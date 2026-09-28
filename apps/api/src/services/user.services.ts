@@ -3,6 +3,7 @@ import { adminTelegramIds } from '../config/env.js';
 import { UserModel, type UserDocument } from '../models/user.model.js';
 import type { TelegramProfile } from '../utils/telegram.js';
 import { ApiError } from '../utils/api-error.js';
+import { isDuplicateKeyError } from '../utils/mongo.js';
 
 const BCRYPT_COST = 12;
 
@@ -48,12 +49,23 @@ export async function createUserWithEmail(
 
   const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
 
-  return UserModel.create({
-    email,
-    passwordHash,
-    firstName,
-    role: 'participant'
-  });
+  try {
+    return await UserModel.create({
+      email,
+      passwordHash,
+      firstName,
+      role: 'participant'
+    });
+  } catch (error) {
+    /* The findOne above is a courtesy; this is the guarantee. Two requests
+       can both pass the check, and only the unique index decides which one
+       wins — the loser gets the same message the check above would have
+       given, not a raw driver error. */
+    if (isDuplicateKeyError(error)) {
+      throw ApiError.conflict('That email is already in use.');
+    }
+    throw error;
+  }
 }
 
 /**
@@ -83,6 +95,17 @@ export async function linkTelegramToUser(
   user.username = profile.username;
   user.photoUrl = profile.photoUrl;
   user.languageCode = profile.languageCode;
-  await user.save();
+
+  try {
+    await user.save();
+  } catch (error) {
+    // Same race as createUserWithEmail: the findOne above is a courtesy,
+    // the unique index is the guarantee.
+    if (isDuplicateKeyError(error)) {
+      throw ApiError.conflict('That Telegram account is already connected to a different user.');
+    }
+    throw error;
+  }
+
   return user;
 }

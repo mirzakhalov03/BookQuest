@@ -84,7 +84,7 @@ const created = (data: unknown): Result => ({ status: 201, data });
 function requireUser(context: Context): SessionUser {
   const state = getState();
   if (context.token === null || context.token !== state.token) {
-    throw new MockError(401, 'unauthorized', 'Sign in with Telegram to continue.');
+    throw new MockError(401, 'unauthorized', 'Sign in to continue.');
   }
   return readUser(state);
 }

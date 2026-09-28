@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { TelegramWidgetAuthPayload } from '@bookquest/shared';
+import { ApiRequestError } from '@/lib/api/client';
 import { authKeys } from '@/lib/auth/useAuth';
 import { linkTelegram } from '@/lib/auth/authApi';
 
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME;
 
 type State = 'idle' | 'linking' | 'error' | 'script-failed';
+
+const GENERIC_LINK_ERROR = 'Telegram confirmed you, but connecting failed. Try again.';
 
 /**
  * The deferred half of email/password sign-up: once the app's Telegram
@@ -17,6 +20,7 @@ export function ConnectTelegram() {
   const containerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const [state, setState] = useState<State>('idle');
+  const [errorMessage, setErrorMessage] = useState(GENERIC_LINK_ERROR);
 
   useEffect(() => {
     if (!BOT_USERNAME) {
@@ -30,7 +34,14 @@ export function ConnectTelegram() {
         .then((user) => {
           queryClient.setQueryData(authKeys.me(), user);
         })
-        .catch(() => setState('error'));
+        .catch((error: unknown) => {
+          // Most likely real failure: this Telegram account is already the
+          // Mini App identity of a different user — the server says so
+          // ("already connected to a different user"), and "try again"
+          // would be wrong advice for that case.
+          setErrorMessage(error instanceof ApiRequestError ? error.message : GENERIC_LINK_ERROR);
+          setState('error');
+        });
     };
 
     const script = document.createElement('script');
@@ -60,9 +71,7 @@ export function ConnectTelegram() {
       </p>
       <div ref={containerRef} />
       {state === 'linking' && <p className="text-sm text-paper-dim">Connecting…</p>}
-      {state === 'error' && (
-        <p className="text-sm text-ember">Telegram confirmed you, but connecting failed. Try again.</p>
-      )}
+      {state === 'error' && <p className="text-sm text-ember">{errorMessage}</p>}
     </section>
   );
 }

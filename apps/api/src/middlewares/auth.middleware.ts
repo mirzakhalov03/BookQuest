@@ -30,7 +30,7 @@ export const optionalUser: RequestHandler = async (req, _res, next) => {
 export const requireUser: RequestHandler = async (req, _res, next) => {
   const user = await resolveUser(req);
   if (!user) {
-    next(ApiError.unauthorized('Sign in with Telegram to continue.'));
+    next(ApiError.unauthorized('Sign in to continue.'));
     return;
   }
   req.currentUser = user;
@@ -46,7 +46,7 @@ export const requireUser: RequestHandler = async (req, _res, next) => {
 export const requireAdmin: RequestHandler = (req, _res, next) => {
   const user = req.currentUser;
   if (!user) {
-    next(ApiError.unauthorized('Sign in with Telegram to continue.'));
+    next(ApiError.unauthorized('Sign in to continue.'));
     return;
   }
   if (user.role !== 'admin') {
@@ -59,6 +59,6 @@ export const requireAdmin: RequestHandler = (req, _res, next) => {
 /** For controllers and services that run behind requireUser. */
 export function currentUser(req: Request): UserDocument {
   const user = req.currentUser;
-  if (!user) throw ApiError.unauthorized('Sign in with Telegram to continue.');
+  if (!user) throw ApiError.unauthorized('Sign in to continue.');
   return user;
 }
