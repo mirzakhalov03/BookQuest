@@ -3,6 +3,7 @@ import type {
   PhoneRegisterPayload,
   Session,
   SessionUser,
+  TelegramCodeChallenge,
   TelegramWidgetAuthPayload
 } from '@bookquest/shared';
 import { api } from '@/lib/api/client';
@@ -87,4 +88,15 @@ export async function loginWithPhone(payload: PhoneLoginPayload): Promise<Sessio
  */
 export async function linkTelegram(payload: TelegramWidgetAuthPayload): Promise<SessionUser> {
   return api.post<SessionUser>('/auth/telegram/link', payload);
+}
+
+/** Asks the bot to send a login code to whoever the identifier resolves to. */
+export const requestTelegramCode = (identifier: string): Promise<TelegramCodeChallenge> =>
+  api.post<TelegramCodeChallenge>('/auth/telegram-code/request', { identifier });
+
+/** Trades the code for a session, the same shape as every other sign-in. */
+export async function verifyTelegramCode(challengeId: string, code: string): Promise<Session> {
+  const session = await api.post<Session>('/auth/telegram-code/verify', { challengeId, code });
+  storeToken(session);
+  return session;
 }
