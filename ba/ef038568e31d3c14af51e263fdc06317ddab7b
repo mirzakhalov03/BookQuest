@@ -1,0 +1,21 @@
+docs/superpowers/plans/2026-09-28-email-password-auth.md
+  s_ef567437deda14::t_21eec45b62d087 22,42-43,162,166,169,187-198,203-204
+docs/superpowers/specs/2026-09-28-email-password-auth-design.md
+  s_ef567437deda14::t_f61772d54d012a 25-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "baef038568e31d3c14af51e263fdc06317ddab7b",
+  "prompts": {},
+  "sessions": {
+    "s_ef567437deda14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "86aad487-bde6-4a31-9839-6d8b92f80ed6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
