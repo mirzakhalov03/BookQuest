@@ -1,0 +1,33 @@
+apps/web/src/components/HeroBanner.tsx
+  s_e092d5137db325::t_f2efdc84c5e09c 1-22
+apps/web/src/features/registration/RegisterPage.tsx
+  s_e092d5137db325::t_e577c4ff65f6cc 131
+apps/web/src/lib/auth/AuthScreen.tsx
+  s_e092d5137db325::t_7af6a1454e6607 1-72
+apps/web/src/lib/auth/TelegramCodeLogin.tsx
+  s_e092d5137db325::t_4d6f691cadf4cc 104
+apps/web/src/lib/auth/guards.tsx
+  s_e092d5137db325::t_878483d4e336eb 5,33
+apps/web/src/styles/register.css
+  s_e092d5137db325::t_d90e1461fd1521 125-126,267-302
+apps/web/src/styles/shell.css
+  s_e092d5137db325::t_b72d19475542bf 111-116
+apps/web/src/lib/auth/PhoneAuthForm.tsx
+  s_e092d5137db325::t_ca379ee65473b3 3,11,21-24,26-27,29,34,38,45-53,63-64,77-78,97-105,137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "df9d2dbdc8bfd969a33a303f54e2b8368efc28d4",
+  "prompts": {},
+  "sessions": {
+    "s_e092d5137db325": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75ca2b73-e2b8-4b93-a93a-768bbcc04164",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
