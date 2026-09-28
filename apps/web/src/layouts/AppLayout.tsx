@@ -20,16 +20,14 @@ export function AppLayout() {
   // Chrome-less routes: no *participant* bottom tab bar. The admin area
   // (`AdminLayout`) renders its own bottom tab bar for its own five
   // destinations, so it stays off this one rather than getting two. The
-  // title page and its reveal are the one screen the design (spec §4,
-  // `prototype/index.html` views 1/2) never puts a tab bar under either —
-  // there is nowhere for it to navigate *to* before a place is claimed.
+  // number reveal is the one participant screen the design never puts a tab
+  // bar under — nothing should pull the eye off the number.
   // Path-gated rather than a second layout root so every chrome-less route
   // still keeps the one atmosphere and the one Toast every other route gets.
   const isChromeless =
     pathname === '/admin' ||
     pathname.startsWith('/admin/') ||
-    pathname === '/register' ||
-    pathname === '/register/success';
+    pathname === '/me/welcome';
 
   return (
     <div className="relative flex min-h-dvh flex-col">

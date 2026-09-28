@@ -4,7 +4,6 @@ import type { Quest } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { useAuth } from '@/lib/auth/useAuth';
-import { TelegramLoginWidget } from '@/lib/auth/TelegramLoginWidget';
 import { haptic } from '@/lib/telegram';
 import { formatCount, formatParticipantNumber } from '@/lib/format';
 
@@ -18,7 +17,7 @@ interface QuestActionProps {
  * straight off the API, never derived here (rule 4).
  */
 export function QuestAction({ quest }: QuestActionProps) {
-  const { status, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const participant = user?.participant ?? null;
 
@@ -77,21 +76,10 @@ export function QuestAction({ quest }: QuestActionProps) {
     );
   }
 
-  // Not registered, registration still open. On the open web there is no
-  // Mini App session yet — offer the standalone Login Widget (Phase 3)
-  // instead of a button that can only fail (spec §7).
-  if (status === 'unavailable') {
-    return (
-      <Act>
-        <p className="act__sub">Sign in with Telegram to claim a place</p>
-        <TelegramLoginWidget />
-      </Act>
-    );
-  }
-
+  // Not registered, registration still open. `/me` handles signing in first when needed.
   return (
     <Act>
-      <PrimaryButton onClick={() => go('/register')}>Join BookQuest</PrimaryButton>
+      <PrimaryButton onClick={() => go('/me')}>Join BookQuest</PrimaryButton>
       <p className="act__sub">Registration closes when the reading period ends</p>
     </Act>
   );

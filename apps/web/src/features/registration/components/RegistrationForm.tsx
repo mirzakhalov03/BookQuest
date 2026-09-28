@@ -144,7 +144,7 @@ export function RegistrationForm() {
         contactValue: contact.value
       });
       setRevealNumber(participant.number);
-      navigate('/register/success');
+      navigate('/me/welcome');
     } catch (error) {
       haptic('error');
 
@@ -225,7 +225,7 @@ export function RegistrationForm() {
         </p>
       )}
 
-      <p className="form__note">No password, no email. Your participant number is your key.</p>
+      <p className="form__note">Your number goes on the leaderboard, your quiz sheet and your certificate.</p>
     </form>
   );
 }

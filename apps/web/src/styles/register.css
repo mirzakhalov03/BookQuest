@@ -1,5 +1,6 @@
 /**
- * Registration and the number reveal — ported from
+ * Joining on `/me` — the join form, the number reveal (`/me/welcome`) and the
+ * hero banner. The form and reveal are ported from
  * `prototype/styles/register.css`, verbatim, with the prototype's token
  * names swapped for this app's (`--rule`, `--rule-gold`, `--wide` and
  * `--wide-tight` already share a name with `styles/base.css`; `--ease-out`
@@ -18,38 +19,6 @@
  * elements in `RegistrationForm.tsx` / `SuccessScreen.tsx`, using this
  * file's `title-rise`/`view-in` keyframes — same values, right selector.
  */
-
-/* ── Registration — set like the title page of a book ────────────────── */
-
-.view--register {
-  position: relative;
-  justify-content: center;
-}
-
-/* The screen reads as the right-hand page of a book: its fore-edge is
-   stacked paper, catching the same warm light as everything else. */
-.view--register::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: clamp(14px, 3vw, 34px);
-  background:
-    linear-gradient(90deg, transparent, rgba(232, 223, 210, 0.05)),
-    repeating-linear-gradient(90deg, rgba(232, 223, 210, 0.1) 0 1px, transparent 1px 4px);
-  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%, #000 74%, transparent);
-  mask-image: linear-gradient(180deg, transparent, #000 22%, #000 74%, transparent);
-  pointer-events: none;
-}
-
-.titlepage {
-  width: min(100%, 1080px);
-  margin-inline: auto;
-  padding: clamp(2.5rem, 8vh, 5rem) clamp(1.4rem, 6vw, 4rem) 6rem;
-  display: grid;
-  gap: clamp(2rem, 5vw, 3.5rem);
-}
 
 /* ── Edition line ── */
 .edition {
@@ -73,60 +42,11 @@
   border-radius: 2px;
 }
 
-/* ── The title ── */
-.titlepage__title {
-  font-family: var(--font-display);
-  font-size: clamp(3.1rem, 12.5vw, 8.5rem);
-  font-weight: 600;
-  font-stretch: var(--wide);
-  line-height: 0.92;
-  letter-spacing: -0.035em;
-  color: var(--color-paper);
-  text-wrap: balance;
-  animation: title-rise 900ms var(--ease-out-quest) both;
-}
 @keyframes title-rise {
   from {
     opacity: 0;
     transform: translateY(20px);
     filter: blur(6px);
-  }
-}
-
-.lede {
-  margin: 0;
-  font-size: 1.0625rem;
-  line-height: 1.66;
-  color: var(--color-paper-dim);
-  max-width: 34ch;
-}
-
-/* Desktop: the page splits — recto carries the title, verso the form */
-@media (min-width: 880px) {
-  .titlepage {
-    grid-template-columns: 1.05fr 0.95fr;
-    align-items: center;
-    column-gap: clamp(3rem, 7vw, 6rem);
-    grid-template-areas:
-      'edition form'
-      'title   form'
-      'lede    form';
-    row-gap: 1.6rem;
-  }
-  .edition {
-    grid-area: edition;
-  }
-  .titlepage__title {
-    grid-area: title;
-  }
-  .lede {
-    grid-area: lede;
-  }
-  /* Scoped: `.form` also lives outside the title page (e.g. `AuthScreen`). */
-  .titlepage .form {
-    grid-area: form;
-    padding-left: clamp(3rem, 6vw, 5rem);
-    border-left: 1px solid var(--rule);
   }
 }
 

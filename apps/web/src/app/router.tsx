@@ -1,9 +1,8 @@
-import { createBrowserRouter } from 'react-router';
+import { Navigate, createBrowserRouter } from 'react-router';
 import { AppLayout } from '@/layouts/AppLayout';
 import { Screen } from '@/components/layout/Screen';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { HomePage } from '@/features/home/HomePage';
-import { RegisterPage } from '@/features/registration/RegisterPage';
 import { SuccessScreen } from '@/features/registration/SuccessScreen';
 import { BookPage } from '@/features/book/BookPage';
 import { QuestsPage } from '@/features/quests/QuestsPage';
@@ -30,8 +29,8 @@ export const router = createBrowserRouter([
     children: [
       // Public.
       { path: '/', element: <HomePage /> },
-      { path: '/register', element: <RegisterPage /> },
-      { path: '/register/success', element: <SuccessScreen /> },
+      // `/me` owns joining now; old links and bookmarks land there.
+      { path: '/register', element: <Navigate to="/me" replace /> },
 
       { path: '/book', element: <BookPage /> },
       { path: '/quests', element: <QuestsPage /> },
@@ -44,7 +43,10 @@ export const router = createBrowserRouter([
       {
         path: '/me',
         element: <RequireAuth />,
-        children: [{ index: true, element: <ProfilePage /> }]
+        children: [
+          { index: true, element: <ProfilePage /> },
+          { path: 'welcome', element: <SuccessScreen /> }
+        ]
       },
 
       // A notification is always someone's own — there is no session-less

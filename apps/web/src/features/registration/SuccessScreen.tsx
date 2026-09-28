@@ -28,7 +28,7 @@ export function SuccessScreen() {
     if (number !== null) haptic('reveal');
   }, [number]);
 
-  if (number === null) return <Navigate to="/" replace />;
+  if (number === null) return <Navigate to="/me" replace />;
 
   const digits = formatParticipantNumber(number).split('');
 
@@ -37,7 +37,7 @@ export function SuccessScreen() {
       <div className="success">
         <div className="success__beam" aria-hidden="true" />
 
-        {/* `/register/success`'s one heading — `.success__hail`'s look comes
+        {/* `/me/welcome`'s one heading — `.success__hail`'s look comes
             from the class, not the tag. */}
         <h1 className="success__hail">You&rsquo;re in.</h1>
 
@@ -70,9 +70,9 @@ export function SuccessScreen() {
 
         <Button
           className="group animate-[view-in_560ms_var(--ease-out-quest)_1.45s_both]"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/me')}
         >
-          <span>Enter BookQuest</span>
+          <span>See your profile</span>
           <ArrowIcon />
         </Button>
       </div>
