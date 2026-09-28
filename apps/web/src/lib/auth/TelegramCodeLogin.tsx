@@ -8,7 +8,7 @@ import { FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
 import { ApiRequestError } from '@/lib/api/client';
 import { useCountdown } from '@/hooks/useCountdown';
 import { requestTelegramCode, verifyTelegramCode } from './authApi';
-import { authKeys } from './useAuth';
+import { setSessionUser } from './useAuth';
 
 interface FieldState {
   value: string;
@@ -66,7 +66,7 @@ export function TelegramCodeLogin() {
     setBusy(true);
     try {
       const session = await verifyTelegramCode(challenge.challengeId, code.value);
-      queryClient.setQueryData(authKeys.me(), session.user);
+      setSessionUser(queryClient, session.user);
     } catch (error) {
       if (error instanceof ApiRequestError && error.fields.code) {
         setCode((prev) => ({ ...prev, status: 'bad', message: error.fields.code }));

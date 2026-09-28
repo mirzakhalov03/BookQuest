@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { TelegramWidgetAuthPayload } from '@bookquest/shared';
-import { authKeys } from './useAuth';
+import { setSessionUser } from './useAuth';
 import { loginWithWidget } from './authApi';
 
 declare global {
@@ -36,7 +36,7 @@ export function TelegramLoginWidget() {
       setState('signing-in');
       void loginWithWidget(user)
         .then((session) => {
-          queryClient.setQueryData(authKeys.me(), session.user);
+          setSessionUser(queryClient, session.user);
         })
         .catch(() => setState('error'));
     };

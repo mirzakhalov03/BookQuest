@@ -18,12 +18,21 @@ import { findCurrentQuestDocument } from './quest.services.js';
 const CODE_TTL_MS = 10 * 60_000;
 const RESEND_COOLDOWN_MS = 60_000;
 const MAX_ATTEMPTS = 5;
+const HOUR_MS = 60 * 60_000;
+const DAY_MS = 24 * HOUR_MS;
+// Per-user, not per-IP: an attacker can rotate IPs, never the victim. These caps
+// are what bound brute force — about 15 guesses a day, not 5 per fresh code.
+const MAX_CODES_PER_HOUR = 5;
+const MAX_FAILURES_PER_DAY = 15;
 
 const REG_NUMBER = /^#?\d{1,4}$/;
 const USERNAME_LIKE = /^[A-Za-z][A-Za-z0-9_]{4,31}$/;
 
 const NO_MATCH = "We couldn't find anyone with that.";
 const EXPIRED = 'That code expired. Send a new one.';
+// Code login only; the Mini App and password log-in don't go through these budgets.
+const LOCKED =
+  'Too many attempts on this account. Try again tomorrow, or open BookQuest in Telegram.';
 
 const hashCode = (code: string): string =>
   createHmac('sha256', env.LOGIN_CODE_SECRET).update(code).digest('hex');
@@ -60,11 +69,15 @@ async function findCandidateUserIds(identifier: string): Promise<string[]> {
     if (!parsed.ok) throw invalidIdentifier(parsed.message);
     // Safe to build a RegExp from: the parser only lets [A-Za-z0-9_] through.
     const pattern = new RegExp(`^@?${parsed.value.slice(1)}$`, 'i');
-    const [users, participants] = await Promise.all([
-      UserModel.find({ username: pattern }, '_id'),
-      ParticipantModel.find({ 'contact.method': 'telegram', 'contact.value': pattern }, 'user')
-    ]);
-    return userIds(users, participants);
+    // `User.username` comes from Telegram itself; quest contacts are free text anyone can type.
+    // Trust the verified source first, so a planted contact can't make a real handle ambiguous.
+    const users = await UserModel.find({ username: pattern }, '_id');
+    if (users.length > 0) return userIds(users, []);
+    const participants = await ParticipantModel.find(
+      { 'contact.method': 'telegram', 'contact.value': pattern },
+      'user'
+    );
+    return userIds([], participants);
   }
 
   const phone = parsePhoneNumber(raw);
@@ -99,25 +112,52 @@ function maskUsername(username: string | null | undefined): string {
   return username ? `@${username.slice(0, 3)}…` : 'your Telegram';
 }
 
-/** POST /auth/telegram-code/request */
-export async function requestLoginCode(identifier: string): Promise<TelegramCodeChallenge> {
-  const user = await resolveLoginUser(identifier);
+/** Wrong guesses across all of the user's codes in the last 24h. A successful guess isn't one. */
+async function failuresToday(userId: UserDocument['_id']): Promise<number> {
+  const rows = await LoginCodeModel.find(
+    { user: userId, createdAt: { $gt: new Date(Date.now() - DAY_MS) } },
+    'attempts consumedAt'
+  );
+  return rows.reduce((sum, row) => sum + row.attempts - (row.consumedAt ? 1 : 0), 0);
+}
 
-  // Stops anyone from flooding another person's Telegram with codes.
+/** POST /auth/telegram-code/request */
+export async function requestLoginCode(
+  identifier: string,
+  requestIp: string | null
+): Promise<TelegramCodeChallenge> {
+  const user = await resolveLoginUser(identifier);
+  const now = Date.now();
+
+  if ((await failuresToday(user._id)) >= MAX_FAILURES_PER_DAY) {
+    throw ApiError.tooManyRequests(LOCKED);
+  }
+
+  const sentThisHour = await LoginCodeModel.countDocuments({
+    user: user._id,
+    createdAt: { $gt: new Date(now - HOUR_MS) }
+  });
+  if (sentThisHour >= MAX_CODES_PER_HOUR) {
+    throw ApiError.tooManyRequests('Too many codes sent to this account. Try again in an hour.');
+  }
+
+  // Keyed on the requester too, so someone else's requests can't hold yours off.
   const recent = await LoginCodeModel.exists({
     user: user._id,
-    createdAt: { $gt: new Date(Date.now() - RESEND_COOLDOWN_MS) }
+    requestIp,
+    createdAt: { $gt: new Date(now - RESEND_COOLDOWN_MS) }
   });
   if (recent) throw ApiError.tooManyRequests('Wait a minute before asking for another code.');
 
-  // One live code per person: asking again retires the old one.
-  await LoginCodeModel.deleteMany({ user: user._id });
-
+  // Earlier codes stay valid: a challenge id only ever reaches whoever asked for it,
+  // so retiring them would only let a stranger's request cancel yours.
   const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
   const loginCode = await LoginCodeModel.create({
     user: user._id,
     codeHash: hashCode(code),
-    expiresAt: new Date(Date.now() + CODE_TTL_MS)
+    requestIp,
+    validUntil: new Date(now + CODE_TTL_MS),
+    expiresAt: new Date(now + DAY_MS)
   });
 
   const sent = await sendTelegramMessage(
@@ -125,6 +165,7 @@ export async function requestLoginCode(identifier: string): Promise<TelegramCode
     `Your BookQuest login code: ${code}. It expires in 10 minutes. If you didn't ask for this, ignore this message.`
   );
   if (!sent) {
+    // Nothing was delivered, so it shouldn't count against the send budget.
     await loginCode.deleteOne();
     throw ApiError.unprocessable(
       "We couldn't reach your Telegram. Open the BookQuest bot in Telegram, tap Start, then try again."
@@ -140,24 +181,36 @@ export async function verifyLoginCode(challengeId: string, code: string): Promis
 
   // Count the attempt before comparing, atomically, so parallel guesses can't slip past the cap.
   const loginCode = await LoginCodeModel.findOneAndUpdate(
-    { _id: challengeId, expiresAt: { $gt: new Date() }, attempts: { $lt: MAX_ATTEMPTS } },
+    {
+      _id: challengeId,
+      validUntil: { $gt: new Date() },
+      consumedAt: null,
+      attempts: { $lt: MAX_ATTEMPTS }
+    },
     { $inc: { attempts: 1 } },
     { returnDocument: 'after' }
   );
   if (!loginCode) throw ApiError.gone(EXPIRED);
 
+  // The daily budget holds across codes, so fresh challenges can't buy more guesses.
+  if ((await failuresToday(loginCode.user)) > MAX_FAILURES_PER_DAY) {
+    throw ApiError.tooManyRequests(LOCKED);
+  }
+
   if (!codeMatches(loginCode.codeHash, code)) {
+    // The row stays: it keeps counting toward the budgets after it's used up.
     const left = MAX_ATTEMPTS - loginCode.attempts;
-    if (left <= 0) {
-      await loginCode.deleteOne();
-      throw ApiError.gone(EXPIRED);
-    }
+    if (left <= 0) throw ApiError.gone(EXPIRED);
     const message = `That code isn't right — ${left} ${left === 1 ? 'try' : 'tries'} left.`;
     throw ApiError.badRequest(message, { code: message });
   }
 
-  // Single use.
-  await loginCode.deleteOne();
+  // Claimed atomically, so two parallel right guesses can't both open a session.
+  const claimed = await LoginCodeModel.findOneAndUpdate(
+    { _id: loginCode._id, consumedAt: null },
+    { $set: { consumedAt: new Date() } }
+  );
+  if (!claimed) throw ApiError.gone(EXPIRED);
 
   const user = await UserModel.findById(loginCode.user);
   if (!user) throw ApiError.gone(EXPIRED);

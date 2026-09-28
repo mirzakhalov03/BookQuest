@@ -5,7 +5,7 @@ import { Field, type FieldStatus } from '@/components/ui/Field';
 import { Button } from '@/components/ui/Button';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { ApiRequestError } from '@/lib/api/client';
-import { authKeys } from './useAuth';
+import { setSessionUser } from './useAuth';
 import { loginWithPhone, registerWithPhone } from './authApi';
 
 export type AuthMode = 'login' | 'signup';
@@ -64,7 +64,7 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
               firstName: name?.ok ? name.value : fullName.value
             });
 
-      queryClient.setQueryData(authKeys.me(), session.user);
+      setSessionUser(queryClient, session.user);
     } catch (error) {
       if (error instanceof ApiRequestError) {
         if (error.fields.phoneNumber) {

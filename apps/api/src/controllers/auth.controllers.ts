@@ -46,7 +46,7 @@ export async function getMe(req: Request, res: Response): Promise<void> {
 /** POST /api/v1/auth/telegram-code/request */
 export async function requestTelegramCode(req: Request, res: Response): Promise<void> {
   const { identifier } = req.body as TelegramCodeRequestPayload;
-  ok(res, await loginCodeService.requestLoginCode(identifier));
+  ok(res, await loginCodeService.requestLoginCode(identifier, req.ip ?? null));
 }
 
 /** POST /api/v1/auth/telegram-code/verify */

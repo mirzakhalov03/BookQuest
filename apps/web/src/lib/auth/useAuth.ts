@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import type { SessionUser } from '@bookquest/shared';
 import { getInitData } from '@/lib/telegram';
 import { fetchMe, loginWithTelegram } from './authApi';
@@ -9,6 +9,17 @@ export const authKeys = {
   all: ['auth'] as const,
   me: () => [...authKeys.all, 'me'] as const
 };
+
+/**
+ * Every cached query belongs to whoever was signed in when it ran, so a new
+ * (or no) session drops them all — otherwise the next person on a shared
+ * device briefly sees the last one's profile. `auth` itself is kept and
+ * overwritten, since every `useAuth` is subscribed to it.
+ */
+export function setSessionUser(queryClient: QueryClient, user: SessionUser | null): void {
+  queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== authKeys.all[0] });
+  queryClient.setQueryData(authKeys.me(), user);
+}
 
 export type AuthStatus = 'loading' | 'authenticated' | 'anonymous' | 'unavailable';
 
@@ -64,7 +75,7 @@ export function useAuth(): Auth {
       if (!session) return false;
       // The exchange already returned the user, so seed the cache rather than
       // spend a round trip on /auth/me asking what we were just told.
-      queryClient.setQueryData(authKeys.me(), session.user);
+      setSessionUser(queryClient, session.user);
       return true;
     } catch {
       return false;
@@ -73,7 +84,7 @@ export function useAuth(): Auth {
 
   const signOut = useCallback(() => {
     clearToken();
-    queryClient.setQueryData(authKeys.me(), null);
+    setSessionUser(queryClient, null);
   }, [queryClient]);
 
   return {
