@@ -1,0 +1,51 @@
+.env.example
+  s_ef567437deda14::t_9714415ea4ea3c 28-31
+apps/api/src/config/env.ts
+  s_ef567437deda14::t_b80e0030c850ff 31-33,69
+apps/api/src/controllers/auth.controllers.ts
+  s_ef567437deda14::t_5b9bfb6f107ee7 3-4,24-25,29-30
+apps/api/src/models/user.model.ts
+  s_ef567437deda14::t_02d776a00cb421 13,20,22,46-48,58,61-62
+apps/api/src/routes/auth.routes.ts
+  s_ef567437deda14::t_365929440c8648 9-10,34-35,38
+apps/api/src/services/auth.services.ts
+  s_ef567437deda14::t_6e6717bd8d46da 3-4,16-17,22,26,69-70,75-77,79-80,118
+apps/api/src/services/broadcast.services.ts
+  s_ef567437deda14::t_4b781b30df5fd8 45
+apps/api/src/services/user.services.ts
+  s_ef567437deda14::t_e953b0f8f28cd3 2,39-41,45,47,51,55,58,66,77-78,103
+apps/api/src/validators/auth.validators.ts
+  s_ef567437deda14::t_b8f7e03d55be09 4-5,11-12
+apps/web/src/features/profile/components/ConnectTelegram.tsx
+  s_ef567437deda14::t_33bebcf1ab4852 15-16
+apps/web/src/features/registration/RegisterPage.tsx
+  s_ef567437deda14::t_3a33b2141432d2 12,130-131
+apps/web/src/lib/api/mock/fixtures.ts
+  s_ef567437deda14::t_dc28d6bee38931 183
+apps/web/src/lib/auth/PhoneAuthForm.tsx
+  s_ef567437deda14::t_4b5e1e8275aae9 8,26,33,37,44,56-58,66-68,76,106-115
+apps/web/src/lib/auth/authApi.ts
+  s_ef567437deda14::t_8280b84f4107fc 2-3,69-70,76-77
+apps/web/src/lib/auth/guards.tsx
+  s_ef567437deda14::t_61f53ee1dde07b 6,53-66
+packages/shared/src/schemas/auth.ts
+  s_ef567437deda14::t_26cc9977ee558b 43-45,47-56,61,63-64,68
+packages/shared/src/schemas/user.ts
+  s_ef567437deda14::t_7c9ea079a84bff 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "5e41d1af3553e706f8cfb701e0ee76c0016dc181",
+  "prompts": {},
+  "sessions": {
+    "s_ef567437deda14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "86aad487-bde6-4a31-9839-6d8b92f80ed6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
