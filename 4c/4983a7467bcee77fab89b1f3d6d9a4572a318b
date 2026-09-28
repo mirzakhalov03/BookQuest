@@ -1,0 +1,25 @@
+apps/api/src/models/user.model.ts
+  s_ef567437deda14::t_ed0f9d94cf8636 12-21,39-43
+apps/api/src/services/auth.services.ts
+  s_ef567437deda14::t_9c4a1e3d00e406 58-59
+apps/api/src/services/broadcast.services.ts
+  s_ef567437deda14::t_919eecd75fbb2e 45-49
+apps/web/src/lib/api/mock/fixtures.ts
+  s_ef567437deda14::t_79530dafb0ea55 183
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "4c4983a7467bcee77fab89b1f3d6d9a4572a318b",
+  "prompts": {},
+  "sessions": {
+    "s_ef567437deda14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "86aad487-bde6-4a31-9839-6d8b92f80ed6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
