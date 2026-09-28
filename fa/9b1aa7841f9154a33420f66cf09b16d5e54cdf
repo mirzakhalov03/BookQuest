@@ -1,0 +1,27 @@
+apps/api/src/controllers/auth.controllers.ts
+  s_e092d5137db325::t_f39ea8ce36a74b 6-7,11,45-56
+apps/api/src/routes/auth.routes.ts
+  s_e092d5137db325::t_81b0c8bff62d08 10-12,42-55
+apps/api/src/services/auth.services.ts
+  s_e092d5137db325::t_d3b605c1f71292 30
+apps/api/src/services/login-code.services.ts
+  s_e092d5137db325::t_4940a0919f1215 1-165
+apps/api/src/validators/auth.validators.ts
+  s_e092d5137db325::t_6cdf7d01d3eff1 5-7,15-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "fa9b1aa7841f9154a33420f66cf09b16d5e54cdf",
+  "prompts": {},
+  "sessions": {
+    "s_e092d5137db325": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75ca2b73-e2b8-4b93-a93a-768bbcc04164",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
