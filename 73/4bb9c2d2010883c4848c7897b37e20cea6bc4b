@@ -1,0 +1,49 @@
+apps/web/src/app/router.tsx
+  s_e092d5137db325::t_1ef64878150398 1,32-33,46-49
+apps/web/src/features/home/components/QuestAction.tsx
+  s_e092d5137db325::t_7fecda0f1b8e0a 20,79,82
+apps/web/src/features/profile/ProfilePage.tsx
+  s_e092d5137db325::t_fe93d5f65a4eb8 7-8,10,12,15,26,32-33,44-50,52,57-78,80-90,92-93,98-102,104-114,116-153,155-156,158-162,170-173,180,187
+apps/web/src/features/registration/JoinQuest.tsx
+  s_e092d5137db325::t_8ddb7245466480 1,3,7-8,10-13,15
+apps/web/src/features/registration/SuccessScreen.tsx
+  s_e092d5137db325::t_617ff210bcfff8 31,40,73,75
+apps/web/src/features/registration/api/useRegister.ts
+  s_e092d5137db325::t_20c4cd477673e1 4,14-16
+apps/web/src/features/registration/components/RegistrationForm.tsx
+  s_e092d5137db325::t_861386cc8ed2e9 147,228
+apps/web/src/layouts/AppLayout.tsx
+  s_e092d5137db325::t_123729e26097fa 23-24,30
+apps/web/src/lib/api/participant.ts
+  s_e092d5137db325::t_bf4cb7104c5c09 3,5-6
+apps/web/src/styles/register.css
+  s_e092d5137db325::t_ba19578aa12b81 2-3
+apps/web/src/features/profile/components/Avatar.tsx
+  s_e711e27986f7c9::t_56a3cbb3187d95 1-12
+apps/web/src/features/profile/components/LogoutIcon.tsx
+  s_e711e27986f7c9::t_bb239dd6d7e031 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "734bb9c2d2010883c4848c7897b37e20cea6bc4b",
+  "prompts": {},
+  "sessions": {
+    "s_e092d5137db325": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75ca2b73-e2b8-4b93-a93a-768bbcc04164",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_e711e27986f7c9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eefed506-dec9-4021-a053-7adbca1a0e43",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
