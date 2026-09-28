@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, Users, BookOpen, BarChart3, Megaphone } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router';
 
 interface Tab {
   to: string;
   label: string;
-  icon: ReactNode;
+  icon: LucideIcon;
 }
 
 /**
@@ -18,56 +20,11 @@ interface Tab {
  * 3), and admin's five are a different set going to different places.
  */
 const TABS: Tab[] = [
-  {
-    to: '/admin',
-    label: 'Dashboard',
-    icon: (
-      <>
-        <rect x="4" y="4" width="7" height="7" rx="1" />
-        <rect x="13" y="4" width="7" height="7" rx="1" />
-        <rect x="4" y="13" width="7" height="7" rx="1" />
-        <rect x="13" y="13" width="7" height="7" rx="1" />
-      </>
-    )
-  },
-  {
-    to: '/admin/participants',
-    label: 'Participants',
-    icon: (
-      <>
-        <circle cx="9" cy="8" r="3" />
-        <path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6" />
-        <circle cx="18" cy="9" r="2.2" />
-        <path d="M15.5 20c.2-2.6 1.8-4.4 4.5-4.7" />
-      </>
-    )
-  },
-  {
-    to: '/admin/quest',
-    label: 'Quest',
-    icon: (
-      <>
-        <path d="M6 4h12v16H6z" />
-        <path d="M9 4v16" />
-      </>
-    )
-  },
-  {
-    to: '/admin/results',
-    label: 'Results',
-    icon: <path d="M5 20V14M12 20V6M19 20v-9" />
-  },
-  {
-    to: '/admin/broadcast',
-    label: 'Broadcast',
-    icon: (
-      <>
-        <path d="M4 10v4h3l7 4V6l-7 4H4z" />
-        <path d="M16.5 9a4 4 0 0 1 0 6" />
-        <path d="M19 7a7 7 0 0 1 0 10" />
-      </>
-    )
-  }
+  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/admin/participants', label: 'Participants', icon: Users },
+  { to: '/admin/quest', label: 'Quest', icon: BookOpen },
+  { to: '/admin/results', label: 'Results', icon: BarChart3 },
+  { to: '/admin/broadcast', label: 'Broadcast', icon: Megaphone }
 ];
 
 /**
@@ -102,8 +59,9 @@ export function AdminLayout() {
 function AdminNav() {
   return (
     <header className="flex items-baseline gap-3 border-b border-[color:var(--rule)] px-4 pt-[calc(1rem+var(--safe-b))] pb-4 sm:px-8">
-      <Link to="/" className="type-label text-taupe hover:text-paper-dim">
-        ← Back to the stage
+      <Link to="/" className="flex items-center gap-1 type-label text-taupe hover:text-paper-dim">
+        <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
+        Back to the stage
       </Link>
       <span className="type-display text-lg text-paper">BookQuest</span>
       <span className="type-label">Admin</span>
@@ -114,16 +72,14 @@ function AdminNav() {
 function AdminTabBar() {
   return (
     <nav className="tabbar" aria-label="Admin sections">
-      {TABS.map(({ to, label, icon }) => (
+      {TABS.map(({ to, label, icon: Icon }) => (
         <NavLink
           key={to}
           to={to}
           end={to === '/admin'}
           className={({ isActive }) => (isActive ? 'tab is-on' : 'tab')}
         >
-          <svg className="tab__icon" viewBox="0 0 24 24" aria-hidden="true">
-            {icon}
-          </svg>
+          <Icon className="tab__icon" aria-hidden="true" />
           <span>{label}</span>
         </NavLink>
       ))}

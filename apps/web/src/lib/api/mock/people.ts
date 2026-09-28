@@ -9,12 +9,12 @@ import type {
 import { objectId } from './fixtures';
 
 /**
- * The people in the mock: a roster big enough to page through, the results
- * derived from it, and a certificate derived from one of them.
+ * The people in the mock: name/contact generation for whoever registers
+ * through the app, plus results and certificates derived from them.
  *
- * Everything is generated deterministically from an index, so participant 3047
- * is the same person on every reload and a screenshot taken today matches one
- * taken tomorrow.
+ * `buildRoster` seeds nobody (`ROSTER_SIZE` is 0) — a fresh quest starts
+ * empty, the way a real one does. Generation stays deterministic on an
+ * index in case a future fixture wants a non-empty roster again.
  */
 
 const FIRST_NAMES = [
@@ -92,16 +92,8 @@ const FEMININE = new Set([
   'Nilufar'
 ]);
 
-/** Enough to page through at the admin default of 50 per page and mean it. */
-const ROSTER_SIZE = 120;
-
-/**
- * Participant 3047 is the number the contract's duplicate message names, so
- * the person holding it is spelled out rather than generated. Registering
- * `@sofia_k` reproduces that error verbatim.
- */
-const SOFIA_INDEX = 47;
-const SOFIA_CONTACT = '@sofia_k';
+/** No seeded roster — a fresh quest starts with nobody registered. */
+const ROSTER_SIZE = 0;
 
 function fullNameFor(index: number): string {
   const first = FIRST_NAMES[index % FIRST_NAMES.length] ?? 'Aziza';
@@ -135,16 +127,13 @@ export function buildRoster(questId: string, firstNumber: number): Participant[]
   const now = Date.now();
 
   return Array.from({ length: ROSTER_SIZE }, (_, index) => {
-    const isSofia = index === SOFIA_INDEX;
-    const fullName = isSofia ? 'Sofia Karimova' : fullNameFor(index);
+    const fullName = fullNameFor(index);
 
     return {
       id: objectId(`participant:${index}`),
       number: firstNumber + index,
       fullName,
-      contact: isSofia
-        ? { method: 'telegram' as const, value: SOFIA_CONTACT }
-        : contactFor(index, fullName),
+      contact: contactFor(index, fullName),
       questId,
       registeredAt: new Date(now - (ROSTER_SIZE - index) ** 1.6 * step).toISOString()
     };

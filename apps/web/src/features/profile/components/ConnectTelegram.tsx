@@ -65,7 +65,11 @@ export function ConnectTelegram() {
 
   return (
     <section className="flex flex-col gap-3">
-      <p className="type-label">Connect Telegram</p>
+      {/* Accented like `Button`'s primary variant, since the Telegram widget
+          below is drawn by Telegram's own script — no color option in its
+          API — so the accent goes on the one thing here that's actually
+          ours. */}
+      <p className="type-label text-ember">Connect Telegram</p>
       <p className="max-w-sm text-taupe-dim">
         Link your Telegram account for a faster sign-in next time.
       </p>

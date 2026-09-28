@@ -1,10 +1,13 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { Link } from 'react-router';
 
 type Variant = 'primary' | 'gold' | 'quiet';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   children: ReactNode;
+  /** Renders as a `Link` to this route instead of a `<button>`, same styles. */
+  to?: string;
 }
 
 const VARIANTS: Record<Variant, string> = {
@@ -14,16 +17,26 @@ const VARIANTS: Record<Variant, string> = {
   quiet: 'text-taupe hover:text-paper-dim'
 };
 
+const BASE_CLASSES =
+  'inline-flex min-h-[3.25rem] items-center justify-center gap-3 rounded-[3px] px-6 text-base font-semibold transition-transform duration-150 active:translate-y-0.5';
+
 /**
  * The filled button is the only solid surface in the interface, which is what
  * makes it read as the action. Keep it rare.
  */
-export function Button({ variant = 'primary', className = '', children, ...props }: ButtonProps) {
+export function Button({ variant = 'primary', className = '', to, children, ...props }: ButtonProps) {
+  const classes = `${BASE_CLASSES} ${VARIANTS[variant]} ${className}`;
+
+  if (to) {
+    return (
+      <Link to={to} className={classes}>
+        {children}
+      </Link>
+    );
+  }
+
   return (
-    <button
-      {...props}
-      className={`inline-flex min-h-[3.25rem] items-center justify-center gap-3 rounded-[3px] px-6 text-base font-semibold transition-transform duration-150 active:translate-y-0.5 ${VARIANTS[variant]} ${className}`}
-    >
+    <button {...props} className={classes}>
       {children}
     </button>
   );

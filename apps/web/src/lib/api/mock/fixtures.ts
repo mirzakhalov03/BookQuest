@@ -83,91 +83,8 @@ export interface PastEdition {
   winner: QuestSummary['winner'];
 }
 
-function pastQuest(
-  edition: number,
-  year: number,
-  book: Quest['book'],
-  prizes: Quest['prizes'],
-  participantCount: number
-): Quest {
-  return {
-    id: objectId(`quest:${edition}`),
-    edition,
-    year,
-    phase: 'finished',
-    book,
-    prizes,
-    opensAt: `${year}-08-01T09:00:00.000Z`,
-    readingDeadline: `${year}-09-20T18:59:00.000Z`,
-    quizOpensAt: `${year}-09-21T13:00:00.000Z`,
-    quizClosesAt: `${year}-09-21T15:00:00.000Z`,
-    resultsAt: `${year}-09-22T07:00:00.000Z`,
-    quizQuestionCount: 20,
-    quizDurationMinutes: 30,
-    participantCount
-  };
-}
-
-/** Newest first, which is the order the archive endpoint promises. */
-export const PAST_EDITIONS: PastEdition[] = [
-  {
-    quest: pastQuest(
-      3,
-      2025,
-      {
-        title: 'The Old Man and the Sea',
-        author: 'Ernest Hemingway',
-        pages: 127,
-        coverUrl: 'https://covers.openlibrary.org/b/id/8231856-L.jpg',
-        description:
-          'An old fisherman, a marlin bigger than his boat, and two days alone at sea. Hemingway at his shortest and least forgiving.',
-        resources: [
-          { label: 'PDF (English)', url: 'https://t.me/bookquest_uz/94', kind: 'pdf' },
-          { label: 'Audiobook (Uzbek)', url: 'https://t.me/bookquest_uz/95', kind: 'audio' }
-        ]
-      },
-      { first: 'iPad (10th gen)', second: '750,000 so‘m', third: 'A stack of books' },
-      412
-    ),
-    winner: { number: 3218, fullName: 'Dilnoza Rashidova' }
-  },
-  {
-    quest: pastQuest(
-      2,
-      2024,
-      {
-        title: 'Animal Farm',
-        author: 'George Orwell',
-        pages: 112,
-        coverUrl: 'https://covers.openlibrary.org/b/id/7891013-L.jpg',
-        description:
-          'The animals take the farm. What happens next is the part everyone quotes and half of us misremember.',
-        resources: [{ label: 'PDF (English)', url: 'https://t.me/bookquest_uz/61', kind: 'pdf' }]
-      },
-      { first: 'AirPods (2nd gen)', second: '500,000 so‘m', third: 'A stack of books' },
-      287
-    ),
-    winner: { number: 3094, fullName: 'Jasur Toshmatov' }
-  },
-  {
-    quest: pastQuest(
-      1,
-      2023,
-      {
-        title: 'The Little Prince',
-        author: 'Antoine de Saint-Exupéry',
-        pages: 96,
-        coverUrl: 'https://covers.openlibrary.org/b/id/8114155-L.jpg',
-        description:
-          'A pilot crashes in the desert and meets a boy from an asteroid. It is a children’s book the way a mirror is a piece of glass.',
-        resources: []
-      },
-      { first: 'A Kindle', second: '300,000 so‘m', third: 'A stack of books' },
-      143
-    ),
-    winner: { number: 3011, fullName: 'Malika Yusupova' }
-  }
-];
+/** No seeded history — a fresh quest has no past editions yet either. */
+export const PAST_EDITIONS: PastEdition[] = [];
 
 /**
  * Whoever is holding the mock session. Admin by default so the admin area is
@@ -183,7 +100,7 @@ export const SESSION_USER: SessionUser = {
   phoneNumber: null,
   firstName: 'Aziza',
   username: 'aziza_n',
-  photoUrl: 'https://i.pravatar.cc/160?img=47',
+  photoUrl: null,
   role: 'admin',
   participant: null
 };

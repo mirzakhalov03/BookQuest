@@ -1,3 +1,4 @@
+import { Bell, ArrowUpRight } from 'lucide-react';
 import { NavLink } from 'react-router';
 import { isInsideTelegram, openExternalLink } from '@/lib/telegram';
 import { readToken } from '@/lib/auth/tokenStore';
@@ -52,7 +53,7 @@ function NotificationsBell() {
 
   return (
     <NavLink to="/notifications" aria-label="Notifications" className="relative">
-      <span aria-hidden="true">🔔</span>
+      <Bell className="h-5 w-5" strokeWidth={1.8} aria-hidden="true" />
       {unreadCount > 0 && (
         <span className="absolute -right-1 -top-1 rounded-full bg-ember px-1 text-xs text-paper">
           {unreadCount}
@@ -85,7 +86,7 @@ function WebLink() {
         if (openExternalLink(WEB_URL)) event.preventDefault();
       }}
     >
-      Open on web <span aria-hidden="true">↗</span>
+      Open on web <ArrowUpRight className="inline h-4 w-4 align-[-2px]" aria-hidden="true" />
     </a>
   );
 }

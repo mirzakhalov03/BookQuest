@@ -1,3 +1,4 @@
+import { ArrowUpRight } from 'lucide-react';
 import type { BookResource } from '@bookquest/shared';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { openExternalLink } from '@/lib/telegram';
@@ -51,12 +52,10 @@ export function ResourceList({ resources }: ResourceListProps) {
           >
             <ResourceIcon kind={resource.kind} />
             <span className="flex-1">{resource.label}</span>
-            <span
+            <ArrowUpRight
+              className="h-4 w-4 shrink-0 text-taupe transition-colors group-hover:text-paper-dim"
               aria-hidden="true"
-              className="text-taupe transition-colors group-hover:text-paper-dim"
-            >
-              ↗
-            </span>
+            />
           </a>
         </li>
       ))}
