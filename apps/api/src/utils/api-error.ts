@@ -45,6 +45,14 @@ export class ApiError extends Error {
     return new ApiError(403, 'forbidden', message);
   }
 
+  static gone(message: string): ApiError {
+    return new ApiError(410, 'expired', message);
+  }
+
+  static unprocessable(message: string): ApiError {
+    return new ApiError(422, 'unprocessable', message);
+  }
+
   static tooManyRequests(message = 'Too many attempts. Try again shortly.'): ApiError {
     return new ApiError(429, 'rate_limited', message);
   }

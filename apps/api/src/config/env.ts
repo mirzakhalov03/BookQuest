@@ -22,6 +22,8 @@ const envSchema = z.object({
       itself, not a person — there is no Telegram initData to verify for a
       service call. Generate with: openssl rand -hex 32 */
   BOT_SERVICE_TOKEN: z.string().min(32, 'BOT_SERVICE_TOKEN must be at least 32 characters'),
+  /** HMAC key for login codes — the DB only ever holds the hash. Generate with: openssl rand -hex 32 */
+  LOGIN_CODE_SECRET: z.string().min(32, 'LOGIN_CODE_SECRET must be at least 32 characters'),
   JWT_EXPIRES_IN_DAYS: z.coerce.number().int().positive().max(90).default(7),
   /** How long a signed initData string stays usable — the replay window. */
   AUTH_INIT_DATA_MAX_AGE_SECONDS: z.coerce.number().int().positive().default(3600),
