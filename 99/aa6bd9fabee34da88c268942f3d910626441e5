@@ -1,0 +1,49 @@
+apps/web/package.json
+  s_e711e27986f7c9::t_4f4f97a3df6b3c 16
+pnpm-lock.yaml
+  s_e711e27986f7c9::t_cbe9a6895fef88 115-117,1159-1163,2363-2366
+apps/web/src/components/layout/TabBar.tsx
+  s_e711e27986f7c9::t_246a70cb8323a4 1-2,8,12-14,17-21,35,44
+apps/web/src/components/layout/TopBar.tsx
+  s_e711e27986f7c9::t_b0da17f64faf4d 1,56,89
+apps/web/src/components/ui/ArrowIcon.tsx
+  s_e711e27986f7c9::t_f40afc2d41cd96 1-2,4-7,11-12,15
+apps/web/src/components/ui/Button.tsx
+  s_4d85a2b18a8ca2::t_a4d7be78e48fa1 2,9-10,20-22,27-37,39
+apps/web/src/features/book/components/ResourceIcon.tsx
+  s_4d85a2b18a8ca2::t_2349afa46c1ec6 1-2,6,10-14,18-19
+apps/web/src/features/book/components/ResourceList.tsx
+  s_e711e27986f7c9::t_29e7766fb9d608 1,55-56,58
+apps/web/src/features/profile/components/ConnectTelegram.tsx
+  s_4d85a2b18a8ca2::t_71ed796fe9053c 68-72
+apps/web/src/layouts/AdminLayout.tsx
+  s_e711e27986f7c9::t_0ae198f59c49b2 2-3,9,23-27,62-64,75,82
+apps/web/src/lib/api/mock/fixtures.ts
+  s_4d85a2b18a8ca2::t_94fdfbe81042a6 86-87,103
+apps/web/src/lib/api/mock/people.ts
+  s_4d85a2b18a8ca2::t_e63fac6c46079c 12-13,15-17,95-96,130,136
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "99aa6bd9fabee34da88c268942f3d910626441e5",
+  "prompts": {},
+  "sessions": {
+    "s_4d85a2b18a8ca2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7c0f7fd7-32db-4930-b5c1-8a6f0f1f31b5",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_e711e27986f7c9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eefed506-dec9-4021-a053-7adbca1a0e43",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
