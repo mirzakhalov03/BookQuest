@@ -1,0 +1,21 @@
+packages/shared/src/api.ts
+  s_e092d5137db325::t_242b0d6ed95e5b 30-33
+packages/shared/src/schemas/auth.ts
+  s_e092d5137db325::t_b7b8b250428f49 69-92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "ef75a880cac239941c94b542efb6a2390884f300",
+  "prompts": {},
+  "sessions": {
+    "s_e092d5137db325": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75ca2b73-e2b8-4b93-a93a-768bbcc04164",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
