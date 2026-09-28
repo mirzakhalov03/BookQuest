@@ -55,7 +55,8 @@ export async function authenticateWithTelegramWidget(
 export async function toSessionUser(user: UserDocument): Promise<SessionUser> {
   return {
     id: user.id,
-    telegramUserId: user.telegramUserId,
+    telegramUserId: user.telegramUserId ?? null,
+    email: user.email ?? null,
     firstName: user.firstName,
     username: user.username ?? null,
     photoUrl: user.photoUrl ?? null,
