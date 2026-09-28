@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SessionUser } from '@bookquest/shared';
 import { getInitData } from '@/lib/telegram';
 import { fetchMe, loginWithTelegram } from './authApi';
-import { readToken } from './tokenStore';
+import { clearToken, readToken } from './tokenStore';
 
 export const authKeys = {
   all: ['auth'] as const,
@@ -19,6 +19,9 @@ export interface Auth {
   isAdmin: boolean;
   /** Runs the `initData` exchange. Resolves to false when no session was created. */
   signIn: () => Promise<boolean>;
+  /** Drops the stored token and the cached session — the next render sees
+      the viewer as signed out, no navigation required. */
+  signOut: () => void;
 }
 
 /**
@@ -68,11 +71,17 @@ export function useAuth(): Auth {
     }
   }, [queryClient]);
 
+  const signOut = useCallback(() => {
+    clearToken();
+    queryClient.setQueryData(authKeys.me(), null);
+  }, [queryClient]);
+
   return {
     status: resolveStatus(user, isFetching),
     user,
     isAdmin: user?.role === 'admin',
-    signIn
+    signIn,
+    signOut
   };
 }
 

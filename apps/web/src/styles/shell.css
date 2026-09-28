@@ -84,7 +84,8 @@
 
 /* ── The screen box ────────────────────────────────────────────────
    Consistent padding, a reading measure, and the clearance under the tab bar.
-   This is the only place that knows `--tabbar-h` and `--safe-b` (spec §4).
+   `.admin-screen` below is the only other place that knows `--tabbar-h` and
+   `--safe-b` (spec §4) — same clearance, for `AdminLayout`'s own tab bar.
 
    In `@layer components` so a screen that needs a different measure — a
    leaderboard, an admin table — can say so with a Tailwind utility. Unlayered
@@ -112,6 +113,13 @@
        leaves the flow and stops reserving its own height. Here the screen has
        to reserve it, or the last line scrolls under the pill. */
     .screen {
+      padding-bottom: calc(var(--tabbar-h) + var(--safe-b) + 1.5rem);
+    }
+
+    /* Same reservation, for `AdminLayout`'s bottom tab bar. Below 900px
+       `.tabbar` is sticky, not fixed — it already takes its own row in the
+       flow, so nothing reserves space for it down there. */
+    .admin-screen {
       padding-bottom: calc(var(--tabbar-h) + var(--safe-b) + 1.5rem);
     }
   }

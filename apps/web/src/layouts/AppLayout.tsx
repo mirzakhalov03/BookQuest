@@ -17,14 +17,14 @@ import { Toast } from '@/components/ui/Toast';
  */
 export function AppLayout() {
   const { pathname } = useLocation();
-  // Chrome-less routes: no bottom tab bar. The admin area gets a top nav
-  // instead (`AdminLayout`) — plan Phase 4's "tables instead of a stage"
-  // means no bottom tab bar to a stage that isn't there. The title page and
-  // its reveal are the one screen the design (spec §4, `prototype/index.html`
-  // views 1/2) never puts a tab bar under either — there is nowhere for it to
-  // navigate *to* before a place is claimed. Path-gated rather than a second
-  // layout root so every chrome-less route still keeps the one atmosphere and
-  // the one Toast every other route gets.
+  // Chrome-less routes: no *participant* bottom tab bar. The admin area
+  // (`AdminLayout`) renders its own bottom tab bar for its own five
+  // destinations, so it stays off this one rather than getting two. The
+  // title page and its reveal are the one screen the design (spec §4,
+  // `prototype/index.html` views 1/2) never puts a tab bar under either —
+  // there is nowhere for it to navigate *to* before a place is claimed.
+  // Path-gated rather than a second layout root so every chrome-less route
+  // still keeps the one atmosphere and the one Toast every other route gets.
   const isChromeless =
     pathname === '/admin' ||
     pathname.startsWith('/admin/') ||

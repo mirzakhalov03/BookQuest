@@ -29,7 +29,7 @@ const CONTACT_LABELS: Record<Participant['contact']['method'], string> = {
  * Telegram back button.
  */
 export function ProfilePage() {
-  const { isAdmin, user } = useAuth();
+  const { isAdmin, user, signOut } = useAuth();
   const participant = useParticipant();
 
   if (participant.isPending) return <LoadingState label="Finding your number…" />;
@@ -64,6 +64,9 @@ export function ProfilePage() {
           Admin dashboard
         </Link>
       )}
+      <Button variant="quiet" className="self-start px-0" onClick={signOut}>
+        Log out
+      </Button>
     </Screen>
   );
 }
