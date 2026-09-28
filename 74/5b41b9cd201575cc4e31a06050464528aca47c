@@ -1,0 +1,21 @@
+apps/web/src/features/profile/ProfilePage.tsx
+  s_ef567437deda14::t_77e4d92a5eb5a8 16,32,54
+apps/web/src/features/profile/components/ConnectTelegram.tsx
+  s_ef567437deda14::t_43c8448b22f6f4 1-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "745b41b9cd201575cc4e31a06050464528aca47c",
+  "prompts": {},
+  "sessions": {
+    "s_ef567437deda14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "86aad487-bde6-4a31-9839-6d8b92f80ed6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
