@@ -1,0 +1,19 @@
+apps/web/src/features/registration/RegisterPage.tsx
+  s_ef567437deda14::t_eb3bb860b9ff81 11,104-115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "987ca1a8ea8338e29c1b574d76a45af96bc74a30",
+  "prompts": {},
+  "sessions": {
+    "s_ef567437deda14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "86aad487-bde6-4a31-9839-6d8b92f80ed6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
