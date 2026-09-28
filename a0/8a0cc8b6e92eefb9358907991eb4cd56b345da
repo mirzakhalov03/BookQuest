@@ -1,0 +1,53 @@
+apps/api/src/scripts/seed.ts
+  s_ed192446d1905a::t_80ada6d0df3f05 33-36
+apps/web/src/lib/api/mock/fixtures.ts
+  s_ed192446d1905a::t_1bbac2772163cf 68-71
+apps/web/src/features/registration/RegisterPage.tsx
+  s_08b1ea8380223a::t_f42c34a61c65e5 2,8,16-27,49-53
+apps/web/src/lib/api/client.ts
+  s_399e1787f53895::t_905b31a9d92bf3 79-83
+apps/web/src/lib/telegram.ts
+  s_399e1787f53895::t_decca9c95f2091 90-99,103-107
+apps/web/vite.config.ts
+  s_04208b9bba22eb::t_764d3eeedd9069 16-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "a08a0cc8b6e92eefb9358907991eb4cd56b345da",
+  "prompts": {},
+  "sessions": {
+    "s_04208b9bba22eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1547e32e-56f1-48c2-aaba-e2c2735d877b",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_08b1ea8380223a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0d30c08e-170d-4cde-a183-9fd8012728e3",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_399e1787f53895": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "616f8b0f-8224-408e-a7f7-1bfe4b077ed2",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_ed192446d1905a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d6db370d-1e4d-419f-b8a9-ecb33eb136e7",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
