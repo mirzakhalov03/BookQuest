@@ -1,0 +1,25 @@
+.env.example
+  s_e092d5137db325::t_426647c725554a 20-23
+apps/api/src/config/env.ts
+  s_e092d5137db325::t_4300f2072e0f29 25-26
+apps/api/src/models/login-code.model.ts
+  s_e092d5137db325::t_69fb266a82d155 1-21
+apps/api/src/utils/api-error.ts
+  s_e092d5137db325::t_64e7a398475490 48-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "339a8ab380a49e5625e02e0292c29081db7b7926",
+  "prompts": {},
+  "sessions": {
+    "s_e092d5137db325": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75ca2b73-e2b8-4b93-a93a-768bbcc04164",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
