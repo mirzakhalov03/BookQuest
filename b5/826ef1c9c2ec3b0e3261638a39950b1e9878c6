@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-09-28-telegram-code-login-design.md
+  s_e092d5137db325::t_dd75ce929c0bed 1-149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "b5826ef1c9c2ec3b0e3261638a39950b1e9878c6",
+  "prompts": {},
+  "sessions": {
+    "s_e092d5137db325": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75ca2b73-e2b8-4b93-a93a-768bbcc04164",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
