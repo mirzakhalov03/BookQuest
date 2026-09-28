@@ -1,0 +1,19 @@
+apps/web/src/lib/auth/TelegramCodeLogin.tsx
+  s_e092d5137db325::t_2b76c10de1151b 93-107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "41d1ad12f0626fc5550e8479d4fd381d7bd8f510",
+  "prompts": {},
+  "sessions": {
+    "s_e092d5137db325": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75ca2b73-e2b8-4b93-a93a-768bbcc04164",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
