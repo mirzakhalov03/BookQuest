@@ -38,3 +38,23 @@ export const telegramWidgetAuthSchema = z.object({
 });
 
 export type TelegramWidgetAuthPayload = z.infer<typeof telegramWidgetAuthSchema>;
+
+/**
+ * Email + password sign-up. 72 is bcrypt's own input ceiling — anything
+ * longer is silently truncated by bcrypt itself, so this rejects before
+ * that point rather than hash a password the user didn't actually type.
+ */
+export const emailRegisterSchema = z.object({
+  email: z.string().trim().toLowerCase().email('Enter a valid email address.'),
+  password: z.string().min(8, 'Use at least 8 characters.').max(72, 'Use at most 72 characters.'),
+  firstName: z.string().trim().min(1, 'Enter your name.')
+});
+
+export type EmailRegisterPayload = z.infer<typeof emailRegisterSchema>;
+
+export const emailLoginSchema = z.object({
+  email: z.string().trim().toLowerCase().email('Enter a valid email address.'),
+  password: z.string().min(1, 'Enter your password.')
+});
+
+export type EmailLoginPayload = z.infer<typeof emailLoginSchema>;

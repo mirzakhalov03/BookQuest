@@ -9,7 +9,8 @@ import { participantSchema } from './participant.js';
  */
 export const sessionUserSchema = z.object({
   id: z.string(),
-  telegramUserId: z.string(),
+  telegramUserId: z.string().nullable(),
+  email: z.string().nullable(),
   firstName: z.string(),
   username: z.string().nullable(),
   photoUrl: z.string().nullable(),
