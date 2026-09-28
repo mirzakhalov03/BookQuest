@@ -3,9 +3,12 @@ import type {
   PhoneLoginPayload,
   PhoneRegisterPayload,
   TelegramAuthPayload,
+  TelegramCodeRequestPayload,
+  TelegramCodeVerifyPayload,
   TelegramWidgetAuthPayload
 } from '@bookquest/shared';
 import * as authService from '../services/auth.services.js';
+import * as loginCodeService from '../services/login-code.services.js';
 import { currentUser } from '../middlewares/auth.middleware.js';
 import { ok } from '../utils/respond.js';
 
@@ -38,4 +41,16 @@ export async function linkTelegramAccount(req: Request, res: Response): Promise<
 /** GET /api/v1/auth/me */
 export async function getMe(req: Request, res: Response): Promise<void> {
   ok(res, await authService.toSessionUser(currentUser(req)));
+}
+
+/** POST /api/v1/auth/telegram-code/request */
+export async function requestTelegramCode(req: Request, res: Response): Promise<void> {
+  const { identifier } = req.body as TelegramCodeRequestPayload;
+  ok(res, await loginCodeService.requestLoginCode(identifier));
+}
+
+/** POST /api/v1/auth/telegram-code/verify */
+export async function verifyTelegramCode(req: Request, res: Response): Promise<void> {
+  const { challengeId, code } = req.body as TelegramCodeVerifyPayload;
+  ok(res, await loginCodeService.verifyLoginCode(challengeId, code));
 }

@@ -7,7 +7,9 @@ import {
   telegramAuthBody,
   telegramWidgetAuthBody,
   phoneRegisterBody,
-  phoneLoginBody
+  phoneLoginBody,
+  telegramCodeRequestBody,
+  telegramCodeVerifyBody
 } from '../validators/auth.validators.js';
 
 export const authRoutes: Router = Router();
@@ -36,6 +38,20 @@ authRoutes.post(
 );
 
 authRoutes.post('/login', authRateLimit, validate(phoneLoginBody), authController.signInWithPhone);
+
+authRoutes.post(
+  '/telegram-code/request',
+  authRateLimit,
+  validate(telegramCodeRequestBody),
+  authController.requestTelegramCode
+);
+
+authRoutes.post(
+  '/telegram-code/verify',
+  authRateLimit,
+  validate(telegramCodeVerifyBody),
+  authController.verifyTelegramCode
+);
 
 authRoutes.post(
   '/telegram/link',

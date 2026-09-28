@@ -27,7 +27,7 @@ const INCORRECT_CREDENTIALS = 'Incorrect phone number or password.';
  * here on there is exactly one answer to "what does signing in mean": mint a
  * token, return the session.
  */
-async function issueSession(user: UserDocument): Promise<Session> {
+export async function issueSession(user: UserDocument): Promise<Session> {
   const { token, expiresAt } = await signSessionToken(user.id);
 
   return {
