@@ -1,0 +1,27 @@
+apps/web/src/features/profile/ProfilePage.tsx
+  s_ef567437deda14::t_e22dcf75ecc62a 32,67-69
+apps/web/src/layouts/AdminLayout.tsx
+  s_ef567437deda14::t_3e17302f3585c3 2,7,11,13-18,21-70,75-77,97,104-109,114-133,141-147,150
+apps/web/src/layouts/AppLayout.tsx
+  s_ef567437deda14::t_852dfe2a94d27c 20-27
+apps/web/src/lib/auth/useAuth.ts
+  s_ef567437deda14::t_dbc8334a8cfe48 6,22-24,74-78,83-84
+apps/web/src/styles/shell.css
+  s_ef567437deda14::t_1c8455627163a8 87-88,118-124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "fd06b9be532174e673d23be1ceeaf2d990f2fb06",
+  "prompts": {},
+  "sessions": {
+    "s_ef567437deda14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "86aad487-bde6-4a31-9839-6d8b92f80ed6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
