@@ -65,10 +65,10 @@ export const CURRENT_QUEST: Quest = {
     third: 'A year of books, on us'
   },
   opensAt: '2026-08-01T09:00:00.000Z',
-  readingDeadline: '2026-09-20T18:59:00.000Z',
-  quizOpensAt: '2026-09-21T13:00:00.000Z',
-  quizClosesAt: '2026-09-21T15:00:00.000Z',
-  resultsAt: '2026-09-22T07:00:00.000Z',
+  readingDeadline: '2026-10-10T18:59:00.000Z',
+  quizOpensAt: '2026-10-11T13:00:00.000Z',
+  quizClosesAt: '2026-10-11T15:00:00.000Z',
+  resultsAt: '2026-10-12T07:00:00.000Z',
   quizQuestionCount: 20,
   quizDurationMinutes: 30,
   participantCount: 0

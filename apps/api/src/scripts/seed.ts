@@ -30,10 +30,10 @@ const QUEST = {
     third: null
   },
   opensAt: new Date('2026-08-01T09:00:00Z'),
-  readingDeadline: new Date('2026-09-20T18:59:00Z'),
-  quizOpensAt: new Date('2026-09-21T13:00:00Z'),
-  quizClosesAt: new Date('2026-09-21T15:00:00Z'),
-  resultsAt: new Date('2026-09-22T07:00:00Z'),
+  readingDeadline: new Date('2026-10-10T18:59:00Z'),
+  quizOpensAt: new Date('2026-10-11T13:00:00Z'),
+  quizClosesAt: new Date('2026-10-11T15:00:00Z'),
+  resultsAt: new Date('2026-10-12T07:00:00Z'),
   quizQuestionCount: 20,
   quizDurationMinutes: 30,
   isCurrent: true

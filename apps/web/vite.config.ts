@@ -13,6 +13,9 @@ export default defineConfig({
   server: {
     port: 5173,
     // The Telegram Mini App loads over https through a tunnel in development.
-    host: true
+    host: true,
+    // Vite's host-check rejects the tunnel's hostname by default; this trusts
+    // any ngrok subdomain, since the free tier reassigns it on every restart.
+    allowedHosts: ['.ngrok-free.app']
   }
 });

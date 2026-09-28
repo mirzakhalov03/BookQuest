@@ -76,6 +76,11 @@ function send(path: string, options: RequestOptions, token: string | null): Prom
     headers: {
       ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
       ...(token === null ? {} : { Authorization: `Bearer ${token}` }),
+      // Free-tier ngrok shows a "Visit Site" interstitial to any request with a
+      // real browser User-Agent — which the Telegram WebView always sends — and
+      // that page has no CORS headers, so fetch() fails before a response ever
+      // arrives. This header is ngrok's own opt-out; harmless off-tunnel.
+      'ngrok-skip-browser-warning': 'true',
       ...headers
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) })

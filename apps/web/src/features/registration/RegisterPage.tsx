@@ -1,16 +1,29 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router';
+import { Link, Navigate } from 'react-router';
 import { Screen } from '@/components/layout/Screen';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { Button } from '@/components/ui/Button';
+import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { isNotFound } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/useAuth';
 import { TelegramLoginWidget } from '@/lib/auth/TelegramLoginWidget';
 import { useCurrentQuest } from '@/lib/api/quest';
 import { EditionMark } from './components/EditionMark';
 import { RegistrationForm } from './components/RegistrationForm';
+
+// This route is deliberately chromeless (AppLayout) — no tab bar to fall
+// back on — so the between-editions empty state needs its own way out.
+const BACK_TO_STAGE = (
+  <Link
+    to="/"
+    className="group inline-flex items-center gap-3 text-taupe transition-colors hover:text-paper-dim"
+  >
+    Back to the stage
+    <ArrowIcon />
+  </Link>
+);
 
 /**
  * The title page (spec §4). Ported from `prototype/index.html` view 1 and
@@ -33,7 +46,11 @@ export function RegisterPage() {
     if (isNotFound(error)) {
       return (
         <Screen>
-          <EmptyState title={error.message} body="Check back once the next edition opens." />
+          <EmptyState
+            title={error.message}
+            body="Check back once the next edition opens."
+            action={BACK_TO_STAGE}
+          />
         </Screen>
       );
     }

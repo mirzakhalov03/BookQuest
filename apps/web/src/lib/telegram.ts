@@ -87,13 +87,24 @@ export function initTelegram(): void {
   webApp.ready();
   webApp.expand();
   // Newer clients support a real fullscreen request; expand() above is the
-  // fallback every client understands. There is no feature-detection beyond
-  // "does the method exist" — older clients simply don't have it.
-  webApp.requestFullscreen?.();
+  // fallback every client understands. "Does the method exist" isn't enough
+  // feature-detection though: the web fallback build of this same script
+  // (loaded on the open web, see index.html) defines the method but throws
+  // `WebAppMethodUnsupported` synchronously when called, exactly like
+  // `haptic()` below already has to guard against.
+  try {
+    webApp.requestFullscreen?.();
+  } catch {
+    // Unsupported on this client build — expand() above already ran.
+  }
   // The platform's actual ceiling for "hard to dismiss": Telegram has no API
   // to block the swipe-down/back-gesture close, only to ask for confirmation
   // before it happens.
-  webApp.enableClosingConfirmation?.();
+  try {
+    webApp.enableClosingConfirmation?.();
+  } catch {
+    // Unsupported on this client build.
+  }
   webApp.setHeaderColor?.('#14100C');
   webApp.setBackgroundColor?.('#14100C');
 }
