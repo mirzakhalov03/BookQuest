@@ -1,12 +1,12 @@
 import {
   telegramAuthSchema,
   telegramWidgetAuthSchema,
-  emailRegisterSchema,
-  emailLoginSchema
+  phoneRegisterSchema,
+  phoneLoginSchema
 } from '@bookquest/shared';
 
 /** Request-shaped wrapper around the shared rule. */
 export const telegramAuthBody = telegramAuthSchema;
 export const telegramWidgetAuthBody = telegramWidgetAuthSchema;
-export const emailRegisterBody = emailRegisterSchema;
-export const emailLoginBody = emailLoginSchema;
+export const phoneRegisterBody = phoneRegisterSchema;
+export const phoneLoginBody = phoneLoginSchema;

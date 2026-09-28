@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import type {
-  EmailLoginPayload,
-  EmailRegisterPayload,
+  PhoneLoginPayload,
+  PhoneRegisterPayload,
   TelegramAuthPayload,
   TelegramWidgetAuthPayload
 } from '@bookquest/shared';
@@ -21,13 +21,13 @@ export async function signInWithTelegramWidget(req: Request, res: Response): Pro
 }
 
 /** POST /api/v1/auth/register */
-export async function registerWithEmail(req: Request, res: Response): Promise<void> {
-  ok(res, await authService.registerWithEmail(req.body as EmailRegisterPayload));
+export async function registerWithPhone(req: Request, res: Response): Promise<void> {
+  ok(res, await authService.registerWithPhone(req.body as PhoneRegisterPayload));
 }
 
 /** POST /api/v1/auth/login */
-export async function signInWithEmail(req: Request, res: Response): Promise<void> {
-  ok(res, await authService.authenticateWithEmail(req.body as EmailLoginPayload));
+export async function signInWithPhone(req: Request, res: Response): Promise<void> {
+  ok(res, await authService.authenticateWithPhone(req.body as PhoneLoginPayload));
 }
 
 /** POST /api/v1/auth/telegram/link */

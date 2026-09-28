@@ -9,7 +9,7 @@ import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { isNotFound } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/useAuth';
 import { TelegramLoginWidget } from '@/lib/auth/TelegramLoginWidget';
-import { EmailAuthForm } from '@/lib/auth/EmailAuthForm';
+import { PhoneAuthForm } from '@/lib/auth/PhoneAuthForm';
 import { useCurrentQuest } from '@/lib/api/quest';
 import { EditionMark } from './components/EditionMark';
 import { RegistrationForm } from './components/RegistrationForm';
@@ -127,8 +127,8 @@ function NoSessionNote({ status }: { status: 'loading' | 'anonymous' | 'unavaila
         <TelegramLoginWidget />
       </div>
       <div className="grid gap-3">
-        <p className="type-label text-amber">Or use email</p>
-        <EmailAuthForm />
+        <p className="type-label text-amber">Or use a phone number</p>
+        <PhoneAuthForm />
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { ApiRequestError } from '@/lib/api/client';
 import { authKeys } from './useAuth';
-import { loginWithEmail, registerWithEmail } from './authApi';
+import { loginWithPhone, registerWithPhone } from './authApi';
 
 type Mode = 'login' | 'signup';
 
@@ -23,25 +23,25 @@ const EMPTY_FIELD: FieldState = { value: '' };
  * up. Reuses `Field`/`Button`/`.form` from the registration form next to it
  * so the two don't read as two different products sharing a page.
  */
-export function EmailAuthForm() {
+export function PhoneAuthForm() {
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<Mode>('login');
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const [firstName, setFirstName] = useState<FieldState>(EMPTY_FIELD);
-  const [email, setEmail] = useState<FieldState>(EMPTY_FIELD);
+  const [phoneNumber, setPhoneNumber] = useState<FieldState>(EMPTY_FIELD);
   const [password, setPassword] = useState<FieldState>(EMPTY_FIELD);
 
   const firstNameRef = useRef<HTMLInputElement>(null);
-  const emailRef = useRef<HTMLInputElement>(null);
+  const phoneNumberRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
   function switchMode() {
     setMode((current) => (current === 'login' ? 'signup' : 'login'));
     setFormError(null);
     setFirstName(EMPTY_FIELD);
-    setEmail(EMPTY_FIELD);
+    setPhoneNumber(EMPTY_FIELD);
     setPassword(EMPTY_FIELD);
   }
 
@@ -53,9 +53,9 @@ export function EmailAuthForm() {
     try {
       const session =
         mode === 'login'
-          ? await loginWithEmail({ email: email.value, password: password.value })
-          : await registerWithEmail({
-              email: email.value,
+          ? await loginWithPhone({ phoneNumber: phoneNumber.value, password: password.value })
+          : await registerWithPhone({
+              phoneNumber: phoneNumber.value,
               password: password.value,
               firstName: firstName.value
             });
@@ -63,9 +63,9 @@ export function EmailAuthForm() {
       queryClient.setQueryData(authKeys.me(), session.user);
     } catch (error) {
       if (error instanceof ApiRequestError) {
-        if (error.fields.email) {
-          setEmail((prev) => ({ ...prev, status: 'bad', message: error.fields.email }));
-          emailRef.current?.focus();
+        if (error.fields.phoneNumber) {
+          setPhoneNumber((prev) => ({ ...prev, status: 'bad', message: error.fields.phoneNumber }));
+          phoneNumberRef.current?.focus();
         } else if (error.fields.password) {
           setPassword((prev) => ({ ...prev, status: 'bad', message: error.fields.password }));
           passwordRef.current?.focus();
@@ -73,7 +73,7 @@ export function EmailAuthForm() {
           setFirstName((prev) => ({ ...prev, status: 'bad', message: error.fields.firstName }));
           firstNameRef.current?.focus();
         } else {
-          // The 409 (email taken) and 401 (wrong credentials) carry no
+          // The 409 (phone number taken) and 401 (wrong credentials) carry no
           // field — shown verbatim, same convention RegistrationForm uses
           // for its own field-less rejections.
           setFormError(error.message);
@@ -103,16 +103,16 @@ export function EmailAuthForm() {
       )}
 
       <Field
-        ref={emailRef}
-        label="Email"
-        name="email"
-        type="email"
-        autoComplete="email"
-        placeholder="you@example.com"
-        value={email.value}
-        status={email.status}
-        message={email.message}
-        onChange={(event) => setEmail({ value: event.target.value })}
+        ref={phoneNumberRef}
+        label="Phone number"
+        name="phoneNumber"
+        type="tel"
+        autoComplete="tel"
+        placeholder="+998901234567"
+        value={phoneNumber.value}
+        status={phoneNumber.status}
+        message={phoneNumber.message}
+        onChange={(event) => setPhoneNumber({ value: event.target.value })}
       />
 
       <Field

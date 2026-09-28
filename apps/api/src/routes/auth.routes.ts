@@ -6,8 +6,8 @@ import { authRateLimit } from '../middlewares/rate-limit.middleware.js';
 import {
   telegramAuthBody,
   telegramWidgetAuthBody,
-  emailRegisterBody,
-  emailLoginBody
+  phoneRegisterBody,
+  phoneLoginBody
 } from '../validators/auth.validators.js';
 
 export const authRoutes: Router = Router();
@@ -31,11 +31,11 @@ authRoutes.post(
 authRoutes.post(
   '/register',
   authRateLimit,
-  validate(emailRegisterBody),
-  authController.registerWithEmail
+  validate(phoneRegisterBody),
+  authController.registerWithPhone
 );
 
-authRoutes.post('/login', authRateLimit, validate(emailLoginBody), authController.signInWithEmail);
+authRoutes.post('/login', authRateLimit, validate(phoneLoginBody), authController.signInWithPhone);
 
 authRoutes.post(
   '/telegram/link',

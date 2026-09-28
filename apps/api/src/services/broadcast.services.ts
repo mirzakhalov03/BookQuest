@@ -42,7 +42,7 @@ export async function sendBroadcast(message: string, createdBy: UserDocument): P
   }
 
   for (const recipient of recipients) {
-    // An email/password account with no Telegram identity linked yet has
+    // A phone/password account with no Telegram identity linked yet has
     // nothing to DM — the Notification row above is their copy of this
     // broadcast; there's no second delivery to attempt.
     if (!recipient.telegramUserId) continue;

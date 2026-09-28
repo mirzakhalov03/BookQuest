@@ -28,6 +28,9 @@ const envSchema = z.object({
 
   /** The entire admin model: a comma-separated allowlist of Telegram user ids. */
   ADMIN_TELEGRAM_IDS: z.string().default(''),
+  /** Same allowlist, for phone/password accounts — a comma-separated list of
+      phone numbers (in the same shape the login form accepts). */
+  ADMIN_PHONE_NUMBERS: z.string().default(''),
 
   RATE_LIMIT_REGISTER_PER_HOUR: z.coerce.number().int().positive().default(5),
   RATE_LIMIT_AUTH_PER_MINUTE: z.coerce.number().int().positive().default(20),
@@ -63,6 +66,7 @@ const splitList = (value: string): string[] =>
  * a number would round-trip incorrectly and silently match the wrong person.
  */
 export const adminTelegramIds: ReadonlySet<string> = new Set(splitList(env.ADMIN_TELEGRAM_IDS));
+export const adminPhoneNumbers: ReadonlySet<string> = new Set(splitList(env.ADMIN_PHONE_NUMBERS));
 
 /**
  * Configuration that is legal but probably wrong. Collected here and logged by

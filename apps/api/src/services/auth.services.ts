@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import type {
-  EmailLoginPayload,
-  EmailRegisterPayload,
+  PhoneLoginPayload,
+  PhoneRegisterPayload,
   Session,
   SessionUser,
   TelegramWidgetAuthPayload
@@ -13,17 +13,17 @@ import { signSessionToken } from '../utils/token.js';
 import { verifyInitData, verifyLoginWidget } from '../utils/telegram.js';
 import { findParticipantForUser } from './participant.services.js';
 import {
-  createUserWithEmail,
-  findUserByEmail,
+  createUserWithPhone,
+  findUserByPhone,
   linkTelegramToUser,
   upsertUserFromTelegramProfile
 } from './user.services.js';
 
-const INCORRECT_CREDENTIALS = 'Incorrect email or password.';
+const INCORRECT_CREDENTIALS = 'Incorrect phone number or password.';
 
 /**
  * The point every sign-in path converges on, whoever proved who is asking —
- * Telegram's initData, the Login Widget, or an email/password match. From
+ * Telegram's initData, the Login Widget, or a phone/password match. From
  * here on there is exactly one answer to "what does signing in mean": mint a
  * token, return the session.
  */
@@ -66,18 +66,18 @@ export async function authenticateWithTelegramWidget(
 }
 
 /** POST /auth/register */
-export async function registerWithEmail(payload: EmailRegisterPayload): Promise<Session> {
-  const user = await createUserWithEmail(payload.email, payload.password, payload.firstName);
+export async function registerWithPhone(payload: PhoneRegisterPayload): Promise<Session> {
+  const user = await createUserWithPhone(payload.phoneNumber, payload.password, payload.firstName);
   return issueSession(user);
 }
 
 /**
- * POST /auth/login. The message is identical whether the email doesn't
- * exist or the password is wrong — a different message either way would let
- * a caller enumerate which emails have accounts.
+ * POST /auth/login. The message is identical whether the phone number
+ * doesn't exist or the password is wrong — a different message either way
+ * would let a caller enumerate which phone numbers have accounts.
  */
-export async function authenticateWithEmail(payload: EmailLoginPayload): Promise<Session> {
-  const user = await findUserByEmail(payload.email);
+export async function authenticateWithPhone(payload: PhoneLoginPayload): Promise<Session> {
+  const user = await findUserByPhone(payload.phoneNumber);
 
   if (!user || !user.passwordHash) {
     throw ApiError.unauthorized(INCORRECT_CREDENTIALS);
@@ -115,7 +115,7 @@ export async function toSessionUser(user: UserDocument): Promise<SessionUser> {
   return {
     id: user.id,
     telegramUserId: user.telegramUserId ?? null,
-    email: user.email ?? null,
+    phoneNumber: user.phoneNumber ?? null,
     firstName: user.firstName,
     username: user.username ?? null,
     photoUrl: user.photoUrl ?? null,

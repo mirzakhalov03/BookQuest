@@ -3,6 +3,7 @@ import { Navigate, Outlet } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from './useAuth';
 import { TelegramLoginWidget } from './TelegramLoginWidget';
+import { PhoneAuthForm } from './PhoneAuthForm';
 
 /**
  * Route guards — **UX, not security.**
@@ -49,12 +50,20 @@ export function RequireAdmin() {
 function ContinueInTelegram() {
   return (
     <Panel label="Sign in">
-      <h1 className="type-display text-4xl">Sign in with Telegram</h1>
-      <p className="max-w-[34ch] text-paper-dim">
-        BookQuest uses your Telegram account to identify you — no password to
-        remember.
-      </p>
-      <TelegramLoginWidget />
+      <h1 className="type-display text-4xl">Sign in</h1>
+      <div className="grid gap-6">
+        <div className="grid gap-3">
+          <p className="type-label text-amber">Sign in with Telegram</p>
+          <p className="max-w-[30rem] text-paper-dim">
+            Fastest way in — Telegram is also how the quiz and certificate find you.
+          </p>
+          <TelegramLoginWidget />
+        </div>
+        <div className="grid gap-3">
+          <p className="type-label text-amber">Or use a phone number</p>
+          <PhoneAuthForm />
+        </div>
+      </div>
     </Panel>
   );
 }

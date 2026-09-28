@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { adminTelegramIds } from '../config/env.js';
+import { adminPhoneNumbers, adminTelegramIds } from '../config/env.js';
 import { UserModel, type UserDocument } from '../models/user.model.js';
 import type { TelegramProfile } from '../utils/telegram.js';
 import { ApiError } from '../utils/api-error.js';
@@ -36,25 +36,26 @@ export async function upsertUserFromTelegramProfile(
   );
 }
 
-/** POST /auth/register. Throws 409 if the email is already in use. */
-export async function createUserWithEmail(
-  email: string,
+/** POST /auth/register. Throws 409 if the phone number is already in use. */
+export async function createUserWithPhone(
+  phoneNumber: string,
   password: string,
   firstName: string
 ): Promise<UserDocument> {
-  const existing = await UserModel.findOne({ email });
+  const existing = await UserModel.findOne({ phoneNumber });
   if (existing) {
-    throw ApiError.conflict('That email is already in use.');
+    throw ApiError.conflict('That phone number is already in use.');
   }
 
   const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
+  const role = adminPhoneNumbers.has(phoneNumber) ? 'admin' : 'participant';
 
   try {
     return await UserModel.create({
-      email,
+      phoneNumber,
       passwordHash,
       firstName,
-      role: 'participant'
+      role
     });
   } catch (error) {
     /* The findOne above is a courtesy; this is the guarantee. Two requests
@@ -62,7 +63,7 @@ export async function createUserWithEmail(
        wins — the loser gets the same message the check above would have
        given, not a raw driver error. */
     if (isDuplicateKeyError(error)) {
-      throw ApiError.conflict('That email is already in use.');
+      throw ApiError.conflict('That phone number is already in use.');
     }
     throw error;
   }
@@ -73,8 +74,8 @@ export async function createUserWithEmail(
  * (see the User model), so a normal query would return `undefined` and
  * every `bcrypt.compare` would fail even with the right password.
  */
-export function findUserByEmail(email: string): Promise<UserDocument | null> {
-  return UserModel.findOne({ email }).select('+passwordHash');
+export function findUserByPhone(phoneNumber: string): Promise<UserDocument | null> {
+  return UserModel.findOne({ phoneNumber }).select('+passwordHash');
 }
 
 /**
@@ -99,7 +100,7 @@ export async function linkTelegramToUser(
   try {
     await user.save();
   } catch (error) {
-    // Same race as createUserWithEmail: the findOne above is a courtesy,
+    // Same race as createUserWithPhone: the findOne above is a courtesy,
     // the unique index is the guarantee.
     if (isDuplicateKeyError(error)) {
       throw ApiError.conflict('That Telegram account is already connected to a different user.');

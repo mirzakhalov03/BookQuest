@@ -12,8 +12,8 @@ type State = 'idle' | 'linking' | 'error' | 'script-failed';
 const GENERIC_LINK_ERROR = 'Telegram confirmed you, but connecting failed. Try again.';
 
 /**
- * The deferred half of email/password sign-up: once the app's Telegram
- * domain is registered with @BotFather, an email/password user can attach
+ * The deferred half of phone/password sign-up: once the app's Telegram
+ * domain is registered with @BotFather, a phone/password user can attach
  * their Telegram identity here without creating a second account.
  */
 export function ConnectTelegram() {

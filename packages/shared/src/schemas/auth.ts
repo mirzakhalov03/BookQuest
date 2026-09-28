@@ -40,21 +40,29 @@ export const telegramWidgetAuthSchema = z.object({
 export type TelegramWidgetAuthPayload = z.infer<typeof telegramWidgetAuthSchema>;
 
 /**
- * Email + password sign-up. 72 is bcrypt's own input ceiling — anything
- * longer is silently truncated by bcrypt itself, so this rejects before
- * that point rather than hash a password the user didn't actually type.
+ * E.164-ish: an optional leading `+`, then 8-15 digits, not starting with 0.
+ * Permissive on purpose — this is a login identifier, not an SMS dispatch
+ * target, so there is no carrier lookup to satisfy.
  */
-export const emailRegisterSchema = z.object({
-  email: z.string().trim().toLowerCase().email('Enter a valid email address.'),
+const PHONE_NUMBER_PATTERN = /^\+?[1-9]\d{7,14}$/;
+
+/**
+ * Phone number + password sign-up. 72 is bcrypt's own input ceiling —
+ * anything longer is silently truncated by bcrypt itself, so this rejects
+ * before that point rather than hash a password the user didn't actually
+ * type.
+ */
+export const phoneRegisterSchema = z.object({
+  phoneNumber: z.string().trim().regex(PHONE_NUMBER_PATTERN, 'Enter a valid phone number.'),
   password: z.string().min(8, 'Use at least 8 characters.').max(72, 'Use at most 72 characters.'),
   firstName: z.string().trim().min(1, 'Enter your name.')
 });
 
-export type EmailRegisterPayload = z.infer<typeof emailRegisterSchema>;
+export type PhoneRegisterPayload = z.infer<typeof phoneRegisterSchema>;
 
-export const emailLoginSchema = z.object({
-  email: z.string().trim().toLowerCase().email('Enter a valid email address.'),
+export const phoneLoginSchema = z.object({
+  phoneNumber: z.string().trim().regex(PHONE_NUMBER_PATTERN, 'Enter a valid phone number.'),
   password: z.string().min(1, 'Enter your password.')
 });
 
-export type EmailLoginPayload = z.infer<typeof emailLoginSchema>;
+export type PhoneLoginPayload = z.infer<typeof phoneLoginSchema>;

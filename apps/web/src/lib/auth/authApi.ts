@@ -1,6 +1,6 @@
 import type {
-  EmailLoginPayload,
-  EmailRegisterPayload,
+  PhoneLoginPayload,
+  PhoneRegisterPayload,
   Session,
   SessionUser,
   TelegramWidgetAuthPayload
@@ -66,15 +66,15 @@ export async function loginWithWidget(payload: TelegramWidgetAuthPayload): Promi
   return session;
 }
 
-/** The standalone web app's email sign-up. */
-export async function registerWithEmail(payload: EmailRegisterPayload): Promise<Session> {
+/** The standalone web app's phone number sign-up. */
+export async function registerWithPhone(payload: PhoneRegisterPayload): Promise<Session> {
   const session = await api.post<Session>('/auth/register', payload);
   storeToken(session);
   return session;
 }
 
-/** The standalone web app's email sign-in. */
-export async function loginWithEmail(payload: EmailLoginPayload): Promise<Session> {
+/** The standalone web app's phone number sign-in. */
+export async function loginWithPhone(payload: PhoneLoginPayload): Promise<Session> {
   const session = await api.post<Session>('/auth/login', payload);
   storeToken(session);
   return session;
