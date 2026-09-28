@@ -1,0 +1,29 @@
+apps/api/src/db/connect.ts
+  s_ef567437deda14::t_3df7ddbd50412a 4,18-30
+apps/api/src/middlewares/auth.middleware.ts
+  s_ef567437deda14::t_4b6612949fb854 33,49,62
+apps/api/src/models/user.model.ts
+  s_ef567437deda14::t_c5eee42664ec6a 13-18,21-23,25-27,45-65
+apps/api/src/services/user.services.ts
+  s_ef567437deda14::t_10e38010010afd 6,52-68,98-109
+apps/web/src/features/profile/components/ConnectTelegram.tsx
+  s_ef567437deda14::t_a4fc3301b1c826 4,12-13,23,37-44,74
+apps/web/src/lib/api/mock/routes.ts
+  s_ef567437deda14::t_2850105bc01635 87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "a292f9aac601a181df82d2ad91415741f7b1d5f9",
+  "prompts": {},
+  "sessions": {
+    "s_ef567437deda14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "86aad487-bde6-4a31-9839-6d8b92f80ed6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
