@@ -3,7 +3,12 @@ import * as authController from '../controllers/auth.controllers.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { requireUser } from '../middlewares/auth.middleware.js';
 import { authRateLimit } from '../middlewares/rate-limit.middleware.js';
-import { telegramAuthBody, telegramWidgetAuthBody } from '../validators/auth.validators.js';
+import {
+  telegramAuthBody,
+  telegramWidgetAuthBody,
+  emailRegisterBody,
+  emailLoginBody
+} from '../validators/auth.validators.js';
 
 export const authRoutes: Router = Router();
 
@@ -21,6 +26,23 @@ authRoutes.post(
   authRateLimit,
   validate(telegramWidgetAuthBody),
   authController.signInWithTelegramWidget
+);
+
+authRoutes.post(
+  '/register',
+  authRateLimit,
+  validate(emailRegisterBody),
+  authController.registerWithEmail
+);
+
+authRoutes.post('/login', authRateLimit, validate(emailLoginBody), authController.signInWithEmail);
+
+authRoutes.post(
+  '/telegram/link',
+  requireUser,
+  authRateLimit,
+  validate(telegramWidgetAuthBody),
+  authController.linkTelegramAccount
 );
 
 authRoutes.get('/me', requireUser, authController.getMe);
