@@ -1,0 +1,21 @@
+packages/shared/src/schemas/auth.ts
+  s_ef567437deda14::t_b61715988f5370 41-60
+packages/shared/src/schemas/user.ts
+  s_ef567437deda14::t_f535b7c7e1e041 12-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "8bd4c670006b05f0ca578e5615f01e21ed212fef",
+  "prompts": {},
+  "sessions": {
+    "s_ef567437deda14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "86aad487-bde6-4a31-9839-6d8b92f80ed6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
