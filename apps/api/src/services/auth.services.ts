@@ -1,22 +1,33 @@
-import type { Session, SessionUser, TelegramWidgetAuthPayload } from '@bookquest/shared';
+import bcrypt from 'bcrypt';
+import type {
+  EmailLoginPayload,
+  EmailRegisterPayload,
+  Session,
+  SessionUser,
+  TelegramWidgetAuthPayload
+} from '@bookquest/shared';
 import { logger } from '../config/logger.js';
 import type { UserDocument } from '../models/user.model.js';
 import { ApiError } from '../utils/api-error.js';
 import { signSessionToken } from '../utils/token.js';
 import { verifyInitData, verifyLoginWidget } from '../utils/telegram.js';
 import { findParticipantForUser } from './participant.services.js';
-import { upsertUserFromTelegramProfile } from './user.services.js';
-import type { TelegramProfile } from '../utils/telegram.js';
+import {
+  createUserWithEmail,
+  findUserByEmail,
+  linkTelegramToUser,
+  upsertUserFromTelegramProfile
+} from './user.services.js';
+
+const INCORRECT_CREDENTIALS = 'Incorrect email or password.';
 
 /**
- * The point both entry points converge on. Whichever Telegram product proved
- * who is asking — the Mini App's initData or the Login Widget's callback —
- * from here on there is exactly one answer to "what does signing in mean":
- * upsert the user, mint a token, return the session. Neither path can drift
- * from the other past this line.
+ * The point every sign-in path converges on, whoever proved who is asking —
+ * Telegram's initData, the Login Widget, or an email/password match. From
+ * here on there is exactly one answer to "what does signing in mean": mint a
+ * token, return the session.
  */
-async function issueSessionForProfile(profile: TelegramProfile): Promise<Session> {
-  const user = await upsertUserFromTelegramProfile(profile);
+async function issueSession(user: UserDocument): Promise<Session> {
   const { token, expiresAt } = await signSessionToken(user.id);
 
   return {
@@ -35,7 +46,8 @@ export async function authenticateWithTelegram(initData: string): Promise<Sessio
     throw ApiError.unauthorized('That Telegram sign-in could not be verified.');
   }
 
-  return issueSessionForProfile(verified.profile);
+  const user = await upsertUserFromTelegramProfile(verified.profile);
+  return issueSession(user);
 }
 
 /** POST /api/v1/auth/telegram-widget — the standalone web app's sign-in. */
@@ -49,7 +61,54 @@ export async function authenticateWithTelegramWidget(
     throw ApiError.unauthorized('That Telegram sign-in could not be verified.');
   }
 
-  return issueSessionForProfile(verified.profile);
+  const user = await upsertUserFromTelegramProfile(verified.profile);
+  return issueSession(user);
+}
+
+/** POST /auth/register */
+export async function registerWithEmail(payload: EmailRegisterPayload): Promise<Session> {
+  const user = await createUserWithEmail(payload.email, payload.password, payload.firstName);
+  return issueSession(user);
+}
+
+/**
+ * POST /auth/login. The message is identical whether the email doesn't
+ * exist or the password is wrong — a different message either way would let
+ * a caller enumerate which emails have accounts.
+ */
+export async function authenticateWithEmail(payload: EmailLoginPayload): Promise<Session> {
+  const user = await findUserByEmail(payload.email);
+
+  if (!user || !user.passwordHash) {
+    throw ApiError.unauthorized(INCORRECT_CREDENTIALS);
+  }
+
+  const matches = await bcrypt.compare(payload.password, user.passwordHash);
+  if (!matches) {
+    throw ApiError.unauthorized(INCORRECT_CREDENTIALS);
+  }
+
+  return issueSession(user);
+}
+
+/**
+ * POST /auth/telegram/link. Unlike the other three, this doesn't issue a new
+ * session — the caller is already signed in — it just returns the updated
+ * `SessionUser` so the client can refresh its cache.
+ */
+export async function linkTelegram(
+  user: UserDocument,
+  payload: TelegramWidgetAuthPayload
+): Promise<SessionUser> {
+  const verified = verifyLoginWidget(payload);
+
+  if (!verified.ok) {
+    logger.warn({ reason: verified.reason }, 'Rejected Telegram widget sign-in');
+    throw ApiError.unauthorized('That Telegram sign-in could not be verified.');
+  }
+
+  const linked = await linkTelegramToUser(user, verified.profile);
+  return toSessionUser(linked);
 }
 
 export async function toSessionUser(user: UserDocument): Promise<SessionUser> {
