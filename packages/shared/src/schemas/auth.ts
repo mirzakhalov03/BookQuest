@@ -66,3 +66,27 @@ export const phoneLoginSchema = z.object({
 });
 
 export type PhoneLoginPayload = z.infer<typeof phoneLoginSchema>;
+
+/** Reg number, phone or @username — the server works out which. */
+export const telegramCodeRequestSchema = z.object({
+  identifier: z
+    .string()
+    .trim()
+    .min(1, 'Enter your reg number, phone or @username.')
+    .max(64, 'That’s longer than any of those can be.')
+});
+
+export type TelegramCodeRequestPayload = z.infer<typeof telegramCodeRequestSchema>;
+
+export const telegramCodeVerifySchema = z.object({
+  challengeId: z.string().min(1),
+  code: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit code.')
+});
+
+export type TelegramCodeVerifyPayload = z.infer<typeof telegramCodeVerifySchema>;
+
+export interface TelegramCodeChallenge {
+  challengeId: string;
+  /** Masked destination, e.g. "@sof…", so the user knows which Telegram to check. */
+  sentTo: string;
+}

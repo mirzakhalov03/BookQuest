@@ -27,6 +27,10 @@ export const API_ERROR_CODES = [
   'unauthorized',
   /** Authenticated, but not allowed — admin-only routes. */
   'forbidden',
+  /** Existed once, gone now — an expired or used-up login code. */
+  'expired',
+  /** Understood, but can't be done for this account — e.g. no Telegram to send a code to. */
+  'unprocessable',
   'rate_limited',
   'internal_error'
 ] as const;
