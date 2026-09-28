@@ -180,6 +180,7 @@ export const PAST_EDITIONS: PastEdition[] = [
 export const SESSION_USER: SessionUser = {
   id: objectId('user:aziza'),
   telegramUserId: '783120945',
+  email: null,
   firstName: 'Aziza',
   username: 'aziza_n',
   photoUrl: 'https://i.pravatar.cc/160?img=47',

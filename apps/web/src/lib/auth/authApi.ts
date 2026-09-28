@@ -1,4 +1,10 @@
-import type { Session, SessionUser, TelegramWidgetAuthPayload } from '@bookquest/shared';
+import type {
+  EmailLoginPayload,
+  EmailRegisterPayload,
+  Session,
+  SessionUser,
+  TelegramWidgetAuthPayload
+} from '@bookquest/shared';
 import { api } from '@/lib/api/client';
 import { getInitData } from '@/lib/telegram';
 import { storeToken } from './tokenStore';
@@ -58,4 +64,27 @@ export async function loginWithWidget(payload: TelegramWidgetAuthPayload): Promi
   const session = await api.post<Session>('/auth/telegram-widget', payload);
   storeToken(session);
   return session;
+}
+
+/** The standalone web app's email sign-up. */
+export async function registerWithEmail(payload: EmailRegisterPayload): Promise<Session> {
+  const session = await api.post<Session>('/auth/register', payload);
+  storeToken(session);
+  return session;
+}
+
+/** The standalone web app's email sign-in. */
+export async function loginWithEmail(payload: EmailLoginPayload): Promise<Session> {
+  const session = await api.post<Session>('/auth/login', payload);
+  storeToken(session);
+  return session;
+}
+
+/**
+ * Attaches a Telegram identity to the current session. No `storeToken` —
+ * unlike the other sign-in calls, this doesn't issue a new session, it just
+ * returns the updated `SessionUser` for the caller to write into the cache.
+ */
+export async function linkTelegram(payload: TelegramWidgetAuthPayload): Promise<SessionUser> {
+  return api.post<SessionUser>('/auth/telegram/link', payload);
 }

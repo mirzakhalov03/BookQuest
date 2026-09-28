@@ -19,7 +19,7 @@
 - Password: min 8, max 72 characters (72 is bcrypt's input ceiling; longer is silently truncated by bcrypt itself, so reject before that).
 - Login failure (unknown email OR wrong password) returns the identical message `"Incorrect email or password."` — never reveal which one was wrong.
 - `passwordHash` must never appear in an API response — schema field is `select: false`.
-- `email` and `telegramUserId` are both optional, sparse-unique indexes on `User`.
+- `email` and `telegramUserId` are both optional, unique via a partial index (`$type: 'string'`, not `sparse`) on `User` — see Task 2's correction note.
 - `/auth/register` and `/auth/login` are unauthenticated and sit behind `authRateLimit` (same tier as `/auth/telegram`). `/auth/telegram/link` requires a session (`requireUser`) and also sits behind `authRateLimit`.
 - bcrypt cost factor: 12.
 - Email is always stored and compared lowercased/trimmed.
@@ -39,7 +39,8 @@
 **Backend:**
 - Modify `packages/shared/src/schemas/auth.ts` — add `emailRegisterSchema`, `emailLoginSchema`
 - Modify `packages/shared/src/schemas/user.ts` — `sessionUserSchema.telegramUserId` nullable, add `email`
-- Modify `apps/api/src/models/user.model.ts` — `telegramUserId` optional+sparse-unique, add `email`, `passwordHash`
+- Modify `apps/api/src/models/user.model.ts` — `telegramUserId` optional+partial-unique, add `email`, `passwordHash`
+- Modify `apps/api/src/db/connect.ts` — `UserModel.syncIndexes()` on boot (Task 2 correction)
 - Modify `apps/api/src/services/user.services.ts` — add `createUserWithEmail`, `findUserByEmail`, `linkTelegramToUser`
 - Modify `apps/api/src/services/auth.services.ts` — split `issueSessionForProfile` into `issueSession` + Telegram upsert call; add `registerWithEmail`, `authenticateWithEmail`, `linkTelegram`
 - Modify `apps/api/src/validators/auth.validators.ts` — add `emailRegisterBody`, `emailLoginBody`
@@ -158,14 +159,14 @@ const userSchema = new Schema(
     /* Stored as a string. Telegram ids can exceed 2^53, and a number that
        silently loses its last digit would match the wrong account. Optional:
        an email/password account has no Telegram id until it's linked. */
-    telegramUserId: { type: String, default: null },
+    telegramUserId: { type: String },
 
     /* Optional: a Telegram-only account never sets these. Lowercased and
        trimmed on write so "Jane@X.com" and "jane@x.com" are one account. */
-    email: { type: String, default: null, lowercase: true, trim: true },
+    email: { type: String, lowercase: true, trim: true },
     /* Excluded from default query results — nothing should ever have to
        remember not to serialize this. */
-    passwordHash: { type: String, default: null, select: false },
+    passwordHash: { type: String, select: false },
 
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, default: null },
@@ -183,13 +184,23 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
-// Sparse: many users have no telegramUserId or no email, and sparse indexes
-// skip documents where the field is null instead of colliding on it.
-userSchema.index({ telegramUserId: 1 }, { unique: true, sparse: true });
-userSchema.index({ email: 1 }, { unique: true, sparse: true });
+// Partial, not sparse: a sparse index only excludes a *missing* field — it
+// still indexes an explicit `null`, so two users with no telegramUserId (or
+// no email) would collide on that shared `null`. A partial filter excludes
+// anything that isn't actually a string, `null` included.
+userSchema.index(
+  { telegramUserId: 1 },
+  { unique: true, partialFilterExpression: { telegramUserId: { $type: 'string' } }, name: 'telegramUserId_unique_partial' }
+);
+userSchema.index(
+  { email: 1 },
+  { unique: true, partialFilterExpression: { email: { $type: 'string' } }, name: 'email_unique_partial' }
+);
 ```
 
 Remove the old inline `unique: true` from the `telegramUserId` field (now handled by the explicit index above, since it's no longer `required`).
+
+**Correction (found in final review, not caught during planning):** the original version of this step used `sparse: true` instead of a partial filter, and kept `default: null` on all three fields above. That combination breaks after the *first* user with no `telegramUserId` (or no `email`) — a sparse index still indexes an explicit `null`, so the second such user collides on the unique constraint. It also means any database that already has the old (pre-this-feature) non-sparse `telegramUserId` index needs it replaced, not augmented — MongoDB won't silently swap an index's options under the same auto-generated name, and Mongoose's default index build reports that as an event, not a thrown error, so a stale index fails silently. The corrected version above uses `partialFilterExpression` and drops `default: null`; a corresponding `UserModel.syncIndexes()` call was added to `connectToDatabase` (`apps/api/src/db/connect.ts`) so any existing database self-heals on the next boot instead of needing a one-off migration.
 
 - [ ] **Step 2: Rebuild and typecheck the API**
 

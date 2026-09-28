@@ -9,6 +9,7 @@ import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { isNotFound } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/useAuth';
 import { TelegramLoginWidget } from '@/lib/auth/TelegramLoginWidget';
+import { EmailAuthForm } from '@/lib/auth/EmailAuthForm';
 import { useCurrentQuest } from '@/lib/api/quest';
 import { EditionMark } from './components/EditionMark';
 import { RegistrationForm } from './components/RegistrationForm';
@@ -117,13 +118,18 @@ function NoSessionNote({ status }: { status: 'loading' | 'anonymous' | 'unavaila
   }
 
   return (
-    <div className="grid gap-3">
-      <p className="type-label text-amber">Sign in with Telegram</p>
-      <p className="max-w-[30rem] text-paper-dim">
-        BookQuest uses your Telegram account to identify you — that&rsquo;s how the quiz and
-        certificate find you.
-      </p>
-      <TelegramLoginWidget />
+    <div className="grid gap-6">
+      <div className="grid gap-3">
+        <p className="type-label text-amber">Sign in with Telegram</p>
+        <p className="max-w-[30rem] text-paper-dim">
+          Fastest way in — Telegram is also how the quiz and certificate find you.
+        </p>
+        <TelegramLoginWidget />
+      </div>
+      <div className="grid gap-3">
+        <p className="type-label text-amber">Or use email</p>
+        <EmailAuthForm />
+      </div>
     </div>
   );
 }

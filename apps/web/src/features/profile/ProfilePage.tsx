@@ -13,6 +13,7 @@ import { formatOrdinalEdition } from '@/lib/format';
 import { useParticipant } from './api/useParticipant';
 import { useCertificate } from './api/useCertificate';
 import { Certificate } from './components/Certificate';
+import { ConnectTelegram } from './components/ConnectTelegram';
 
 const CONTACT_LABELS: Record<Participant['contact']['method'], string> = {
   telegram: 'Telegram',
@@ -28,7 +29,7 @@ const CONTACT_LABELS: Record<Participant['contact']['method'], string> = {
  * Telegram back button.
  */
 export function ProfilePage() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const participant = useParticipant();
 
   if (participant.isPending) return <LoadingState label="Finding your number…" />;
@@ -50,6 +51,7 @@ export function ProfilePage() {
       <ProfileHeader participant={participant.data} />
       <QuestHistory />
       <CertificateSection />
+      {!user?.telegramUserId && <ConnectTelegram />}
       {/* The Mini App sheet has no address bar, so `/admin` — four screens
           behind a route guard — was otherwise impossible to reach in the
           product's primary runtime (`useAuth().isAdmin` had no consumer that
