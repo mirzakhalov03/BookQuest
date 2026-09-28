@@ -90,18 +90,21 @@ export function TelegramCodeLogin() {
   if (!challenge) {
     return (
       <form className="form" onSubmit={sendCode} noValidate>
-        <Field
-          label="Reg number, phone or @username"
-          name="identifier"
-          autoComplete="username"
-          placeholder="#0142"
-          value={identifier.value}
-          status={identifier.status}
-          message={identifier.message}
-          onChange={(event) => setIdentifier({ value: event.target.value })}
-        />
-        {/* Not Field's message slot — that's invisible in the neutral state. */}
-        <p className="form__note -mt-[1.2rem]">We'll send a code to your Telegram.</p>
+        {/* Grouped so the form's gap doesn't split the hint from its field; Field's own
+            message slot is invisible in the neutral state, so the hint can't live there. */}
+        <div className="grid">
+          <Field
+            label="Reg number, phone or @username"
+            name="identifier"
+            autoComplete="username"
+            placeholder="#0142"
+            value={identifier.value}
+            status={identifier.status}
+            message={identifier.message}
+            onChange={(event) => setIdentifier({ value: event.target.value })}
+          />
+          <p className="form__note">We'll send a code to your Telegram.</p>
+        </div>
         <Button type="submit" className="group mt-[0.3rem]" disabled={busy}>
           <span>{busy ? 'Sending…' : 'Send code'}</span>
           <ArrowIcon />
