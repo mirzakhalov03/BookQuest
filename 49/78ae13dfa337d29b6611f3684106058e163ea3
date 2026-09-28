@@ -1,0 +1,19 @@
+apps/web/src/lib/auth/authApi.ts
+  s_ef567437deda14::t_f5ee971264e043 1-7,68-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "4978ae13dfa337d29b6611f3684106058e163ea3",
+  "prompts": {},
+  "sessions": {
+    "s_ef567437deda14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "86aad487-bde6-4a31-9839-6d8b92f80ed6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
