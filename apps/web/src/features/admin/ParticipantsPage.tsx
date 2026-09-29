@@ -34,6 +34,7 @@ export function ParticipantsPage() {
       <SearchInput
         aria-label="Search participants"
         placeholder="Name, number or contact"
+        maxLength={80}
         value={searchInput}
         onChange={setSearchInput}
         className="max-w-sm"

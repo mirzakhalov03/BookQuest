@@ -103,8 +103,9 @@ export function toOptionalCount(value: string): number | null {
 
 export function isValidResourceUrl(value: string): boolean {
   try {
-    new URL(value);
-    return true;
+    // Only web links: participants tap these, so javascript: or data: must never pass.
+    const { protocol } = new URL(value);
+    return protocol === 'http:' || protocol === 'https:';
   } catch {
     return false;
   }

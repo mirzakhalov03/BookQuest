@@ -12,7 +12,9 @@ export async function sendTelegramMessage(telegramUserId: string, text: string):
     const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: telegramUserId, text })
+      body: JSON.stringify({ chat_id: telegramUserId, text }),
+      // A hung connection would stall the whole fan-out; a timeout lands in the catch as one failed send.
+      signal: AbortSignal.timeout(10_000)
     });
 
     if (!response.ok) {

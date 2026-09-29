@@ -1,9 +1,12 @@
 import { z } from 'zod';
 import { BOOK_RESOURCE_KINDS, QUEST_PHASES } from '../constants/quest.js';
 
+// `.url()` alone admits javascript: and data: links, which participants would tap. A regex because shared has no URL global in its types.
+const isHttpUrl = (value: string): boolean => /^https?:\/\//i.test(value);
+
 export const bookResourceSchema = z.object({
   label: z.string().min(1).max(80),
-  url: z.string().url(),
+  url: z.string().url().refine(isHttpUrl, 'Use a full http(s) link.'),
   kind: z.enum(BOOK_RESOURCE_KINDS)
 });
 

@@ -48,7 +48,8 @@ export async function sendBroadcast(message: string, createdBy: UserDocument): P
     );
   }
 
-  void deliver(broadcast._id, dmTargets, message);
+  // deliver() handles its own errors; this keeps any slip from becoming an unhandled rejection, which kills Node.
+  void deliver(broadcast._id, dmTargets, message).catch(() => undefined);
   return toBroadcastDto(broadcast);
 }
 
