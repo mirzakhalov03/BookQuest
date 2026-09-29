@@ -1,0 +1,97 @@
+apps/api/src/services/admin.services.ts
+  s_1cb22da4389969::t_70a911e5d9fef7 1,9-16,20-22,42-43,58-59
+apps/api/src/validators/admin.validators.ts
+  s_1cb22da4389969::t_b7ecca0863b6bc 2,13-15
+apps/web/src/components/BookCover.tsx
+  s_13c5629a4826cc::t_32c84c24d76ed5 25
+apps/web/src/components/ui/Field.tsx
+  s_1cb22da4389969::t_223c803bf327bb 3,51-54,81,129,137
+apps/web/src/components/ui/ParticipantNumeral.tsx
+  s_1cb22da4389969::t_8ec980b5538621 6-7,22,32
+apps/web/src/components/ui/SearchInput.tsx
+  s_6601433e531379::t_a78de5db7d12c8 3,16,23
+apps/web/src/components/ui/Select.tsx
+  s_1cb22da4389969::t_2bc0567b6e0911 2-3,22,34
+apps/web/src/components/ui/TelegramIcon.tsx
+  s_1cb22da4389969::t_2c0e02757abd3b 1-10
+apps/web/src/components/ui/TextArea.tsx
+  s_1cb22da4389969::t_0e7e983e125f64 2-3,21,39,44
+apps/web/src/components/ui/fieldSize.ts
+  s_1cb22da4389969::t_d93c3a9d0679b9 1-8
+apps/web/src/features/admin/DashboardPage.tsx
+  s_6601433e531379::t_0cdf1d21958d2a 1-3,8,15,39-46,60-62,66,80-84,89-94,96-97,124-137
+apps/web/src/features/admin/ParticipantsPage.tsx
+  s_1cb22da4389969::t_22d19c49f142ab 14,25-31,40-51,54-65,86-91,104-109
+apps/web/src/features/admin/api/adminKeys.ts
+  s_1cb22da4389969::t_400279dd8665db 16
+apps/web/src/features/admin/api/useAdminParticipants.ts
+  s_1cb22da4389969::t_4f4d30cd3f57cb 11-20,22,24-29
+apps/web/src/features/admin/components/AdminPageHeader.tsx
+  s_1cb22da4389969::t_bc33c03258b5a8 4-6,10-15,19-22
+apps/web/src/features/admin/components/ContactLink.tsx
+  s_1cb22da4389969::t_46e319880449b6 1,3,41-45
+apps/web/src/features/admin/components/ParticipantControls.tsx
+  s_1cb22da4389969::t_692d03c372fefd 1-74
+apps/web/src/features/admin/components/ParticipantsTable.tsx
+  s_1cb22da4389969::t_cb5170ec28e1ce 4,26-32,52,58
+apps/web/src/features/admin/quest/QuestEditorPage.tsx
+  s_1cb22da4389969::t_3fc46d54c838af 39-44,81-83,101,103-107,111-124,132-136
+apps/web/src/features/admin/quest/components/BookFieldsSection.tsx
+  s_1cb22da4389969::t_e9d1651b87808c 35-45
+apps/web/src/features/admin/quest/components/CoverPicker.tsx
+  s_1cb22da4389969::t_c0399b7b7b4675 1-2,5,8,19-20,25-26,32-38,43-44,46-49,64-67,73-76,90-132,134-136,139-147,149-156,160-179
+apps/web/src/features/admin/quest/components/QuestFormFields.tsx
+  s_1cb22da4389969::t_e1dcb238812162 1,3,7,22-26,28,31,33-50,52,55-68
+apps/web/src/features/admin/quest/components/SectionTabs.tsx
+  s_1cb22da4389969::t_517b4aa0858ecb 1-2,4-5,7,10-16,20-22,24-25,28-62,64-76
+apps/web/src/layouts/AdminLayout.tsx
+  s_1cb22da4389969::t_1297fc495901f7 3,5,62-68,70-73,112-116
+apps/web/src/lib/format.ts
+  s_1cb22da4389969::t_0b730360ca4cb3 29-34,50-55
+apps/web/src/styles/base.css
+  s_6601433e531379::t_0bdf88e638d5b7 41
+apps/web/src/styles/stage.css
+  s_13c5629a4826cc::t_a521fd0224b916 25-26,32-33,274-276,284-286,290-293,296-301,304,349-351,353-354,367,380-381,390-391,431-432,714
+docs/TODO.md
+  s_8c562a2bc886b4::t_35d443fdebaebd 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "b50c4c14af030ebb5bbacf7883082c6503532d35",
+  "prompts": {},
+  "sessions": {
+    "s_13c5629a4826cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af0a02e0-29af-4155-a6b1-e4b4c3f383ed",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_1cb22da4389969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "37c642f6-99cc-4383-b103-2c55dfbe5a51",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_6601433e531379": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "27e1f34b-c73c-4771-b24b-d21ea33eb9ff",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_8c562a2bc886b4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b3be0bb1-cde1-4729-80c4-eb6b048dc9a2",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
