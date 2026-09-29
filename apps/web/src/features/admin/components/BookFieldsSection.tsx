@@ -5,7 +5,9 @@ import { CoverPicker } from './CoverPicker';
 
 interface BookFieldsSectionProps {
   value: QuestFormState['book'];
-  onChange: (value: QuestFormState['book']) => void;
+  /** Only the changed keys — the parent merges them into its latest state, so an async
+   * update (a cover finishing upload) never overwrites edits made meanwhile. */
+  onPatch: (patch: Partial<QuestFormState['book']>) => void;
   /** Server `error.fields`, dotted paths — `book.title`, `book.pages`, etc.
    * The whole map is handed to every section rather than sliced per-section:
    * each one only ever reads the few keys it owns. */
@@ -18,9 +20,7 @@ interface BookFieldsSectionProps {
  * Title, author, pages, cover and description. The cover uploads on pick and
  * lands here as a URL, so the save path treats it like any other text field.
  */
-export function BookFieldsSection({ value, onChange, errors, onCoverUploadingChange }: BookFieldsSectionProps) {
-  const set = (patch: Partial<QuestFormState['book']>) => onChange({ ...value, ...patch });
-
+export function BookFieldsSection({ value, onPatch, errors, onCoverUploadingChange }: BookFieldsSectionProps) {
   return (
     <section className="flex flex-col gap-4">
       <p className="type-label">Book</p>
@@ -30,7 +30,7 @@ export function BookFieldsSection({ value, onChange, errors, onCoverUploadingCha
         value={value.title}
         status={errors['book.title'] ? 'bad' : undefined}
         message={errors['book.title']}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => set({ title: event.target.value })}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => onPatch({ title: event.target.value })}
       />
 
       <Field
@@ -38,7 +38,7 @@ export function BookFieldsSection({ value, onChange, errors, onCoverUploadingCha
         value={value.author}
         status={errors['book.author'] ? 'bad' : undefined}
         message={errors['book.author']}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => set({ author: event.target.value })}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => onPatch({ author: event.target.value })}
       />
 
       <Field
@@ -48,13 +48,13 @@ export function BookFieldsSection({ value, onChange, errors, onCoverUploadingCha
         value={value.pages}
         status={errors['book.pages'] ? 'bad' : undefined}
         message={errors['book.pages']}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => set({ pages: event.target.value })}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => onPatch({ pages: event.target.value })}
       />
 
       <CoverPicker
         value={value.coverUrl}
         error={errors['book.coverUrl']}
-        onChange={(coverUrl) => set({ coverUrl })}
+        onChange={(coverUrl) => onPatch({ coverUrl })}
         onUploadingChange={onCoverUploadingChange}
       />
 
@@ -64,7 +64,7 @@ export function BookFieldsSection({ value, onChange, errors, onCoverUploadingCha
           value={value.description}
           rows={4}
           placeholder="A shepherd boy leaves everything he knows…"
-          onChange={(event) => set({ description: event.target.value })}
+          onChange={(event) => onPatch({ description: event.target.value })}
           className="w-full resize-y border-0 border-b border-b-[color:var(--rule-strong)] bg-transparent px-[0.15rem] py-2 text-base text-paper placeholder:text-taupe focus:border-b-[color:var(--color-ember)] focus:outline-none"
         />
         <p className="min-h-[1.15rem] text-sm text-[#E9976A]">{errors['book.description']}</p>

@@ -117,7 +117,7 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
         <BookFieldsSection
           value={form.book}
           errors={fieldErrors}
-          onChange={(book) => setForm((prev) => ({ ...prev, book }))}
+          onPatch={(patch) => setForm((prev) => ({ ...prev, book: { ...prev.book, ...patch } }))}
           onCoverUploadingChange={setIsCoverUploading}
         />
 
