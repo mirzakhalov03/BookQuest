@@ -8,11 +8,25 @@ import { adminKeys } from './adminKeys';
  * list — "Load more" works the same on a phone as a laptop. `keepPreviousData`
  * keeps the old rows up while a new search loads.
  */
-export function useAdminParticipants({ q, limit }: { q: string; limit: number }) {
+export interface ParticipantFilters {
+  q: string;
+  limit: number;
+  sort: 'number' | 'name' | 'registered';
+  order: 'asc' | 'desc';
+}
+
+export function useAdminParticipants(filters: ParticipantFilters) {
+  const { q, limit, sort, order } = filters;
+
   return useInfiniteQuery({
-    queryKey: adminKeys.participants({ q, limit }),
+    queryKey: adminKeys.participants(filters),
     queryFn: ({ pageParam }) => {
-      const params = new URLSearchParams({ page: String(pageParam), limit: String(limit) });
+      const params = new URLSearchParams({
+        page: String(pageParam),
+        limit: String(limit),
+        sort,
+        order
+      });
       if (q) params.set('q', q);
       return api.get<Paginated<Participant>>(`/admin/participants?${params.toString()}`);
     },

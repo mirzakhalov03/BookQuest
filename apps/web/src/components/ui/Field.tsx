@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useId, useState } from 'react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
+import { useFieldSize } from './fieldSize';
 
 export type FieldStatus = 'good' | 'bad';
 
@@ -47,6 +48,10 @@ export function fieldLineClass(status?: FieldStatus): string {
   return INPUT_BORDER[status ?? 'neutral'];
 }
 
+/** The recessed well every input sits in: darker than the page, a hairline border, a soft inner shadow. */
+export const fieldSurfaceClass =
+  'rounded-box border border-[color:var(--rule)] bg-void/40 shadow-[inset_0_1px_3px_rgba(0,0,0,0.55)] hover:border-[color:var(--rule-strong)]';
+
 /** Server or schema message → the two props every input takes; blank means neutral. */
 export function statusFor(message?: string): { status: FieldStatus | undefined; message: string | undefined } {
   return { status: message ? 'bad' : undefined, message };
@@ -73,6 +78,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
   ref
 ) {
   const autoId = useId();
+  const compact = useFieldSize() === 'compact';
   const fieldId = id ?? autoId;
   const msgId = `${fieldId}-msg`;
 
@@ -120,7 +126,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
         id={fieldId}
         aria-describedby={msgId}
         aria-invalid={status === 'bad' || undefined}
-        className={`h-[3.25rem] w-full border-0 border-b bg-transparent px-[0.15rem] text-[1.25rem] font-medium text-paper placeholder:text-base placeholder:font-normal placeholder:text-taupe transition-[border-color,background-color] duration-[180ms] ease-linear focus:bg-[linear-gradient(180deg,transparent_60%,rgba(226,99,42,0.07))] focus:outline-none ${borderClass} ${
+        className={`w-full px-3 font-medium ${compact ? 'h-11 text-base' : 'h-[3.25rem] text-[1.25rem]'} text-paper placeholder:text-base placeholder:font-normal placeholder:text-taupe transition-[border-color,box-shadow] duration-[180ms] ease-linear focus:outline-none ${fieldSurfaceClass} ${borderClass} ${
           isShaking ? 'animate-[nudge_320ms_var(--ease-soft)]' : ''
         }`}
       />
@@ -128,7 +134,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
       <p
         id={msgId}
         role="status"
-        className={`m-0 min-h-[1.15rem] text-sm leading-[1.35] [transition:opacity_180ms_linear,transform_180ms_var(--ease-out-quest)] ${msgClass}`}
+        className={`m-0 text-sm ${compact ? 'empty:hidden' : 'min-h-[1.15rem]'} leading-[1.35] [transition:opacity_180ms_linear,transform_180ms_var(--ease-out-quest)] ${msgClass}`}
       >
         {message}
       </p>

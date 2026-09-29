@@ -1,5 +1,6 @@
 import { forwardRef, useId, type ReactNode, type TextareaHTMLAttributes } from 'react';
-import { fieldLineClass, type FieldStatus } from './Field';
+import { useFieldSize } from './fieldSize';
+import { fieldLineClass, fieldSurfaceClass, type FieldStatus } from './Field';
 
 export interface TextAreaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'id'> {
   id?: string;
@@ -17,6 +18,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
   ref
 ) {
   const autoId = useId();
+  const compact = useFieldSize() === 'compact';
   const fieldId = id ?? autoId;
   const msgId = `${fieldId}-msg`;
 
@@ -34,12 +36,12 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
         id={fieldId}
         aria-describedby={msgId}
         aria-invalid={status === 'bad' || undefined}
-        className={`w-full resize-y border-0 border-b bg-transparent px-[0.15rem] py-2 text-base text-paper placeholder:text-taupe focus:outline-none ${fieldLineClass(status)}`}
+        className={`w-full resize-y px-3 py-2.5 text-base text-paper placeholder:text-taupe transition-[border-color,box-shadow] duration-[180ms] focus:outline-none ${fieldSurfaceClass} ${fieldLineClass(status)}`}
       />
       <p
         id={msgId}
         role="status"
-        className={`m-0 min-h-[1.15rem] text-sm leading-[1.35] ${status === 'bad' ? 'text-error' : 'text-taupe'}`}
+        className={`m-0 text-sm ${compact ? 'empty:hidden' : 'min-h-[1.15rem]'} leading-[1.35] ${status === 'bad' ? 'text-error' : 'text-taupe'}`}
       >
         {message}
       </p>

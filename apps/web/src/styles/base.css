@@ -38,7 +38,7 @@ body {
   overflow-x: hidden;
 }
 
-:focus-visible {
+:focus-visible:not(input, textarea, select) {
   outline: 2px solid var(--color-amber);
   outline-offset: 3px;
   border-radius: var(--radius-chip);

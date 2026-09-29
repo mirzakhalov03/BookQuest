@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { ArrowLeft, LayoutDashboard, Users, BookOpen, BarChart3, Megaphone } from 'lucide-react';
+import { Home, LayoutDashboard, Users, BookOpen, BarChart3, Megaphone } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router';
+import { FieldSizeContext } from '@/components/ui/fieldSize';
 
 interface Tab {
   to: string;
@@ -58,13 +59,18 @@ export function AdminLayout() {
 
 function AdminNav() {
   return (
-    <header className="flex items-baseline gap-3 border-b border-[color:var(--rule)] px-4 pt-[calc(1rem+var(--safe-t))] pb-4 sm:px-8">
-      <Link to="/" className="flex items-center gap-1 type-label text-taupe hover:text-paper-dim">
-        <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
-        Back to the stage
+    <header className="flex items-center justify-between gap-3 border-b border-[color:var(--rule)] px-4 pt-[calc(1rem+var(--safe-t))] pb-4 sm:px-8">
+      <Link
+        to="/"
+        aria-label="Back to the stage"
+        className="-ml-2 flex h-9 w-9 items-center justify-center rounded-full text-taupe hover:text-paper-dim"
+      >
+        <Home className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
       </Link>
-      <span className="type-display text-lg text-paper">BookQuest</span>
-      <span className="type-label">Admin</span>
+      <div className="flex flex-col items-end leading-tight">
+        <span className="type-display text-lg text-paper">BookQuest</span>
+        <span className="type-label">Admin</span>
+      </div>
     </header>
   );
 }
@@ -103,5 +109,9 @@ interface AdminScreenProps {
  * reserve space for it.
  */
 export function AdminScreen({ children, className = '' }: AdminScreenProps) {
-  return <div className={`admin-screen flex flex-1 flex-col gap-6 ${className}`}>{children}</div>;
+  return (
+    <FieldSizeContext.Provider value="compact">
+      <div className={`admin-screen flex flex-1 flex-col gap-6 ${className}`}>{children}</div>
+    </FieldSizeContext.Provider>
+  );
 }

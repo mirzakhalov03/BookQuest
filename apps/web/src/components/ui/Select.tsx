@@ -1,5 +1,6 @@
 import { useId, type SelectHTMLAttributes } from 'react';
-import { fieldLineClass } from './Field';
+import { useFieldSize } from './fieldSize';
+import { fieldLineClass, fieldSurfaceClass } from './Field';
 
 export interface SelectOption<V extends string> {
   value: V;
@@ -18,6 +19,7 @@ interface SelectProps<V extends string>
 /** A native select in `Field`'s clothes; native keeps the phone's own picker. */
 export function Select<V extends string>({ label, value, options, onChange, className = '', ...props }: SelectProps<V>) {
   const id = useId();
+  const compact = useFieldSize() === 'compact';
 
   return (
     <div className={`grid gap-[0.4rem] ${className}`}>
@@ -29,7 +31,7 @@ export function Select<V extends string>({ label, value, options, onChange, clas
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value as V)}
-        className={`h-[3.25rem] w-full border-0 border-b bg-transparent px-1 text-base text-paper focus:outline-none ${fieldLineClass()}`}
+        className={`${compact ? 'h-11' : 'h-[3.25rem]'} w-full px-3 text-base text-paper transition-[border-color,box-shadow] duration-[180ms] focus:outline-none ${fieldSurfaceClass} ${fieldLineClass()}`}
       >
         {options.map((option) => (
           <option key={option.value} value={option.value} className="bg-ink text-paper">

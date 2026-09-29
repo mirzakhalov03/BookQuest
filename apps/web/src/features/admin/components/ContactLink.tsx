@@ -1,5 +1,6 @@
-import { Copy } from 'lucide-react';
+import { Copy, Phone } from 'lucide-react';
 import type { Participant } from '@bookquest/shared';
+import { TelegramIcon } from '@/components/ui/TelegramIcon';
 import { openTelegramLink } from '@/lib/telegram';
 import { useUiStore } from '@/stores/ui.store';
 
@@ -37,7 +38,11 @@ export function ContactLink({ contact }: { contact: Contact }) {
         }}
         className="min-w-0 truncate text-paper-dim underline decoration-[color:var(--rule-strong)] underline-offset-4 hover:text-paper"
       >
-        <span className="type-label mr-1">{contact.method}</span>
+        {contact.method === 'telegram' ? (
+          <TelegramIcon aria-label="Telegram" role="img" className="mr-1.5 inline-block h-4 w-4 -translate-y-px" />
+        ) : (
+          <Phone aria-label="Phone" role="img" className="mr-1.5 inline-block h-4 w-4 -translate-y-px" />
+        )}
         {contact.value}
       </a>
       <button

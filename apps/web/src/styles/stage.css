@@ -22,12 +22,15 @@
 :root {
   --book-w: clamp(138px, 43vw, 190px);
   --book-h: calc(var(--book-w) * 1.47);
-  --book-d: clamp(24px, 6.5vw, 32px);
+  /* 200-page hardcover: ~22mm thick on a ~152mm-wide cover, so ~0.145 of the width. */
+  --book-d: calc(var(--book-w) * 0.145);
 
   /* TRAP 1. The tilt is POSITIVE. It turns the cover to the right, which
      brings the spine into view. Negate it and you expose the fore-edge,
      hide the spine, and the book flattens into a rectangle. */
   --book-tilt: 27deg;
+  /* Slight backward lean, as in the original. */
+  --book-pitch: 4deg;
 }
 
 /* The stage's parts fade up in sequence once the screen settles. The route
@@ -268,7 +271,9 @@
   z-index: 2;
   perspective: 1500px;
   perspective-origin: 50% 40%;
-  animation: float 8s ease-in-out 1.5s infinite;
+  animation:
+    float 8s ease-in-out 1.5s infinite,
+    book-fade 1.5s var(--ease-out-quest) 120ms both;
 }
 
 .book {
@@ -276,19 +281,27 @@
   width: var(--book-w);
   height: var(--book-h);
   transform-style: preserve-3d;
-  transform: rotateY(var(--book-tilt)) rotateX(4deg);
+  user-select: none;
+  -webkit-user-select: none;
+  transform: rotateY(var(--book-tilt)) rotateX(var(--book-pitch));
   animation: book-enter 1.5s var(--ease-out-quest) 120ms both;
 }
 /* Swings in from nearly edge-on, so the first thing you see is that it is
-   an object with depth. */
-@keyframes book-enter {
+   an object with depth. No `opacity` in here: an animated (or filled)
+   opacity on a `preserve-3d` element flattens it, and the sides vanish once
+   the swing ends. The fade lives on `.bookwrap` via `book-fade`. */
+@keyframes book-fade {
   from {
     opacity: 0;
-    transform: rotateY(64deg) rotateX(4deg) scale(0.9);
+  }
+}
+
+@keyframes book-enter {
+  from {
+    transform: rotateY(64deg) rotateX(var(--book-pitch)) scale(0.9);
   }
   to {
-    opacity: 1;
-    transform: rotateY(var(--book-tilt)) rotateX(4deg) scale(1);
+    transform: rotateY(var(--book-tilt)) rotateX(var(--book-pitch)) scale(1);
   }
 }
 
@@ -333,12 +346,12 @@
   background:
     linear-gradient(
       90deg,
-      rgba(0, 0, 0, 0.45) 0%,
-      rgba(255, 205, 150, 0.1) 55%,
-      rgba(255, 214, 164, 0.2) 100%
+      rgba(0, 0, 0, 0.16) 0%,
+      transparent 35%,
+      rgba(255, 255, 255, 0.5) 100%
     ),
-    linear-gradient(180deg, #a33f1d, #78290f 58%, #571b0a);
-  box-shadow: inset -1px 0 0 rgba(255, 214, 164, 0.28);
+    linear-gradient(180deg, #fbf8f2, #efe9de);
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -351,7 +364,7 @@
   font-size: calc(var(--book-d) * 0.26);
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: rgba(240, 220, 190, 0.82);
+  color: rgba(40, 30, 22, 0.75);
   white-space: nowrap;
 }
 
@@ -364,8 +377,8 @@
   transform-origin: right center;
   transform: rotateY(90deg) translateX(calc(var(--book-d) / 2));
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.34), transparent 40%),
-    repeating-linear-gradient(90deg, #d8cbb6 0 1px, #b9a98f 1px 2px, #c9bca4 2px 3px);
+    linear-gradient(90deg, rgba(0, 0, 0, 0.22), transparent 40%),
+    repeating-linear-gradient(90deg, #fbf9f5 0 1px, #e6e1d8 1px 2px);
 }
 
 .book__top {
@@ -374,8 +387,8 @@
   transform-origin: center top;
   transform: rotateX(90deg) translateY(calc(var(--book-d) / -2));
   background:
-    linear-gradient(180deg, rgba(255, 220, 170, 0.28), transparent 70%),
-    repeating-linear-gradient(180deg, #dccfba 0 1px, #bcac92 1px 2px, #cdc0a8 2px 3px);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 70%),
+    repeating-linear-gradient(180deg, #fdfbf8 0 1px, #e9e4db 1px 2px);
 }
 
 /* Not ported — the prototype never shows a cover outside the 3D stage. A flat
@@ -415,6 +428,8 @@
    illustration does, so the two are interchangeable from the face's point of
    view. */
 .cover__image {
+  -webkit-user-drag: none;
+  user-select: none;
   position: absolute;
   inset: 0;
   width: 100%;
@@ -696,10 +711,9 @@
 /* ── Desktop composition ──────────────────────────────────────────── */
 
 @media (min-width: 900px) {
-  /* The whole desktop book is these three lines — see the note at the top. */
+  /* The whole desktop book is these two lines — see the note at the top. */
   :root {
     --book-w: clamp(210px, 16vw, 262px);
-    --book-d: clamp(36px, 2.9vw, 46px);
     --book-tilt: 29deg; /* still positive — see TRAP 1 */
   }
 

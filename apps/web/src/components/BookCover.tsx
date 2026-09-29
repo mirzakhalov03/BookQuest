@@ -22,7 +22,7 @@ export function BookCover({ title, author, coverUrl }: BookCoverProps) {
   if (coverUrl) {
     return (
       <div className="cover">
-        <img className="cover__image" src={coverUrl} alt={`${title} cover`} />
+        <img className="cover__image" draggable={false} src={coverUrl} alt={`${title} cover`} />
         <div className="cover__sheen" />
       </div>
     );

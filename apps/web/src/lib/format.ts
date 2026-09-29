@@ -26,6 +26,12 @@ const TIME = new Intl.DateTimeFormat('en-GB', {
   hourCycle: 'h23'
 });
 
+const COMPACT_DATE = new Intl.DateTimeFormat('en-GB', {
+  day: '2-digit',
+  month: '2-digit',
+  year: '2-digit'
+});
+
 const COUNT = new Intl.NumberFormat('en-GB');
 const SHORT_DATE = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
 
@@ -39,6 +45,12 @@ const SHORT_DATE = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'sh
 export function formatLongDate(value: string | Date): string {
   const date = typeof value === 'string' ? new Date(value) : value;
   return `${DATE.format(date)}, ${TIME.format(date)}`;
+}
+
+/** "27/09/26, 22:16" — a timestamp in a dense list, where the month name costs too much width. */
+export function formatCompactDate(value: string | Date): string {
+  const date = typeof value === 'string' ? new Date(value) : value;
+  return `${COMPACT_DATE.format(date)}, ${TIME.format(date)}`;
 }
 
 /** "5 Apr" — a date inside a one-line summary, where year and time are noise. */

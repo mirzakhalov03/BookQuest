@@ -1,7 +1,7 @@
 import type { Participant } from '@bookquest/shared';
 import { ParticipantNumeral } from '@/components/ui/ParticipantNumeral';
 import { ContactLink } from './ContactLink';
-import { formatLongDate } from '@/lib/format';
+import { formatCompactDate } from '@/lib/format';
 
 /**
  * Two renderings of the same rows, not one table forced to behave at every
@@ -23,11 +23,14 @@ export function ParticipantsTable({ participants }: { participants: Participant[
             className="flex flex-col gap-2 rounded-box border border-[color:var(--rule)] px-3 py-3"
           >
             <div className="flex items-baseline justify-between gap-3">
-              <ParticipantNumeral value={participant.number} className="type-display text-lg text-gold" />
-              <span className="text-sm text-taupe-dim">{formatLongDate(participant.registeredAt)}</span>
+              <ParticipantNumeral hash value={participant.number} className="type-display text-lg text-gold" />
+              <span className="text-sm text-taupe-dim">{formatCompactDate(participant.registeredAt)}</span>
             </div>
-            <p className="text-paper">{participant.fullName}</p>
-            <ContactLink contact={participant.contact} />
+            {/* Shares a line when it fits; otherwise the contact wraps below, still right-aligned. */}
+            <div className="flex flex-wrap items-center justify-between gap-x-3">
+              <p className="text-paper">{participant.fullName}</p>
+              <ContactLink contact={participant.contact} />
+            </div>
           </li>
         ))}
       </ul>
@@ -46,13 +49,13 @@ export function ParticipantsTable({ participants }: { participants: Participant[
             {participants.map((participant) => (
               <tr key={participant.id} className="border-b border-[color:var(--rule)]">
                 <td className="py-2 pr-3">
-                  <ParticipantNumeral value={participant.number} className="type-display text-base text-gold" />
+                  <ParticipantNumeral hash value={participant.number} className="type-display text-base text-gold" />
                 </td>
                 <td className="py-2 pr-3 text-paper">{participant.fullName}</td>
                 <td className="py-2 pr-3 text-paper-dim">
                   <ContactLink contact={participant.contact} />
                 </td>
-                <td className="py-2 pr-3 text-taupe-dim">{formatLongDate(participant.registeredAt)}</td>
+                <td className="py-2 pr-3 text-taupe-dim">{formatCompactDate(participant.registeredAt)}</td>
               </tr>
             ))}
           </tbody>

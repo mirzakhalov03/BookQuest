@@ -22,14 +22,6 @@ export function BookFieldsSection({ onCoverUploadingChange }: BookFieldsSectionP
     <>
       <Field label="Title" {...register('book.title')} {...statusFor(e?.title?.message)} />
       <Field label="Author" {...register('book.author')} {...statusFor(e?.author?.message)} />
-      <Field
-        label="Pages"
-        type="number"
-        inputMode="numeric"
-        min={1}
-        {...register('book.pages')}
-        {...statusFor(e?.pages?.message)}
-      />
       <Controller
         control={control}
         name="book.coverUrl"
@@ -40,6 +32,17 @@ export function BookFieldsSection({ onCoverUploadingChange }: BookFieldsSectionP
             onChange={field.onChange}
             error={fieldState.error?.message}
             onUploadingChange={onCoverUploadingChange}
+            aside={
+              <Field
+                label="Pages"
+                className="max-w-32"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                {...register('book.pages')}
+                {...statusFor(e?.pages?.message)}
+              />
+            }
           />
         )}
       />

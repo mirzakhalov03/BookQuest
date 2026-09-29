@@ -1,4 +1,4 @@
-import type { AdminStats, Paginated, Participant } from '@bookquest/shared';
+import type { AdminStats, ContactMethod, Paginated, Participant } from '@bookquest/shared';
 import { ParticipantModel } from '../models/participant.model.js';
 import { ResultModel } from '../models/result.model.js';
 import { QuestModel } from '../models/quest.model.js';
@@ -6,9 +6,20 @@ import { ApiError } from '../utils/api-error.js';
 import { requireCurrentQuestDocument, resolvePhase } from './quest.services.js';
 import { toParticipantDto } from './participant.services.js';
 
+const SORT_FIELDS = { number: 'number', name: 'fullName', registered: 'createdAt' } as const;
+
+/** `number` is unique per quest, so as the tiebreaker it keeps pages stable when names or dates collide. */
+function sortSpec({ sort, order }: Pick<ParticipantQuery, 'sort' | 'order'>): Record<string, 1 | -1> {
+  const direction = order === 'asc' ? 1 : -1;
+  return sort === 'number' ? { number: direction } : { [SORT_FIELDS[sort]]: direction, number: 1 };
+}
+
 export interface ParticipantQuery {
   q?: string | undefined;
   questId?: string | undefined;
+  contactMethod?: ContactMethod | undefined;
+  sort: 'number' | 'name' | 'registered';
+  order: 'asc' | 'desc';
   page: number;
   limit: number;
 }
@@ -28,6 +39,8 @@ export async function listParticipants(query: ParticipantQuery): Promise<Paginat
   const filter: Record<string, unknown> = { quest: quest._id };
   const term = query.q?.trim();
 
+  if (query.contactMethod) filter['contact.method'] = query.contactMethod;
+
   if (term) {
     const asNumber = Number(term);
     const digits = term.replace(/\D/g, '');
@@ -42,7 +55,8 @@ export async function listParticipants(query: ParticipantQuery): Promise<Paginat
 
   const [participants, total] = await Promise.all([
     ParticipantModel.find(filter)
-      .sort({ number: 1 })
+      .sort(sortSpec(query))
+      .collation({ locale: 'en', strength: 2 })
       .skip((query.page - 1) * query.limit)
       .limit(query.limit),
     ParticipantModel.countDocuments(filter)

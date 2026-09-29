@@ -1,9 +1,11 @@
-import { useEffect, useId, useRef, useState, type ChangeEvent } from 'react';
-import { ImagePlus } from 'lucide-react';
+import { useEffect, useId, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
+import { Eye, ImagePlus, RefreshCw, Trash2, type LucideIcon } from 'lucide-react';
 import { COVER_CONTENT_TYPES, COVER_MAX_BYTES, COVER_MESSAGES } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
+import { Sheet } from '@/components/ui/Sheet';
 import { Spinner } from '@/components/ui/Spinner';
 import { ApiRequestError } from '@/lib/api/client';
+import { useUiStore } from '@/stores/ui.store';
 import { useUploadCover } from '../../api/useUploadCover';
 
 interface CoverPickerProps {
@@ -14,26 +16,37 @@ interface CoverPickerProps {
   error?: string;
   /** Must be stable (a state setter) — it runs in an effect. */
   onUploadingChange: (uploading: boolean) => void;
+  /** Sits beside the image, top-aligned — for a short field that doesn't need its own row. */
+  aside?: ReactNode;
 }
-
-const HINT = 'JPEG, PNG or WebP · up to 5MB · leave empty for the drawn cover';
 
 // Same rules the API enforces, checked first so a 12MB photo fails instantly instead of after the upload.
 function checkFile(file: File): string | null {
-  if (!(COVER_CONTENT_TYPES as readonly string[]).includes(file.type)) return COVER_MESSAGES.wrongType;
+  if (!(COVER_CONTENT_TYPES as readonly string[]).includes(file.type))
+    return COVER_MESSAGES.wrongType;
   if (file.size > COVER_MAX_BYTES) return COVER_MESSAGES.tooLarge;
   return null;
 }
 
 /** Uploads on pick; the quest save then sends the returned URL like any other field. */
-export function CoverPicker({ value, onChange, error, onUploadingChange }: CoverPickerProps) {
+export function CoverPicker({
+  value,
+  onChange,
+  error,
+  onUploadingChange,
+  aside
+}: CoverPickerProps) {
   const inputId = useId();
-  const msgId = `${inputId}-msg`;
   const inputRef = useRef<HTMLInputElement>(null);
   const upload = useUploadCover();
   const [preview, setPreview] = useState<string | null>(null);
-  const [localError, setLocalError] = useState<string | null>(null);
+  const showToast = useUiStore((state) => state.showToast);
+  const [isViewing, setIsViewing] = useState(false);
 
+  // The server's verdict on the saved cover arrives as a field error; surface it like the rest.
+  useEffect(() => {
+    if (error) showToast(error);
+  }, [error, showToast]);
   useEffect(() => onUploadingChange(upload.isPending), [upload.isPending, onUploadingChange]);
   useEffect(
     () => () => {
@@ -48,86 +61,119 @@ export function CoverPicker({ value, onChange, error, onUploadingChange }: Cover
     if (!file) return;
 
     const problem = checkFile(file);
-    setLocalError(problem);
-    if (problem) return;
+    if (problem) {
+      showToast(problem);
+      return;
+    }
 
     setPreview(URL.createObjectURL(file));
     upload.mutate(file, {
       onSuccess: ({ url }) => onChange(url),
       onError: (err) =>
-        setLocalError(
-          err instanceof ApiRequestError ? (err.fields.file ?? err.message) : 'Upload failed. Try again.'
+        showToast(
+          err instanceof ApiRequestError
+            ? (err.fields.file ?? err.message)
+            : 'Upload failed. Try again.'
         ),
       onSettled: () => setPreview(null)
     });
   }
 
   function handleRemove() {
-    setLocalError(null);
     onChange('');
   }
 
   const shown = preview ?? (value || null);
-  const message = localError ?? error ?? HINT;
-  const isBad = Boolean(localError ?? error);
 
   return (
     <div className="grid gap-[0.4rem]">
-      <span className="type-label">Cover</span>
-
-      <div className="flex items-end gap-5">
-        <label
-          htmlFor={inputId}
-          className="relative grid aspect-[2/3] w-32 cursor-pointer place-items-center overflow-hidden rounded-box border border-dashed border-[color:var(--rule-strong)] text-taupe transition-colors duration-150 hover:border-[color:var(--color-ember)] hover:text-paper-dim focus-within:border-[color:var(--color-ember)]"
-        >
-          {shown ? (
-            <img
-              src={shown}
-              alt="Book cover"
-              className={`h-full w-full object-cover transition-opacity ${upload.isPending ? 'opacity-50' : ''}`}
+      <div className="flex items-start gap-5">
+        <div className="grid shrink-0 gap-[0.4rem]">
+          <span className="type-label">Cover</span>
+          <label
+            htmlFor={inputId}
+            className={`group relative grid aspect-[2/3] w-32 place-items-center overflow-hidden rounded-box border border-dashed border-[color:var(--rule-strong)] text-taupe transition-colors duration-150 focus-within:border-[color:var(--color-ember)] cursor-pointer hover:border-[color:var(--color-ember)] hover:text-paper-dim`}
+          >
+            {shown ? (
+              <img
+                src={shown}
+                alt="Book cover"
+                className={`h-full w-full object-cover transition-opacity ${upload.isPending ? 'opacity-50' : ''}`}
+              />
+            ) : (
+              <span className="flex flex-col items-center gap-2 px-3 text-center text-sm">
+                <ImagePlus aria-hidden className="h-6 w-6" />
+                Choose a cover image
+              </span>
+            )}
+            {upload.isPending && (
+              <span className="absolute inset-0 grid place-items-center">
+                <Spinner size="md" />
+              </span>
+            )}
+            {value && !upload.isPending && (
+              <span className="absolute inset-x-0 bottom-0 flex justify-center gap-2 bg-gradient-to-t from-black/75 to-transparent px-2 pb-2 pt-6">
+                <OverlayButton
+                  label="Replace cover"
+                  icon={RefreshCw}
+                  onClick={() => inputRef.current?.click()}
+                />
+                <OverlayButton label="View cover" icon={Eye} onClick={() => setIsViewing(true)} />
+                <OverlayButton label="Remove cover" icon={Trash2} onClick={handleRemove} />
+              </span>
+            )}
+            <input
+              ref={inputRef}
+              id={inputId}
+              type="file"
+              accept={COVER_CONTENT_TYPES.join(',')}
+              disabled={upload.isPending}
+              onChange={handleChange}
+              className="sr-only"
             />
-          ) : (
-            <span className="flex flex-col items-center gap-2 px-3 text-center text-sm">
-              <ImagePlus aria-hidden className="h-6 w-6" />
-              Choose a cover image
-            </span>
-          )}
-          {upload.isPending && (
-            <span className="absolute inset-0 grid place-items-center">
-              <Spinner size="md" />
-            </span>
-          )}
-          <input
-            ref={inputRef}
-            id={inputId}
-            type="file"
-            accept={COVER_CONTENT_TYPES.join(',')}
-            disabled={upload.isPending}
-            aria-describedby={msgId}
-            onChange={handleChange}
-            className="sr-only"
-          />
-        </label>
-
-        {value && !upload.isPending && (
-          <div className="flex flex-col">
-            <Button type="button" variant="quiet" onClick={() => inputRef.current?.click()}>
-              Replace
-            </Button>
-            <Button type="button" variant="quiet" onClick={handleRemove}>
-              Remove
-            </Button>
-          </div>
-        )}
+          </label>
+        </div>
+        {aside && <div className="min-w-0 flex-1">{aside}</div>}
       </div>
 
-      <p
-        id={msgId}
-        role="status"
-        className={`m-0 min-h-[1.15rem] text-sm leading-[1.35] ${isBad ? 'text-error' : 'text-taupe'}`}
+      <Sheet
+        open={isViewing}
+        onClose={() => setIsViewing(false)}
+        title="Cover"
+        actions={
+          <Button type="button" variant="quiet" onClick={() => setIsViewing(false)}>
+            Close
+          </Button>
+        }
       >
-        {message}
-      </p>
+        {value && (
+          <img
+            src={value}
+            alt="Book cover"
+            className="mx-auto max-h-[65vh] w-auto rounded-box object-contain"
+          />
+        )}
+      </Sheet>
     </div>
+  );
+}
+
+interface OverlayButtonProps {
+  label: string;
+  icon: LucideIcon;
+  onClick: () => void;
+}
+
+function OverlayButton({ label, icon: Icon, onClick }: OverlayButtonProps) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      className="grid h-9 w-9 place-items-center rounded-full bg-black/60 text-paper transition-colors hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-ember)]"
+    >
+      <Icon aria-hidden className="h-4 w-4" />
+    </button>
   );
 }

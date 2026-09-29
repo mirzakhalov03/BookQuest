@@ -3,6 +3,8 @@ import { formatParticipantNumber } from '@/lib/format';
 interface ParticipantNumeralProps {
   value: number;
   className?: string;
+  /** Prefix with `#` where the number needs reading as an ID, e.g. the admin roster. */
+  hash?: boolean;
 }
 
 /**
@@ -17,7 +19,7 @@ interface ParticipantNumeralProps {
  * feature (spec §4 rule 1) — both need the same fixed-width numeral, neither
  * owns it.
  */
-export function ParticipantNumeral({ value, className = '' }: ParticipantNumeralProps) {
+export function ParticipantNumeral({ value, className = '', hash = false }: ParticipantNumeralProps) {
   const digits = formatParticipantNumber(value).split('');
 
   return (
@@ -27,6 +29,7 @@ export function ParticipantNumeral({ value, className = '' }: ParticipantNumeral
     // dropped by several AT combinations and the digits underneath, each
     // individually `aria-hidden`, announce nothing.
     <span role="img" className={className} aria-label={`Participant ${value}`}>
+      {hash && <span aria-hidden="true">#</span>}
       {digits.map((digit, index) => (
         <span key={index} className="type-numeral" aria-hidden="true">
           {digit}

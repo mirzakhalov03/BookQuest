@@ -16,7 +16,6 @@ import { AdminQuery } from '../components/AdminQuery';
 import { AdminPageHeader } from '../components/AdminPageHeader';
 import { SaveBar } from '../components/SaveBar';
 import { UnsavedChangesSheet } from '../components/UnsavedChangesSheet';
-import { PreviewButton, QuestEditorLayout, QuestPreview } from './components/QuestPreview';
 import { ReviewChangesSheet } from './components/ReviewChangesSheet';
 import { QuestFormFields } from './components/QuestFormFields';
 import { buildQuestPatch, toFormState, type QuestFormState } from './questForm';
@@ -37,7 +36,12 @@ export function QuestEditorPage() {
       query={quest}
       loadingLabel="Opening the ledger…"
       notFound={(error) => (
-        <EmptyState title={error.message} body="There's nothing to edit between editions." action={<Button to="/admin/quest/new">Start next edition</Button>} className="flex-1" />
+        <EmptyState
+          title={error.message}
+          body="There's nothing to edit between editions."
+          action={<Button to="/admin/quest/new">Start next edition</Button>}
+          className="flex-1"
+        />
       )}
     >
       {/* Keyed on id: a different current edition remounts with a clean form. */}
@@ -61,7 +65,6 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
   const update = useUpdateQuest(quest.id);
 
   const values = watch();
-  const preview = <QuestPreview edition={quest.edition} values={values} />;
   const changes = summarizeChanges(buildQuestPatch(quest, values));
   const isDirty = changes.count > 0;
   const errorCount = countErrors(formState.errors);
@@ -75,7 +78,9 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
       reset(toFormState(updated));
       showToast('Quest updated.');
     } catch (error) {
-      setFormError(error instanceof ApiRequestError ? applyServerErrors(error, setError) : FALLBACK_MESSAGE);
+      setFormError(
+        error instanceof ApiRequestError ? applyServerErrors(error, setError) : FALLBACK_MESSAGE
+      );
     }
   }
 
@@ -93,30 +98,30 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
     <FormProvider {...form}>
       <AdminScreen className="max-w-5xl">
         <AdminPageHeader
-          eyebrow={`Quest · ${quest.year}`}
-          title={quest.book.title}
+          eyebrow={`BookQuest ${quest.year}`}
           actions={
-            <>
-              {canStartNextEdition(quest, now) && (
-                <Button to="/admin/quest/new" variant="quiet" className="min-h-11 px-3">
-                  Next edition
-                </Button>
-              )}
-              <PreviewButton preview={preview} />
-            </>
+            canStartNextEdition(quest, now) && (
+              <Button to="/admin/quest/new" variant="quiet" className="min-h-11 px-3">
+                Next edition
+              </Button>
+            )
           }
         />
 
-        <QuestEditorLayout preview={preview}>
-          <form id={QUEST_FORM_ID} onSubmit={submit} noValidate className="flex flex-col gap-6">
-            <QuestFormFields changes={changes} savedDates={toFormState(quest).dates} onCoverUploadingChange={setIsCoverUploading} />
-            {formError && (
-              <p role="alert" className="m-0 text-sm text-error">
-                {formError}
-              </p>
-            )}
-          </form>
-        </QuestEditorLayout>
+        <h1 className="sr-only">{quest.book.title}</h1>
+
+        <form id={QUEST_FORM_ID} onSubmit={submit} noValidate className="flex flex-col gap-6">
+          <QuestFormFields
+            changes={changes}
+            savedDates={toFormState(quest).dates}
+            onCoverUploadingChange={setIsCoverUploading}
+          />
+          {formError && (
+            <p role="alert" className="m-0 text-sm text-error">
+              {formError}
+            </p>
+          )}
+        </form>
 
         {/* Room for the save bar, so the last section never hides under it. */}
         {isDirty && <div aria-hidden className="h-20" />}
@@ -124,7 +129,11 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
 
       <SaveBar
         visible={isDirty}
-        summary={errorCount > 0 ? `Fix ${errorCount} ${errorCount === 1 ? 'field' : 'fields'}` : `${changes.count} ${changes.count === 1 ? 'change' : 'changes'}`}
+        summary={
+          errorCount > 0
+            ? `Fix ${errorCount} ${errorCount === 1 ? 'field' : 'fields'}`
+            : `${changes.count} ${changes.count === 1 ? 'change' : 'changes'}`
+        }
         tone={errorCount > 0 ? 'bad' : 'neutral'}
         submitLabel="Save"
         busyLabel="Saving…"
