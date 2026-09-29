@@ -15,11 +15,13 @@ import { AdminQuery } from '../components/AdminQuery';
 import { AdminPageHeader } from '../components/AdminPageHeader';
 import { SaveBar } from '../components/SaveBar';
 import { UnsavedChangesSheet } from '../components/UnsavedChangesSheet';
+import { ReviewChangesSheet } from './components/ReviewChangesSheet';
 import { QuestFormFields } from './components/QuestFormFields';
 import { buildQuestPatch, toFormState, type QuestFormState } from './questForm';
 import { questFormSchema } from './questFormSchema';
 import { applyServerErrors } from './serverErrors';
 import { countErrors, summarizeChanges } from './changes';
+import { describeRiskyChanges, needsReview } from './review';
 
 export const QUEST_FORM_ID = 'quest-form';
 
@@ -49,6 +51,7 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
   });
   const { handleSubmit, reset, setError, watch, formState } = form;
   const [formError, setFormError] = useState<string | null>(null);
+  const [pendingPatch, setPendingPatch] = useState<UpdateQuestPayload | null>(null);
   const [isCoverUploading, setIsCoverUploading] = useState(false);
   const showToast = useUiStore((state) => state.showToast);
   const update = useUpdateQuest(quest.id);
@@ -73,7 +76,9 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
 
   const submit = handleSubmit((valid) => {
     const patch = buildQuestPatch(quest, valid);
-    if (patch) void save(patch);
+    if (!patch) return;
+    if (needsReview(quest, patch)) setPendingPatch(patch);
+    else void save(patch);
   });
   // One rule for ⌘S and the Save button, so they can't drift.
   const canSave = isDirty && !update.isPending && !isCoverUploading;
@@ -109,6 +114,17 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
         onDiscard={() => {
           setFormError(null);
           reset();
+        }}
+      />
+      <ReviewChangesSheet
+        open={pendingPatch !== null}
+        lines={pendingPatch ? describeRiskyChanges(quest, pendingPatch) : []}
+        participantCount={quest.participantCount}
+        onCancel={() => setPendingPatch(null)}
+        onConfirm={() => {
+          const patch = pendingPatch;
+          setPendingPatch(null);
+          if (patch) void save(patch);
         }}
       />
       <UnsavedChangesSheet blocker={guard.blocker} />
