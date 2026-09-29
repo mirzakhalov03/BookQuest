@@ -1,0 +1,21 @@
+apps/api/src/services/cover.services.ts
+  s_bbdd4b3ae72dd6::t_9f28392a695b85 58
+apps/api/src/services/quest.services.ts
+  s_bbdd4b3ae72dd6::t_55cf0a34581fa1 16,109-114,139
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "70a989d48e3d896e74f0a0178ebc894acce14037",
+  "prompts": {},
+  "sessions": {
+    "s_bbdd4b3ae72dd6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f03ca0a1-a314-401a-9923-d7380087fb9a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
