@@ -75,7 +75,9 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
     const patch = buildQuestPatch(quest, valid);
     if (patch) void save(patch);
   });
-  useSaveShortcut(isDirty ? () => void submit() : null);
+  // One rule for ⌘S and the Save button, so they can't drift.
+  const canSave = isDirty && !update.isPending && !isCoverUploading;
+  useSaveShortcut(canSave ? () => void submit() : null);
 
   return (
     <FormProvider {...form}>
@@ -102,7 +104,7 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
         submitLabel="Save"
         busyLabel="Saving…"
         isBusy={update.isPending}
-        disabled={update.isPending || isCoverUploading}
+        disabled={!canSave}
         formId={QUEST_FORM_ID}
         onDiscard={() => {
           setFormError(null);
