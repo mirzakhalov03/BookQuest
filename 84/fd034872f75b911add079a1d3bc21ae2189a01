@@ -1,0 +1,23 @@
+apps/web/src/features/admin/quest/QuestEditorPage.tsx
+  s_599d0204756638::t_93f327c9acc242 18,24,54,79-81,119-129
+apps/web/src/features/admin/quest/components/ReviewChangesSheet.tsx
+  s_599d0204756638::t_c0344ec8467ebc 1-45
+apps/web/src/features/admin/quest/review.ts
+  s_599d0204756638::t_82db21f2279816 1-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "84fd034872f75b911add079a1d3bc21ae2189a01",
+  "prompts": {},
+  "sessions": {
+    "s_599d0204756638": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "56e397ae-d88b-409d-90e9-e3ea5ad104c0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
