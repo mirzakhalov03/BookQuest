@@ -1,0 +1,33 @@
+apps/api/src/services/admin.services.ts
+  s_599d0204756638::t_3d5b4efdb8cbd4 35
+apps/api/src/validators/admin.validators.ts
+  s_599d0204756638::t_dc4a8bfd021a32 10
+apps/web/src/features/admin/ParticipantsPage.tsx
+  s_599d0204756638::t_e1ee91f874cbb9 1-4,7-8,12,19,21-24,26-29,34-39,41-51,56-57,59-62,64-66,70,78-80,82-86
+apps/web/src/features/admin/api/adminKeys.ts
+  s_599d0204756638::t_9f5fdf1864e0da 16
+apps/web/src/features/admin/api/useAdminParticipants.ts
+  s_599d0204756638::t_febdc609c567fc 1,7-9,11-15,19-20
+apps/web/src/features/admin/components/ContactLink.tsx
+  s_599d0204756638::t_73ceee9d3545e1 1-4,6-11,14-26,29-38,40-47,49-51
+apps/web/src/features/admin/components/ParticipantsTable.tsx
+  s_599d0204756638::t_d5f726730f9ac2 3,30,53
+apps/web/src/lib/api/mock/routes.ts
+  s_599d0204756638::t_4503f2e86ee4a9 320-323
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "bd89f99273c31578b05b2a5e26d938c31ec714d9",
+  "prompts": {},
+  "sessions": {
+    "s_599d0204756638": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "56e397ae-d88b-409d-90e9-e3ea5ad104c0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
