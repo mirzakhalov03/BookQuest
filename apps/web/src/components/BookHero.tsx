@@ -8,6 +8,7 @@ interface BookHeroProps {
   author: string;
   pages: number;
   coverUrl: string | null;
+  titleAs?: 'h1' | 'h2';
 }
 
 /**
@@ -16,7 +17,7 @@ interface BookHeroProps {
  * show the exact same shape of information about two different quests. Lives
  * here rather than in either feature because both need it (spec §4 rule 1).
  */
-export function BookHero({ edition, year, title, author, pages, coverUrl }: BookHeroProps) {
+export function BookHero({ edition, year, title, author, pages, coverUrl, titleAs: Title = 'h1' }: BookHeroProps) {
   return (
     <header className="flex items-start gap-5">
       <div className="cover-box">
@@ -27,7 +28,7 @@ export function BookHero({ edition, year, title, author, pages, coverUrl }: Book
         <p className="type-label">
           {formatOrdinalEdition(edition)} edition · {year}
         </p>
-        <h1 className="type-display text-3xl text-paper">{title}</h1>
+        <Title className="type-display text-3xl text-paper">{title}</Title>
         <p className="text-taupe">{author}</p>
         <p className="text-sm text-taupe-dim">{formatCount(pages)} pages</p>
       </div>

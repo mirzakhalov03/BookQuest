@@ -15,6 +15,7 @@ import { AdminQuery } from '../components/AdminQuery';
 import { AdminPageHeader } from '../components/AdminPageHeader';
 import { SaveBar } from '../components/SaveBar';
 import { UnsavedChangesSheet } from '../components/UnsavedChangesSheet';
+import { PreviewButton, QuestEditorLayout, QuestPreview } from './components/QuestPreview';
 import { ReviewChangesSheet } from './components/ReviewChangesSheet';
 import { QuestFormFields } from './components/QuestFormFields';
 import { buildQuestPatch, toFormState, type QuestFormState } from './questForm';
@@ -57,6 +58,7 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
   const update = useUpdateQuest(quest.id);
 
   const values = watch();
+  const preview = <QuestPreview edition={quest.edition} values={values} />;
   const changes = summarizeChanges(buildQuestPatch(quest, values));
   const isDirty = changes.count > 0;
   const errorCount = countErrors(formState.errors);
@@ -86,17 +88,19 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
 
   return (
     <FormProvider {...form}>
-      <AdminScreen className="max-w-3xl">
-        <AdminPageHeader eyebrow={`Quest · ${quest.year}`} title={quest.book.title} />
+      <AdminScreen className="max-w-5xl">
+        <AdminPageHeader eyebrow={`Quest · ${quest.year}`} title={quest.book.title} actions={<PreviewButton preview={preview} />} />
 
-        <form id={QUEST_FORM_ID} onSubmit={submit} noValidate className="flex flex-col gap-6">
-          <QuestFormFields changes={changes} savedDates={toFormState(quest).dates} onCoverUploadingChange={setIsCoverUploading} />
-          {formError && (
-            <p role="alert" className="m-0 text-sm text-error">
-              {formError}
-            </p>
-          )}
-        </form>
+        <QuestEditorLayout preview={preview}>
+          <form id={QUEST_FORM_ID} onSubmit={submit} noValidate className="flex flex-col gap-6">
+            <QuestFormFields changes={changes} savedDates={toFormState(quest).dates} onCoverUploadingChange={setIsCoverUploading} />
+            {formError && (
+              <p role="alert" className="m-0 text-sm text-error">
+                {formError}
+              </p>
+            )}
+          </form>
+        </QuestEditorLayout>
 
         {/* Room for the save bar, so the last section never hides under it. */}
         {isDirty && <div aria-hidden className="h-20" />}
