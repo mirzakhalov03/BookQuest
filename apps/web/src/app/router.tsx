@@ -16,7 +16,7 @@ import { ParticipantsPage } from '@/features/admin/ParticipantsPage';
 import { QuestEditorPage } from '@/features/admin/quest/QuestEditorPage';
 import { NewEditionPage } from '@/features/admin/quest/NewEditionPage';
 import { ResultsInspectionPage } from '@/features/admin/ResultsInspectionPage';
-import { BroadcastPage } from '@/features/admin/BroadcastPage';
+import { BroadcastPage } from '@/features/admin/broadcast/BroadcastPage';
 import { RequireAdmin, RequireAuth } from '@/lib/auth/guards';
 import { RouteErrorBoundary } from './RouteErrorBoundary';
 
