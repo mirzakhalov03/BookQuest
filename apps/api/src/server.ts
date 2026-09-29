@@ -2,11 +2,14 @@ import { createApp } from './app.js';
 import { configWarnings, env } from './config/env.js';
 import { logger } from './config/logger.js';
 import { connectToDatabase, disconnectFromDatabase } from './db/connect.js';
+import { markInterruptedBroadcasts } from './services/broadcast.services.js';
 
 async function start(): Promise<void> {
   for (const warning of configWarnings) logger.warn(warning);
 
   await connectToDatabase();
+  const interrupted = await markInterruptedBroadcasts();
+  if (interrupted > 0) logger.warn({ interrupted }, 'Marked broadcasts left mid-send by the last shutdown as interrupted');
 
   const server = createApp().listen(env.PORT, () => {
     logger.info(`BookQuest API listening on http://localhost:${env.PORT}`);

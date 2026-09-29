@@ -1,6 +1,7 @@
 import {
   COVER_MESSAGES,
   PARTICIPANT_NUMBER_MAX,
+  createBroadcastSchema,
   createQuestSchema,
   findQuestDateIssues,
   registerParticipantSchema,
@@ -11,6 +12,8 @@ import type {
   AdminStats,
   ApiErrorCode,
   ApiResponse,
+  Broadcast,
+  BroadcastList,
   CursorPage,
   Paginated,
   Participant,
@@ -493,6 +496,56 @@ function uploadCover(context: Context): Result {
   return created({ url: URL.createObjectURL(file) });
 }
 
+/* ── Broadcasts ──────────────────────────────────────────────────────────── */
+
+/** Not in MockState: nothing else reads it, and a reload clearing the outbox is fine. */
+let outbox: Array<{ broadcast: Broadcast; startedAt: number }> = [];
+const MOCK_SEND_MS = 40;
+
+function audience(): { audience: number; dmAudience: number } {
+  const total = getState().participants.length + 12;
+  return { audience: total, dmAudience: Math.round(total * 0.8) };
+}
+
+/** Progress is derived from elapsed time, so the screen's polling has something to watch. */
+function progressed({ broadcast, startedAt }: (typeof outbox)[number]): Broadcast {
+  const sentCount = Math.min(broadcast.dmCount, Math.floor((Date.now() - startedAt) / MOCK_SEND_MS));
+  const done = sentCount === broadcast.dmCount;
+  return {
+    ...broadcast,
+    sentCount,
+    status: done ? 'sent' : 'sending',
+    completedAt: done ? new Date(startedAt + broadcast.dmCount * MOCK_SEND_MS).toISOString() : null
+  };
+}
+
+function listBroadcasts(context: Context): Result {
+  requireAdmin(context);
+  const list: BroadcastList = { items: outbox.slice(0, 20).map(progressed), ...audience() };
+  return ok(list);
+}
+
+function sendBroadcast(context: Context): Result {
+  requireAdmin(context);
+  const parsed = createBroadcastSchema.safeParse(context.body);
+  if (!parsed.success) throw validationError(parsed.error.issues);
+
+  const { audience: recipientCount, dmAudience: dmCount } = audience();
+  const broadcast: Broadcast = {
+    id: objectId(`broadcast:${outbox.length}`),
+    message: parsed.data.message,
+    status: 'sending',
+    recipientCount,
+    dmCount,
+    sentCount: 0,
+    failedCount: 0,
+    createdAt: new Date().toISOString(),
+    completedAt: null
+  };
+  outbox = [{ broadcast, startedAt: Date.now() }, ...outbox];
+  return { status: 202, data: broadcast };
+}
+
 /* ── Table ───────────────────────────────────────────────────────────────── */
 
 /** Literal paths sit above their `:param` neighbours — first match wins. */
@@ -521,6 +574,8 @@ const routes: Route[] = [
 
   { method: 'GET', path: '/admin/participants', handle: adminParticipants },
   { method: 'GET', path: '/admin/stats', handle: adminStats },
+  { method: 'GET', path: '/admin/broadcasts', handle: listBroadcasts },
+  { method: 'POST', path: '/admin/broadcasts', handle: sendBroadcast },
   { method: 'POST', path: '/admin/covers', handle: uploadCover },
   { method: 'POST', path: '/admin/quests', handle: createQuest },
   { method: 'POST', path: '/admin/quests/:id/make-current', handle: makeQuestCurrent },

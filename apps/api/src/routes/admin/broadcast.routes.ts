@@ -5,4 +5,5 @@ import { createBroadcastBody } from '../../validators/admin.validators.js';
 
 export const adminBroadcastRoutes: Router = Router();
 
+adminBroadcastRoutes.get('/', adminBroadcastController.listBroadcasts);
 adminBroadcastRoutes.post('/', validate(createBroadcastBody), adminBroadcastController.createBroadcast);
