@@ -436,7 +436,28 @@ function createQuest(context: Context): Result {
     draft.archive = [{ quest, winner: null }, ...draft.archive];
   });
 
+  if (input.makeCurrent) {
+    switchCurrent(quest);
+    return created(readQuest(quest, 0));
+  }
+
   return created({ ...quest, phase: resolvePhase(quest) } satisfies Quest);
+}
+
+/** Swaps the current edition; the outgoing one joins the archive and the roster follows its edition. */
+function switchCurrent(target: Quest): void {
+  updateState((draft) => {
+    const outgoing = draft.quest;
+    draft.archive = [
+      // Only a quest that was actually current has just left the stage.
+      ...(draft.questRunning ? [{ quest: outgoing, winner: null }] : []),
+      ...draft.archive.filter((entry) => entry.quest.id !== target.id && entry.quest.id !== outgoing.id)
+    ];
+    draft.quest = target;
+    draft.participants = draft.participants.filter((entry) => entry.questId === target.id);
+    draft.myParticipantId = null;
+    draft.questRunning = true;
+  });
 }
 
 /**
@@ -456,20 +477,7 @@ function makeQuestCurrent(context: Context): Result {
     return ok(readQuest(target, state.participants.length));
   }
 
-  updateState((draft) => {
-    const outgoing = draft.quest;
-    draft.archive = [
-      // Only a quest that was actually current has just left the stage.
-      ...(draft.questRunning ? [{ quest: outgoing, winner: null }] : []),
-      ...draft.archive.filter(
-        (entry) => entry.quest.id !== target.id && entry.quest.id !== outgoing.id
-      )
-    ];
-    draft.quest = target;
-    draft.participants = draft.participants.filter((entry) => entry.questId === target.id);
-    draft.myParticipantId = null;
-    draft.questRunning = true;
-  });
+  switchCurrent(target);
 
   return ok(readQuest(target, countFor(getState(), target)));
 }

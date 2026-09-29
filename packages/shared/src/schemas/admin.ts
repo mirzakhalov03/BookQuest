@@ -62,7 +62,9 @@ export const createQuestSchema = z.strictObject({
   prizes: z.strictObject(prizeFields).partial().optional(),
   ...questDateFields,
   quizQuestionCount: quizMetaFields.quizQuestionCount.default(null),
-  quizDurationMinutes: quizMetaFields.quizDurationMinutes.default(null)
+  quizDurationMinutes: quizMetaFields.quizDurationMinutes.default(null),
+  /** Swap the current edition in the same transaction, so "created but not live" can't happen. */
+  makeCurrent: z.boolean().default(false)
 });
 
 export type CreateQuestPayload = z.infer<typeof createQuestSchema>;

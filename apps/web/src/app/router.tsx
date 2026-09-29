@@ -14,6 +14,7 @@ import { AdminLayout } from '@/layouts/AdminLayout';
 import { DashboardPage } from '@/features/admin/DashboardPage';
 import { ParticipantsPage } from '@/features/admin/ParticipantsPage';
 import { QuestEditorPage } from '@/features/admin/quest/QuestEditorPage';
+import { NewEditionPage } from '@/features/admin/quest/NewEditionPage';
 import { ResultsInspectionPage } from '@/features/admin/ResultsInspectionPage';
 import { BroadcastPage } from '@/features/admin/BroadcastPage';
 import { RequireAdmin, RequireAuth } from '@/lib/auth/guards';
@@ -94,6 +95,7 @@ export const router = createBrowserRouter([
               { index: true, element: <DashboardPage /> },
               { path: 'participants', element: <ParticipantsPage /> },
               { path: 'quest', element: <QuestEditorPage /> },
+              { path: 'quest/new', element: <NewEditionPage /> },
               { path: 'results', element: <ResultsInspectionPage /> },
               { path: 'broadcast', element: <BroadcastPage /> }
             ]

@@ -15,5 +15,6 @@ export const adminKeys = {
   stats: () => [...adminKeys.all, 'stats'] as const,
   participants: (params: { q: string; page: number; limit: number }) =>
     [...adminKeys.all, 'participants', params] as const,
-  results: () => [...adminKeys.all, 'results'] as const
+  results: () => [...adminKeys.all, 'results'] as const,
+  latestQuest: () => [...adminKeys.all, 'latestQuest'] as const
 };

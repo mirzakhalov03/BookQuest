@@ -71,21 +71,35 @@ export async function listPastQuests(options: {
    authorization and HTTP shape. */
 
 export async function createQuest(payload: CreateQuestPayload): Promise<Quest> {
+  const { makeCurrent, ...fields } = payload;
+
   const issues = findQuestDateIssues({
-    opensAt: payload.opensAt,
-    readingDeadline: payload.readingDeadline,
-    quizOpensAt: payload.quizOpensAt,
-    quizClosesAt: payload.quizClosesAt,
-    resultsAt: payload.resultsAt
+    opensAt: fields.opensAt,
+    readingDeadline: fields.readingDeadline,
+    quizOpensAt: fields.quizOpensAt,
+    quizClosesAt: fields.quizClosesAt,
+    resultsAt: fields.resultsAt
   });
   if (issues) throw badDates(issues);
 
   try {
-    const quest = await QuestModel.create({ ...payload, isCurrent: false });
+    // Inserted inside the callback: a retried transaction must insert afresh, not reuse a rolled-back document.
+    const quest = await withTransaction(async (session) => {
+      const [created] = await QuestModel.create([{ ...fields, isCurrent: false }], { session });
+      if (!created) throw new Error('Quest insert returned no document.');
+
+      if (makeCurrent) {
+        // Unset first: the partial unique index allows one current quest at any instant.
+        await QuestModel.updateMany({ isCurrent: true }, { $set: { isCurrent: false } }, { session });
+        await QuestModel.updateOne({ _id: created._id }, { $set: { isCurrent: true } }, { session });
+        created.isCurrent = true;
+      }
+      return created;
+    });
     return toQuestDto(quest);
   } catch (error) {
     if (isDuplicateKeyError(error)) {
-      throw ApiError.conflict(`Edition ${payload.edition} already exists.`);
+      throw ApiError.conflict(`Edition ${fields.edition} already exists.`);
     }
     throw error;
   }

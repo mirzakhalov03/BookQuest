@@ -7,7 +7,7 @@ import { ok } from '../../utils/respond.js';
 /** POST /api/v1/admin/quests */
 export async function createQuest(req: Request, res: Response): Promise<void> {
   const quest = await questService.createQuest(req.body as CreateQuestPayload);
-  auditAdmin(req, 'create-quest', { edition: quest.edition });
+  auditAdmin(req, 'create-quest', { edition: quest.edition, makeCurrent: (req.body as CreateQuestPayload).makeCurrent });
   ok(res, quest, 201);
 }
 

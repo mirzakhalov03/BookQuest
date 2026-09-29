@@ -69,3 +69,27 @@ export function shiftLaterDates(dates: DateInputs, field: QuestDateField, nextVa
   }
   return next;
 }
+
+/** Same calendar position a year on — the natural first guess for next year's schedule. */
+export function plusOneYear(iso: string): string {
+  const date = new Date(iso);
+  date.setFullYear(date.getFullYear() + 1);
+  return toDateTimeLocalInput(date.toISOString());
+}
+
+/** A sensible first schedule when there's no previous edition to copy: 60 days' reading, a 2-day quiz. */
+export function defaultDates(now: Date): DateInputs {
+  const at = (days: number, hour: number) => {
+    const date = new Date(now);
+    date.setDate(date.getDate() + 7 + days);
+    date.setHours(hour, 0, 0, 0);
+    return toDateTimeLocalInput(date.toISOString());
+  };
+  return {
+    opensAt: at(0, 9),
+    readingDeadline: at(60, 18),
+    quizOpensAt: at(60, 18),
+    quizClosesAt: at(62, 18),
+    resultsAt: at(63, 12)
+  };
+}

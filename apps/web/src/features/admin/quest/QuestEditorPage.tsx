@@ -6,6 +6,7 @@ import { useCurrentQuest } from '@/lib/api/quest';
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
+import { Button } from '@/components/ui/Button';
 import { ApiRequestError } from '@/lib/api/client';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
@@ -35,7 +36,7 @@ export function QuestEditorPage() {
       query={quest}
       loadingLabel="Opening the ledger…"
       notFound={(error) => (
-        <EmptyState title={error.message} body="There's nothing to edit between editions." className="flex-1" />
+        <EmptyState title={error.message} body="There's nothing to edit between editions." action={<Button to="/admin/quest/new">Start next edition</Button>} className="flex-1" />
       )}
     >
       {/* Keyed on id: a different current edition remounts with a clean form. */}
@@ -89,7 +90,20 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
   return (
     <FormProvider {...form}>
       <AdminScreen className="max-w-5xl">
-        <AdminPageHeader eyebrow={`Quest · ${quest.year}`} title={quest.book.title} actions={<PreviewButton preview={preview} />} />
+        <AdminPageHeader
+          eyebrow={`Quest · ${quest.year}`}
+          title={quest.book.title}
+          actions={
+            <>
+              {quest.phase === 'finished' && (
+                <Button to="/admin/quest/new" variant="quiet" className="min-h-11 px-3">
+                  Next edition
+                </Button>
+              )}
+              <PreviewButton preview={preview} />
+            </>
+          }
+        />
 
         <QuestEditorLayout preview={preview}>
           <form id={QUEST_FORM_ID} onSubmit={submit} noValidate className="flex flex-col gap-6">
