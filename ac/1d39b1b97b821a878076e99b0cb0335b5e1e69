@@ -1,0 +1,21 @@
+apps/web/src/features/admin/QuestEditorPage.tsx
+  s_bbdd4b3ae72dd6::t_48203f521a81da 120
+apps/web/src/features/admin/components/BookFieldsSection.tsx
+  s_bbdd4b3ae72dd6::t_3afacffe87ddc0 8-10,23,33,41,51,57,67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "ac1d39b1b97b821a878076e99b0cb0335b5e1e69",
+  "prompts": {},
+  "sessions": {
+    "s_bbdd4b3ae72dd6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f03ca0a1-a314-401a-9923-d7380087fb9a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
