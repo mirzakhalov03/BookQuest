@@ -151,6 +151,8 @@ apps/web/src/
 | `/admin/participants` | Participant table | admin | |
 | `/admin/quest` | Book, dates, prizes | admin | |
 | `/admin/results` | Result inspection | admin | |
+| `/admin/broadcast` | Broadcast composer + sent history | admin | Background delivery, polls while sending. |
+| `/admin/quest/new` | Start the next edition | admin | Only once the current quest is `finished`. |
 | `/admin/quiz` | Quiz management | admin | **Not in this plan.** |
 
 **Route guards are UX, not security.** `<RequireAuth>` and `<RequireAdmin>` exist so people are not

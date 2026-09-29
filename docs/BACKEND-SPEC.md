@@ -917,7 +917,12 @@ Edit the admin-owned content of a quest: book, dates, prizes, quiz metadata.
 Create next year's edition, and switch which one is current (in a transaction, so there is never
 zero or two current quests).
 
-**Auth:** required, `role === 'admin'`. **`200`/`201`** → `Quest`.
+**Auth:** required, `role === 'admin'`.
+
+**Body:** `{ "makeCurrent"?: boolean }`
+- `makeCurrent` (default `false`). When `true`, the new quest becomes current in the same transaction.
+
+**`200`/`201`** → `Quest`.
 
 ---
 
@@ -928,6 +933,30 @@ Dashboard numbers: registrations today, total, quiz submissions, completion rate
 **Auth:** required, `role === 'admin'`.
 
 **`200`** → `{ "ok": true, "data": { "participants": 412, "registeredToday": 17, "quizSubmitted": 0, "phase": "reading" } }`
+
+---
+
+#### `POST /api/v1/admin/broadcasts` ⬜
+
+Send a Telegram broadcast to participants. Delivery is asynchronous — DMs are sent after the response.
+
+**Auth:** required, `role === 'admin'`.
+
+**Body:** `{ "message": "...", "sendDmToAll": boolean }`
+
+**`202 Accepted`** → `{ "ok": true, "data": { "id": "...", "status": "sending", "sentAt": "2026-09-29T...", "dmCount": 412 } }`
+
+---
+
+#### `GET /api/v1/admin/broadcasts` ⬜
+
+List sent broadcasts and delivery status.
+
+**Auth:** required, `role === 'admin'`.
+
+**`200`** → `{ "ok": true, "data": { "items": [ /* Broadcast[] (latest 20) */ ], "audience": 412, "dmAudience": 127 } }`
+
+**On boot:** any `sending` broadcasts are marked `interrupted`.
 
 ---
 
