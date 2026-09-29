@@ -8,18 +8,18 @@ import { EditorSection } from './EditorSection';
 import { BookFieldsSection } from './BookFieldsSection';
 import { ResourceListEditor } from './ResourceListEditor';
 import { PrizeFieldsSection } from './PrizeFieldsSection';
-import { QuestDateFieldsSection } from './QuestDateFieldsSection';
+import { DateTimelineField } from './DateTimelineField';
 import { QuizMetaFieldsSection } from './QuizMetaFieldsSection';
 
 interface QuestFormFieldsProps {
   changes: ChangeSummary;
-  /** The saved schedule — past dates in it lock (Task 5). `null` when creating. */
+  /** The saved schedule — past dates in it lock. `null` when creating. */
   savedDates: DateInputs | null;
   onCoverUploadingChange: (uploading: boolean) => void;
 }
 
 /** Every quest field, grouped. Shared by the editor and the new-edition page through form context. */
-export function QuestFormFields({ changes, onCoverUploadingChange }: QuestFormFieldsProps) {
+export function QuestFormFields({ changes, savedDates, onCoverUploadingChange }: QuestFormFieldsProps) {
   const {
     watch,
     formState: { errors }
@@ -47,7 +47,7 @@ export function QuestFormFields({ changes, onCoverUploadingChange }: QuestFormFi
         <PrizeFieldsSection />
       </EditorSection>
       <EditorSection title="Dates" {...section('dates')}>
-        <QuestDateFieldsSection />
+        <DateTimelineField savedDates={savedDates} />
       </EditorSection>
       <EditorSection title="Quiz" {...section('quiz')}>
         <QuizMetaFieldsSection />

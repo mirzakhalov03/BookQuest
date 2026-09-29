@@ -1,3 +1,4 @@
+import { QUEST_DATE_FIELDS } from '@bookquest/shared';
 import type { Book, BookResource, Prizes, Quest, QuestDates, UpdateQuestPayload } from '@bookquest/shared';
 import { toDateTimeLocalInput } from '@/lib/format';
 
@@ -27,6 +28,9 @@ export interface QuestFormState {
   quizQuestionCount: string;
   quizDurationMinutes: string;
 }
+
+/** Paths of all five dates, for re-validating them together. */
+export const DATE_PATHS = QUEST_DATE_FIELDS.map((key) => `dates.${key}` as const);
 
 /** Everything the API sends becomes an editable string — even `pages`, a
  * number — so every field in the form is the same kind of controlled input,
