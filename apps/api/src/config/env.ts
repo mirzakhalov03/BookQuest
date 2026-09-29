@@ -39,7 +39,9 @@ const envSchema = z.object({
   RATE_LIMIT_GLOBAL_PER_MINUTE: z.coerce.number().int().positive().default(300),
 
   /** Absolute URL of the web app, for certificate links and bot messages. */
-  WEB_APP_URL: z.string().url().optional()
+  WEB_APP_URL: z.string().url().optional(),
+  /** Absolute base of this API as browsers reach it — uploaded cover URLs are built from it. */
+  PUBLIC_API_URL: z.string().url().optional()
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -56,6 +58,9 @@ export const isProduction = env.NODE_ENV === 'production';
 
 /** Comma-separated list, so preview deployments can be added without a code change. */
 export const corsOrigins = env.CORS_ORIGIN.split(',').map((origin) => origin.trim());
+
+/** Baked into stored cover URLs, so it must be the address browsers use, not an internal one. */
+export const publicApiUrl = (env.PUBLIC_API_URL ?? `http://localhost:${env.PORT}`).replace(/\/+$/, '');
 
 const splitList = (value: string): string[] =>
   value
@@ -82,4 +87,10 @@ if (adminTelegramIds.size === 0) {
     'ADMIN_TELEGRAM_IDS is empty — no account can reach /admin. Set it to a comma-separated list of Telegram user ids.';
   if (isProduction) throw new Error(`Invalid environment configuration:\n  ${message}`);
   configWarnings.push(message);
+}
+
+if (isProduction && !env.PUBLIC_API_URL) {
+  configWarnings.push(
+    "PUBLIC_API_URL is not set — uploaded cover URLs will point at localhost. Set it to the API's public origin."
+  );
 }

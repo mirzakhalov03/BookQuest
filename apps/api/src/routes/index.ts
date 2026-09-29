@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authRoutes } from './auth.routes.js';
 import { questRoutes } from './quest.routes.js';
+import { coverRoutes } from './cover.routes.js';
 import { participantRoutes } from './participant.routes.js';
 import { adminRoutes } from './admin/index.js';
 import { botRoutes } from './bot.routes.js';
@@ -14,6 +15,7 @@ export const apiRoutes: Router = Router();
 
 apiRoutes.use('/auth', authRoutes);
 apiRoutes.use('/quests', questRoutes);
+apiRoutes.use('/covers', coverRoutes);
 apiRoutes.use('/participants', participantRoutes);
 apiRoutes.use('/admin', adminRoutes);
 apiRoutes.use('/bot', botRoutes);
