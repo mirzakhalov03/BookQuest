@@ -1,0 +1,23 @@
+apps/web/src/features/admin/QuestEditorPage.tsx
+  s_bbdd4b3ae72dd6::t_3ad5cf7feb8c55 64,80-81,121
+apps/web/src/features/admin/components/BookFieldsSection.tsx
+  s_bbdd4b3ae72dd6::t_d32b6be30ed6ef 4,13-14,18-19,21,54,56-58
+apps/web/src/features/admin/components/CoverPicker.tsx
+  s_bbdd4b3ae72dd6::t_a51bd44403499c 1-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "ad86cfa76bc44140b5ff8917c70e0dd0a12183c8",
+  "prompts": {},
+  "sessions": {
+    "s_bbdd4b3ae72dd6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f03ca0a1-a314-401a-9923-d7380087fb9a",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
