@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-09-29-cover-uploads-design.md
+  s_bbdd4b3ae72dd6::t_a0da25ea0d8319 1-154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "6e752065bf9ace3da2df3f60e9f7db2d330eebd7",
+  "prompts": {},
+  "sessions": {
+    "s_bbdd4b3ae72dd6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f03ca0a1-a314-401a-9923-d7380087fb9a",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
