@@ -62,7 +62,7 @@ function Dashboard({ quest }: { quest: Quest }) {
 
       {milestone && <MilestoneLine milestone={milestone} />}
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatCard label="Participants" value={count(stats.data?.participants)} />
         <StatCard label="Joined today" value={count(stats.data?.registeredToday)} />
         <StatCard label="Quiz submitted" value={count(stats.data?.quizSubmitted)} />
@@ -104,7 +104,7 @@ function MilestoneLine({ milestone }: { milestone: Milestone }) {
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex min-w-0 flex-col gap-1 rounded-box border border-[color:var(--rule)] bg-[color:var(--color-ash)] px-3 py-3">
-      <p className="type-label m-0">{label}</p>
+      <p className="type-label m-0 break-words">{label}</p>
       <p className="type-display m-0 tabular-nums text-2xl text-paper">{value}</p>
     </div>
   );

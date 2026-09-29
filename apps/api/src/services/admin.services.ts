@@ -30,9 +30,12 @@ export async function listParticipants(query: ParticipantQuery): Promise<Paginat
 
   if (term) {
     const asNumber = Number(term);
+    const digits = term.replace(/\D/g, '');
     filter.$or = [
       { fullName: { $regex: escapeRegex(term), $options: 'i' } },
       { 'contact.value': { $regex: escapeRegex(term), $options: 'i' } },
+      // Phones are stored grouped ("+998 90 123 45 67"); let any separators sit between typed digits. Digits need no escaping.
+      ...(digits.length >= 4 ? [{ 'contact.value': { $regex: digits.split('').join('\\D*'), $options: 'i' } }] : []),
       ...(Number.isInteger(asNumber) ? [{ number: asNumber }] : [])
     ];
   }

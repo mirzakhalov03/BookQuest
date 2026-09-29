@@ -21,16 +21,22 @@ export function broadcastSuggestions(quest: Quest, now: Date): Suggestion[] {
         }
       ];
     case 'reading': {
-      const days = Math.max(0, Math.ceil((Date.parse(quest.readingDeadline) - now.getTime()) / DAY_MS));
+      const left = Date.parse(quest.readingDeadline) - now.getTime();
+      const quizDates = {
+        label: 'Quiz dates',
+        message: `Mark your calendar: the quiz opens ${formatLongDate(quest.quizOpensAt)} and closes ${formatLongDate(quest.quizClosesAt)}. One attempt, so pick your moment!`
+      };
+      // Past the deadline a reading reminder would say "0 days left"; the quiz dates lead instead.
+      if (left <= 0) return [quizDates];
+
+      const days = Math.floor(left / DAY_MS);
+      const remaining = days < 1 ? 'Less than a day' : `${days} ${days === 1 ? 'day' : 'days'}`;
       return [
         {
           label: 'Remind readers',
-          message: `${days} ${days === 1 ? 'day' : 'days'} left to finish ${title}. The quiz opens ${formatLongDate(quest.quizOpensAt)}.`
+          message: `${remaining} left to finish ${title}. The quiz opens ${formatLongDate(quest.quizOpensAt)}.`
         },
-        {
-          label: 'Quiz dates',
-          message: `Mark your calendar: the quiz opens ${formatLongDate(quest.quizOpensAt)} and closes ${formatLongDate(quest.quizClosesAt)}. One attempt, so pick your moment!`
-        }
+        quizDates
       ];
     }
     case 'quiz':

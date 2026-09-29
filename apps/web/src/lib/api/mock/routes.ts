@@ -311,6 +311,8 @@ function adminParticipants(context: Context): Result {
   requireCurrentQuest();
 
   const term = (context.query.get('q') ?? '').trim().toLowerCase();
+  // Phones are stored grouped ("+998 90 123 45 67"); compare bare digits so "901234" still matches.
+  const digits = term.replace(/\D/g, '');
   const page = readInt(context.query.get('page'), 1, 1, Number.MAX_SAFE_INTEGER);
   const limit = readInt(context.query.get('limit'), 50, 1, 200);
 
@@ -320,6 +322,7 @@ function adminParticipants(context: Context): Result {
         (entry) =>
           entry.fullName.toLowerCase().includes(term) ||
           entry.contact.value.toLowerCase().includes(term) ||
+          (digits.length >= 4 && entry.contact.value.replace(/\D/g, '').includes(digits)) ||
           String(entry.number) === term
       )
     : all;
