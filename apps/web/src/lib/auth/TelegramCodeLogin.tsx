@@ -148,7 +148,7 @@ export function TelegramCodeLogin() {
 
 function FormError({ message }: { message: string }) {
   return (
-    <p role="alert" className="m-0 text-sm text-[#E9976A]">
+    <p role="alert" className="m-0 text-sm text-error">
       {message}
     </p>
   );

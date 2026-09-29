@@ -27,6 +27,7 @@ const TIME = new Intl.DateTimeFormat('en-GB', {
 });
 
 const COUNT = new Intl.NumberFormat('en-GB');
+const SHORT_DATE = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
 
 /**
  * "20 September 2026, 23:59" — the deadline, the quiz window, the results time.
@@ -38,6 +39,11 @@ const COUNT = new Intl.NumberFormat('en-GB');
 export function formatLongDate(value: string | Date): string {
   const date = typeof value === 'string' ? new Date(value) : value;
   return `${DATE.format(date)}, ${TIME.format(date)}`;
+}
+
+/** "5 Apr" — a date inside a one-line summary, where year and time are noise. */
+export function formatShortDate(value: string | Date): string {
+  return SHORT_DATE.format(typeof value === 'string' ? new Date(value) : value);
 }
 
 /** "1,204" — a quantity, so it gets thousands separators. Readers, questions, marks. */

@@ -17,6 +17,8 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   shakeToken?: number;
   /** Content on the label's line — the prototype puts the contact-method Switch here. */
   head?: ReactNode;
+  /** Keeps the label for screen readers only — for rows that already show it, like the date timeline. */
+  hideLabel?: boolean;
   className?: string;
 }
 
@@ -28,7 +30,7 @@ const INPUT_BORDER: Record<'neutral' | FieldStatus, string> = {
   neutral:
     'border-b-[color:var(--rule-strong)] focus:border-b-[color:var(--color-ember)]',
   good: 'border-b-[color:var(--rule-gold)]',
-  bad: 'border-b-[color:#B2532A]'
+  bad: 'border-b-error-line'
 };
 
 // The palette has no red, deliberately — the prototype's rejected state is
@@ -37,8 +39,18 @@ const INPUT_BORDER: Record<'neutral' | FieldStatus, string> = {
 const MSG: Record<'neutral' | FieldStatus, string> = {
   neutral: 'text-taupe opacity-0 -translate-y-[3px]',
   good: 'text-gold-soft opacity-100 translate-y-0',
-  bad: 'text-[#E9976A] opacity-100 translate-y-0'
+  bad: 'text-error opacity-100 translate-y-0'
 };
+
+/** The ruled underline, shared with TextArea and Select so every input reads as one family. */
+export function fieldLineClass(status?: FieldStatus): string {
+  return INPUT_BORDER[status ?? 'neutral'];
+}
+
+/** Server or schema message → the two props every input takes; blank means neutral. */
+export function statusFor(message?: string): { status: FieldStatus | undefined; message: string | undefined } {
+  return { status: message ? 'bad' : undefined, message };
+}
 
 /**
  * Label, ruled input, message slot (spec §4). Carries no product knowledge —
@@ -57,7 +69,7 @@ const MSG: Record<'neutral' | FieldStatus, string> = {
  * DOM directly.
  */
 export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
-  { id, label, message, status, shakeToken = 0, head, className = '', ...inputProps },
+  { id, label, message, status, shakeToken = 0, head, hideLabel = false, className = '', ...inputProps },
   ref
 ) {
   const autoId = useId();
@@ -91,13 +103,13 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
     <div className={`grid gap-[0.4rem] ${className}`}>
       {head ? (
         <div className="flex items-baseline justify-between gap-4">
-          <label htmlFor={fieldId} className="type-label">
+          <label htmlFor={fieldId} className={hideLabel ? 'sr-only' : 'type-label'}>
             {label}
           </label>
           {head}
         </div>
       ) : (
-        <label htmlFor={fieldId} className="type-label">
+        <label htmlFor={fieldId} className={hideLabel ? 'sr-only' : 'type-label'}>
           {label}
         </label>
       )}

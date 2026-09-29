@@ -140,7 +140,7 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
       </Button>
 
       {formError && (
-        <p role="alert" className="m-0 text-sm text-[#E9976A]">
+        <p role="alert" className="m-0 text-sm text-error">
           {formError}
         </p>
       )}

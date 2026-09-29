@@ -124,7 +124,7 @@ export function CoverPicker({ value, onChange, error, onUploadingChange }: Cover
       <p
         id={msgId}
         role="status"
-        className={`m-0 min-h-[1.15rem] text-sm leading-[1.35] ${isBad ? 'text-[#E9976A]' : 'text-taupe'}`}
+        className={`m-0 min-h-[1.15rem] text-sm leading-[1.35] ${isBad ? 'text-error' : 'text-taupe'}`}
       >
         {message}
       </p>

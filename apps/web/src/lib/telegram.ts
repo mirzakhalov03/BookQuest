@@ -46,6 +46,7 @@ interface TelegramWebApp {
   isFullscreen?: boolean;
   enableClosingConfirmation?: () => void;
   openLink?: (url: string) => void;
+  openTelegramLink?: (url: string) => void;
   /**
    * Present, and deliberately unused. `MainButton` docks a button into
    * Telegram's own chrome at the bottom of the sheet. BookQuest's primary
@@ -184,6 +185,21 @@ export function openExternalLink(url: string): boolean {
 
   try {
     openLink(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** A t.me link opened from inside the sheet stays inside Telegram; `false` means use a plain link. */
+export function openTelegramLink(url: string): boolean {
+  if (!isInsideTelegram()) return false;
+
+  const open = getTelegramWebApp()?.openTelegramLink;
+  if (!open) return false;
+
+  try {
+    open(url);
     return true;
   } catch {
     return false;

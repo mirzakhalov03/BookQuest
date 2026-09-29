@@ -29,6 +29,10 @@
   --color-gold: #c8a24a;
   --color-gold-soft: #e3c77e;
 
+  /* Rejected states: the palette's own ember-adjacent orange, never a borrowed red */
+  --color-error: #e9976a;
+  --color-error-line: #b2532a;
+
   /* One family, two widths */
   --font-display: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-sans: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;

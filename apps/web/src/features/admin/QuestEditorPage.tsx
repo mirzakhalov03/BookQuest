@@ -153,7 +153,7 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
         />
 
         {formError && (
-          <p role="alert" className="m-0 text-sm text-[#E9976A]">
+          <p role="alert" className="m-0 text-sm text-error">
             {formError}
           </p>
         )}

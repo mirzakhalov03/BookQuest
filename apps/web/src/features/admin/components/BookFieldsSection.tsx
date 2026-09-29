@@ -67,7 +67,7 @@ export function BookFieldsSection({ value, onPatch, errors, onCoverUploadingChan
           onChange={(event) => onPatch({ description: event.target.value })}
           className="w-full resize-y border-0 border-b border-b-[color:var(--rule-strong)] bg-transparent px-[0.15rem] py-2 text-base text-paper placeholder:text-taupe focus:border-b-[color:var(--color-ember)] focus:outline-none"
         />
-        <p className="min-h-[1.15rem] text-sm text-[#E9976A]">{errors['book.description']}</p>
+        <p className="min-h-[1.15rem] text-sm text-error">{errors['book.description']}</p>
       </label>
     </section>
   );
