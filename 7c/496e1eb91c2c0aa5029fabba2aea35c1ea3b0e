@@ -1,0 +1,43 @@
+apps/web/src/features/admin/components/SaveBar.tsx
+  s_599d0204756638::t_cbb2896b25f0d2 1-53
+apps/web/src/features/admin/components/UnsavedChangesSheet.tsx
+  s_599d0204756638::t_ac819723bc8e32 1-25
+apps/web/src/features/admin/quest/QuestEditorPage.tsx
+  s_599d0204756638::t_c7dad7459851fa 1-4,8-11,14-26,30-41,45-50,56-60,62,66-67,70,74-78,80-113
+apps/web/src/features/admin/quest/components/BookFieldsSection.tsx
+  s_599d0204756638::t_622613984d17fe 1-3,8,12-19,21-24,28,30-31,33-44,46-53
+apps/web/src/features/admin/quest/components/EditorSection.tsx
+  s_599d0204756638::t_92bf3024908c10 1-51
+apps/web/src/features/admin/quest/components/PrizeFieldsSection.tsx
+  s_599d0204756638::t_cc7ae8ab445868 1-2,5-10,13-19
+apps/web/src/features/admin/quest/components/QuestDateFieldsSection.tsx
+  s_599d0204756638::t_65400a46383db2 1-4,7-9,12-29
+apps/web/src/features/admin/quest/components/QuestFormFields.tsx
+  s_599d0204756638::t_0534ad9cd93c25 1-57
+apps/web/src/features/admin/quest/components/QuizMetaFieldsSection.tsx
+  s_599d0204756638::t_b4eb31b0690372 1,3,5-10,13,15,17,20,22,25,27,30,32,34
+apps/web/src/features/admin/quest/components/ResourceListEditor.tsx
+  s_599d0204756638::t_62ebd82d7e2a30 1-2,4,8-14,17,19-20,22-25,35-36,41
+apps/web/src/hooks/useSaveShortcut.ts
+  s_599d0204756638::t_1cd0bce28c1e8a 1-20
+apps/web/src/hooks/useUnsavedChangesGuard.ts
+  s_599d0204756638::t_4d0f2da1a420cb 1-32
+apps/web/src/styles/shell.css
+  s_599d0204756638::t_8304e419c01530 256-302
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "7c496e1eb91c2c0aa5029fabba2aea35c1ea3b0e",
+  "prompts": {},
+  "sessions": {
+    "s_599d0204756638": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "56e397ae-d88b-409d-90e9-e3ea5ad104c0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
