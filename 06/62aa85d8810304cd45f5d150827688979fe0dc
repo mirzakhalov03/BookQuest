@@ -1,0 +1,37 @@
+apps/web/src/components/ui/Button.tsx
+  s_13c5629a4826cc::t_31b6225fdbdaa7 21
+apps/web/src/components/ui/Toast.tsx
+  s_13c5629a4826cc::t_a74befa8d0dd2c 18
+apps/web/src/features/admin/BroadcastPage.tsx
+  s_13c5629a4826cc::t_f38dc56fb01eb6 35,49,65
+apps/web/src/features/admin/DashboardPage.tsx
+  s_13c5629a4826cc::t_5beaa26e2df1dc 106
+apps/web/src/features/admin/components/ParticipantsTable.tsx
+  s_13c5629a4826cc::t_faac477583e810 22
+apps/web/src/features/notifications/NotificationsPage.tsx
+  s_13c5629a4826cc::t_5c6ebae1a2d934 34
+apps/web/src/styles/base.css
+  s_13c5629a4826cc::t_d55dfb84d4276a 39
+apps/web/src/styles/register.css
+  s_13c5629a4826cc::t_d03df5be07b4b1 42
+apps/web/src/styles/results.css
+  s_13c5629a4826cc::t_8bfa1b1d8d7246 40
+apps/web/src/styles/theme.css
+  s_13c5629a4826cc::t_fd3436981d2f64 38-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "0662aa85d8810304cd45f5d150827688979fe0dc",
+  "prompts": {},
+  "sessions": {
+    "s_13c5629a4826cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af0a02e0-29af-4155-a6b1-e4b4c3f383ed",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
