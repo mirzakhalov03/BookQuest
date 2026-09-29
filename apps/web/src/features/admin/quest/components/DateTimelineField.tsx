@@ -17,16 +17,26 @@ interface DateTimelineFieldProps {
 }
 
 export function DateTimelineField({ savedDates }: DateTimelineFieldProps) {
-  const { control, setValue, trigger } = useFormContext<QuestFormState>();
+  const {
+    control,
+    setValue,
+    trigger,
+    formState: { errors }
+  } = useFormContext<QuestFormState>();
   const dates = useWatch({ control, name: 'dates' });
   const [mode, setMode] = useState<ShiftMode>('keep');
   const [unlocked, setUnlocked] = useState<ReadonlySet<QuestDateField>>(new Set());
+  // Captured once per editing session on purpose, so dates don't flip to "passed" mid-edit.
   const [now] = useState(() => new Date());
 
   const isLocked = (field: QuestDateField) => {
     const saved = savedDates ? parseLocal(savedDates[field]) : null;
     return saved !== null && saved <= now && !unlocked.has(field);
   };
+
+  // Ordering errors land on the later date of a pair and keep-the-gaps moves later dates, so both must become inputs.
+  const unlockFrom = (key: QuestDateField) =>
+    setUnlocked((prev) => new Set([...prev, ...QUEST_DATE_FIELDS.slice(QUEST_DATE_FIELDS.indexOf(key))]));
 
   // setValue rather than field.onChange: keeping the gaps changes several dates at once.
   const change = (key: QuestDateField, value: string) => {
@@ -61,17 +71,20 @@ export function DateTimelineField({ savedDates }: DateTimelineFieldProps) {
           const date = parsed[key];
           if (isLocked(key) && date) {
             return (
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="text-paper-dim">{formatLongDate(date)} · passed</span>
-                <Button
-                  type="button"
-                  variant="quiet"
-                  className="min-h-11 px-2 text-sm"
-                  onClick={() => setUnlocked((prev) => new Set(prev).add(key))}
-                >
-                  Edit anyway
-                </Button>
-              </div>
+              <>
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-paper-dim">{formatLongDate(date)} · passed</span>
+                  <Button type="button" variant="quiet" className="min-h-11 px-2 text-sm" onClick={() => unlockFrom(key)}>
+                    Edit anyway
+                  </Button>
+                </div>
+                {/* Backstop for server errors; ordering errors can't land here because later dates unlock too. */}
+                {errors.dates?.[key]?.message && (
+                  <p role="alert" className="m-0 text-sm text-error">
+                    {errors.dates[key]?.message}
+                  </p>
+                )}
+              </>
             );
           }
           return (
