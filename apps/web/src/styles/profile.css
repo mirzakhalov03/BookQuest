@@ -1,0 +1,115 @@
+/**
+ * `/me` — the reader's pass. Hand-written for the same reason `stage.css` is:
+ * the ticket's notches are masks, which have no legible utility form.
+ */
+
+/* ── The pass: two stubs, each notched on its shared edge ─────────── */
+
+.pass {
+  --notch: 11px;
+  display: flex;
+  flex-direction: column;
+  filter: drop-shadow(0 18px 32px rgb(10 7 5 / 0.55));
+}
+
+.pass__stub {
+  position: relative;
+  padding: 1.35rem 1.35rem 1.25rem;
+  background: var(--color-ash);
+}
+
+/* The upper stub catches the lamp from the atmosphere above it. */
+.pass__stub--top {
+  border-radius: var(--radius-box) var(--radius-box) 0 0;
+  background:
+    radial-gradient(90% 120% at 15% 0%, rgb(240 160 60 / 0.12), transparent 60%), var(--color-ash);
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at 0 100%, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% 100%, #0000 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle var(--notch) at 0 100%, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% 100%, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+
+.pass__stub--bottom {
+  border-radius: 0 0 var(--radius-box) var(--radius-box);
+  background: var(--color-ash-hi);
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at 0 0, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% 0, #0000 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle var(--notch) at 0 0, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% 0, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+
+/* The tear line, inset so it stops short of the notches. */
+.pass__stub--bottom::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: calc(var(--notch) + 0.5rem);
+  right: calc(var(--notch) + 0.5rem);
+  border-top: 1.5px dashed var(--rule-strong);
+}
+
+/* The number, as a plate — the same gold as the `/me/welcome` reveal, at rest. */
+.pass__number {
+  font-family: var(--font-display);
+  font-size: clamp(2.43rem, 12.96vw, 3.44rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--color-gold);
+  text-shadow: 0 0 36px rgb(200 162 74 / 0.3);
+}
+
+/* ── The certificate slot, before there's a certificate in it ─────── */
+
+.cert-slot {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.15rem;
+  border: 1.5px dashed var(--rule-gold);
+  border-radius: var(--radius-box);
+  background: rgb(200 162 74 / 0.04);
+}
+
+/* ── The avatar picker: a bottom sheet on `<dialog>` ─────────────── */
+
+.avatar-sheet {
+  inset: auto 0 0;
+  width: 100%;
+  max-width: 32rem;
+  max-height: 85dvh;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--rule-gold);
+  border-radius: 1.25rem 1.25rem 0 0;
+  background: var(--color-ash);
+  color: var(--color-paper);
+  overflow-y: auto;
+}
+
+.avatar-sheet[open] {
+  animation: sheet-up 380ms var(--ease-out-quest);
+}
+
+.avatar-sheet::backdrop {
+  background: rgb(10 7 5 / 0.65);
+  backdrop-filter: blur(3px);
+  animation: sheet-fade 240ms linear;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+}
