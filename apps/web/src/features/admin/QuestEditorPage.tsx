@@ -61,6 +61,7 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
   const [form, setForm] = useState<QuestFormState>(() => toFormState(quest));
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const [isCoverUploading, setIsCoverUploading] = useState(false);
   const showToast = useUiStore((state) => state.showToast);
   const update = useUpdateQuest(quest.id);
 
@@ -76,7 +77,8 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
     (resource) => resource.url.trim() === '' || isValidResourceUrl(resource.url)
   );
 
-  const canSubmit = patch !== null && !dateIssues && resourcesAreValid && !update.isPending;
+  const canSubmit =
+    patch !== null && !dateIssues && resourcesAreValid && !update.isPending && !isCoverUploading;
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -116,6 +118,7 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
           value={form.book}
           errors={fieldErrors}
           onChange={(book) => setForm((prev) => ({ ...prev, book }))}
+          onCoverUploadingChange={setIsCoverUploading}
         />
 
         <ResourceListEditor

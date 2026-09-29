@@ -1,6 +1,7 @@
 import type { ChangeEvent } from 'react';
 import { Field } from '@/components/ui/Field';
 import type { QuestFormState } from '../questForm';
+import { CoverPicker } from './CoverPicker';
 
 interface BookFieldsSectionProps {
   value: QuestFormState['book'];
@@ -9,15 +10,15 @@ interface BookFieldsSectionProps {
    * The whole map is handed to every section rather than sliced per-section:
    * each one only ever reads the few keys it owns. */
   errors: Record<string, string>;
+  /** Lets the editor hold Save while a cover is still uploading. */
+  onCoverUploadingChange: (uploading: boolean) => void;
 }
 
 /**
- * Title, author, pages, cover and description. Cover is a URL field, not an
- * upload (TBD-6: no upload endpoint exists, and `coverUrl` is validated as a
- * URL server-side) — so it's the same `Field` every other text input here
- * is, just typed `url`.
+ * Title, author, pages, cover and description. The cover uploads on pick and
+ * lands here as a URL, so the save path treats it like any other text field.
  */
-export function BookFieldsSection({ value, onChange, errors }: BookFieldsSectionProps) {
+export function BookFieldsSection({ value, onChange, errors, onCoverUploadingChange }: BookFieldsSectionProps) {
   const set = (patch: Partial<QuestFormState['book']>) => onChange({ ...value, ...patch });
 
   return (
@@ -50,14 +51,11 @@ export function BookFieldsSection({ value, onChange, errors }: BookFieldsSection
         onChange={(event: ChangeEvent<HTMLInputElement>) => set({ pages: event.target.value })}
       />
 
-      <Field
-        label="Cover URL"
-        type="url"
-        placeholder="https://…"
+      <CoverPicker
         value={value.coverUrl}
-        status={errors['book.coverUrl'] ? 'bad' : undefined}
-        message={errors['book.coverUrl'] ?? 'Leave blank for the drawn cover.'}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => set({ coverUrl: event.target.value })}
+        error={errors['book.coverUrl']}
+        onChange={(coverUrl) => set({ coverUrl })}
+        onUploadingChange={onCoverUploadingChange}
       />
 
       <label className="grid gap-[0.4rem]">
