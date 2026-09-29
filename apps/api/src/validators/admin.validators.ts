@@ -7,7 +7,7 @@ const objectId = z.string().regex(OBJECT_ID_PATTERN, 'That is not a valid id.');
 export const questIdParams = z.object({ id: objectId });
 
 export const adminParticipantQuery = z.object({
-  /** Matched against name or number. */
+  /** Matched against name, number or contact. */
   q: z.string().trim().max(80).optional(),
   questId: objectId.optional(),
   page: z.coerce.number().int().positive().default(1),

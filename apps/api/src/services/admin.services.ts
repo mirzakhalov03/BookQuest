@@ -32,6 +32,7 @@ export async function listParticipants(query: ParticipantQuery): Promise<Paginat
     const asNumber = Number(term);
     filter.$or = [
       { fullName: { $regex: escapeRegex(term), $options: 'i' } },
+      { 'contact.value': { $regex: escapeRegex(term), $options: 'i' } },
       ...(Number.isInteger(asNumber) ? [{ number: asNumber }] : [])
     ];
   }

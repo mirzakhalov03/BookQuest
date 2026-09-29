@@ -1,5 +1,6 @@
 import type { Participant } from '@bookquest/shared';
 import { ParticipantNumeral } from '@/components/ui/ParticipantNumeral';
+import { ContactLink } from './ContactLink';
 import { formatLongDate } from '@/lib/format';
 
 /**
@@ -26,10 +27,7 @@ export function ParticipantsTable({ participants }: { participants: Participant[
               <span className="text-sm text-taupe-dim">{formatLongDate(participant.registeredAt)}</span>
             </div>
             <p className="text-paper">{participant.fullName}</p>
-            <p className="text-sm text-taupe-dim">
-              <span className="type-label mr-1">{participant.contact.method}</span>
-              {participant.contact.value}
-            </p>
+            <ContactLink contact={participant.contact} />
           </li>
         ))}
       </ul>
@@ -52,8 +50,7 @@ export function ParticipantsTable({ participants }: { participants: Participant[
                 </td>
                 <td className="py-2 pr-3 text-paper">{participant.fullName}</td>
                 <td className="py-2 pr-3 text-paper-dim">
-                  <span className="type-label mr-1">{participant.contact.method}</span>
-                  {participant.contact.value}
+                  <ContactLink contact={participant.contact} />
                 </td>
                 <td className="py-2 pr-3 text-taupe-dim">{formatLongDate(participant.registeredAt)}</td>
               </tr>

@@ -317,7 +317,10 @@ function adminParticipants(context: Context): Result {
   const all = [...getState().participants].sort((a, b) => a.number - b.number);
   const matches = term
     ? all.filter(
-        (entry) => entry.fullName.toLowerCase().includes(term) || String(entry.number) === term
+        (entry) =>
+          entry.fullName.toLowerCase().includes(term) ||
+          entry.contact.value.toLowerCase().includes(term) ||
+          String(entry.number) === term
       )
     : all;
 

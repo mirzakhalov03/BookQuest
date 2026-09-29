@@ -1,95 +1,73 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
+import type { Paginated, Participant } from '@bookquest/shared';
+import type { InfiniteData } from '@tanstack/react-query';
 import { AdminScreen } from '@/layouts/AdminLayout';
-import { LoadingState } from '@/components/feedback/LoadingState';
-import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
+import { Button } from '@/components/ui/Button';
+import { SearchInput } from '@/components/ui/SearchInput';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { formatCount } from '@/lib/format';
 import { useAdminParticipants } from './api/useAdminParticipants';
+import { AdminQuery } from './components/AdminQuery';
 import { AdminPageHeader } from './components/AdminPageHeader';
-import { ForbiddenState, isForbidden } from './components/ForbiddenState';
 import { ParticipantsTable } from './components/ParticipantsTable';
-import { ParticipantsPager } from './components/ParticipantsPager';
 
 const LIMIT = 50;
 const SEARCH_DEBOUNCE_MS = 350;
 
-/**
- * `/admin/participants` — number, name, contact, registered date. Contact is
- * the whole reason this endpoint exists separately from `ParticipantPublic`
- * (spec: admins need to reach people; everyone else gets a name and a
- * number, never a phone or a Telegram handle).
- */
+/** `/admin/participants` — the roster with contact, which is why this endpoint is admin-only. */
 export function ParticipantsPage() {
-  const [searchInput, setSearchInput] = useState('');
-  const [page, setPage] = useState(1);
-  const debouncedQuery = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchInput, setSearchInput] = useState(() => searchParams.get('q') ?? '');
+  const query = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
+  const participants = useAdminParticipants({ q: query, limit: LIMIT });
 
-  const query = useAdminParticipants({ q: debouncedQuery, page, limit: LIMIT });
-
-  function handleSearchChange(value: string) {
-    setSearchInput(value);
-    // A new search is a new result set — staying on page 3 of an old query
-    // would either show the wrong rows or a page that no longer exists.
-    setPage(1);
-  }
+  // In the URL so a refresh, a shared link or Back keeps the search.
+  useEffect(() => {
+    setSearchParams(query ? { q: query } : {}, { replace: true });
+  }, [query, setSearchParams]);
 
   return (
     <AdminScreen className="max-w-4xl">
       <AdminPageHeader eyebrow="Participants" title="The roster" />
-
-      <label className="flex flex-col gap-1">
-        <span className="type-label">Search</span>
-        <input
-          type="search"
-          value={searchInput}
-          onChange={(event) => handleSearchChange(event.target.value)}
-          placeholder="Name or participant number"
-          className="h-11 w-full max-w-sm border-0 border-b border-b-[color:var(--rule-strong)] bg-transparent px-1 text-base text-paper placeholder:text-taupe focus:border-b-[color:var(--color-ember)] focus:outline-none"
-        />
-      </label>
-
-      <Body
-        query={query}
-        page={page}
-        onPageChange={setPage}
-        limit={LIMIT}
-        hasQuery={debouncedQuery.length > 0}
+      <SearchInput
+        aria-label="Search participants"
+        placeholder="Name, number or contact"
+        value={searchInput}
+        onChange={setSearchInput}
+        className="max-w-sm"
       />
+      <AdminQuery query={participants} loadingLabel="Counting the roster…">
+        {(data) => (
+          <Roster
+            data={data}
+            hasQuery={query.length > 0}
+            hasMore={participants.hasNextPage}
+            isLoadingMore={participants.isFetchingNextPage}
+            onLoadMore={() => void participants.fetchNextPage()}
+          />
+        )}
+      </AdminQuery>
     </AdminScreen>
   );
 }
 
-function Body({
-  query,
-  page,
-  onPageChange,
-  limit,
-  hasQuery
-}: {
-  query: ReturnType<typeof useAdminParticipants>;
-  page: number;
-  onPageChange: (page: number) => void;
-  limit: number;
+interface RosterProps {
+  data: InfiniteData<Paginated<Participant>>;
   hasQuery: boolean;
-}) {
-  if (query.isPending) return <LoadingState label="Counting the roster…" />;
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  onLoadMore: () => void;
+}
 
-  if (query.error) {
-    if (isForbidden(query.error)) return <ForbiddenState error={query.error} />;
-    return <ErrorState error={query.error} onRetry={() => query.refetch()} className="flex-1" />;
-  }
-
-  const { items, total } = query.data;
+function Roster({ data, hasQuery, hasMore, isLoadingMore, onLoadMore }: RosterProps) {
+  const items = data.pages.flatMap((page) => page.items);
+  const total = data.pages[0]?.total ?? 0;
 
   if (items.length === 0) {
     return hasQuery ? (
-      <EmptyState
-        title="No one matches that search"
-        titleAs="h2"
-        body="Try a different name or number."
-        className="flex-1"
-      />
+      <EmptyState title="No one matches that search" titleAs="h2" body="Try a different name, number or contact." className="flex-1" />
     ) : (
       <EmptyState title="No one has registered yet" titleAs="h2" className="flex-1" />
     );
@@ -97,15 +75,15 @@ function Body({
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <p className="text-sm text-taupe">{formatCount(total)} registered</p>
+      <p className="m-0 text-sm text-taupe">
+        {formatCount(total)} {hasQuery ? 'found' : 'registered'}
+      </p>
       <ParticipantsTable participants={items} />
-      <ParticipantsPager
-        page={page}
-        limit={limit}
-        total={total}
-        onPageChange={onPageChange}
-        isFetching={query.isFetching}
-      />
+      {hasMore && (
+        <Button variant="quiet" onClick={onLoadMore} disabled={isLoadingMore} className="self-center">
+          {isLoadingMore ? 'Loading…' : `Show more · ${formatCount(total - items.length)} left`}
+        </Button>
+      )}
     </div>
   );
 }
