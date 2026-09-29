@@ -938,13 +938,14 @@ Dashboard numbers: registrations today, total, quiz submissions, completion rate
 
 #### `POST /api/v1/admin/broadcasts` ⬜
 
-Send a Telegram broadcast to participants. Delivery is asynchronous — DMs are sent after the response.
+Send a broadcast to participants. Every user gets it in-app; users with Telegram linked also get a DM. Delivery is asynchronous — DMs are sent after the response.
 
 **Auth:** required, `role === 'admin'`.
 
-**Body:** `{ "message": "...", "sendDmToAll": boolean }`
+**Body:** `{ "message": string (trimmed, 1–1000 chars) }`
 
-**`202 Accepted`** → `{ "ok": true, "data": { "id": "...", "status": "sending", "sentAt": "2026-09-29T...", "dmCount": 412 } }`
+**`202 Accepted`** → `{ "ok": true, "data": { /* Broadcast */ } }`
+- `status` is `"sending"` on POST; updates to `"sent"` or `"interrupted"` as delivery progresses.
 
 ---
 
