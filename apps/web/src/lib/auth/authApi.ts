@@ -4,7 +4,8 @@ import type {
   Session,
   SessionUser,
   TelegramCodeChallenge,
-  TelegramWidgetAuthPayload
+  TelegramWidgetAuthPayload,
+  UpdateProfilePayload
 } from '@bookquest/shared';
 import { api } from '@/lib/api/client';
 import { getInitData } from '@/lib/telegram';
@@ -17,6 +18,9 @@ import { storeToken } from './tokenStore';
  */
 
 export const fetchMe = (): Promise<SessionUser> => api.get<SessionUser>('/auth/me');
+
+export const updateProfile = (payload: UpdateProfilePayload): Promise<SessionUser> =>
+  api.patch<SessionUser>('/auth/me', payload);
 
 /**
  * The Mini App's sign-in. Resolves to null outside Telegram, where there is

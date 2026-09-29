@@ -31,6 +31,10 @@ const userSchema = new Schema(
     username: { type: String, default: null },
     photoUrl: { type: String, default: null },
     languageCode: { type: String, default: null },
+    /* An id from the shared `AVATARS` list. No enum here: the set will be
+       swapped, and a retired id should read back as "no avatar", not fail
+       validation on the user's next save. */
+    avatar: { type: String, default: null },
 
     /* Resolved from ADMIN_TELEGRAM_IDS at login and re-read from here on every
        admin request. There is no endpoint that writes it. */

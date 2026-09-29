@@ -101,6 +101,7 @@ export const SESSION_USER: SessionUser = {
   firstName: 'Aziza',
   username: 'aziza_n',
   photoUrl: null,
+  avatar: null,
   role: 'admin',
   participant: null
 };

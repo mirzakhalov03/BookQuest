@@ -5,9 +5,11 @@ import type {
   TelegramAuthPayload,
   TelegramCodeRequestPayload,
   TelegramCodeVerifyPayload,
-  TelegramWidgetAuthPayload
+  TelegramWidgetAuthPayload,
+  UpdateProfilePayload
 } from '@bookquest/shared';
 import * as authService from '../services/auth.services.js';
+import * as userService from '../services/user.services.js';
 import * as loginCodeService from '../services/login-code.services.js';
 import { currentUser } from '../middlewares/auth.middleware.js';
 import { ok } from '../utils/respond.js';
@@ -41,6 +43,12 @@ export async function linkTelegramAccount(req: Request, res: Response): Promise<
 /** GET /api/v1/auth/me */
 export async function getMe(req: Request, res: Response): Promise<void> {
   ok(res, await authService.toSessionUser(currentUser(req)));
+}
+
+/** PATCH /api/v1/auth/me */
+export async function updateMe(req: Request, res: Response): Promise<void> {
+  const user = await userService.updateProfile(currentUser(req), req.body as UpdateProfilePayload);
+  ok(res, await authService.toSessionUser(user));
 }
 
 /** POST /api/v1/auth/telegram-code/request */

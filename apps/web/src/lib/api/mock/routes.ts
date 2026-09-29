@@ -3,6 +3,7 @@ import {
   createQuestSchema,
   findQuestDateIssues,
   registerParticipantSchema,
+  updateProfileSchema,
   updateQuestSchema
 } from '@bookquest/shared';
 import type {
@@ -145,6 +146,17 @@ function describe(issue: Issue): string {
 }
 
 /* ── Handlers ────────────────────────────────────────────────────────────── */
+
+function updateMe(context: Context): Result {
+  requireUser(context);
+  const parsed = updateProfileSchema.safeParse(context.body);
+  if (!parsed.success) throw validationError(parsed.error.issues);
+
+  const next = updateState((draft) => {
+    draft.user = { ...draft.user, avatar: parsed.data.avatar };
+  });
+  return ok(readUser(next));
+}
 
 function login(context: Context): Result {
   const initData = (context.body as { initData?: unknown } | null)?.initData;
@@ -467,6 +479,7 @@ function makeQuestCurrent(context: Context): Result {
 const routes: Route[] = [
   { method: 'POST', path: '/auth/telegram', handle: login },
   { method: 'GET', path: '/auth/me', handle: (context) => ok(requireUser(context)) },
+  { method: 'PATCH', path: '/auth/me', handle: updateMe },
 
   { method: 'GET', path: '/quests', handle: listQuests },
   { method: 'GET', path: '/quests/current', handle: () => ok(requireCurrentQuest()) },

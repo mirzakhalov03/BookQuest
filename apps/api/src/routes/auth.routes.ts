@@ -9,7 +9,8 @@ import {
   phoneRegisterBody,
   phoneLoginBody,
   telegramCodeRequestBody,
-  telegramCodeVerifyBody
+  telegramCodeVerifyBody,
+  updateProfileBody
 } from '../validators/auth.validators.js';
 
 export const authRoutes: Router = Router();
@@ -62,3 +63,4 @@ authRoutes.post(
 );
 
 authRoutes.get('/me', requireUser, authController.getMe);
+authRoutes.patch('/me', requireUser, validate(updateProfileBody), authController.updateMe);

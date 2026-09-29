@@ -4,7 +4,8 @@ import {
   phoneRegisterSchema,
   phoneLoginSchema,
   telegramCodeRequestSchema,
-  telegramCodeVerifySchema
+  telegramCodeVerifySchema,
+  updateProfileSchema
 } from '@bookquest/shared';
 
 /** Request-shaped wrapper around the shared rule. */
@@ -14,3 +15,4 @@ export const phoneRegisterBody = phoneRegisterSchema;
 export const phoneLoginBody = phoneLoginSchema;
 export const telegramCodeRequestBody = telegramCodeRequestSchema;
 export const telegramCodeVerifyBody = telegramCodeVerifySchema;
+export const updateProfileBody = updateProfileSchema;

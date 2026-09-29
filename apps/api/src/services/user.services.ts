@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import type { UpdateProfilePayload } from '@bookquest/shared';
 import { adminPhoneNumbers, adminTelegramIds } from '../config/env.js';
 import { UserModel, type UserDocument } from '../models/user.model.js';
 import type { TelegramProfile } from '../utils/telegram.js';
@@ -108,5 +109,15 @@ export async function linkTelegramToUser(
     throw error;
   }
 
+  return user;
+}
+
+/** PATCH /auth/me. Only the avatar is editable for now. */
+export async function updateProfile(
+  user: UserDocument,
+  update: UpdateProfilePayload
+): Promise<UserDocument> {
+  user.avatar = update.avatar;
+  await user.save();
   return user;
 }

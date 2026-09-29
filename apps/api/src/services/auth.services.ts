@@ -6,6 +6,7 @@ import type {
   SessionUser,
   TelegramWidgetAuthPayload
 } from '@bookquest/shared';
+import { isAvatarId } from '@bookquest/shared';
 import { logger } from '../config/logger.js';
 import type { UserDocument } from '../models/user.model.js';
 import { ApiError } from '../utils/api-error.js';
@@ -119,6 +120,7 @@ export async function toSessionUser(user: UserDocument): Promise<SessionUser> {
     firstName: user.firstName,
     username: user.username ?? null,
     photoUrl: user.photoUrl ?? null,
+    avatar: isAvatarId(user.avatar) ? user.avatar : null,
     role: user.role,
     participant: await findParticipantForUser(user)
   };
