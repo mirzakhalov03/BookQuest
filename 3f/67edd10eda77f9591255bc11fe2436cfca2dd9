@@ -1,0 +1,19 @@
+docs/BACKEND-SPEC.md
+  s_89281e0373e10b::t_8bf6af01270f16 941,945,947-948
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "3f67edd10eda77f9591255bc11fe2436cfca2dd9",
+  "prompts": {},
+  "sessions": {
+    "s_89281e0373e10b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a6d1b393fb9780682",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
