@@ -78,9 +78,23 @@ export function formDates(form: QuestFormState): QuestDates {
 
 /** Blank means "clear it" — the schema's prize and cover/description fields
  * are all nullable, and an empty input is never meant to become `""`. */
-function trimmedOrNull(value: string): string | null {
+export function trimmedOrNull(value: string): string | null {
   const trimmed = value.trim();
   return trimmed === '' ? null : trimmed;
+}
+
+/** Trimmed rows, the exact shape the API stores — used by both the edit diff and the create payload. */
+export function toResources(drafts: ResourceDraft[]): BookResource[] {
+  return drafts.map((resource) => ({
+    label: resource.label.trim(),
+    url: resource.url.trim(),
+    kind: resource.kind
+  }));
+}
+
+/** Blank → `null` ("undecided"); anything else is already a validated whole number. */
+export function toOptionalCount(value: string): number | null {
+  return value.trim() === '' ? null : Number(value);
 }
 
 export function emptyResource(): ResourceDraft {
@@ -119,11 +133,7 @@ export function buildQuestPatch(initial: Quest, form: QuestFormState): UpdateQue
   if (coverUrl !== initial.book.coverUrl) book.coverUrl = coverUrl;
   const description = trimmedOrNull(form.book.description);
   if (description !== initial.book.description) book.description = description;
-  const resources: BookResource[] = form.book.resources.map((resource) => ({
-    label: resource.label.trim(),
-    url: resource.url.trim(),
-    kind: resource.kind
-  }));
+  const resources = toResources(form.book.resources);
   if (JSON.stringify(resources) !== JSON.stringify(initial.book.resources)) {
     book.resources = resources;
   }
@@ -146,12 +156,10 @@ export function buildQuestPatch(initial: Quest, form: QuestFormState): UpdateQue
     }
   }
 
-  const quizQuestionCount =
-    form.quizQuestionCount.trim() === '' ? null : Number(form.quizQuestionCount);
+  const quizQuestionCount = toOptionalCount(form.quizQuestionCount);
   if (quizQuestionCount !== initial.quizQuestionCount) patch.quizQuestionCount = quizQuestionCount;
 
-  const quizDurationMinutes =
-    form.quizDurationMinutes.trim() === '' ? null : Number(form.quizDurationMinutes);
+  const quizDurationMinutes = toOptionalCount(form.quizDurationMinutes);
   if (quizDurationMinutes !== initial.quizDurationMinutes) {
     patch.quizDurationMinutes = quizDurationMinutes;
   }

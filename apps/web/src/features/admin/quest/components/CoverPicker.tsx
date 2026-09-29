@@ -4,7 +4,7 @@ import { COVER_CONTENT_TYPES, COVER_MAX_BYTES, COVER_MESSAGES } from '@bookquest
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { ApiRequestError } from '@/lib/api/client';
-import { useUploadCover } from '../api/useUploadCover';
+import { useUploadCover } from '../../api/useUploadCover';
 
 interface CoverPickerProps {
   /** The form's `book.coverUrl`; `''` means the drawn cover. */

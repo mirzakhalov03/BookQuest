@@ -13,7 +13,7 @@ import { ProfilePage } from '@/features/profile/ProfilePage';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import { DashboardPage } from '@/features/admin/DashboardPage';
 import { ParticipantsPage } from '@/features/admin/ParticipantsPage';
-import { QuestEditorPage } from '@/features/admin/QuestEditorPage';
+import { QuestEditorPage } from '@/features/admin/quest/QuestEditorPage';
 import { ResultsInspectionPage } from '@/features/admin/ResultsInspectionPage';
 import { BroadcastPage } from '@/features/admin/BroadcastPage';
 import { RequireAdmin, RequireAuth } from '@/lib/auth/guards';
