@@ -253,3 +253,50 @@
     border-radius: var(--radius-box);
   }
 }
+
+/* ── Admin save bar ────────────────────────────────────────────────
+   `features/admin/components/SaveBar.tsx`. Below 900px the tab bar sits at the
+   viewport bottom, so the bar docks right on top of it; above, both float. */
+.admin-savebar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--tabbar-h) + var(--safe-b));
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--rule);
+  background: rgb(20 16 12 / 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  opacity: 0;
+  transform: translateY(0.75rem);
+  pointer-events: none;
+  transition:
+    opacity 180ms linear,
+    transform 220ms var(--ease-out-quest);
+}
+
+.admin-savebar.is-on {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+@media (min-width: 900px) {
+  .admin-savebar {
+    left: 50%;
+    right: auto;
+    width: min(44rem, calc(100% - 3rem));
+    bottom: calc(var(--tabbar-h) + 2.2rem);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-box);
+    transform: translate(-50%, 0.75rem);
+  }
+
+  .admin-savebar.is-on {
+    transform: translate(-50%, 0);
+  }
+}

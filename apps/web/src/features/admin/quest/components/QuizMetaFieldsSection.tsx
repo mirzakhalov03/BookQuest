@@ -1,49 +1,36 @@
-import type { ChangeEvent } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { Field } from '@/components/ui/Field';
+import type { QuestFormState } from '../questForm';
 
-interface QuizMetaFieldsSectionProps {
-  questionCount: string;
-  durationMinutes: string;
-  onChangeQuestionCount: (value: string) => void;
-  onChangeDurationMinutes: (value: string) => void;
-  errors: Record<string, string>;
-}
+/** Only for the Home screen's "20 questions, 30 minutes" line; blank means undecided. */
+export function QuizMetaFieldsSection() {
+  const {
+    register,
+    formState: { errors }
+  } = useFormContext<QuestFormState>();
 
-/** `quizQuestionCount` / `quizDurationMinutes` — both nullable, both just for
- * the Home screen's "20 questions, 30 minutes" copy (spec §11). Blank clears
- * to `null`, same convention as prizes and the description. */
-export function QuizMetaFieldsSection({
-  questionCount,
-  durationMinutes,
-  onChangeQuestionCount,
-  onChangeDurationMinutes,
-  errors
-}: QuizMetaFieldsSectionProps) {
   return (
-    <section className="flex flex-col gap-4">
-      <p className="type-label">Quiz</p>
-
+    <div className="grid grid-cols-2 gap-4">
       <Field
-        label="Question count"
+        label="Questions"
         type="number"
+        inputMode="numeric"
         min={1}
         placeholder="20"
-        value={questionCount}
+        {...register('quizQuestionCount')}
         status={errors.quizQuestionCount ? 'bad' : undefined}
-        message={errors.quizQuestionCount}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => onChangeQuestionCount(event.target.value)}
+        message={errors.quizQuestionCount?.message}
       />
-
       <Field
-        label="Duration (minutes)"
+        label="Minutes"
         type="number"
+        inputMode="numeric"
         min={1}
         placeholder="30"
-        value={durationMinutes}
+        {...register('quizDurationMinutes')}
         status={errors.quizDurationMinutes ? 'bad' : undefined}
-        message={errors.quizDurationMinutes ?? 'Leave a field blank to leave it undecided.'}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => onChangeDurationMinutes(event.target.value)}
+        message={errors.quizDurationMinutes?.message}
       />
-    </section>
+    </div>
   );
 }
