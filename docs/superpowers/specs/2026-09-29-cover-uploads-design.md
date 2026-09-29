@@ -36,7 +36,7 @@ If it is left at the default in production, a line goes into `configWarnings`. I
 
 ### Storage
 
-A lazily created `mongoose.mongo.GridFSBucket` named `covers` on `mongoose.connection.db`. Each file's metadata: `{ contentType, uploadedBy }` (the acting user's Telegram id, as in the admin audit log). `filename` is the original name, used only for debugging.
+A lazily created `mongoose.mongo.GridFSBucket` named `covers` on `mongoose.connection.db`. Each file's metadata: `{ contentType, uploadedBy }` (the uploading user's Mongo id — every account has one; phone accounts have no Telegram id). `filename` is the original name, used only for debugging.
 
 ### Routes
 
@@ -58,7 +58,7 @@ A lazily created `mongoose.mongo.GridFSBucket` named `covers` on `mongoose.conne
 
 **`GET /covers/:id`**:
 
-- `:id` is validated with the existing `objectId` pattern (move it from `admin.validators.ts` to a shared `validators/common.validators.ts` so both use it). An invalid id → 404, the same as a missing one, so ids can't be probed by format.
+- `:id` is checked against `OBJECT_ID_PATTERN` inside `cover.services#openCover`. An invalid id → 404, the same as a missing one, so ids can't be probed by format.
 - Looks up the file. Missing → **404** `not_found` ("No such cover.").
 - Headers:
   - `Content-Type`: the stored `metadata.contentType`
@@ -85,10 +85,13 @@ apps/api/src/
   routes/admin/cover.routes.ts          new — POST /
   routes/index.ts                       + apiRoutes.use('/covers', coverRoutes)
   routes/admin/index.ts                 + adminRoutes.use('/covers', adminCoverRoutes)
-  validators/common.validators.ts       new — objectId, idParams
-  validators/admin.validators.ts        imports objectId from common
+  utils/mongo.ts                        + OBJECT_ID_PATTERN (shared by validators and the cover service)
+  utils/audit.ts                        new — admin audit line, shared by quest and cover controllers
+  validators/admin.validators.ts        uses OBJECT_ID_PATTERN
   services/quest.services.ts            delete replaced cover after update
 ```
+
+Limits and copy (`COVER_MAX_BYTES`, `COVER_CONTENT_TYPES`, `COVER_MESSAGES`, `CoverUpload`) live in `packages/shared/src/constants/cover.ts`, so the browser pre-check and the API share one source.
 
 New dependency: `multer` and `@types/multer` in `apps/api`.
 
