@@ -4,32 +4,35 @@ import { Field, statusFor } from '@/components/ui/Field';
 import { DATE_LABEL } from '../../dates';
 import type { QuestFormState } from '../questForm';
 
-/** One Controller over the whole `dates` object, so an ordering error lands on whichever date it names. */
+const DATE_PATHS = QUEST_DATE_FIELDS.map((key) => `dates.${key}` as const);
+
 export function QuestDateFieldsSection() {
   const { control, trigger } = useFormContext<QuestFormState>();
 
   return (
-    <Controller
-      control={control}
-      name="dates"
-      render={({ field, formState: { errors } }) => (
-        <>
-          {QUEST_DATE_FIELDS.map((key) => (
+    <>
+      {QUEST_DATE_FIELDS.map((key) => (
+        <Controller
+          key={key}
+          control={control}
+          name={`dates.${key}`}
+          render={({ field, fieldState }) => (
             <Field
-              key={key}
+              ref={field.ref}
               type="datetime-local"
               label={DATE_LABEL[key]}
-              value={field.value[key]}
+              value={field.value}
+              onBlur={field.onBlur}
               onChange={(event) => {
-                field.onChange({ ...field.value, [key]: event.target.value });
-                // Re-validate explicitly: the resolver's lookup for a whole-object Controller drops nested errors.
-                void trigger('dates');
+                field.onChange(event.target.value);
+                // Ordering errors can land on a date the user didn't touch, so re-check all five.
+                void trigger(DATE_PATHS);
               }}
-              {...statusFor(errors.dates?.[key]?.message)}
+              {...statusFor(fieldState.error?.message)}
             />
-          ))}
-        </>
-      )}
-    />
+          )}
+        />
+      ))}
+    </>
   );
 }
