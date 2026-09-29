@@ -48,6 +48,9 @@ export function installMockTransport(): void {
 
 async function readBody(request: Request): Promise<unknown> {
   if (request.method === 'GET' || request.method === 'HEAD') return null;
+  if (request.headers.get('content-type')?.startsWith('multipart/form-data')) {
+    return request.formData();
+  }
 
   const raw = await request.text();
   if (!raw) return null;

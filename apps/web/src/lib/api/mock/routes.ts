@@ -1,4 +1,5 @@
 import {
+  COVER_MESSAGES,
   PARTICIPANT_NUMBER_MAX,
   createQuestSchema,
   findQuestDateIssues,
@@ -473,6 +474,17 @@ function makeQuestCurrent(context: Context): Result {
   return ok(readQuest(target, countFor(getState(), target)));
 }
 
+/** A session-lived blob URL stands in for the GridFS URL — enough for the picker to work end to end. */
+function uploadCover(context: Context): Result {
+  requireAdmin(context);
+
+  const file = context.body instanceof FormData ? context.body.get('file') : null;
+  if (!(file instanceof File)) {
+    throw new MockError(400, 'validation_failed', COVER_MESSAGES.missing, { file: COVER_MESSAGES.missing });
+  }
+  return created({ url: URL.createObjectURL(file) });
+}
+
 /* ── Table ───────────────────────────────────────────────────────────────── */
 
 /** Literal paths sit above their `:param` neighbours — first match wins. */
@@ -501,6 +513,7 @@ const routes: Route[] = [
 
   { method: 'GET', path: '/admin/participants', handle: adminParticipants },
   { method: 'GET', path: '/admin/stats', handle: adminStats },
+  { method: 'POST', path: '/admin/covers', handle: uploadCover },
   { method: 'POST', path: '/admin/quests', handle: createQuest },
   { method: 'POST', path: '/admin/quests/:id/make-current', handle: makeQuestCurrent },
   { method: 'PATCH', path: '/admin/quests/:id', handle: updateQuest }

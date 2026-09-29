@@ -70,11 +70,13 @@ export function registerReauthenticate(fn: Reauthenticate): void {
 
 function send(path: string, options: RequestOptions, token: string | null): Promise<Response> {
   const { body, headers, ...rest } = options;
+  // The browser must write the multipart boundary itself, so FormData gets no Content-Type from us.
+  const isForm = body instanceof FormData;
 
   return fetch(`${BASE_URL}${path}`, {
     ...rest,
     headers: {
-      ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      ...(body === undefined || isForm ? {} : { 'Content-Type': 'application/json' }),
       ...(token === null ? {} : { Authorization: `Bearer ${token}` }),
       // Free-tier ngrok shows a "Visit Site" interstitial to any request with a
       // real browser User-Agent — which the Telegram WebView always sends — and
@@ -83,7 +85,7 @@ function send(path: string, options: RequestOptions, token: string | null): Prom
       'ngrok-skip-browser-warning': 'true',
       ...headers
     },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) })
+    ...(body === undefined ? {} : { body: isForm ? body : JSON.stringify(body) })
   });
 }
 
@@ -123,5 +125,6 @@ export const api = {
   // The admin quest editor is the first caller: `strictObject().partial()` on
   // the server means a partial body is the contract, not a shortcut, so this
   // sends exactly what the caller builds — no merging happens here.
-  patch: <T>(path: string, body: unknown) => request<T>(path, { method: 'PATCH', body })
+  patch: <T>(path: string, body: unknown) => request<T>(path, { method: 'PATCH', body }),
+  upload: <T>(path: string, form: FormData) => request<T>(path, { method: 'POST', body: form })
 };
