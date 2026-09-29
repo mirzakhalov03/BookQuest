@@ -55,7 +55,7 @@ export async function openCover(id: string) {
 }
 
 /** Our own cover's id from a stored `coverUrl`; `null` for pasted external URLs. */
-export function coverIdFromUrl(url: string | null): string | null {
+export function coverIdFromUrl(url: string | null | undefined): string | null {
   if (!url?.startsWith(COVER_URL_PREFIX)) return null;
   const id = url.slice(COVER_URL_PREFIX.length);
   return OBJECT_ID_PATTERN.test(id) ? id : null;

@@ -13,6 +13,7 @@ import { ParticipantModel } from '../models/participant.model.js';
 import { ApiError } from '../utils/api-error.js';
 import { isDuplicateKeyError } from '../utils/mongo.js';
 import { withTransaction } from '../utils/transaction.js';
+import { coverIdFromUrl, discardCover } from './cover.services.js';
 
 const ARCHIVE_PAGE_SIZE = 20;
 
@@ -105,6 +106,12 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
   });
   if (issues) throw badDates(issues);
 
+  // Only when the cover actually changes, and only if the old one is ours — pasted URLs aren't ours to delete.
+  const replacedCoverId =
+    payload.book && 'coverUrl' in payload.book && payload.book.coverUrl !== quest.book.coverUrl
+      ? coverIdFromUrl(quest.book.coverUrl)
+      : null;
+
   const update: Record<string, unknown> = {};
 
   for (const field of QUEST_DATE_FIELDS) {
@@ -129,6 +136,7 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
   );
 
   if (!updated) throw ApiError.notFound('No such quest.');
+  if (replacedCoverId) await discardCover(replacedCoverId);
   return toQuestDto(updated);
 }
 
