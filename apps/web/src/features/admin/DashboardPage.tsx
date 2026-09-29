@@ -10,6 +10,7 @@ import { formatCount, formatLongDate } from '@/lib/format';
 import { useAdminStats } from './api/useAdminStats';
 import { AdminQuery } from './components/AdminQuery';
 import { AdminPageHeader } from './components/AdminPageHeader';
+import { ForbiddenState, isForbidden } from './components/ForbiddenState';
 import { QuestTimeline } from './components/QuestTimeline';
 import { PHASE_LABEL, nextMilestone, type Milestone } from './phase';
 import { questDates } from './dates';
@@ -42,6 +43,9 @@ function Dashboard({ quest }: { quest: Quest }) {
   const stats = useAdminStats();
   const [now] = useState(() => new Date());
   const milestone = nextMilestone(quest, now);
+  // Quest is public; only the stats call tells us the viewer isn't an admin.
+  if (isForbidden(stats.error)) return <ForbiddenState error={stats.error} />;
+
   const count = (value: number | undefined) => (value === undefined ? '—' : formatCount(value));
 
   return (
@@ -81,8 +85,13 @@ function Dashboard({ quest }: { quest: Quest }) {
 function MilestoneLine({ milestone }: { milestone: Milestone }) {
   // Memoised on the ISO string: a fresh Date each render would restart useCountdown's tick.
   const target = useMemo(() => new Date(milestone.at), [milestone.at]);
-  const { days } = useCountdown(target);
-  const when = days === 0 ? 'today' : `in ${days} ${days === 1 ? 'day' : 'days'}`;
+  const { days, hours } = useCountdown(target);
+  // Worded from time remaining: days === 0 spans 24h, so it can't say "today" honestly.
+  let when: string;
+  if (target.getTime() <= Date.now()) when = 'now';
+  else if (days >= 1) when = `in ${days} ${days === 1 ? 'day' : 'days'}`;
+  else if (hours >= 1) when = `in ${hours} h`;
+  else when = 'within the hour';
 
   return (
     <p className="m-0 text-paper">
