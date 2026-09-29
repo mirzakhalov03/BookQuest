@@ -1,0 +1,21 @@
+docs/BACKEND-SPEC.md
+  s_89281e0373e10b::t_dedc5e6f8e8752 920-925,939-962
+docs/FRONTEND-SPEC.md
+  s_89281e0373e10b::t_2ac03e46dc8424 154-155
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "ed6993c84d5fea8ce02472bce58661777848ef33",
+  "prompts": {},
+  "sessions": {
+    "s_89281e0373e10b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a6d1b393fb9780682",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
