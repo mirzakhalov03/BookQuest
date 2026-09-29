@@ -8,7 +8,6 @@ import { ErrorState, FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { ApiRequestError, isNotFound } from '@/lib/api/client';
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton';
 import { useUiStore } from '@/stores/ui.store';
 import { useUpdateQuest } from './api/useUpdateQuest';
 import { ForbiddenState, isForbidden } from './components/ForbiddenState';
@@ -24,12 +23,8 @@ import { buildQuestPatch, formDates, isValidResourceUrl, toFormState, type Quest
  * `edition`, `year` and `participantCount` are absent on purpose: the
  * server's body schema is strict about them (spec: "identity" and "owned by
  * the registration path"), so there is nothing here that could send them.
- *
- * A child of the dashboard, so it gets the back button.
  */
 export function QuestEditorPage() {
-  useTelegramBackButton('/admin');
-
   const quest = useCurrentQuest();
 
   if (quest.isPending) return <LoadingState label="Opening the ledger…" />;

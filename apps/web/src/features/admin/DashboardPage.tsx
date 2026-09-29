@@ -9,14 +9,13 @@ import { isNotFound } from '@/lib/api/client';
 import { useCountdown } from '@/hooks/useCountdown';
 import { formatCount, formatLongDate } from '@/lib/format';
 import { useAdminStats } from './api/useAdminStats';
+import { PHASE_LABEL } from './phase';
 import { ForbiddenState, isForbidden } from './components/ForbiddenState';
 
 /**
  * `/admin` — the dashboard, and the root of the admin tree (like Home is the
- * root of the participant one), so it gets no Telegram back button; the
- * three screens under it do — see `useTelegramBackButton`'s reasoning and
- * `ParticipantsPage`/`QuestEditorPage`/`ResultsInspectionPage`, which all
- * name this route as their parent.
+ * root of the participant one); no admin tab root shows the Telegram back
+ * button — they are siblings, not children.
  *
  * Two queries feed one screen: `useAdminStats` for the counts, and
  * `useCurrentQuest` — the same cached query Home reads (spec §6) — for the
@@ -93,7 +92,7 @@ export function DashboardPage() {
 
       <div className="flex flex-col gap-1 border-t border-[color:var(--rule)] pt-4 text-sm">
         <p className="text-taupe">
-          Phase: <span className="text-paper-dim">{stats.data.phase}</span>
+          Phase: <span className="text-paper-dim">{PHASE_LABEL[stats.data.phase]}</span>
         </p>
         <p className="text-taupe">{daysRemainingCaption(quest.data)}</p>
       </div>

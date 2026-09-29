@@ -58,7 +58,7 @@ export function AdminLayout() {
 
 function AdminNav() {
   return (
-    <header className="flex items-baseline gap-3 border-b border-[color:var(--rule)] px-4 pt-[calc(1rem+var(--safe-b))] pb-4 sm:px-8">
+    <header className="flex items-baseline gap-3 border-b border-[color:var(--rule)] px-4 pt-[calc(1rem+var(--safe-t))] pb-4 sm:px-8">
       <Link to="/" className="flex items-center gap-1 type-label text-taupe hover:text-paper-dim">
         <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
         Back to the stage

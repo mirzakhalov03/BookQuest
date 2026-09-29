@@ -3,10 +3,10 @@ import { AdminScreen } from '@/layouts/AdminLayout';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { formatCount } from '@/lib/format';
 import { useAdminParticipants } from './api/useAdminParticipants';
+import { AdminPageHeader } from './components/AdminPageHeader';
 import { ForbiddenState, isForbidden } from './components/ForbiddenState';
 import { ParticipantsTable } from './components/ParticipantsTable';
 import { ParticipantsPager } from './components/ParticipantsPager';
@@ -19,12 +19,8 @@ const SEARCH_DEBOUNCE_MS = 350;
  * the whole reason this endpoint exists separately from `ParticipantPublic`
  * (spec: admins need to reach people; everyone else gets a name and a
  * number, never a phone or a Telegram handle).
- *
- * A child of the dashboard, not a tab root, so it does get the back button.
  */
 export function ParticipantsPage() {
-  useTelegramBackButton('/admin');
-
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
   const debouncedQuery = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
@@ -40,10 +36,7 @@ export function ParticipantsPage() {
 
   return (
     <AdminScreen className="max-w-4xl">
-      <header className="flex flex-col gap-1">
-        <p className="type-label">Participants</p>
-        <h1 className="type-display text-3xl text-paper">The roster</h1>
-      </header>
+      <AdminPageHeader eyebrow="Participants" title="The roster" />
 
       <label className="flex flex-col gap-1">
         <span className="type-label">Search</span>

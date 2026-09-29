@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { QuestPhase } from '../constants/quest.js';
 import { bookResourceSchema } from './quest.js';
 
 /**
@@ -71,5 +72,5 @@ export interface AdminStats {
   participants: number;
   registeredToday: number;
   quizSubmitted: number;
-  phase: string;
+  phase: QuestPhase;
 }
