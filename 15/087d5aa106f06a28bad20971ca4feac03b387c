@@ -1,0 +1,25 @@
+apps/web/src/lib/api/mock/routes.ts
+  s_bbdd4b3ae72dd6::t_855073bc5601e8 2,477-487,516
+apps/web/src/features/admin/api/useUploadCover.ts
+  s_bbdd4b3ae72dd6::t_e8327264abb6cd 1-14
+apps/web/src/lib/api/client.ts
+  s_bbdd4b3ae72dd6::t_f4aa5d01f8ea8c 73-74,79,88,128-129
+apps/web/src/lib/api/mock/transport.ts
+  s_bbdd4b3ae72dd6::t_f012677e3b8db5 51-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "15087d5aa106f06a28bad20971ca4feac03b387c",
+  "prompts": {},
+  "sessions": {
+    "s_bbdd4b3ae72dd6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f03ca0a1-a314-401a-9923-d7380087fb9a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
