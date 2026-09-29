@@ -31,7 +31,7 @@ export function NotificationsPage() {
         {notifications.data.map((notification) => (
           <li
             key={notification.id}
-            className={`rounded-[3px] border border-[color:var(--rule)] px-4 py-3 ${
+            className={`rounded-box border border-[color:var(--rule)] px-4 py-3 ${
               notification.readAt ? 'opacity-60' : ''
             }`}
             onClick={() => {

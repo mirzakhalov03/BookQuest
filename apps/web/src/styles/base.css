@@ -36,7 +36,7 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-amber);
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: var(--radius-chip);
 }
 
 /* In `@layer components`, same reason `shell.css`'s `.screen` is (see its

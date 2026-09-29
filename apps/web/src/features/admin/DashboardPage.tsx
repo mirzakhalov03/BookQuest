@@ -103,7 +103,7 @@ export function DashboardPage() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded-[3px] border border-[color:var(--rule)] bg-[color:var(--color-ash)] px-4 py-3">
+    <div className="flex flex-col gap-1 rounded-box border border-[color:var(--rule)] bg-[color:var(--color-ash)] px-4 py-3">
       <p className="type-label">{label}</p>
       <p className="type-display tabular-nums text-2xl text-paper">{value}</p>
     </div>

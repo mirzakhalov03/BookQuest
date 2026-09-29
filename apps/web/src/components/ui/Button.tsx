@@ -18,7 +18,7 @@ const VARIANTS: Record<Variant, string> = {
 };
 
 const BASE_CLASSES =
-  'inline-flex min-h-[3.25rem] items-center justify-center gap-3 rounded-[3px] px-6 text-base font-semibold transition-transform duration-150 active:translate-y-0.5';
+  'inline-flex min-h-[3.25rem] items-center justify-center gap-3 rounded-box px-6 text-base font-semibold transition-transform duration-150 active:translate-y-0.5';
 
 /**
  * The filled button is the only solid surface in the interface, which is what

@@ -15,7 +15,7 @@ export function Toast() {
     <p
       role="status"
       aria-live="polite"
-      className={`fixed left-1/2 z-20 m-0 -translate-x-1/2 whitespace-nowrap rounded-[3px] border border-[color:var(--rule)] bg-[rgba(33,27,21,0.94)] px-4 py-[0.6rem] text-sm text-paper-dim backdrop-blur-[10px] pointer-events-none bottom-[calc(var(--tabbar-h)+var(--safe-b)+1rem)] [transition:opacity_200ms_linear,transform_220ms_var(--ease-out-quest)] ${
+      className={`fixed left-1/2 z-20 m-0 -translate-x-1/2 whitespace-nowrap rounded-box border border-[color:var(--rule)] bg-[rgba(33,27,21,0.94)] px-4 py-[0.6rem] text-sm text-paper-dim backdrop-blur-[10px] pointer-events-none bottom-[calc(var(--tabbar-h)+var(--safe-b)+1rem)] [transition:opacity_200ms_linear,transform_220ms_var(--ease-out-quest)] ${
         isOn ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
       }`}
     >

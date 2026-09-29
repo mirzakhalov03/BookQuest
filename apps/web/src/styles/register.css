@@ -39,7 +39,7 @@
   color: var(--color-gold);
   padding: 0.1rem 0.45rem 0.15rem;
   border: 1px solid var(--rule-gold);
-  border-radius: 2px;
+  border-radius: var(--radius-chip);
 }
 
 @keyframes title-rise {

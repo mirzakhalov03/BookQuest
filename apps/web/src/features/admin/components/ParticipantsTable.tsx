@@ -19,7 +19,7 @@ export function ParticipantsTable({ participants }: { participants: Participant[
         {participants.map((participant) => (
           <li
             key={participant.id}
-            className="flex flex-col gap-2 rounded-[3px] border border-[color:var(--rule)] px-3 py-3"
+            className="flex flex-col gap-2 rounded-box border border-[color:var(--rule)] px-3 py-3"
           >
             <div className="flex items-baseline justify-between gap-3">
               <ParticipantNumeral value={participant.number} className="type-display text-lg text-gold" />

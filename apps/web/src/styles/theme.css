@@ -35,6 +35,10 @@
 
   --tracking-label: 0.16em;
 
+  /* Every box, button and card — `rounded-box` or `var(--radius-box)` */
+  --radius-box: 8px;
+  --radius-chip: 6px;
+
   /* The prototype's body measure (`--t-md` in tokens.css) is 17px; Tailwind
      preflight's default `text-base` is 16px. This one token closes that gap
      for both the CSS variable and the `text-base` utility — the rest of the

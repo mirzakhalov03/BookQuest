@@ -32,7 +32,7 @@ export function BroadcastPage() {
         }}
       >
         <textarea
-          className="min-h-32 rounded-[3px] border border-[color:var(--rule)] bg-[color:var(--color-ash)] p-3 text-paper"
+          className="min-h-32 rounded-box border border-[color:var(--rule)] bg-[color:var(--color-ash)] p-3 text-paper"
           value={message}
           onChange={(event) => {
             setMessage(event.target.value);
@@ -46,7 +46,7 @@ export function BroadcastPage() {
             <button
               type="submit"
               disabled={sendBroadcast.isPending}
-              className="rounded-[3px] bg-ember px-4 py-2 text-paper disabled:opacity-50"
+              className="rounded-box bg-ember px-4 py-2 text-paper disabled:opacity-50"
             >
               {sendBroadcast.isPending ? 'Sending…' : 'Confirm: send to everyone'}
             </button>
@@ -62,7 +62,7 @@ export function BroadcastPage() {
           <button
             type="submit"
             disabled={!message.trim()}
-            className="rounded-[3px] bg-ember px-4 py-2 text-paper disabled:opacity-50"
+            className="rounded-box bg-ember px-4 py-2 text-paper disabled:opacity-50"
           >
             Send to everyone
           </button>
