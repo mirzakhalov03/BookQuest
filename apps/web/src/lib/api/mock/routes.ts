@@ -438,6 +438,12 @@ function createQuest(context: Context): Result {
     );
   }
 
+  // Mirrors the API: results live only on the current quest, so it can't be archived before they're out.
+  const { quest: outgoing, questRunning } = getState();
+  if (input.makeCurrent && questRunning && !areResultsPublished(outgoing)) {
+    throw new MockError(409, 'conflict', `Results for edition ${outgoing.edition} are not out yet.`);
+  }
+
   updateState((draft) => {
     draft.archive = [{ quest, winner: null }, ...draft.archive];
   });

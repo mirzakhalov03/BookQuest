@@ -12,7 +12,7 @@ import { AdminQuery } from './components/AdminQuery';
 import { AdminPageHeader } from './components/AdminPageHeader';
 import { ForbiddenState, isForbidden } from './components/ForbiddenState';
 import { QuestTimeline } from './components/QuestTimeline';
-import { PHASE_LABEL, nextMilestone, type Milestone } from './phase';
+import { PHASE_LABEL, canStartNextEdition, nextMilestone, type Milestone } from './phase';
 import { questDates } from './dates';
 import { broadcastSuggestions } from './broadcast/suggestions';
 import type { BroadcastLocationState } from './broadcast/BroadcastPage';
@@ -129,13 +129,18 @@ function NextSteps({ quest, now }: { quest: Quest; now: Date }) {
       );
       break;
     case 'finished':
-      content = (
+      // Results are served only for the current quest, so the next edition waits for them.
+      content = canStartNextEdition(quest, now) ? (
         <>
           <Button to="/admin/quest/new">Start next edition</Button>
           <Button to="/admin/results" variant="quiet">
             View results
           </Button>
         </>
+      ) : (
+        <p className="m-0 text-sm text-taupe">
+          Results go out {formatLongDate(quest.resultsAt)}. The next edition can start after that.
+        </p>
       );
       break;
   }

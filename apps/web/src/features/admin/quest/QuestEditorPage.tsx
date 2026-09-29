@@ -24,6 +24,7 @@ import { questFormSchema } from './questFormSchema';
 import { applyServerErrors } from './serverErrors';
 import { countErrors, summarizeChanges } from './changes';
 import { describeRiskyChanges, needsReview } from './review';
+import { canStartNextEdition } from '../phase';
 
 export const QUEST_FORM_ID = 'quest-form';
 
@@ -55,6 +56,7 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
   const [formError, setFormError] = useState<string | null>(null);
   const [pendingPatch, setPendingPatch] = useState<UpdateQuestPayload | null>(null);
   const [isCoverUploading, setIsCoverUploading] = useState(false);
+  const [now] = useState(() => new Date());
   const showToast = useUiStore((state) => state.showToast);
   const update = useUpdateQuest(quest.id);
 
@@ -95,7 +97,7 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
           title={quest.book.title}
           actions={
             <>
-              {quest.phase === 'finished' && (
+              {canStartNextEdition(quest, now) && (
                 <Button to="/admin/quest/new" variant="quiet" className="min-h-11 px-3">
                   Next edition
                 </Button>

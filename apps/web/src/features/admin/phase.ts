@@ -30,3 +30,8 @@ export function nextMilestone(quest: Quest, now: Date): Milestone | null {
       return before(quest.resultsAt) ? { label: 'Results published', at: quest.resultsAt } : null;
   }
 }
+
+/** Results, ranks and certificates exist only for the current quest, so it can't be archived before `resultsAt`. */
+export function canStartNextEdition(quest: Quest, now: Date): boolean {
+  return quest.phase === 'finished' && now.getTime() >= Date.parse(quest.resultsAt);
+}

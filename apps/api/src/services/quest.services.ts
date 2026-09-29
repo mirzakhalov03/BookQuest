@@ -82,6 +82,14 @@ export async function createQuest(payload: CreateQuestPayload): Promise<Quest> {
   });
   if (issues) throw badDates(issues);
 
+  if (makeCurrent) {
+    // Results, ranks and certificates are served only for the current quest; archiving it early loses them.
+    const outgoing = await findCurrentQuestDocument();
+    if (outgoing && new Date() < outgoing.resultsAt) {
+      throw ApiError.conflict(`Results for edition ${outgoing.edition} are not out yet.`);
+    }
+  }
+
   try {
     // Inserted inside the callback: a retried transaction must insert afresh, not reuse a rolled-back document.
     const quest = await withTransaction(async (session) => {

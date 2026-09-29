@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { CreateQuestPayload } from '@bookquest/shared';
+import type { CreateQuestPayload, Quest } from '@bookquest/shared';
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
 import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
 import { ApiRequestError } from '@/lib/api/client';
+import { formatLongDate } from '@/lib/format';
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useUiStore } from '@/stores/ui.store';
@@ -24,6 +25,7 @@ import { NO_CHANGES, countErrors } from './changes';
 import { buildCreatePayload, nextEditionDraft } from './nextEdition';
 import { questFormSchema } from './questFormSchema';
 import { applyServerErrors } from './serverErrors';
+import { canStartNextEdition } from '../phase';
 import type { QuestFormState } from './questForm';
 
 const FORM_ID = 'new-edition-form';
@@ -32,26 +34,38 @@ const FORM_ID = 'new-edition-form';
 export function NewEditionPage() {
   useTelegramBackButton('/admin/quest');
   const latest = useLatestQuest();
+  const [now] = useState(() => new Date());
 
   return (
     <AdminQuery query={latest} loadingLabel="Finding the last edition…">
       {(source) =>
-        source?.isCurrent && source.quest.phase !== 'finished' ? (
-          <EmptyState
-            title={`Edition ${source.quest.edition} is still running`}
-            body="Start the next edition once its quiz has closed."
-            action={
-              <Button to="/admin/quest" variant="quiet">
-                Back to the quest
-              </Button>
-            }
-            className="flex-1"
-          />
+        source?.isCurrent && !canStartNextEdition(source.quest, now) ? (
+          <StillRunning quest={source.quest} />
         ) : (
           <NewEditionForm key={source?.quest.id ?? 'first'} source={source} />
         )
       }
     </AdminQuery>
+  );
+}
+
+function StillRunning({ quest }: { quest: Quest }) {
+  const awaitingResults = quest.phase === 'finished';
+  return (
+    <EmptyState
+      title={awaitingResults ? `Results for edition ${quest.edition} aren't out yet` : `Edition ${quest.edition} is still running`}
+      body={
+        awaitingResults
+          ? `Start the next edition after they're published on ${formatLongDate(quest.resultsAt)}.`
+          : 'Start the next edition once its results are out.'
+      }
+      action={
+        <Button to="/admin/quest" variant="quiet">
+          Back to the quest
+        </Button>
+      }
+      className="flex-1"
+    />
   );
 }
 

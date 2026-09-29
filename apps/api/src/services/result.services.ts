@@ -5,7 +5,7 @@ import { ParticipantModel } from '../models/participant.model.js';
 import type { QuestDocument } from '../models/quest.model.js';
 import type { UserDocument } from '../models/user.model.js';
 import { ApiError } from '../utils/api-error.js';
-import { requireCurrentQuestDocument } from './quest.services.js';
+import { findCurrentQuestDocument, requireCurrentQuestDocument } from './quest.services.js';
 import { requireParticipantForUser } from './participant.services.js';
 
 const PODIUM_SIZE = 3;
@@ -67,6 +67,16 @@ export async function getCertificateForUser(user: UserDocument): Promise<Certifi
     rank: result.rank ?? null,
     issuedAt: quest.resultsAt.toISOString()
   };
+}
+
+/**
+ * Freezes ranks on the current quest before a new edition replaces it: once
+ * archived nothing ranks it lazily, so the archive would show no winner.
+ * Before `resultsAt` it does nothing — createQuest refuses that swap anyway.
+ */
+export async function rankOutgoingQuest(now = new Date()): Promise<void> {
+  const outgoing = await findCurrentQuestDocument();
+  if (outgoing && now >= outgoing.resultsAt) await ensureRanked(outgoing);
 }
 
 /* ── Internals ───────────────────────────────────────────────────────────── */
