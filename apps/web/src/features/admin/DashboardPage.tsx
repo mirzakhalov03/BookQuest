@@ -1,155 +1,140 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
 import type { Quest } from '@bookquest/shared';
 import { useCurrentQuest } from '@/lib/api/quest';
 import { AdminScreen } from '@/layouts/AdminLayout';
-import { LoadingState } from '@/components/feedback/LoadingState';
-import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
-import { isNotFound } from '@/lib/api/client';
+import { Button } from '@/components/ui/Button';
 import { useCountdown } from '@/hooks/useCountdown';
 import { formatCount, formatLongDate } from '@/lib/format';
 import { useAdminStats } from './api/useAdminStats';
-import { PHASE_LABEL } from './phase';
-import { ForbiddenState, isForbidden } from './components/ForbiddenState';
+import { AdminQuery } from './components/AdminQuery';
+import { AdminPageHeader } from './components/AdminPageHeader';
+import { QuestTimeline } from './components/QuestTimeline';
+import { PHASE_LABEL, nextMilestone, type Milestone } from './phase';
+import { questDates } from './dates';
+import { broadcastSuggestions } from './broadcast/suggestions';
+import type { BroadcastLocationState } from './broadcast/BroadcastPage';
 
-/**
- * `/admin` — the dashboard, and the root of the admin tree (like Home is the
- * root of the participant one); no admin tab root shows the Telegram back
- * button — they are siblings, not children.
- *
- * Two queries feed one screen: `useAdminStats` for the counts, and
- * `useCurrentQuest` — the same cached query Home reads (spec §6) — for the
- * dates "days remaining" counts down to. Neither is optional; a dashboard
- * missing either number is just a smaller dashboard, not a broken one, but
- * both come from the same "is a quest even running" fact, so in practice
- * they succeed or 404 together.
- */
+/** `/admin` — where the quest stands and the one or two things worth doing about it. */
 export function DashboardPage() {
-  const stats = useAdminStats();
   const quest = useCurrentQuest();
 
-  const isPending = stats.isPending || quest.isPending;
-  const error = stats.error ?? quest.error;
-
-  // Memoised on the ISO string, not a fresh `Date` every render — the same
-  // reason Home's own countdown target is (see `HomePage.tsx`): a new Date
-  // instance each render would change `useCountdown`'s effect dependency
-  // every time and the tick would never settle.
-  const targetIso = quest.data ? countdownTargetIso(quest.data) : null;
-  const target = useMemo(() => (targetIso ? new Date(targetIso) : null), [targetIso]);
-  const { days } = useCountdown(target);
-
-  if (isPending) return <LoadingState label="Reading the register…" />;
-
-  if (error) {
-    if (isForbidden(error)) return <ForbiddenState error={error} />;
-
-    if (isNotFound(error)) {
-      return (
+  return (
+    <AdminQuery
+      query={quest}
+      loadingLabel="Reading the register…"
+      notFound={(error) => (
         <EmptyState
           title={error.message}
-          body="There is nothing to administer between editions. Start the next one from the quest editor once it's ready."
+          body="Nothing is running between editions. Set up the next one when you're ready."
+          action={<Button to="/admin/quest/new">Start next edition</Button>}
           className="flex-1"
         />
-      );
-    }
+      )}
+    >
+      {(data) => <Dashboard quest={data} />}
+    </AdminQuery>
+  );
+}
 
-    return (
-      <ErrorState
-        error={error}
-        onRetry={() => {
-          void stats.refetch();
-          void quest.refetch();
-        }}
-        className="flex-1"
-      />
-    );
-  }
-
-  // `isPending`/`error` above are two separate queries' worth of checks, so
-  // TS can't narrow either `.data` from them alone. Both queries are settled
-  // and error-free by this line — this is just proving it to the compiler.
-  if (!stats.data || !quest.data) return null;
+function Dashboard({ quest }: { quest: Quest }) {
+  const stats = useAdminStats();
+  const [now] = useState(() => new Date());
+  const milestone = nextMilestone(quest, now);
+  const count = (value: number | undefined) => (value === undefined ? '—' : formatCount(value));
 
   return (
     <AdminScreen>
-      <header className="flex flex-col gap-1">
-        <p className="type-label">Dashboard</p>
-        <h1 className="type-display text-3xl text-paper">
-          {quest.data.book.title}, edition {quest.data.edition}
-        </h1>
-      </header>
+      <AdminPageHeader
+        eyebrow={`Edition ${quest.edition}`}
+        title={quest.book.title}
+        actions={
+          <span className="type-label rounded-chip border border-[color:var(--rule-strong)] px-2 py-1 text-paper-dim">
+            {PHASE_LABEL[quest.phase]}
+          </span>
+        }
+      />
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Participants" value={formatCount(stats.data.participants)} />
-        <StatCard label="Registered today" value={formatCount(stats.data.registeredToday)} />
-        <StatCard label="Quiz submitted" value={formatCount(stats.data.quizSubmitted)} />
-        <StatCard
-          label={daysRemainingLabel(quest.data.phase)}
-          value={target ? String(days) : '—'}
+      {milestone && <MilestoneLine milestone={milestone} />}
+
+      <div className="grid grid-cols-3 gap-3">
+        <StatCard label="Participants" value={count(stats.data?.participants)} />
+        <StatCard label="Joined today" value={count(stats.data?.registeredToday)} />
+        <StatCard label="Quiz submitted" value={count(stats.data?.quizSubmitted)} />
+      </div>
+
+      <NextSteps quest={quest} now={now} />
+
+      <section className="flex flex-col gap-2">
+        <h2 className="type-label m-0">Schedule</h2>
+        <QuestTimeline
+          dates={questDates(quest)}
+          now={now}
+          renderValue={(field) => <span className="text-paper-dim">{formatLongDate(quest[field])}</span>}
         />
-      </div>
-
-      <div className="flex flex-col gap-1 border-t border-[color:var(--rule)] pt-4 text-sm">
-        <p className="text-taupe">
-          Phase: <span className="text-paper-dim">{PHASE_LABEL[stats.data.phase]}</span>
-        </p>
-        <p className="text-taupe">{daysRemainingCaption(quest.data)}</p>
-      </div>
+      </section>
     </AdminScreen>
+  );
+}
+
+function MilestoneLine({ milestone }: { milestone: Milestone }) {
+  // Memoised on the ISO string: a fresh Date each render would restart useCountdown's tick.
+  const target = useMemo(() => new Date(milestone.at), [milestone.at]);
+  const { days } = useCountdown(target);
+  const when = days === 0 ? 'today' : `in ${days} ${days === 1 ? 'day' : 'days'}`;
+
+  return (
+    <p className="m-0 text-paper">
+      {milestone.label} {when}
+      <span className="text-taupe"> · {formatLongDate(milestone.at)}</span>
+    </p>
   );
 }
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded-box border border-[color:var(--rule)] bg-[color:var(--color-ash)] px-4 py-3">
-      <p className="type-label">{label}</p>
-      <p className="type-display tabular-nums text-2xl text-paper">{value}</p>
+    <div className="flex min-w-0 flex-col gap-1 rounded-box border border-[color:var(--rule)] bg-[color:var(--color-ash)] px-3 py-3">
+      <p className="type-label m-0">{label}</p>
+      <p className="type-display m-0 tabular-nums text-2xl text-paper">{value}</p>
     </div>
   );
 }
 
-/**
- * Renders `phase`, never derives it (spec §4 rule 4) — this only picks
- * *which* backend-owned date the clock watches, the same branch `HomePage`
- * makes for its own countdown. `null` (finished) means frozen: there is
- * nothing left on the calendar to count down to.
- */
-function countdownTargetIso(quest: Quest): string | null {
+/** Phase-aware actions only — the tab bar already covers plain navigation. */
+function NextSteps({ quest, now }: { quest: Quest; now: Date }) {
+  const navigate = useNavigate();
+  const [suggestion] = broadcastSuggestions(quest, now);
+  const draft = (message: string) =>
+    navigate('/admin/broadcast', { state: { draft: message } satisfies BroadcastLocationState });
+
+  let content;
   switch (quest.phase) {
     case 'upcoming':
-      return quest.opensAt;
     case 'reading':
-      return quest.readingDeadline;
+      content = suggestion && <Button onClick={() => draft(suggestion.message)}>{suggestion.label}</Button>;
+      break;
     case 'quiz':
-      return quest.quizClosesAt;
+      content = (
+        <p className="m-0 text-sm text-taupe">The quiz is open. Results go out {formatLongDate(quest.resultsAt)}.</p>
+      );
+      break;
     case 'finished':
-      return null;
+      content = (
+        <>
+          <Button to="/admin/quest/new">Start next edition</Button>
+          <Button to="/admin/results" variant="quiet">
+            View results
+          </Button>
+        </>
+      );
+      break;
   }
-}
 
-function daysRemainingLabel(phase: Quest['phase']): string {
-  switch (phase) {
-    case 'upcoming':
-      return 'Days to open';
-    case 'reading':
-      return 'Days to deadline';
-    case 'quiz':
-      return 'Days to quiz close';
-    case 'finished':
-      return 'Days remaining';
-  }
-}
-
-function daysRemainingCaption(quest: Quest): string {
-  switch (quest.phase) {
-    case 'upcoming':
-      return `Opens ${formatLongDate(quest.opensAt)}.`;
-    case 'reading':
-      return `Reading deadline ${formatLongDate(quest.readingDeadline)}.`;
-    case 'quiz':
-      return `Quiz closes ${formatLongDate(quest.quizClosesAt)}.`;
-    case 'finished':
-      return `Results published ${formatLongDate(quest.resultsAt)}.`;
-  }
+  return (
+    <section className="flex flex-col gap-3 rounded-box border border-[color:var(--rule)] p-4">
+      <h2 className="type-label m-0">What's next</h2>
+      <div className="flex flex-wrap items-center gap-3">{content}</div>
+    </section>
+  );
 }
