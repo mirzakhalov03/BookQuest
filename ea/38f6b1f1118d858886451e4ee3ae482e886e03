@@ -1,0 +1,19 @@
+apps/web/src/features/admin/quest/components/QuestDateFieldsSection.tsx
+  s_599d0204756638::t_b2160965ff614e 7-8,13-19,21,24-25,27-29,31,33-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "ea38f6b1f1118d858886451e4ee3ae482e886e03",
+  "prompts": {},
+  "sessions": {
+    "s_599d0204756638": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "56e397ae-d88b-409d-90e9-e3ea5ad104c0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
