@@ -101,10 +101,6 @@ export function toOptionalCount(value: string): number | null {
   return value.trim() === '' ? null : Number(value);
 }
 
-export function emptyResource(): ResourceDraft {
-  return { label: '', url: '', kind: 'link' };
-}
-
 export function isValidResourceUrl(value: string): boolean {
   try {
     new URL(value);
