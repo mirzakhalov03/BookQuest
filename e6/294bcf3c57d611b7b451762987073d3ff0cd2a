@@ -1,0 +1,19 @@
+apps/web/src/features/admin/quest/components/DateTimelineField.tsx
+  s_599d0204756638::t_55b955a6fd76b5 20-25,29,37-40,74-87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "e6294bcf3c57d611b7b451762987073d3ff0cd2a",
+  "prompts": {},
+  "sessions": {
+    "s_599d0204756638": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "56e397ae-d88b-409d-90e9-e3ea5ad104c0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
