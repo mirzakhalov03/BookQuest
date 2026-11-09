@@ -3,17 +3,7 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-quer
 import type { CursorPage, Quest, QuestSummary } from '@bookquest/shared';
 import { api } from './client';
 
-/**
- * The current quest, and the archive of every edition before it. Promoted
- * out of `features/home` and `features/prizes` (spec §4 rule 1: "nothing
- * imports from another feature's internals") — Home, `/book`, `/register`,
- * `/results`, the profile and every admin screen all read the current quest
- * off the same cache (spec §6: one resource, several views), and the
- * archive is read by both `/prizes` and the profile's history section. That
- * reach across features is exactly what `lib/` is for; neither query is
- * particular to Home or to the quests feature, so neither should live inside
- * one of them with the rest borrowing its internals.
- */
+// The current quest and the archive. In `lib/` because many features read them (spec §4 rule 1).
 
 export const questKeys = {
   all: ['quests'] as const,
@@ -27,10 +17,7 @@ export function useCurrentQuest() {
   });
 }
 
-/**
- * For the moment a phase ends: refetch the current quest past the browser's
- * HTTP cache, since the API sends `max-age=30` and would return the old phase.
- */
+/** When a phase ends: refetch past the HTTP cache, which would still hold the old phase. */
 export function useRefreshCurrentQuest(): () => void {
   const queryClient = useQueryClient();
   return useCallback(() => {
@@ -42,11 +29,7 @@ export function useRefreshCurrentQuest(): () => void {
   }, [queryClient]);
 }
 
-/**
- * Its own root, not a child of `questKeys.all` — invalidating "the current
- * quest" and invalidating "the archive" are different events and a shared
- * prefix would couple them.
- */
+// Own root, not under `questKeys.all`: invalidating the current quest and the archive are different events.
 export const questArchiveKeys = {
   all: ['questArchive'] as const,
   list: () => [...questArchiveKeys.all, 'list'] as const,
@@ -55,15 +38,7 @@ export const questArchiveKeys = {
 
 const PAGE_SIZE = 10;
 
-/**
- * The archive, newest edition first. `GET /quests` answers a `CursorPage` —
- * `{ items, nextCursor }`, no `page`/`limit`/`total` — because the archive can
- * grow a new edition at the top between two reads; an offset would then shift
- * every later page by one and duplicate or skip a row. `nextCursor` is an
- * opaque token (the real API base64-encodes an edition number, the mock uses
- * a plain offset) — it is only ever handed back exactly as received, never
- * parsed or incremented here.
- */
+/** Newest first. Cursor, not offset: a new edition at the top would shift every page. The cursor is opaque. */
 export function useQuestArchive() {
   return useInfiniteQuery({
     queryKey: questArchiveKeys.list(),
@@ -73,9 +48,7 @@ export function useQuestArchive() {
       return api.get<CursorPage<QuestSummary>>(`/quests?${params.toString()}`);
     },
     initialPageParam: undefined as string | undefined,
-    // `undefined`, not `null`: React Query only reads "no more pages" from
-    // `undefined` — passing the API's own `null` through would keep
-    // `hasNextPage` true and "Load more" would refetch the last page forever.
+    // `undefined`, not `null`: React Query only treats `undefined` as "no more pages".
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined
   });
 }
