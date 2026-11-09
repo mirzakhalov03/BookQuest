@@ -1,0 +1,21 @@
+apps/api/src/scripts/seed.ts
+  s_ab622ed4f3212f::t_762bb8e7c1563f 28-30
+apps/web/src/lib/api/mock/fixtures.ts
+  s_ab622ed4f3212f::t_9058b4e27c7479 63-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "f6bdc06f44e2a80f4cb06d23cfebcefc106d2e7e",
+  "prompts": {},
+  "sessions": {
+    "s_ab622ed4f3212f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9b1df2d0-b8a8-459d-b678-3a7f489c77e6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
