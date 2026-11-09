@@ -1,0 +1,29 @@
+apps/web/src/layouts/AdminLayout.tsx
+  s_18e30448fb8b06::t_9cf93d215245dd 62
+apps/web/src/layouts/AppLayout.tsx
+  s_18e30448fb8b06::t_78ba4af0489c90 35,38-40,54-58
+apps/web/src/lib/telegram.ts
+  s_18e30448fb8b06::t_3a716b250a874c 35,70-76
+apps/web/src/styles/base.css
+  s_18e30448fb8b06::t_a369938d352812 27-28
+apps/web/src/styles/shell.css
+  s_18e30448fb8b06::t_04c854f33582c9 63-84
+apps/web/src/styles/stage.css
+  s_18e30448fb8b06::t_d18bce9a68fd9e 99-100
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "6b0834cc8d7c0b72d448b70252cd362b7c385333",
+  "prompts": {},
+  "sessions": {
+    "s_18e30448fb8b06": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7a30f8a-e125-4d54-b0e3-0e4732f36968",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
