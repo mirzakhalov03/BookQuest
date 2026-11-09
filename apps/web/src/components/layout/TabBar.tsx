@@ -1,25 +1,37 @@
 import type { LucideIcon } from 'lucide-react';
-import { Sparkles, BookOpen, ListChecks, BarChart3, User } from 'lucide-react';
-import { NavLink } from 'react-router';
+import { Sparkles, BookOpen, Trophy, BarChart3, User, PencilLine } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router';
+import { useCurrentQuest } from '@/lib/api/quest';
 
 interface Tab {
   to: string;
   label: string;
   icon: LucideIcon;
+  /** Other paths that belong to this tab. */
+  alsoMatches?: string;
 }
 
+const QUIZ_TAB: Tab = { to: '/quiz', label: 'Quiz', icon: PencilLine };
+const RESULTS_TAB: Tab = { to: '/results', label: 'Results', icon: BarChart3 };
+
 /**
- * The five destinations of the design, in the prototype's order. This is the
- * whole of the product knowledge a layout primitive is allowed (spec §4 rule
- * 3): where the app goes, not what is there when it arrives.
+ * The five destinations. Product knowledge stays limited to where the app goes
+ * (spec §4 rule 3) — the one exception is the fourth slot, which follows the
+ * API's `quest.phase`: Quiz until the quiz closes, then Results.
  */
-const TABS: Tab[] = [
-  { to: '/', label: 'Stage', icon: Sparkles },
-  { to: '/book', label: 'Book', icon: BookOpen },
-  { to: '/quests', label: 'Quests', icon: ListChecks },
-  { to: '/results', label: 'Results', icon: BarChart3 },
-  { to: '/me', label: 'You', icon: User }
-];
+function useTabs(): Tab[] {
+  const { data: quest, isError } = useCurrentQuest();
+  // No current quest means no quiz to point at; the last results are the useful place.
+  const quizOver = quest?.phase === 'finished' || isError;
+
+  return [
+    { to: '/', label: 'Stage', icon: Sparkles },
+    { to: '/book', label: 'Book', icon: BookOpen },
+    quizOver ? RESULTS_TAB : QUIZ_TAB,
+    { to: '/prizes', label: 'Prizes', icon: Trophy, alsoMatches: '/quests/' },
+    { to: '/me', label: 'You', icon: User }
+  ];
+}
 
 /**
  * Bottom navigation. Styling is `.tabbar` / `.tab` in `styles/shell.css`, with
@@ -30,16 +42,21 @@ const TABS: Tab[] = [
  * there is no `aria-current` in the markup below.
  */
 export function TabBar() {
+  const { pathname } = useLocation();
+  const tabs = useTabs();
+
   return (
     <nav className="tabbar" aria-label="Sections">
-      {TABS.map(({ to, label, icon: Icon }) => (
+      {tabs.map(({ to, label, icon: Icon, alsoMatches }) => (
         <NavLink
           key={to}
           to={to}
           // Only the Stage tab needs `end`. Every other tab should stay lit on
-          // its own sub-routes — /quests/2024 is still Quests.
+          // its own sub-routes. A past edition (/quests/2) lives under Prizes.
           end={to === '/'}
-          className={({ isActive }) => (isActive ? 'tab is-on' : 'tab')}
+          className={({ isActive }) =>
+            isActive || (alsoMatches && pathname.startsWith(alsoMatches)) ? 'tab is-on' : 'tab'
+          }
         >
           <Icon className="tab__icon" aria-hidden="true" />
           <span>{label}</span>

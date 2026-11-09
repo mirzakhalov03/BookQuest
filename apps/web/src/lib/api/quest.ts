@@ -4,11 +4,11 @@ import { api } from './client';
 
 /**
  * The current quest, and the archive of every edition before it. Promoted
- * out of `features/home` and `features/quests` (spec §4 rule 1: "nothing
+ * out of `features/home` and `features/prizes` (spec §4 rule 1: "nothing
  * imports from another feature's internals") — Home, `/book`, `/register`,
  * `/results`, the profile and every admin screen all read the current quest
  * off the same cache (spec §6: one resource, several views), and the
- * archive is read by both `/quests` and the profile's history section. That
+ * archive is read by both `/prizes` and the profile's history section. That
  * reach across features is exactly what `lib/` is for; neither query is
  * particular to Home or to the quests feature, so neither should live inside
  * one of them with the rest borrowing its internals.

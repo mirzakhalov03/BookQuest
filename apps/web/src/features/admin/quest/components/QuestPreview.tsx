@@ -3,7 +3,6 @@ import { Eye } from 'lucide-react';
 import { BookHero } from '@/components/BookHero';
 import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
-import { parseLocal } from '../../dates';
 import { hostnameOf } from '../resources';
 import type { QuestFormState } from '../questForm';
 
@@ -14,10 +13,9 @@ const PLACES = [
 ] as const;
 
 /** The participant-facing `BookHero`, fed unsaved values — the preview can't drift from the real screen. */
-export function QuestPreview({ edition, values }: { edition: number; values: QuestFormState }) {
+export function QuestPreview({ values }: { values: QuestFormState }) {
   const { book, prizes } = values;
   const pages = Number(book.pages);
-  const year = parseLocal(values.dates.opensAt)?.getFullYear() ?? new Date().getFullYear();
   const prizeRows = PLACES.map(([place, key]) => [place, prizes[key].trim()] as const).filter(([, prize]) => prize);
 
   return (
@@ -25,8 +23,6 @@ export function QuestPreview({ edition, values }: { edition: number; values: Que
       <p className="type-label m-0">What participants see</p>
       <BookHero
         titleAs="h2"
-        edition={edition}
-        year={year}
         title={book.title.trim() || 'Untitled'}
         author={book.author.trim() || 'Unknown author'}
         pages={Number.isFinite(pages) && pages > 0 ? pages : 0}

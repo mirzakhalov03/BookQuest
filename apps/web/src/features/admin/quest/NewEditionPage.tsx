@@ -86,7 +86,7 @@ function NewEditionForm({ source }: { source: LatestQuest }) {
   const guard = useUnsavedChangesGuard(formState.isDirty);
 
   const values = watch();
-  const preview = <QuestPreview edition={draft.edition} values={values} />;
+  const preview = <QuestPreview values={values} />;
   const errorCount = countErrors(formState.errors);
 
   const submit = handleSubmit((valid) => {

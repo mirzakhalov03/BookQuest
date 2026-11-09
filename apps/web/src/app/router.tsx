@@ -5,9 +5,10 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { HomePage } from '@/features/home/HomePage';
 import { SuccessScreen } from '@/features/registration/SuccessScreen';
 import { BookPage } from '@/features/book/BookPage';
-import { QuestsPage } from '@/features/quests/QuestsPage';
-import { QuestEditionPage } from '@/features/quests/QuestEditionPage';
+import { PrizesPage } from '@/features/prizes/PrizesPage';
+import { QuestEditionPage } from '@/features/prizes/QuestEditionPage';
 import { ResultsPage } from '@/features/results/ResultsPage';
+import { QuizPage } from '@/features/quiz/QuizPage';
 import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
 import { AdminLayout } from '@/layouts/AdminLayout';
@@ -34,9 +35,12 @@ export const router = createBrowserRouter([
       { path: '/register', element: <Navigate to="/me" replace /> },
 
       { path: '/book', element: <BookPage /> },
-      { path: '/quests', element: <QuestsPage /> },
+      { path: '/prizes', element: <PrizesPage /> },
+      // The archive moved into `/prizes`; old links land there. Single editions keep their URL.
+      { path: '/quests', element: <Navigate to="/prizes" replace /> },
       { path: '/quests/:edition', element: <QuestEditionPage /> },
 
+      { path: '/quiz', element: <QuizPage /> },
       { path: '/results', element: <ResultsPage /> },
 
       // The session-only tree. Its screens mount as `children` of this route,

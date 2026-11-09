@@ -300,3 +300,67 @@
     transform: translate(-50%, 0);
   }
 }
+
+/* ── Expandable text ───────────────────────────────────────────────
+   `components/ui/ExpandableText.tsx`. The fade is a mask, not a gradient
+   overlay, because the atmosphere behind it isn't one flat colour. `--fade`
+   is registered so the mask can animate away instead of snapping off.      */
+@property --fade {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+.expandable {
+  position: relative;
+}
+
+.expandable__text {
+  --fade: 4em;
+  overflow: hidden;
+  white-space: pre-line;
+  /* Every line but the last stays solid; the last fades out under "more". */
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - 1lh) no-repeat,
+    linear-gradient(to left, transparent var(--fade), #000 calc(var(--fade) * 2.2)) bottom / 100% 1lh no-repeat;
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - 1lh) no-repeat,
+    linear-gradient(to left, transparent var(--fade), #000 calc(var(--fade) * 2.2)) bottom / 100% 1lh no-repeat;
+  transition:
+    max-height 480ms var(--ease-out-quest),
+    --fade 320ms linear;
+}
+
+.expandable.is-open .expandable__text {
+  --fade: 0px;
+}
+
+.expandable__toggle {
+  color: var(--color-ember);
+  font-weight: 500;
+  transition:
+    opacity 220ms linear,
+    visibility 220ms linear;
+}
+
+.expandable__toggle:hover {
+  color: var(--color-amber);
+}
+
+.expandable__more {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+.expandable__less {
+  margin-left: 0.4em;
+}
+
+/* Each toggle only exists for its own state; `visibility` also drops the
+   hidden one out of the tab order. */
+.expandable.is-open .expandable__more,
+.expandable:not(.is-open) .expandable__less {
+  opacity: 0;
+  visibility: hidden;
+}

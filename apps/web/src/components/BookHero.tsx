@@ -2,8 +2,9 @@ import { BookCover } from './BookCover';
 import { formatCount, formatOrdinalEdition } from '@/lib/format';
 
 interface BookHeroProps {
-  edition: number;
-  year: number;
+  /** Omitted where the edition is already implied, e.g. `/book` is always the current one. */
+  edition?: number;
+  year?: number;
   title: string;
   author: string;
   pages: number;
@@ -24,11 +25,15 @@ export function BookHero({ edition, year, title, author, pages, coverUrl, titleA
         <BookCover title={title} author={author} coverUrl={coverUrl} />
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 pt-1">
-        <p className="type-label">
-          {formatOrdinalEdition(edition)} edition · {year}
-        </p>
-        <Title className="type-display text-3xl text-paper">{title}</Title>
+      {/* `min-w-0` stops a long title widening the screen; `@container` lets
+          the title size itself to this column instead of breaking words. */}
+      <div className="@container flex min-w-0 flex-1 flex-col gap-2 pt-1">
+        {edition !== undefined && year !== undefined && (
+          <p className="type-label">
+            {formatOrdinalEdition(edition)} edition · {year}
+          </p>
+        )}
+        <Title className="type-display text-[clamp(1.25rem,13cqi,1.75rem)] text-paper">{title}</Title>
         <p className="text-taupe">{author}</p>
         <p className="text-sm text-taupe-dim">{formatCount(pages)} pages</p>
       </div>

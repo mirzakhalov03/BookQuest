@@ -5,6 +5,7 @@ import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { isNotFound } from '@/lib/api/client';
+import { ExpandableText } from '@/components/ui/ExpandableText';
 import { ResourceList } from './components/ResourceList';
 
 /**
@@ -41,8 +42,6 @@ export function BookPage() {
   return (
     <Screen className="gap-8">
       <BookHero
-        edition={quest.edition}
-        year={quest.year}
         title={quest.book.title}
         author={quest.book.author}
         pages={quest.book.pages}
@@ -54,7 +53,7 @@ export function BookPage() {
       {quest.book.description && (
         <section className="flex flex-col gap-2">
           <p className="type-label">About the book</p>
-          <p className="text-paper-dim">{quest.book.description}</p>
+          <ExpandableText className="text-paper-dim">{quest.book.description}</ExpandableText>
         </section>
       )}
 

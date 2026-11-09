@@ -11,27 +11,25 @@ import { isNotFound } from '@/lib/api/client';
 import { formatCount, formatLongDate } from '@/lib/format';
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton';
 import { useQuestByEdition } from './api/useQuestByEdition';
+import { PrizePodium, hasAnyPrize } from './components/PrizePodium';
 
-// The same forward arrow every other "go here next" action uses (spec:
-// reuse it rather than drawing a fourth one) — even though the destination is
-// up a level, the action itself reads the same way "Enter the quest" does.
+// Same forward arrow as every other "go here next" action, even though this goes up a level.
 const BACK_TO_ARCHIVE = (
   <Link
-    to="/quests"
+    to="/prizes"
     className="group inline-flex items-center gap-3 text-taupe transition-colors hover:text-paper-dim"
   >
-    Back to the archive
+    Back to prizes
     <ArrowIcon />
   </Link>
 );
 
 /**
- * One past edition. Reached from a card in the archive, or a direct link
- * someone shares — either way it has a real parent (`/quests`), so unlike
- * `/book` and `/quests` this one does get the Telegram back button.
+ * One past edition. Reached from a card on `/prizes` or a shared link. Either way
+ * `/prizes` is its parent, so unlike the tab screens it gets the Telegram back button.
  */
 export function QuestEditionPage() {
-  useTelegramBackButton('/quests');
+  useTelegramBackButton('/prizes');
 
   const { edition: editionParam } = useParams<{ edition: string }>();
   const edition = Number(editionParam);
@@ -46,7 +44,7 @@ export function QuestEditionPage() {
       <Screen>
         <EmptyState
           title="That's not an edition number"
-          body="Editions are numbered from the archive, not chosen freely."
+          body="Pick an edition from the prizes page instead."
           action={BACK_TO_ARCHIVE}
         />
       </Screen>
@@ -63,7 +61,7 @@ export function QuestEditionPage() {
     if (isNotFound(error)) {
       return (
         <Screen>
-          <EmptyState title={error.message} body="Browse every edition from the archive instead." action={BACK_TO_ARCHIVE} />
+          <EmptyState title={error.message} body="Browse every past edition from the prizes page instead." action={BACK_TO_ARCHIVE} />
         </Screen>
       );
     }
@@ -107,32 +105,13 @@ function DatesSection({ quest }: { quest: Quest }) {
   );
 }
 
-/**
- * Free text, and every one of the three is nullable (spec, contract) — the
- * seeded quest has none set. Rendering three empty rows for a quest with no
- * prizes yet would read as broken, so a place with nothing to show doesn't
- * get a row, and the whole section disappears once none do.
- */
 function PrizesSection({ prizes }: { prizes: Quest['prizes'] }) {
-  const rows: Array<{ place: string; prize: string | null }> = [
-    { place: '1st', prize: prizes.first },
-    { place: '2nd', prize: prizes.second },
-    { place: '3rd', prize: prizes.third }
-  ];
-  const wonRows = rows.filter(
-    (row): row is { place: string; prize: string } => row.prize !== null
-  );
-
-  if (wonRows.length === 0) return null;
+  if (!hasAnyPrize(prizes)) return null;
 
   return (
     <section className="flex flex-col gap-2">
       <p className="type-label">Prizes</p>
-      <dl className="flex flex-col gap-1">
-        {wonRows.map((row) => (
-          <FactRow key={row.place} label={row.place} value={row.prize} />
-        ))}
-      </dl>
+      <PrizePodium prizes={prizes} />
     </section>
   );
 }
