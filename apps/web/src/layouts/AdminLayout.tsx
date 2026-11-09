@@ -59,7 +59,7 @@ export function AdminLayout() {
 
 function AdminNav() {
   return (
-    <header className="flex items-center justify-between gap-3 border-b border-[color:var(--rule)] px-4 pt-[calc(1rem+var(--safe-t))] pb-4 sm:px-8">
+    <header className="flex items-center justify-between gap-3 border-b border-[color:var(--rule)] px-4 pt-4 pb-4 sm:px-8">
       <Link
         to="/"
         aria-label="Back to the stage"

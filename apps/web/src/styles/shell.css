@@ -60,6 +60,28 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
 }
 
+/* ── Chrome guard ──────────────────────────────────────────────────
+   In Telegram fullscreen the Close / ⌄ ⋯ pills float over the page. This band
+   sits behind them, above scrolling content, and fades out at its lower edge
+   so text slides under it instead of being cut off. Height 0 on the web.     */
+
+.chrome-guard {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 6;
+  height: var(--safe-t);
+  background: #17120d; /* the wash's top stop, so the band is invisible at rest */
+  pointer-events: none;
+}
+
+.chrome-guard::after {
+  content: '';
+  position: absolute;
+  inset: 100% 0 auto;
+  height: 1.25rem;
+  background: linear-gradient(#17120d, transparent);
+}
+
 /* ── Route transition ──────────────────────────────────────────────
    The prototype keeps every view in the DOM and toggles `.is-on` /
    `.is-entering` / `.is-leaving`. React Router mounts one route at a time, so

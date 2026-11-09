@@ -32,10 +32,12 @@ export function AppLayout() {
   return (
     <div className="relative flex min-h-dvh flex-col">
       <Atmosphere />
+      <ChromeGuard />
 
       {/* Below the tab bar's z-index, so a sticky bar is never painted over by
-          the screen scrolling under it. */}
-      <main className="relative z-[1] flex flex-1 flex-col">
+          the screen scrolling under it. Top padding clears Telegram's
+          fullscreen buttons and the notch, once, for every screen. */}
+      <main className="relative z-[1] flex flex-1 flex-col pt-[var(--safe-t)]">
         {/* Keyed on the path so the enter animation restarts on every
             navigation — a class alone would only ever run once. */}
         <div key={pathname} className="view flex flex-1 flex-col">
@@ -47,6 +49,11 @@ export function AppLayout() {
       <Toast />
     </div>
   );
+}
+
+/** A solid band under Telegram's floating buttons so content scrolls beneath it, not into them. Zero-height on the web. */
+function ChromeGuard() {
+  return <div aria-hidden className="chrome-guard" />;
 }
 
 /**

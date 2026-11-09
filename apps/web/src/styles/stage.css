@@ -96,7 +96,8 @@
    transition leftovers. `.view--home` gives the screen its height and, at
    ≥900px, the clearance that keeps the CTA out from under the fixed tab bar. */
 .view--home {
-  min-height: 100dvh;
+  /* `<main>` already pads the top inset; without this the stage scrolls by that much. */
+  min-height: calc(100dvh - var(--safe-t));
 }
 
 .home {

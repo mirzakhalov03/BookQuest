@@ -32,6 +32,7 @@ interface TelegramWebApp {
   requestFullscreen?: () => void;
   isFullscreen?: boolean;
   enableClosingConfirmation?: () => void;
+  disableVerticalSwipes?: () => void;
   openLink?: (url: string) => void;
   openTelegramLink?: (url: string) => void;
   /** Deliberately unused: the primary action belongs to the stage composition (spec §9). Don't wire it up. */
@@ -66,7 +67,13 @@ export function initTelegram(): void {
   } catch {
     // expand() above already ran.
   }
-  // Telegram can't block the swipe-to-close; asking for confirmation is the ceiling.
+  // A swipe down should scroll the page, not collapse the sheet (Bot API 7.7+).
+  try {
+    webApp.disableVerticalSwipes?.();
+  } catch {
+    // Older client: the swipe still minimises.
+  }
+  // Close button (and swipe on old clients) asks before leaving.
   try {
     webApp.enableClosingConfirmation?.();
   } catch {

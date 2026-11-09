@@ -24,6 +24,8 @@
 html,
 body {
   height: 100%;
+  /* No rubber-band past the edges: in the Mini App it reads as the sheet coming loose. */
+  overscroll-behavior-y: none;
 }
 
 body {
