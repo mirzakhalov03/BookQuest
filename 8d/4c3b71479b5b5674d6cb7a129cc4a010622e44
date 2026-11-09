@@ -1,0 +1,19 @@
+apps/bot/src/lib/api-client.ts
+  s_66355262d5172c::t_84a09382913f99 5-6,9-11,14-23,25-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "8d4c3b71479b5b5674d6cb7a129cc4a010622e44",
+  "prompts": {},
+  "sessions": {
+    "s_66355262d5172c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4cab12e7-5481-41e2-956c-2ec41f557bea",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
