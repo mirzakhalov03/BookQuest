@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Navigate } from 'react-router';
-import { useCurrentQuest } from '@/lib/api/quest';
+import { useCurrentQuest, useRefreshCurrentQuest } from '@/lib/api/quest';
 import { Screen } from '@/components/layout/Screen';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
@@ -16,6 +16,7 @@ import { formatLongDate } from '@/lib/format';
  */
 export function QuizPage() {
   const { data: quest, isPending, error, refetch } = useCurrentQuest();
+  const refreshQuest = useRefreshCurrentQuest();
 
   // Memoised on the ISO string — a fresh Date each render loops `useCountdown`.
   const targetIso = quest?.quizOpensAt ?? null;
@@ -51,6 +52,7 @@ export function QuizPage() {
         label="Quiz opens in"
         target={target}
         dateText={formatLongDate(quest.quizOpensAt)}
+        onComplete={refreshQuest}
       />
     </Screen>
   );

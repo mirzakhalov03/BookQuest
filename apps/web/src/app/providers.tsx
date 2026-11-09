@@ -3,7 +3,8 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { ApiRequestError, registerReauthenticate } from '@/lib/api/client';
 import { fetchMe, loginWithTelegram, reauthenticate } from '@/lib/auth/authApi';
-import { readToken } from '@/lib/auth/tokenStore';
+import { clearToken, readToken } from '@/lib/auth/tokenStore';
+import { getInitDataUserId } from '@/lib/telegram';
 import { SessionResolvedContext, authKeys } from '@/lib/auth/useAuth';
 import { BootSplash } from './BootSplash';
 
@@ -25,8 +26,13 @@ async function resolveSession(): Promise<void> {
   //    If the API rejects it, the client has cleared it by the time we get here.
   if (readToken() !== null) {
     try {
-      await queryClient.fetchQuery({ queryKey: authKeys.me(), queryFn: fetchMe });
-      return;
+      const me = await queryClient.fetchQuery({ queryKey: authKeys.me(), queryFn: fetchMe });
+      const telegramUserId = getInitDataUserId();
+      if (telegramUserId === null || me.telegramUserId === telegramUserId) return;
+
+      // Inside Telegram as someone other than the stored session: Telegram decides. Fall through to branch 2.
+      clearToken();
+      queryClient.removeQueries({ queryKey: authKeys.all });
     } catch (error) {
       // Don't leave the failure cached under the key a later sign-in writes to.
       queryClient.removeQueries({ queryKey: authKeys.all });

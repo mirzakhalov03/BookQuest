@@ -40,6 +40,7 @@ export const router = createBrowserRouter([
       { path: '/quests', element: <Navigate to="/prizes" replace /> },
       { path: '/quests/:edition', element: <QuestEditionPage /> },
 
+      // Public countdown until the quiz is built; the quiz itself will need a session.
       { path: '/quiz', element: <QuizPage /> },
       { path: '/results', element: <ResultsPage /> },
 
@@ -61,27 +62,6 @@ export const router = createBrowserRouter([
         path: '/notifications',
         element: <RequireAuth />,
         children: [{ index: true, element: <NotificationsPage /> }]
-      },
-
-      // Reserved per the route table (spec §3): "Enter the quiz" already
-      // navigates here and fires its haptic, but question delivery, timing
-      // and submission are a separate plan (Phase 6) — not built against an
-      // imagined API. Session-gated like `/me`, since a quiz is only ever
-      // something a signed-in participant sits.
-      {
-        path: '/quiz',
-        element: <RequireAuth />,
-        children: [
-          {
-            index: true,
-            element: (
-              <ComingNext
-                title="The quiz"
-                body="One attempt, the clock running, speed counts as much as accuracy. This screen is coming next."
-              />
-            )
-          }
-        ]
       },
 
       // The admin tree, same shape: /admin/* children hang off this one.
@@ -124,19 +104,6 @@ function NotFoundPage() {
         title="Nothing here"
         body="That page doesn't exist. Check the address, or head back to the stage."
       />
-    </Screen>
-  );
-}
-
-/**
- * A destination the tab bar can already reach and the screen behind it cannot
- * yet fill. Says what will be here rather than that something is missing — an
- * empty state is an invitation, not an apology (spec §4).
- */
-function ComingNext({ title, body }: { title: string; body: string }) {
-  return (
-    <Screen>
-      <EmptyState title={title} body={body} />
     </Screen>
   );
 }

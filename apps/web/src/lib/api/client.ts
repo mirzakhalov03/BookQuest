@@ -120,7 +120,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
 }
 
 export const api = {
-  get: <T>(path: string) => request<T>(path),
+  get: <T>(path: string, init?: Pick<RequestInit, 'cache'>) => request<T>(path, init),
   post: <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body }),
   // The admin quest editor is the first caller: `strictObject().partial()` on
   // the server means a partial body is the contract, not a shortcut, so this

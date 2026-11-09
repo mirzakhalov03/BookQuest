@@ -13,6 +13,8 @@ interface CountdownProps {
   target: Date | null;
   /** The line under the clock: a formatted date, or a caption like "Results published …". */
   dateText: string;
+  /** Runs once when the clock reaches zero — callers refetch whatever the moment changes. */
+  onComplete?: () => void;
 }
 
 /**
@@ -21,8 +23,8 @@ interface CountdownProps {
  * date drives it, what the label says, what "done" looks like) is the
  * caller's job; this only knows how to tick and how to paint four digits.
  */
-export function Countdown({ label, target, dateText }: CountdownProps) {
-  const time = useCountdown(target);
+export function Countdown({ label, target, dateText, onComplete }: CountdownProps) {
+  const time = useCountdown(target, onComplete);
 
   return (
     <section className="clock" aria-label="Time remaining">

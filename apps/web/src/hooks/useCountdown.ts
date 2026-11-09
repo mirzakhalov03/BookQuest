@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export interface TimeLeft {
   days: number;
@@ -19,19 +19,31 @@ function remaining(target: Date | null): TimeLeft {
   };
 }
 
+// Fire a beat after zero, so a phone clock slightly ahead of the server doesn't refetch the old phase.
+const COMPLETE_GRACE_MS = 1500;
+
 /**
  * Recomputes from the target each tick rather than counting down a stored
  * number, so a backgrounded tab or a sleeping phone comes back showing the
- * right time instead of however far it got.
+ * right time instead of however far it got. `onComplete` fires once when a
+ * running countdown ends — never on mount for a target already past.
  */
-export function useCountdown(target: Date | null): TimeLeft {
+export function useCountdown(target: Date | null, onComplete?: () => void): TimeLeft {
   const [time, setTime] = useState(() => remaining(target));
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   useEffect(() => {
     setTime(remaining(target));
-    if (!target) return;
+    if (!target || target.getTime() + COMPLETE_GRACE_MS <= Date.now()) return;
 
-    const id = window.setInterval(() => setTime(remaining(target)), 1000);
+    const id = window.setInterval(() => {
+      setTime(remaining(target));
+      if (Date.now() >= target.getTime() + COMPLETE_GRACE_MS) {
+        window.clearInterval(id);
+        onCompleteRef.current?.();
+      }
+    }, 1000);
     return () => window.clearInterval(id);
   }, [target]);
 

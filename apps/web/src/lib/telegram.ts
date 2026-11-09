@@ -115,6 +115,18 @@ export function getInitData(): string | null {
   return getTelegramWebApp()?.initData || null;
 }
 
+/** Who Telegram says is using the app. Unverified — only for choosing whether to sign in again. */
+export function getInitDataUserId(): string | null {
+  const initData = getInitData();
+  if (!initData) return null;
+  try {
+    const user = JSON.parse(new URLSearchParams(initData).get('user') ?? 'null') as { id?: unknown } | null;
+    return user?.id == null ? null : String(user.id);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * The hardware back button in Telegram's header. `null` on the web, and also
  * null in a Telegram client too old to have it — `useTelegramBackButton` in

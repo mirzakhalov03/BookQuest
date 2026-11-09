@@ -43,9 +43,7 @@ export function QuestAction({ quest }: QuestActionProps) {
     if (quest.phase === 'quiz') {
       return (
         <Act>
-          {/* `/quiz` is reserved, not built (plan Phase 6) — the route exists
-              behind the session guard so the haptic and the navigation are
-              both real; the screen behind it is a placeholder until then. */}
+          {/* `/quiz` is a countdown placeholder until the quiz is built (plan Phase 6). */}
           <PrimaryButton onClick={() => go('/quiz')}>Enter the quiz</PrimaryButton>
           <p className="act__sub">{quizSubline(quest.quizQuestionCount)}</p>
         </Act>

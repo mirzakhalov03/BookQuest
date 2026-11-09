@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { Quest } from '@bookquest/shared';
-import { useCurrentQuest } from '@/lib/api/quest';
+import { useCurrentQuest, useRefreshCurrentQuest } from '@/lib/api/quest';
 import { BookStage } from './components/BookStage';
 import { StageAside } from './components/StageAside';
 import { QuestAction } from './components/QuestAction';
@@ -22,6 +22,7 @@ import { formatLongDate } from '@/lib/format';
  */
 export function HomePage() {
   const { data: quest, isPending, error, refetch } = useCurrentQuest();
+  const refreshQuest = useRefreshCurrentQuest();
 
   // Memoised on the ISO string, not recreated every render — a fresh Date
   // instance each render would change useCountdown's effect dependency every
@@ -81,7 +82,12 @@ export function HomePage() {
           />
         </div>
 
-        <Countdown label={countdownLabel(quest.phase)} target={target} dateText={countdownDateText(quest)} />
+        <Countdown
+          label={countdownLabel(quest.phase)}
+          target={target}
+          dateText={countdownDateText(quest)}
+          onComplete={refreshQuest}
+        />
 
         <QuestAction quest={quest} />
       </main>

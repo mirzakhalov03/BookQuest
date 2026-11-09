@@ -1,4 +1,5 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CursorPage, Quest, QuestSummary } from '@bookquest/shared';
 import { api } from './client';
 
@@ -24,6 +25,21 @@ export function useCurrentQuest() {
     queryKey: questKeys.current(),
     queryFn: () => api.get<Quest>('/quests/current')
   });
+}
+
+/**
+ * For the moment a phase ends: refetch the current quest past the browser's
+ * HTTP cache, since the API sends `max-age=30` and would return the old phase.
+ */
+export function useRefreshCurrentQuest(): () => void {
+  const queryClient = useQueryClient();
+  return useCallback(() => {
+    void queryClient.fetchQuery({
+      queryKey: questKeys.current(),
+      queryFn: () => api.get<Quest>('/quests/current', { cache: 'no-cache' }),
+      staleTime: 0
+    });
+  }, [queryClient]);
 }
 
 /**
