@@ -46,6 +46,15 @@ export type TelegramWidgetAuthPayload = z.infer<typeof telegramWidgetAuthSchema>
  */
 const PHONE_NUMBER_PATTERN = /^\+?[1-9]\d{7,14}$/;
 
+/** The one stored form, `+<digits>`, so `+998…` and `998…` are the same account. */
+export const toCanonicalPhone = (phone: string): string => `+${phone.replace(/\D/g, '')}`;
+
+const phoneNumberField = z
+  .string()
+  .trim()
+  .regex(PHONE_NUMBER_PATTERN, 'Enter a valid phone number.')
+  .transform(toCanonicalPhone);
+
 /**
  * Phone number + password sign-up. 72 is bcrypt's own input ceiling —
  * anything longer is silently truncated by bcrypt itself, so this rejects
@@ -53,7 +62,7 @@ const PHONE_NUMBER_PATTERN = /^\+?[1-9]\d{7,14}$/;
  * type.
  */
 export const phoneRegisterSchema = z.object({
-  phoneNumber: z.string().trim().regex(PHONE_NUMBER_PATTERN, 'Enter a valid phone number.'),
+  phoneNumber: phoneNumberField,
   password: z.string().min(8, 'Use at least 8 characters.').max(72, 'Use at most 72 characters.'),
   firstName: z.string().trim().min(1, 'Enter your name.')
 });
@@ -61,7 +70,7 @@ export const phoneRegisterSchema = z.object({
 export type PhoneRegisterPayload = z.infer<typeof phoneRegisterSchema>;
 
 export const phoneLoginSchema = z.object({
-  phoneNumber: z.string().trim().regex(PHONE_NUMBER_PATTERN, 'Enter a valid phone number.'),
+  phoneNumber: phoneNumberField,
   password: z.string().min(1, 'Enter your password.')
 });
 

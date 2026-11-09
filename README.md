@@ -22,9 +22,10 @@ Requires Node 22+, pnpm 10+, and a MongoDB you can reach at `MONGODB_URI`.
 
 `JWT_SECRET` needs 32+ characters — `openssl rand -hex 32`. `TELEGRAM_BOT_TOKEN` comes from
 BotFather; every session is an HMAC keyed by it, so a service without one cannot authenticate
-anybody and says so at boot rather than starting up broken. `ADMIN_TELEGRAM_IDS` is the whole admin
-model: a comma-separated allowlist, resolved into a role at sign-in and re-read from the database on
-every admin request. There is no endpoint that grants a role.
+anybody and says so at boot rather than starting up broken. Admins are the Telegram
+ids in `ADMIN_TELEGRAM_IDS`, plus the numbers in `ADMIN_PHONE_NUMBERS`, which sign in only with the
+shared `ADMIN_PASSWORD`. Both lists are checked on every request, so removing someone takes effect
+immediately. There is no endpoint that grants admin.
 
 The seed script also runs `syncIndexes()`, which is how a development database picks up index
 changes. On a production database, index changes are a deliberate migration step.
@@ -98,7 +99,7 @@ in `components/ui/`.
 | ✅ | Quests: `GET /quests/current`, `GET /quests`, `GET /quests/:edition` |
 | ✅ | Participants: register, `/me`, `/me/certificate`, `GET /:number` (session required, no contact) |
 | ✅ | Results: `GET /quests/current/results` — ranked once at publication, then frozen |
-| ✅ | Admin: participant roster, quest create / edit / make-current, stats |
+| ✅ | Admin: participant roster, quest create / edit / next edition, stats |
 | 🚧 | Registration and Home as React components — currently stubs; the design is in `prototype/` |
 | ⬜ | The quiz. Deliberately unspecified — question delivery, scoring, timing and anti-cheat need their own plan |
 

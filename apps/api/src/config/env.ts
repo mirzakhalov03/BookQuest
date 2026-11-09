@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { toCanonicalPhone } from '@bookquest/shared';
 
 /**
  * Environment is parsed once, at boot, and the process refuses to start if it
@@ -30,13 +31,19 @@ const envSchema = z.object({
 
   /** The entire admin model: a comma-separated allowlist of Telegram user ids. */
   ADMIN_TELEGRAM_IDS: z.string().default(''),
-  /** Same allowlist, for phone/password accounts — a comma-separated list of
-      phone numbers (in the same shape the login form accepts). */
+  /** Phone numbers that sign in as organisers — only with ADMIN_PASSWORD. */
   ADMIN_PHONE_NUMBERS: z.string().default(''),
+  /** The organisers' shared password for the numbers above. */
+  ADMIN_PASSWORD: z.string().min(8, 'ADMIN_PASSWORD must be at least 8 characters').optional(),
 
   RATE_LIMIT_REGISTER_PER_HOUR: z.coerce.number().int().positive().default(5),
   RATE_LIMIT_AUTH_PER_MINUTE: z.coerce.number().int().positive().default(20),
   RATE_LIMIT_GLOBAL_PER_MINUTE: z.coerce.number().int().positive().default(300),
+  /** Mini App initData exchange. Each call needs a valid signature, so it can be looser. */
+  RATE_LIMIT_TELEGRAM_AUTH_PER_MINUTE: z.coerce.number().int().positive().default(120),
+  RATE_LIMIT_LOGIN_CODE_PER_HOUR: z.coerce.number().int().positive().default(10),
+  /** Proxies between the client and the API in production (the host's load balancer). */
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
 
   /** Absolute URL of the web app, for certificate links and bot messages. */
   WEB_APP_URL: z.string().url().optional(),
@@ -73,7 +80,9 @@ const splitList = (value: string): string[] =>
  * a number would round-trip incorrectly and silently match the wrong person.
  */
 export const adminTelegramIds: ReadonlySet<string> = new Set(splitList(env.ADMIN_TELEGRAM_IDS));
-export const adminPhoneNumbers: ReadonlySet<string> = new Set(splitList(env.ADMIN_PHONE_NUMBERS));
+export const adminPhoneNumbers: ReadonlySet<string> = new Set(
+  splitList(env.ADMIN_PHONE_NUMBERS).map(toCanonicalPhone)
+);
 
 /**
  * Configuration that is legal but probably wrong. Collected here and logged by
@@ -85,6 +94,12 @@ export const configWarnings: string[] = [];
 if (adminTelegramIds.size === 0) {
   const message =
     'ADMIN_TELEGRAM_IDS is empty — no account can reach /admin. Set it to a comma-separated list of Telegram user ids.';
+  if (isProduction) throw new Error(`Invalid environment configuration:\n  ${message}`);
+  configWarnings.push(message);
+}
+
+if (adminPhoneNumbers.size > 0 && !env.ADMIN_PASSWORD) {
+  const message = 'ADMIN_PHONE_NUMBERS is set but ADMIN_PASSWORD is not — phone admins cannot sign in.';
   if (isProduction) throw new Error(`Invalid environment configuration:\n  ${message}`);
   configWarnings.push(message);
 }

@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from 'node:crypto';
 import bcrypt from 'bcrypt';
 import type {
   PhoneLoginPayload,
@@ -7,6 +8,7 @@ import type {
   TelegramWidgetAuthPayload
 } from '@bookquest/shared';
 import { isAvatarId } from '@bookquest/shared';
+import { adminPhoneNumbers, env } from '../config/env.js';
 import { logger } from '../config/logger.js';
 import type { UserDocument } from '../models/user.model.js';
 import { ApiError } from '../utils/api-error.js';
@@ -16,11 +18,31 @@ import { findParticipantForUser } from './participant.services.js';
 import {
   createUserWithPhone,
   findUserByPhone,
+  isAdmin,
   linkTelegramToUser,
+  upsertAdminPhoneUser,
   upsertUserFromTelegramProfile
 } from './user.services.js';
 
 const INCORRECT_CREDENTIALS = 'Incorrect phone number or password.';
+const DEFAULT_ADMIN_NAME = 'Organiser';
+
+const sha256 = (value: string): Buffer => createHash('sha256').update(value).digest();
+
+// Hashing both sides first gives equal lengths, so the compare leaks nothing about the length either.
+function isAdminPassword(password: string): boolean {
+  return !!env.ADMIN_PASSWORD && timingSafeEqual(sha256(password), sha256(env.ADMIN_PASSWORD));
+}
+
+/** Admin numbers only ever sign in with the shared password — from either tab, same failure as any login. */
+async function authenticateAdminPhone(
+  phoneNumber: string,
+  password: string,
+  firstName = DEFAULT_ADMIN_NAME
+): Promise<Session> {
+  if (!isAdminPassword(password)) throw ApiError.unauthorized(INCORRECT_CREDENTIALS);
+  return issueSession(await upsertAdminPhoneUser(phoneNumber, firstName));
+}
 
 /**
  * The point every sign-in path converges on, whoever proved who is asking —
@@ -68,6 +90,9 @@ export async function authenticateWithTelegramWidget(
 
 /** POST /auth/register */
 export async function registerWithPhone(payload: PhoneRegisterPayload): Promise<Session> {
+  if (adminPhoneNumbers.has(payload.phoneNumber)) {
+    return authenticateAdminPhone(payload.phoneNumber, payload.password, payload.firstName);
+  }
   const user = await createUserWithPhone(payload.phoneNumber, payload.password, payload.firstName);
   return issueSession(user);
 }
@@ -78,6 +103,9 @@ export async function registerWithPhone(payload: PhoneRegisterPayload): Promise<
  * would let a caller enumerate which phone numbers have accounts.
  */
 export async function authenticateWithPhone(payload: PhoneLoginPayload): Promise<Session> {
+  if (adminPhoneNumbers.has(payload.phoneNumber)) {
+    return authenticateAdminPhone(payload.phoneNumber, payload.password);
+  }
   const user = await findUserByPhone(payload.phoneNumber);
 
   if (!user || !user.passwordHash) {
@@ -121,7 +149,7 @@ export async function toSessionUser(user: UserDocument): Promise<SessionUser> {
     username: user.username ?? null,
     photoUrl: user.photoUrl ?? null,
     avatar: isAvatarId(user.avatar) ? user.avatar : null,
-    role: user.role,
+    role: isAdmin(user) ? 'admin' : 'participant',
     participant: await findParticipantForUser(user)
   };
 }

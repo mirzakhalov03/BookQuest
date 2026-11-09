@@ -36,8 +36,8 @@ const userSchema = new Schema(
        validation on the user's next save. */
     avatar: { type: String, default: null },
 
-    /* Resolved from ADMIN_TELEGRAM_IDS at login and re-read from here on every
-       admin request. There is no endpoint that writes it. */
+    /* Only means "this phone account proved the shared admin password".
+       Access itself is decided per request by `isAdmin` (user.services). */
     role: { type: String, enum: ROLES, default: 'participant' },
 
     lastSeenAt: { type: Date, default: null }

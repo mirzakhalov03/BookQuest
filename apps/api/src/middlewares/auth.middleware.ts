@@ -1,5 +1,6 @@
 import type { Request, RequestHandler } from 'express';
 import { UserModel, type UserDocument } from '../models/user.model.js';
+import { isAdmin } from '../services/user.services.js';
 import { readBearerToken, readSessionToken } from '../utils/token.js';
 import { ApiError } from '../utils/api-error.js';
 
@@ -49,7 +50,7 @@ export const requireAdmin: RequestHandler = (req, _res, next) => {
     next(ApiError.unauthorized('Sign in to continue.'));
     return;
   }
-  if (user.role !== 'admin') {
+  if (!isAdmin(user)) {
     next(ApiError.forbidden('This area is for organisers.'));
     return;
   }

@@ -18,8 +18,6 @@ const BCRYPT_COST = 12;
 export async function upsertUserFromTelegramProfile(
   profile: TelegramProfile
 ): Promise<UserDocument> {
-  const role = adminTelegramIds.has(profile.telegramUserId) ? 'admin' : 'participant';
-
   return UserModel.findOneAndUpdate(
     { telegramUserId: profile.telegramUserId },
     {
@@ -29,7 +27,6 @@ export async function upsertUserFromTelegramProfile(
         username: profile.username,
         photoUrl: profile.photoUrl,
         languageCode: profile.languageCode,
-        role,
         lastSeenAt: new Date()
       }
     },
@@ -49,15 +46,9 @@ export async function createUserWithPhone(
   }
 
   const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
-  const role = adminPhoneNumbers.has(phoneNumber) ? 'admin' : 'participant';
 
   try {
-    return await UserModel.create({
-      phoneNumber,
-      passwordHash,
-      firstName,
-      role
-    });
+    return await UserModel.create({ phoneNumber, passwordHash, firstName });
   } catch (error) {
     /* The findOne above is a courtesy; this is the guarantee. Two requests
        can both pass the check, and only the unique index decides which one
@@ -68,6 +59,25 @@ export async function createUserWithPhone(
     }
     throw error;
   }
+}
+
+/**
+ * The single answer to "is this an organiser", read on every request so an
+ * `.env` edit takes effect immediately. Phone admins must also have proven the
+ * shared admin password, which is what a stored `role: 'admin'` records.
+ */
+export function isAdmin(user: UserDocument): boolean {
+  if (user.telegramUserId && adminTelegramIds.has(user.telegramUserId)) return true;
+  return user.role === 'admin' && !!user.phoneNumber && adminPhoneNumbers.has(user.phoneNumber);
+}
+
+/** An admin number signed in with the shared password: find or create its account, marked admin. */
+export async function upsertAdminPhoneUser(phoneNumber: string, firstName: string): Promise<UserDocument> {
+  return UserModel.findOneAndUpdate(
+    { phoneNumber },
+    { $set: { role: 'admin', lastSeenAt: new Date() }, $setOnInsert: { firstName } },
+    { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
+  );
 }
 
 /**
