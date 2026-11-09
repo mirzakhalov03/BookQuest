@@ -1,0 +1,33 @@
+apps/api/src/controllers/result.controllers.ts
+  s_66355262d5172c::t_5ae29b31d03eef 7-10
+apps/api/src/routes/quest.routes.ts
+  s_66355262d5172c::t_0c1366ad676a54 5,12
+apps/api/src/services/result.services.ts
+  s_66355262d5172c::t_a626e75940aea9 13-14,43-45,47-50,102-104,106-119,124-126,132-137,139
+apps/web/src/features/results/ResultsPage.tsx
+  s_66355262d5172c::t_faa48a8f74c710 2,14,17-18,31,40,42,62-74,88,90,131-134
+apps/web/src/features/results/components/FullBoardPrompt.tsx
+  s_66355262d5172c::t_a3333b2277d81f 1-19
+apps/web/src/lib/api/mock/people.ts
+  s_66355262d5172c::t_b61c36fc9bafb1 148,163-164,166-169
+apps/web/src/lib/api/mock/routes.ts
+  s_66355262d5172c::t_d842332740722c 574,577-579
+packages/shared/src/schemas/result.ts
+  s_66355262d5172c::t_60908a775e7692 17,19-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "45d8cfaac92b9567c900f5fb0efd62ef2d8550d8",
+  "prompts": {},
+  "sessions": {
+    "s_66355262d5172c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4cab12e7-5481-41e2-956c-2ec41f557bea",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
