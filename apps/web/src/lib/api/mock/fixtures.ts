@@ -60,9 +60,9 @@ export const CURRENT_QUEST: Quest = {
     ]
   },
   prizes: {
-    first: 'AirPods Pro',
-    second: '1,000,000 so‘m',
-    third: 'A year of books, on us'
+    first: 'AirPods Pro 2',
+    second: 'A 10-book shelf of your choice',
+    third: 'Signed copy of The Alchemist'
   },
   opensAt: '2026-08-01T09:00:00.000Z',
   readingDeadline: '2026-10-10T18:59:00.000Z',

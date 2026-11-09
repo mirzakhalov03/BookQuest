@@ -25,9 +25,9 @@ const QUEST = {
     resources: []
   },
   prizes: {
-    first: null,
-    second: null,
-    third: null
+    first: 'AirPods Pro 2',
+    second: 'A 10-book shelf of your choice',
+    third: 'Signed copy of The Alchemist'
   },
   opensAt: new Date('2026-08-01T09:00:00Z'),
   readingDeadline: new Date('2026-10-10T18:59:00Z'),
