@@ -1,0 +1,59 @@
+apps/web/src/app/router.tsx
+  s_db0ac12717c7e9::t_2e400e887fd694 8-9,11,38-40,43
+apps/web/src/components/BookHero.tsx
+  s_db0ac12717c7e9::t_4f845d06fbe6cc 5-7,28-36
+apps/web/src/components/layout/TabBar.tsx
+  s_db0ac12717c7e9::t_5732b8e093698a 2-4,10-11,14-16,18-20,22-34,45-47,50,55,57-59
+apps/web/src/components/ui/ExpandableText.tsx
+  s_db0ac12717c7e9::t_d072a991474a79 1-66
+apps/web/src/features/admin/quest/NewEditionPage.tsx
+  s_db0ac12717c7e9::t_a19c4a65f7bf3a 89
+apps/web/src/features/admin/quest/components/QuestPreview.tsx
+  s_db0ac12717c7e9::t_a02436b31147e4 16
+apps/web/src/features/book/BookPage.tsx
+  s_db0ac12717c7e9::t_8998643927c870 8,56
+apps/web/src/features/prizes/PrizesPage.tsx
+  s_ab622ed4f3212f::t_1035de250f6172 1-16
+apps/web/src/features/prizes/QuestEditionPage.tsx
+  s_ab622ed4f3212f::t_d571f408b69635 14,16,19,22,28-29,32,47,64,109,114
+apps/web/src/features/prizes/components/CurrentPrizes.tsx
+  s_ab622ed4f3212f::t_2b88e62228d713 1-46
+apps/web/src/features/prizes/components/PreviousQuests.tsx
+  s_ab622ed4f3212f::t_3c612c1d53cfa1 1-67
+apps/web/src/features/prizes/components/PrizePodium.tsx
+  s_ab622ed4f3212f::t_17f1a76ef9f50e 1-38
+apps/web/src/features/quiz/QuizPage.tsx
+  s_db0ac12717c7e9::t_52fa519a7534fb 1-57
+apps/web/src/lib/api/quest.ts
+  s_ab622ed4f3212f::t_04f20451d49d41 7,11
+apps/web/src/styles/index.css
+  s_ab622ed4f3212f::t_3503da40560a71 8
+apps/web/src/styles/prizes.css
+  s_ab622ed4f3212f::t_f0fecde85db2de 1-91
+apps/web/src/styles/shell.css
+  s_db0ac12717c7e9::t_0b72076abda318 303-366
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "439324dff26c693db8bc41062d609492976d3112",
+  "prompts": {},
+  "sessions": {
+    "s_ab622ed4f3212f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9b1df2d0-b8a8-459d-b678-3a7f489c77e6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_db0ac12717c7e9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f5534f2f-20c8-459c-9b71-1f810e089338",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
