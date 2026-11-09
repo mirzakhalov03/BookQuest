@@ -1,4 +1,4 @@
-import { Schema, model, type InferSchemaType, type HydratedDocument } from 'mongoose';
+import { Schema, model, type InferSchemaType, type HydratedDocument, type Types } from 'mongoose';
 import { CONTACT_METHODS, PARTICIPANT_NUMBER_MAX, PARTICIPANT_NUMBER_MIN } from '@bookquest/shared';
 
 /**
@@ -47,5 +47,7 @@ participantSchema.index({ quest: 1, fullName: 1 });
 
 export type ParticipantAttributes = InferSchemaType<typeof participantSchema>;
 export type ParticipantDocument = HydratedDocument<ParticipantAttributes>;
+/** A document or a `.lean()` row: what read-only mappers accept. */
+export type ParticipantRow = ParticipantAttributes & { _id: Types.ObjectId; createdAt: Date };
 
 export const ParticipantModel = model('Participant', participantSchema);

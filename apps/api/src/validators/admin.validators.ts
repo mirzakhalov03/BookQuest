@@ -1,8 +1,6 @@
 import { z } from 'zod';
 import { CONTACT_METHODS, createQuestSchema, updateQuestSchema, createBroadcastSchema } from '@bookquest/shared';
-import { OBJECT_ID_PATTERN } from '../utils/mongo.js';
-
-const objectId = z.string().regex(OBJECT_ID_PATTERN, 'That is not a valid id.');
+import { objectId } from './common.js';
 
 export const questIdParams = z.object({ id: objectId });
 

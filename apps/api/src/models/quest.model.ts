@@ -1,4 +1,4 @@
-import { Schema, model, type InferSchemaType, type HydratedDocument } from 'mongoose';
+import { Schema, model, type InferSchemaType, type HydratedDocument, type Types } from 'mongoose';
 import { BOOK_RESOURCE_KINDS } from '@bookquest/shared';
 
 /** Where to actually get the book. Admin-editable, ordered as entered. */
@@ -75,5 +75,7 @@ questSchema.index({ year: -1 });
 
 export type QuestAttributes = InferSchemaType<typeof questSchema>;
 export type QuestDocument = HydratedDocument<QuestAttributes>;
+/** A document or a `.lean()` row: what read-only mappers accept. */
+export type QuestRow = QuestAttributes & { _id: Types.ObjectId };
 
 export const QuestModel = model('Quest', questSchema);

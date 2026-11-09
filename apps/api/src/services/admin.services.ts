@@ -1,8 +1,10 @@
 import type { AdminStats, ContactMethod, Paginated, Participant } from '@bookquest/shared';
-import { ParticipantModel } from '../models/participant.model.js';
+import { ParticipantModel, type ParticipantRow } from '../models/participant.model.js';
 import { ResultModel } from '../models/result.model.js';
 import { QuestModel } from '../models/quest.model.js';
+import { env } from '../config/env.js';
 import { ApiError } from '../utils/api-error.js';
+import { startOfDayIn } from '../utils/time-zone.js';
 import { requireCurrentQuestDocument, resolvePhase } from './quest.services.js';
 import { toParticipantDto } from './participant.services.js';
 
@@ -58,7 +60,8 @@ export async function listParticipants(query: ParticipantQuery): Promise<Paginat
       .sort(sortSpec(query))
       .collation({ locale: 'en', strength: 2 })
       .skip((query.page - 1) * query.limit)
-      .limit(query.limit),
+      .limit(query.limit)
+      .lean<ParticipantRow[]>(),
     ParticipantModel.countDocuments(filter)
   ]);
 
@@ -73,8 +76,7 @@ export async function listParticipants(query: ParticipantQuery): Promise<Paginat
 export async function getStats(): Promise<AdminStats> {
   const quest = await requireCurrentQuestDocument();
 
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+  const startOfToday = startOfDayIn(env.ORGANISER_TIME_ZONE);
 
   const [participants, registeredToday, quizSubmitted] = await Promise.all([
     ParticipantModel.countDocuments({ quest: quest._id }),

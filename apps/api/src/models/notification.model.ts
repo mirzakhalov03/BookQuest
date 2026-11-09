@@ -1,6 +1,5 @@
 import { Schema, model, type InferSchemaType, type HydratedDocument } from 'mongoose';
-
-const NOTIFICATION_KINDS = ['broadcast', 'system'] as const;
+import { NOTIFICATION_KINDS } from '@bookquest/shared';
 
 /**
  * One row per recipient, regardless of origin — an admin broadcast fans out
@@ -23,6 +22,8 @@ const notificationSchema = new Schema(
 
 // The feed: this person's notifications, newest first.
 notificationSchema.index({ user: 1, createdAt: -1 });
+// The bell's unread count.
+notificationSchema.index({ user: 1, readAt: 1 });
 
 export type NotificationAttributes = InferSchemaType<typeof notificationSchema>;
 export type NotificationDocument = HydratedDocument<NotificationAttributes>;

@@ -6,6 +6,15 @@ import { toCanonicalPhone } from '@bookquest/shared';
  * is wrong. Nothing downstream reads process.env directly, so there is exactly
  * one place to look when a deployment misbehaves.
  */
+function isTimeZone(value: string): boolean {
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
@@ -45,9 +54,15 @@ const envSchema = z.object({
   /** Proxies between the client and the API in production (the host's load balancer). */
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
 
+  /** The organisers' zone (IANA name): where "today" starts on the dashboard. */
+  ORGANISER_TIME_ZONE: z
+    .string()
+    .default('Asia/Tashkent')
+    .refine(isTimeZone, 'ORGANISER_TIME_ZONE must be an IANA zone, e.g. Asia/Tashkent'),
+
   /** Absolute URL of the web app, for certificate links and bot messages. */
   WEB_APP_URL: z.string().url().optional(),
-  /** Absolute base of this API as browsers reach it — uploaded cover URLs are built from it. */
+  /** Absolute base of this API as browsers reach it — cover URLs are built from it per response. */
   PUBLIC_API_URL: z.string().url().optional()
 });
 
@@ -66,7 +81,7 @@ export const isProduction = env.NODE_ENV === 'production';
 /** Comma-separated list, so preview deployments can be added without a code change. */
 export const corsOrigins = env.CORS_ORIGIN.split(',').map((origin) => origin.trim());
 
-/** Baked into stored cover URLs, so it must be the address browsers use, not an internal one. */
+/** Prefixed onto cover paths in responses, so it must be the address browsers use, not an internal one. */
 export const publicApiUrl = (env.PUBLIC_API_URL ?? `http://localhost:${env.PORT}`).replace(/\/+$/, '');
 
 const splitList = (value: string): string[] =>
@@ -106,6 +121,6 @@ if (adminPhoneNumbers.size > 0 && !env.ADMIN_PASSWORD) {
 
 if (isProduction && !env.PUBLIC_API_URL) {
   configWarnings.push(
-    "PUBLIC_API_URL is not set — uploaded cover URLs will point at localhost. Set it to the API's public origin."
+    "PUBLIC_API_URL is not set — cover URLs will point at localhost. Set it to the API's public origin."
   );
 }

@@ -15,6 +15,14 @@ export const notificationSchema = z.object({
 
 export type Notification = z.infer<typeof notificationSchema>;
 
+/** The feed is capped; `unreadCount` covers everything, not just the returned page. */
+export const NOTIFICATION_FEED_LIMIT = 50;
+
+export interface NotificationFeed {
+  items: Notification[];
+  unreadCount: number;
+}
+
 /** One cap, read by the schema and the composer's counter. */
 export const BROADCAST_MAX_LENGTH = 1000;
 

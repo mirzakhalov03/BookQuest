@@ -155,11 +155,11 @@ export async function requestLoginCode(
     expiresAt: new Date(now + DAY_MS)
   });
 
-  const sent = await sendTelegramMessage(
+  const outcome = await sendTelegramMessage(
     user.telegramUserId,
     `Your BookQuest login code: ${code}. It expires in 10 minutes. If you didn't ask for this, ignore this message.`
   );
-  if (!sent) {
+  if (outcome.status !== 'sent') {
     // Nothing was delivered, so it shouldn't count against the send budget.
     await loginCode.deleteOne();
     throw ApiError.unprocessable(

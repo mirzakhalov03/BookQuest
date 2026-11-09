@@ -1,6 +1,7 @@
 import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import mongoose from 'mongoose';
 import { pinoHttp } from 'pino-http';
 import { corsOrigins, env, isProduction } from './config/env.js';
 import { logger } from './config/logger.js';
@@ -24,7 +25,12 @@ export function createApp(): Express {
 
   // Deliberately ahead of the rate limiter: a host's health check must never
   // be throttled into reporting the service as down.
+  // 503 while Mongo is down, so the host stops routing to an instance that can't serve.
   app.get('/health', (_req, res) => {
+    if (mongoose.connection.readyState !== mongoose.ConnectionStates.connected) {
+      res.status(503).json({ ok: false, error: { code: 'unavailable', message: 'Database unreachable.' } });
+      return;
+    }
     res.json({ ok: true, data: { status: 'up', uptime: process.uptime() } });
   });
 

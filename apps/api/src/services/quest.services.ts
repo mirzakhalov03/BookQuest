@@ -7,13 +7,13 @@ import type {
   UpdateQuestPayload
 } from '@bookquest/shared';
 import { QUEST_DATE_FIELDS, findQuestDateIssues } from '@bookquest/shared';
-import { QuestModel, type QuestDocument } from '../models/quest.model.js';
+import { QuestModel, type QuestDocument, type QuestRow } from '../models/quest.model.js';
 import { ResultModel } from '../models/result.model.js';
-import { ParticipantModel } from '../models/participant.model.js';
 import { ApiError } from '../utils/api-error.js';
 import { isDuplicateKeyError } from '../utils/mongo.js';
 import { withTransaction } from '../utils/transaction.js';
-import { coverIdFromUrl, discardCover } from './cover.services.js';
+import { coverIdFromUrl, discardCover, toPublicCoverUrl, toStoredCoverUrl } from './cover.services.js';
+import { participantsById } from './participant-lookup.services.js';
 
 const ARCHIVE_PAGE_SIZE = 20;
 
@@ -54,7 +54,8 @@ export async function listPastQuests(options: {
     ...(before === null ? {} : { edition: { $lt: before } })
   })
     .sort({ edition: -1 })
-    .limit(limit + 1);
+    .limit(limit + 1)
+    .lean<QuestRow[]>();
 
   const page = quests.slice(0, limit);
   const last = page.at(-1);
@@ -93,7 +94,8 @@ export async function createQuest(payload: CreateQuestPayload): Promise<Quest> {
   try {
     // Inserted inside the callback: a retried transaction must insert afresh, not reuse a rolled-back document.
     const quest = await withTransaction(async (session) => {
-      const [created] = await QuestModel.create([{ ...fields, isCurrent: false }], { session });
+      const book = { ...fields.book, coverUrl: toStoredCoverUrl(fields.book.coverUrl) };
+      const [created] = await QuestModel.create([{ ...fields, book, isCurrent: false }], { session });
       if (!created) throw new Error('Quest insert returned no document.');
 
       if (makeCurrent) {
@@ -128,9 +130,15 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
   });
   if (issues) throw badDates(issues);
 
+  const book =
+    payload.book && 'coverUrl' in payload.book
+      ? { ...payload.book, coverUrl: toStoredCoverUrl(payload.book.coverUrl) }
+      : payload.book;
+
   // Only when the cover actually changes, and only if the old one is ours — pasted URLs aren't ours to delete.
   const replacedCoverId =
-    payload.book && 'coverUrl' in payload.book && payload.book.coverUrl !== quest.book.coverUrl
+    // Both sides normalised: a not-yet-migrated absolute row must not read as "changed" and lose its file.
+    book && 'coverUrl' in book && book.coverUrl !== toStoredCoverUrl(quest.book.coverUrl)
       ? coverIdFromUrl(quest.book.coverUrl)
       : null;
 
@@ -142,7 +150,7 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
   }
 
   // Dotted paths, so editing one book field does not blank the others.
-  for (const [key, value] of Object.entries(payload.book ?? {})) {
+  for (const [key, value] of Object.entries(book ?? {})) {
     update[`book.${key}`] = value;
   }
   for (const [key, value] of Object.entries(payload.prizes ?? {})) {
@@ -184,7 +192,7 @@ export function toQuestDto(quest: QuestDocument): Quest {
       title: quest.book.title,
       author: quest.book.author,
       pages: quest.book.pages,
-      coverUrl: quest.book.coverUrl ?? null,
+      coverUrl: toPublicCoverUrl(quest.book.coverUrl),
       description: quest.book.description ?? null,
       resources: (quest.book.resources ?? []).map((resource) => ({
         label: resource.label,
@@ -208,17 +216,14 @@ export function toQuestDto(quest: QuestDocument): Quest {
   };
 }
 
-export function toQuestSummary(
-  quest: QuestDocument,
-  winner: QuestSummary['winner']
-): QuestSummary {
+export function toQuestSummary(quest: QuestRow, winner: QuestSummary['winner']): QuestSummary {
   return {
-    id: quest.id,
+    id: String(quest._id),
     edition: quest.edition,
     year: quest.year,
     bookTitle: quest.book.title,
     bookAuthor: quest.book.author,
-    coverUrl: quest.book.coverUrl ?? null,
+    coverUrl: toPublicCoverUrl(quest.book.coverUrl),
     participantCount: quest.participantCount,
     winner
   };
@@ -234,24 +239,11 @@ async function findWinners(questIds: string[]): Promise<Map<string, QuestSummary
   const results = await ResultModel.find({ quest: { $in: questIds }, rank: 1 })
     .select('quest participant')
     .lean();
-  if (results.length === 0) return winners;
-
-  const participants = await ParticipantModel.find({
-    _id: { $in: results.map((result) => result.participant) }
-  })
-    .select('number fullName')
-    .lean();
-
-  const byId = new Map(participants.map((participant) => [String(participant._id), participant]));
+  const byId = await participantsById(results.map((result) => result.participant));
 
   for (const result of results) {
     const participant = byId.get(String(result.participant));
-    if (participant) {
-      winners.set(String(result.quest), {
-        number: participant.number,
-        fullName: participant.fullName
-      });
-    }
+    if (participant) winners.set(String(result.quest), participant);
   }
 
   return winners;

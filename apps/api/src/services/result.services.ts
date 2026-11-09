@@ -1,45 +1,32 @@
 import crypto from 'node:crypto';
 import type { CertificateData, QuestResults, ResultEntry } from '@bookquest/shared';
 import { ResultModel } from '../models/result.model.js';
-import { ParticipantModel } from '../models/participant.model.js';
 import type { QuestDocument } from '../models/quest.model.js';
 import type { UserDocument } from '../models/user.model.js';
 import { ApiError } from '../utils/api-error.js';
 import { findCurrentQuestDocument, requireCurrentQuestDocument } from './quest.services.js';
 import { requireParticipantForUser } from './participant.services.js';
+import { participantsById } from './participant-lookup.services.js';
 
 const PODIUM_SIZE = 3;
+
+/**
+ * Built leaderboards per quest. Ranks are frozen once published, so this only
+ * goes stale when a quest is edited or replaced, which clears it. Holds the
+ * promise, so the results-day burst shares one build. Single instance, like the rate limiter.
+ */
+const leaderboards = new Map<string, Promise<ResultEntry[]>>();
+
+export function clearResultsCache(): void {
+  leaderboards.clear();
+}
 
 /** Podium public; the full board needs a session (names and numbers, possibly of minors). */
 export async function getCurrentQuestResults(viewer: UserDocument | null): Promise<QuestResults> {
   const quest = await requireCurrentQuestDocument();
   requirePublished(quest);
-  await ensureRanked(quest);
 
-  const results = await ResultModel.find({ quest: quest._id }).sort({ rank: 1 }).lean();
-  const participants = await ParticipantModel.find({
-    _id: { $in: results.map((result) => result.participant) }
-  })
-    .select('number fullName')
-    .lean();
-
-  const byId = new Map(participants.map((participant) => [String(participant._id), participant]));
-
-  const leaderboard: ResultEntry[] = results.flatMap((result) => {
-    const participant = byId.get(String(result.participant));
-    if (!participant || !result.rank) return [];
-    return [
-      {
-        rank: result.rank,
-        number: participant.number,
-        fullName: participant.fullName,
-        score: result.score,
-        total: result.total,
-        durationMs: result.durationMs
-      }
-    ];
-  });
-
+  const leaderboard = await cachedLeaderboard(quest);
   const podium = leaderboard.slice(0, PODIUM_SIZE);
   const isFullBoard = viewer !== null;
 
@@ -57,8 +44,8 @@ export async function getCertificateForUser(user: UserDocument): Promise<Certifi
   requirePublished(quest);
   await ensureRanked(quest);
 
-  const participant = await requireParticipantForUser(user);
-  const result = await ResultModel.findOne({ quest: quest._id, participant: participant.id });
+  const participant = await requireParticipantForUser(user, quest);
+  const result = await ResultModel.findOne({ quest: quest._id, participant: participant.id }).lean();
 
   if (!result) throw ApiError.notFound('There is no completed quiz to certify yet.');
 
@@ -86,6 +73,43 @@ export async function rankOutgoingQuest(now = new Date()): Promise<void> {
 }
 
 /* ── Internals ───────────────────────────────────────────────────────────── */
+
+function cachedLeaderboard(quest: QuestDocument): Promise<ResultEntry[]> {
+  const key = String(quest._id);
+  const cached = leaderboards.get(key);
+  if (cached) return cached;
+
+  const build = buildLeaderboard(quest);
+  leaderboards.set(key, build);
+  // A failed build must not be served to everyone after it.
+  build.catch(() => leaderboards.delete(key));
+  return build;
+}
+
+async function buildLeaderboard(quest: QuestDocument): Promise<ResultEntry[]> {
+  await ensureRanked(quest);
+
+  const results = await ResultModel.find({ quest: quest._id, rank: { $ne: null } })
+    .sort({ rank: 1 })
+    .select('participant rank score total durationMs')
+    .lean();
+  const byId = await participantsById(results.map((result) => result.participant));
+
+  return results.flatMap((result) => {
+    const participant = byId.get(String(result.participant));
+    if (!participant || !result.rank) return [];
+    return [
+      {
+        rank: result.rank,
+        number: participant.number,
+        fullName: participant.fullName,
+        score: result.score,
+        total: result.total,
+        durationMs: result.durationMs
+      }
+    ];
+  });
+}
 
 /**
  * Results that do not exist yet are not found, not forbidden — there is nothing

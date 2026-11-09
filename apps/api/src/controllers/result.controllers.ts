@@ -5,9 +5,12 @@ import { ok } from '../utils/respond.js';
 
 /** GET /api/v1/quests/current/results */
 export async function getCurrentResults(req: Request, res: Response): Promise<void> {
-  // Varies by viewer, so no shared cache may hold it.
-  res.setHeader('Cache-Control', 'private, no-cache');
-  ok(res, await resultService.getCurrentQuestResults(req.currentUser ?? null));
+  const viewer = req.currentUser ?? null;
+  const results = await resultService.getCurrentQuestResults(viewer);
+  // Set after success, so a "not published yet" 404 is never cached. Signed-in viewers get the full board, so theirs stays private.
+  res.setHeader('Cache-Control', `${viewer ? 'private' : 'public'}, max-age=60`);
+  res.setHeader('Vary', 'Authorization');
+  ok(res, results);
 }
 
 /** GET /api/v1/participants/me/certificate */

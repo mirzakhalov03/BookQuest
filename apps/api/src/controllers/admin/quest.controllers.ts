@@ -11,6 +11,7 @@ export async function createQuest(req: Request, res: Response): Promise<void> {
   // Here, not in createQuest: result.services already imports quest.services, so the reverse would be a cycle.
   if (payload.makeCurrent) await resultService.rankOutgoingQuest();
   const quest = await questService.createQuest(payload);
+  if (payload.makeCurrent) resultService.clearResultsCache();
   auditAdmin(req, 'create-quest', { edition: quest.edition, makeCurrent: payload.makeCurrent });
   ok(res, quest, 201);
 }
@@ -20,6 +21,7 @@ export async function updateQuest(req: Request, res: Response): Promise<void> {
   const { id } = req.params as { id: string };
   const payload = req.body as UpdateQuestPayload;
   const quest = await questService.updateQuest(id, payload);
+  resultService.clearResultsCache();
   auditAdmin(req, 'update-quest', { questId: id, changed: Object.keys(payload) });
   ok(res, quest);
 }

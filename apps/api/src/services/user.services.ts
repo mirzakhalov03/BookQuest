@@ -27,6 +27,7 @@ export async function upsertUserFromTelegramProfile(
         username: profile.username,
         photoUrl: profile.photoUrl,
         languageCode: profile.languageCode,
+        dmBlockedAt: null,
         lastSeenAt: new Date()
       }
     },

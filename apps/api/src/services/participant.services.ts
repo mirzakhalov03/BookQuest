@@ -1,6 +1,6 @@
 import type { Participant, ParticipantPublic, RegisterParticipantPayload } from '@bookquest/shared';
 import { PARTICIPANT_NUMBER_MAX, PARTICIPANT_NUMBER_MIN } from '@bookquest/shared';
-import { ParticipantModel, type ParticipantDocument } from '../models/participant.model.js';
+import { ParticipantModel, type ParticipantDocument, type ParticipantRow } from '../models/participant.model.js';
 import { QuestModel, type QuestDocument } from '../models/quest.model.js';
 import { nextSequence } from '../models/counter.model.js';
 import type { UserDocument } from '../models/user.model.js';
@@ -77,23 +77,30 @@ export async function getParticipantByNumber(number: number): Promise<Participan
 }
 
 /** Null when there is no current quest, or the caller has not registered for it. */
-export async function findParticipantForUser(user: UserDocument): Promise<Participant | null> {
-  const quest = await findCurrentQuestDocument();
+export async function findParticipantForUser(
+  user: UserDocument,
+  // Pass it when the caller already loaded it, to skip a second read.
+  currentQuest?: QuestDocument | null
+): Promise<Participant | null> {
+  const quest = currentQuest === undefined ? await findCurrentQuestDocument() : currentQuest;
   if (!quest) return null;
 
   const participant = await ParticipantModel.findOne({ quest: quest._id, user: user._id });
   return participant ? toParticipantDto(participant) : null;
 }
 
-export async function requireParticipantForUser(user: UserDocument): Promise<Participant> {
-  const participant = await findParticipantForUser(user);
+export async function requireParticipantForUser(
+  user: UserDocument,
+  currentQuest?: QuestDocument
+): Promise<Participant> {
+  const participant = await findParticipantForUser(user, currentQuest);
   if (!participant) throw ApiError.notFound('You have not registered for this quest yet.');
   return participant;
 }
 
-export function toParticipantDto(participant: ParticipantDocument): Participant {
+export function toParticipantDto(participant: ParticipantRow): Participant {
   return {
-    id: participant.id,
+    id: String(participant._id),
     number: participant.number,
     fullName: participant.fullName,
     contact: {
@@ -105,6 +112,6 @@ export function toParticipantDto(participant: ParticipantDocument): Participant 
   };
 }
 
-export function toParticipantPublicDto(participant: ParticipantDocument): ParticipantPublic {
+export function toParticipantPublicDto(participant: ParticipantRow): ParticipantPublic {
   return { number: participant.number, fullName: participant.fullName };
 }

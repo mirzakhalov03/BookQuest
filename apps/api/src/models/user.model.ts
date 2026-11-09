@@ -1,28 +1,16 @@
 import { Schema, model, type InferSchemaType, type HydratedDocument } from 'mongoose';
 import { ROLES } from '@bookquest/shared';
 
-/**
- * A person, as Telegram knows them. Created on first successful sign-in; the
- * profile fields are refreshed on every login because a Telegram name, handle
- * or photo can change at any time and nothing here is a key.
- */
+/** A person. Profile fields refresh on every Telegram sign-in: names, handles and photos change. */
 const userSchema = new Schema(
   {
-    /* Stored as a string. Telegram ids can exceed 2^53, and a number that
-       silently loses its last digit would match the wrong account. Optional:
-       a phone/password account has no Telegram id until it's linked. No
-       `default: null` — a partial unique index (below) only excludes a
-       document where the field is genuinely absent, and Mongoose would
-       otherwise write an explicit `null` into every document that omits it,
-       colliding on that one shared `null` past the first such document. */
+    /* A string: ids can exceed 2^53. No `default: null` — every omitted field would
+       store a shared `null` and collide on the unique index below. */
     telegramUserId: { type: String },
 
-    /* Optional: a Telegram-only account never sets this. Trimmed on write.
-       No `default: null` — see telegramUserId above. */
+    // No `default: null`, same reason as telegramUserId.
     phoneNumber: { type: String, trim: true },
-    /* Excluded from default query results — nothing should ever have to
-       remember not to serialize this. No `default: null` for the same
-       reason, though this field isn't indexed. */
+    // Never selected by default, so nothing has to remember not to serialise it.
     passwordHash: { type: String, select: false },
 
     firstName: { type: String, required: true, trim: true },
@@ -31,25 +19,22 @@ const userSchema = new Schema(
     username: { type: String, default: null },
     photoUrl: { type: String, default: null },
     languageCode: { type: String, default: null },
-    /* An id from the shared `AVATARS` list. No enum here: the set will be
-       swapped, and a retired id should read back as "no avatar", not fail
-       validation on the user's next save. */
+    // An `AVATARS` id. No enum: a retired id should read as "no avatar", not fail the next save.
     avatar: { type: String, default: null },
 
     /* Only means "this phone account proved the shared admin password".
        Access itself is decided per request by `isAdmin` (user.services). */
     role: { type: String, enum: ROLES, default: 'participant' },
 
+    /** Telegram answered 403 (bot blocked): later broadcasts skip the DM. Cleared on the next Telegram sign-in or /start. */
+    dmBlockedAt: { type: Date, default: null },
+
     lastSeenAt: { type: Date, default: null }
   },
   { timestamps: true }
 );
 
-// Partial, not sparse: a sparse index only excludes a document where the
-// field is *missing* — it still indexes an explicit `null`, so two users
-// with no Telegram id (or no phone number) would collide on that shared
-// `null`. A partial filter excludes anything that isn't actually a string,
-// `null` included, so any number of users can have neither.
+// Partial, not sparse: sparse still indexes an explicit `null`, so two users without the field would collide.
 userSchema.index(
   { telegramUserId: 1 },
   {
