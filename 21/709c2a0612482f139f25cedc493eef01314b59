@@ -1,0 +1,21 @@
+README.md
+  s_be0972f8b7e2e7::t_fd5e320f9fe388 113-128
+apps/bot/src/bot.ts
+  s_be0972f8b7e2e7::t_46121931f55e8c 23,30-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "21709c2a0612482f139f25cedc493eef01314b59",
+  "prompts": {},
+  "sessions": {
+    "s_be0972f8b7e2e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c13ab3b5-43e0-4932-9620-e614af76548f",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
