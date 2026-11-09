@@ -110,6 +110,22 @@ Phase-by-phase status: `BACKEND-PLAN.md`.
 > ([#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940)), and a lint script
 > that silently passes is worse than none. `pnpm typecheck` is the gate until that lands.
 
+## Deploying
+
+| | Host | Notes |
+|---|---|---|
+| `web` | Vercel, root `apps/web` → `bookquest.uz` | `VITE_*` are baked in at build time — change one, redeploy without cache. |
+| `api` | Railway service `api` → `api.bookquest.uz` | Healthcheck `/health`, restart on failure. |
+| `bot` | Railway service `bot` | Restart always, **one replica** — two pollers on one token steal each other's updates. |
+
+Railway no longer reads config files for new services, so build and start commands are service
+variables (`RAILPACK_BUILD_CMD`, `RAILPACK_START_CMD`): `pnpm turbo run build --filter=@bookquest/<app>`
+and `node apps/<app>/dist/<entry>.js`, both from the repo root so the shared package builds too.
+
+The bot reads `TELEGRAM_BOT_TOKEN` and `BOT_SERVICE_TOKEN` as references to the api's
+(`${{api.…}}`), and reaches it privately at `http://${{api.RAILWAY_PRIVATE_DOMAIN}}:${{api.PORT}}/api/v1`.
+BotFather: `/setdomain bookquest.uz` (web login widget) and the menu button → `https://bookquest.uz`.
+
 ## Scripts
 
 ```bash

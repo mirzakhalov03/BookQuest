@@ -20,15 +20,15 @@ async function start(): Promise<void> {
     logger.error({ error, updateType: ctx.updateType }, 'Unhandled bot error');
   });
 
-  await bot.launch();
-  logger.info('BookQuest bot listening (long polling)');
-
+  // Before launch(): its promise only settles when polling stops, so code after it never runs while live.
   const shutdown = (signal: string) => {
     logger.info({ signal }, 'Shutting down');
     bot.stop(signal);
   };
   process.once('SIGINT', () => shutdown('SIGINT'));
   process.once('SIGTERM', () => shutdown('SIGTERM'));
+
+  await bot.launch(() => logger.info('BookQuest bot listening (long polling)'));
 }
 
 start().catch((error: unknown) => {
