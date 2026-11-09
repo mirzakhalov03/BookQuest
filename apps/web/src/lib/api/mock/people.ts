@@ -145,7 +145,7 @@ export function buildRoster(questId: string, firstNumber: number): Participant[]
  * descending, then the faster run wins. The podium is the top three of the
  * same list, not a separate one.
  */
-export function buildResults(takers: Participant[], quest: Quest): QuestResults {
+export function buildResults(takers: Participant[], quest: Quest, isFullBoard = true): QuestResults {
   const total = quest.quizQuestionCount ?? 20;
 
   const entries = takers.map((participant, index) => ({
@@ -160,9 +160,13 @@ export function buildResults(takers: Participant[], quest: Quest): QuestResults 
     .sort((a, b) => b.score - a.score || a.durationMs - b.durationMs)
     .map((entry, index) => ({ rank: index + 1, ...entry }));
 
+  const podium = leaderboard.slice(0, 3);
+
   return {
-    podium: leaderboard.slice(0, 3),
-    leaderboard,
+    podium,
+    leaderboard: isFullBoard ? leaderboard : podium,
+    finishedCount: leaderboard.length,
+    isFullBoard,
     publishedAt: quest.resultsAt
   };
 }

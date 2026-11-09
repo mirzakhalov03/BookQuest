@@ -571,10 +571,12 @@ const routes: Route[] = [
   {
     method: 'GET',
     path: '/quests/current/results',
-    handle: () => {
+    handle: (context) => {
       const quest = requireCurrentQuest();
       requirePublishedResults(quest);
-      return ok(buildResults(quizTakers(getState()), quest));
+      // Same rule as the API: the full board only with a live session.
+      const signedIn = context.token !== null && context.token === getState().token;
+      return ok(buildResults(quizTakers(getState()), quest, signedIn));
     }
   },
   { method: 'GET', path: '/quests/:edition', handle: getQuestByEdition },

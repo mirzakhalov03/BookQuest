@@ -14,7 +14,11 @@ export type ResultEntry = z.infer<typeof resultEntrySchema>;
 
 export const questResultsSchema = z.object({
   podium: z.array(resultEntrySchema),
+  /** Signed out, only the podium rows; signed in, everyone. */
   leaderboard: z.array(resultEntrySchema),
+  /** How many finished, so a signed-out viewer knows what the full board holds. */
+  finishedCount: z.number().int().nonnegative(),
+  isFullBoard: z.boolean(),
   publishedAt: z.string()
 });
 

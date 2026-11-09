@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useCurrentQuest } from '@/lib/api/quest';
+import { useCurrentQuest, useRefreshCurrentQuest } from '@/lib/api/quest';
 import { Screen } from '@/components/layout/Screen';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
@@ -11,10 +11,11 @@ import { formatLongDate } from '@/lib/format';
 import { useQuestResults } from './api/useQuestResults';
 import { ResultsPodium } from '@/components/ResultsPodium';
 import { LeaderboardRow } from '@/components/LeaderboardRow';
+import { FullBoardPrompt } from './components/FullBoardPrompt';
 
 /**
- * `/results` — public (spec §3), and one of the screens read-only web mode
- * has to render in full (spec §7): nothing here needs a session.
+ * `/results` — public (spec §3). Signed out, the API sends only the podium;
+ * the full board and your rank need a session (audit B6).
  *
  * A tab-bar root, like Home and `/book` — see `BookPage`'s note on why that
  * means no Telegram back button.
@@ -27,7 +28,7 @@ export function ResultsPage() {
   if (results.error) {
     // Results that don't exist yet are *not yet*, not a failure (spec,
     // contract) — the countdown state below, not this retry button.
-    if (isNotFound(results.error)) return <BeforeResults />;
+    if (isNotFound(results.error)) return <BeforeResults onPublished={() => void results.refetch()} />;
 
     return (
       <Screen>
@@ -36,9 +37,9 @@ export function ResultsPage() {
     );
   }
 
-  const { podium, leaderboard, publishedAt } = results.data;
+  const { podium, leaderboard, finishedCount, isFullBoard, publishedAt } = results.data;
 
-  if (leaderboard.length === 0) {
+  if (finishedCount === 0) {
     return (
       <Screen>
         <EmptyState
@@ -58,15 +59,19 @@ export function ResultsPage() {
 
       <ResultsPodium entries={podium} />
 
-      <section className="flex flex-col gap-1">
-        <p className="type-label">Full leaderboard</p>
-        <Rule />
-        <ol className="flex flex-col">
-          {leaderboard.map((entry) => (
-            <LeaderboardRow key={entry.number} entry={entry} />
-          ))}
-        </ol>
-      </section>
+      {isFullBoard ? (
+        <section className="flex flex-col gap-1">
+          <p className="type-label">Full leaderboard</p>
+          <Rule />
+          <ol className="flex flex-col">
+            {leaderboard.map((entry) => (
+              <LeaderboardRow key={entry.number} entry={entry} />
+            ))}
+          </ol>
+        </section>
+      ) : (
+        <FullBoardPrompt finishedCount={finishedCount} />
+      )}
     </Screen>
   );
 }
@@ -80,8 +85,9 @@ export function ResultsPage() {
  * is the one branch that needs it, and it's the same cached query Home and
  * `/book` already read (spec §6: one resource, several views).
  */
-function BeforeResults() {
+function BeforeResults({ onPublished }: { onPublished: () => void }) {
   const quest = useCurrentQuest();
+  const refreshQuest = useRefreshCurrentQuest();
 
   // Memoised on the ISO string, exactly like Home's countdown target: a
   // fresh `Date` every render would change `useCountdown`'s effect
@@ -122,6 +128,10 @@ function BeforeResults() {
         label="Results published in"
         target={target}
         dateText={`Results are published on ${formatLongDate(quest.data.resultsAt)}`}
+        onComplete={() => {
+          refreshQuest();
+          onPublished();
+        }}
       />
     </Screen>
   );

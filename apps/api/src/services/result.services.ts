@@ -10,7 +10,8 @@ import { requireParticipantForUser } from './participant.services.js';
 
 const PODIUM_SIZE = 3;
 
-export async function getCurrentQuestResults(): Promise<QuestResults> {
+/** Podium public; the full board needs a session (names and numbers, possibly of minors). */
+export async function getCurrentQuestResults(viewer: UserDocument | null): Promise<QuestResults> {
   const quest = await requireCurrentQuestDocument();
   requirePublished(quest);
   await ensureRanked(quest);
@@ -39,9 +40,14 @@ export async function getCurrentQuestResults(): Promise<QuestResults> {
     ];
   });
 
+  const podium = leaderboard.slice(0, PODIUM_SIZE);
+  const isFullBoard = viewer !== null;
+
   return {
-    podium: leaderboard.slice(0, PODIUM_SIZE),
-    leaderboard,
+    podium,
+    leaderboard: isFullBoard ? leaderboard : podium,
+    finishedCount: leaderboard.length,
+    isFullBoard,
     publishedAt: quest.resultsAt.toISOString()
   };
 }
@@ -93,28 +99,44 @@ function requirePublished(quest: QuestDocument, now = new Date()): void {
 
 /**
  * Ranking happens once, the first time anyone looks after `resultsAt`, and is
- * then frozen into the row. Recomputing per request would let a rank move
- * between two page loads; a cron job to do it on the hour would be one more
- * thing that can fail silently. The clock triggers it, the database remembers.
+ * then frozen into the row. Concurrent first reads are safe without a lock:
+ * the order is total (ties end on `_id`), so every ranker writes the same
+ * ranks, and `$ifNull` keeps whichever certificate code landed first.
  */
-async function ensureRanked(quest: QuestDocument): Promise<void> {
+const rankingInFlight = new Map<string, Promise<void>>();
+
+// One run per quest per process, so the results-day burst does the work once.
+function ensureRanked(quest: QuestDocument): Promise<void> {
+  const key = String(quest._id);
+  const running = rankingInFlight.get(key);
+  if (running) return running;
+
+  const run = rankQuest(quest).finally(() => rankingInFlight.delete(key));
+  rankingInFlight.set(key, run);
+  return run;
+}
+
+async function rankQuest(quest: QuestDocument): Promise<void> {
   const pending = await ResultModel.countDocuments({ quest: quest._id, rank: null });
   if (pending === 0) return;
 
   const results = await ResultModel.find({ quest: quest._id })
-    .sort({ score: -1, durationMs: 1, submittedAt: 1 })
-    .select('_id certificateCode');
+    .sort({ score: -1, durationMs: 1, submittedAt: 1, _id: 1 })
+    .select('_id')
+    .lean();
 
   await ResultModel.bulkWrite(
     results.map((result, index) => ({
       updateOne: {
         filter: { _id: result._id },
-        update: {
-          $set: {
-            rank: index + 1,
-            certificateCode: result.certificateCode ?? createCertificateCode(quest.edition)
+        update: [
+          {
+            $set: {
+              rank: index + 1,
+              certificateCode: { $ifNull: ['$certificateCode', createCertificateCode(quest.edition)] }
+            }
           }
-        }
+        ]
       }
     }))
   );
