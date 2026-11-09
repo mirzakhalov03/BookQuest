@@ -197,8 +197,8 @@ Telegram identity. Created on first successful `/auth/telegram`.
 
 **No stored `phase`.** Derived by `resolvePhase()` from the dates on every read.
 
-**`isCurrent` integrity.** Only `POST /admin/quests/:id/make-current` may change it, inside a
-transaction that unsets the previous one. A partial unique index
+**`isCurrent` integrity.** Only `POST /admin/quests` with `makeCurrent: true` may change it, inside a
+transaction that unsets the previous one (after the results guard and ranking the outgoing edition). A partial unique index
 (`{ isCurrent: 1 }`, `partialFilterExpression: { isCurrent: true }`, `unique: true`) makes two
 current quests impossible at the storage layer. ⬜
 
@@ -912,10 +912,11 @@ Edit the admin-owned content of a quest: book, dates, prizes, quiz metadata.
 
 ---
 
-#### `POST /api/v1/admin/quests` ⬜ · `POST /api/v1/admin/quests/:id/make-current` ⬜
+#### `POST /api/v1/admin/quests` ⬜
 
-Create next year's edition, and switch which one is current (in a transaction, so there is never
-zero or two current quests).
+Create next year's edition and, with `makeCurrent`, switch to it (in a transaction, so there is never
+zero or two current quests). The old `POST /admin/quests/:id/make-current` was removed: it skipped
+the results guard.
 
 **Auth:** required, `role === 'admin'`.
 

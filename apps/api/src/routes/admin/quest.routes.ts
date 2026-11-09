@@ -17,9 +17,3 @@ adminQuestRoutes.patch(
   validate(updateQuestBody),
   adminQuestController.updateQuest
 );
-
-adminQuestRoutes.post(
-  '/:id/make-current',
-  validate(questIdParams, 'params'),
-  adminQuestController.makeQuestCurrent
-);

@@ -867,9 +867,9 @@ Edit the admin-owned content of a quest: book, dates, prizes, quiz metadata.
 
 ---
 
-#### `POST /api/v1/admin/quests` ⬜ · `POST /api/v1/admin/quests/:id/make-current` ⬜
+#### `POST /api/v1/admin/quests` ⬜
 
-Create next year's edition, and switch which one is current (in a transaction, so there is never
+Create next year's edition and, with `makeCurrent`, switch to it (in a transaction, so there is never
 zero or two current quests).
 
 **Auth:** required, `role === 'admin'`. **`200`/`201`** → `Quest`.

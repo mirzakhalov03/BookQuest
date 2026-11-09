@@ -163,29 +163,6 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
 }
 
 /**
- * Switching the current quest. Unset first, then set: a partial unique index
- * forbids two current quests, so the other order would be rejected by the
- * database. Inside a transaction the gap is invisible; without one it is a few
- * milliseconds where Home reports "no quest running", which is recoverable —
- * two current quests would not be.
- */
-export async function makeQuestCurrent(questId: string): Promise<Quest> {
-  const target = await QuestModel.findById(questId);
-  if (!target) throw ApiError.notFound('No such quest.');
-
-  await withTransaction(async (session) => {
-    await QuestModel.updateMany(
-      { isCurrent: true, _id: { $ne: target._id } },
-      { $set: { isCurrent: false } },
-      { session }
-    );
-    await QuestModel.updateOne({ _id: target._id }, { $set: { isCurrent: true } }, { session });
-  });
-
-  return getQuestByEdition(target.edition);
-}
-
-/**
  * The phase is a function of the clock, not a stored column. Deriving it means
  * a missed cron job or a stale record can never leave the Home screen showing
  * "reading" a week after the deadline passed.

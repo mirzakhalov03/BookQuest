@@ -23,11 +23,3 @@ export async function updateQuest(req: Request, res: Response): Promise<void> {
   auditAdmin(req, 'update-quest', { questId: id, changed: Object.keys(payload) });
   ok(res, quest);
 }
-
-/** POST /api/v1/admin/quests/:id/make-current */
-export async function makeQuestCurrent(req: Request, res: Response): Promise<void> {
-  const { id } = req.params as { id: string };
-  const quest = await questService.makeQuestCurrent(id);
-  auditAdmin(req, 'make-quest-current', { questId: id });
-  ok(res, quest);
-}
