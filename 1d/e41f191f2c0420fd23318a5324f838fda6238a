@@ -1,0 +1,23 @@
+apps/api/railway.json
+  s_be0972f8b7e2e7::t_0e80c3342c5e58 1-15
+apps/bot/railway.json
+  s_be0972f8b7e2e7::t_2374354f4cf244 1-14
+apps/web/vercel.json
+  s_be0972f8b7e2e7::t_5c8428a5250da9 1-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "1de41f191f2c0420fd23318a5324f838fda6238a",
+  "prompts": {},
+  "sessions": {
+    "s_be0972f8b7e2e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c13ab3b5-43e0-4932-9620-e614af76548f",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
