@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
 import { Spinner } from '@/components/ui/Spinner';
 import { ApiRequestError } from '@/lib/api/client';
+import { downscaleImage } from '@/lib/downscaleImage';
 import { useUiStore } from '@/stores/ui.store';
 import { useUploadCover } from '../../api/useUploadCover';
 
@@ -20,13 +21,7 @@ interface CoverPickerProps {
   aside?: ReactNode;
 }
 
-// Same rules the API enforces, checked first so a 12MB photo fails instantly instead of after the upload.
-function checkFile(file: File): string | null {
-  if (!(COVER_CONTENT_TYPES as readonly string[]).includes(file.type))
-    return COVER_MESSAGES.wrongType;
-  if (file.size > COVER_MAX_BYTES) return COVER_MESSAGES.tooLarge;
-  return null;
-}
+const isCoverType = (file: File): boolean => (COVER_CONTENT_TYPES as readonly string[]).includes(file.type);
 
 /** Uploads on pick; the quest save then sends the returned URL like any other field. */
 export function CoverPicker({
@@ -55,14 +50,19 @@ export function CoverPicker({
     [preview]
   );
 
-  function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
+  async function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    const picked = event.target.files?.[0];
     event.target.value = ''; // so picking the same file again still fires change
-    if (!file) return;
+    if (!picked) return;
+    if (!isCoverType(picked)) {
+      showToast(COVER_MESSAGES.wrongType);
+      return;
+    }
 
-    const problem = checkFile(file);
-    if (problem) {
-      showToast(problem);
+    // Size is checked after shrinking, so a big phone photo is fine; the API enforces the same cap.
+    const file = await downscaleImage(picked);
+    if (file.size > COVER_MAX_BYTES) {
+      showToast(COVER_MESSAGES.tooLarge);
       return;
     }
 
@@ -128,7 +128,7 @@ export function CoverPicker({
               type="file"
               accept={COVER_CONTENT_TYPES.join(',')}
               disabled={upload.isPending}
-              onChange={handleChange}
+              onChange={(event) => void handleChange(event)}
               className="sr-only"
             />
           </label>

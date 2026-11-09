@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Quest, UpdateQuestPayload } from '@bookquest/shared';
@@ -21,7 +21,8 @@ import { QuestFormFields } from './components/QuestFormFields';
 import { buildQuestPatch, toFormState, type QuestFormState } from './questForm';
 import { questFormSchema } from './questFormSchema';
 import { applyServerErrors } from './serverErrors';
-import { countErrors, summarizeChanges } from './changes';
+import { countErrors } from './changes';
+import { useQuestChanges } from './useQuestChanges';
 import { describeRiskyChanges, needsReview } from './review';
 import { canStartNextEdition } from '../phase';
 
@@ -56,7 +57,7 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
     defaultValues: toFormState(quest),
     mode: 'onChange'
   });
-  const { handleSubmit, reset, setError, watch, formState } = form;
+  const { handleSubmit, reset, setError, formState } = form;
   const [formError, setFormError] = useState<string | null>(null);
   const [pendingPatch, setPendingPatch] = useState<UpdateQuestPayload | null>(null);
   const [isCoverUploading, setIsCoverUploading] = useState(false);
@@ -64,8 +65,8 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
   const showToast = useUiStore((state) => state.showToast);
   const update = useUpdateQuest(quest.id);
 
-  const values = watch();
-  const changes = summarizeChanges(buildQuestPatch(quest, values));
+  const changes = useQuestChanges(quest, form);
+  const savedDates = useMemo(() => toFormState(quest).dates, [quest]);
   const isDirty = changes.count > 0;
   const errorCount = countErrors(formState.errors);
   const guard = useUnsavedChangesGuard(isDirty);
@@ -113,7 +114,7 @@ function QuestEditorForm({ quest }: { quest: Quest }) {
         <form id={QUEST_FORM_ID} onSubmit={submit} noValidate className="flex flex-col gap-6">
           <QuestFormFields
             changes={changes}
-            savedDates={toFormState(quest).dates}
+            savedDates={savedDates}
             onCoverUploadingChange={setIsCoverUploading}
           />
           {formError && (

@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { useWatch } from 'react-hook-form';
 import { Eye } from 'lucide-react';
 import { BookHero } from '@/components/BookHero';
 import { Button } from '@/components/ui/Button';
@@ -50,6 +51,11 @@ export function QuestPreview({ values }: { values: QuestFormState }) {
       )}
     </div>
   );
+}
+
+/** The preview fed straight from form context; must render inside a `FormProvider`. */
+export function LiveQuestPreview() {
+  return <QuestPreview values={useWatch<QuestFormState>() as QuestFormState} />;
 }
 
 /** Form on the left, sticky preview on the right from `lg`; below that the preview lives in a sheet. */

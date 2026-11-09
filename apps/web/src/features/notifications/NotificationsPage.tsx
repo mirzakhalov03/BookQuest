@@ -15,7 +15,7 @@ export function NotificationsPage() {
     return <ErrorState error={notifications.error} onRetry={() => void notifications.refetch()} />;
   }
 
-  if (notifications.data.length === 0) {
+  if (notifications.data.items.length === 0) {
     return (
       <Screen>
         <h1 className="type-display text-2xl text-paper">Notifications</h1>
@@ -28,7 +28,7 @@ export function NotificationsPage() {
     <Screen>
       <h1 className="type-display text-2xl text-paper">Notifications</h1>
       <ul className="flex flex-col gap-3">
-        {notifications.data.map((notification) => (
+        {notifications.data.items.map((notification) => (
           <li
             key={notification.id}
             className={`rounded-box border border-[color:var(--rule)] px-4 py-3 ${

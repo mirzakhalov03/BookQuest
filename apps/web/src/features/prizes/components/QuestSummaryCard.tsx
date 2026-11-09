@@ -34,7 +34,7 @@ export function QuestSummaryCard({ quest }: { quest: QuestSummary }) {
       className="group flex items-center gap-4 border-b border-[var(--rule)] py-5 last:border-none"
     >
       <div className="cover-box" style={THUMB_STYLE}>
-        <BookCover title={quest.bookTitle} author={quest.bookAuthor} coverUrl={quest.coverUrl} />
+        <BookCover title={quest.bookTitle} author={quest.bookAuthor} coverUrl={quest.coverUrl} lazy />
       </div>
 
       <div className="flex flex-1 flex-col gap-1">

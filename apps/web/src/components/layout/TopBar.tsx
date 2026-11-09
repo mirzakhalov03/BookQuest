@@ -45,7 +45,7 @@ export function TopBar({ year }: TopBarProps) {
  */
 function NotificationsBell() {
   const notifications = useNotifications();
-  const unreadCount = notifications.data?.filter((n) => !n.readAt).length ?? 0;
+  const unreadCount = notifications.data?.unreadCount ?? 0;
 
   // Nothing to show a visitor who has no session to fetch a feed for — same
   // gate `useNotifications` puts on the request itself.

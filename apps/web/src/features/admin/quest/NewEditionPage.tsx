@@ -20,7 +20,7 @@ import { AdminPageHeader } from '../components/AdminPageHeader';
 import { SaveBar } from '../components/SaveBar';
 import { UnsavedChangesSheet } from '../components/UnsavedChangesSheet';
 import { QuestFormFields } from './components/QuestFormFields';
-import { PreviewButton, QuestEditorLayout, QuestPreview } from './components/QuestPreview';
+import { LiveQuestPreview, PreviewButton, QuestEditorLayout } from './components/QuestPreview';
 import { NO_CHANGES, countErrors } from './changes';
 import { buildCreatePayload, nextEditionDraft } from './nextEdition';
 import { questFormSchema } from './questFormSchema';
@@ -76,7 +76,7 @@ function NewEditionForm({ source }: { source: LatestQuest }) {
     defaultValues: draft.values,
     mode: 'onChange'
   });
-  const { handleSubmit, setError, watch, formState } = form;
+  const { handleSubmit, setError, formState } = form;
   const [payload, setPayload] = useState<CreateQuestPayload | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [isCoverUploading, setIsCoverUploading] = useState(false);
@@ -85,8 +85,8 @@ function NewEditionForm({ source }: { source: LatestQuest }) {
   const showToast = useUiStore((state) => state.showToast);
   const guard = useUnsavedChangesGuard(formState.isDirty);
 
-  const values = watch();
-  const preview = <QuestPreview values={values} />;
+  // The preview subscribes itself, so typing doesn't re-render this whole page.
+  const preview = <LiveQuestPreview />;
   const errorCount = countErrors(formState.errors);
 
   const submit = handleSubmit((valid) => {

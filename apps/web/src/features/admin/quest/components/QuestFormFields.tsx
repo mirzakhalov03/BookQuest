@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { BookOpen, CalendarDays, CircleHelp, Link2, Trophy } from 'lucide-react';
 import type { DateInputs } from '../../dates';
@@ -18,8 +18,8 @@ interface QuestFormFieldsProps {
   onCoverUploadingChange: (uploading: boolean) => void;
 }
 
-/** Every quest field, grouped. Shared by the editor and the new-edition page through form context. */
-export function QuestFormFields({
+/** Every quest field, grouped. Shared by the editor and the new-edition page through form context. Memoised: fields subscribe themselves. */
+export const QuestFormFields = memo(function QuestFormFields({
   changes,
   savedDates,
   onCoverUploadingChange
@@ -66,4 +66,4 @@ export function QuestFormFields({
   ];
 
   return <SectionTabs tabs={tabs} active={active} onChange={setActive} />;
-}
+});

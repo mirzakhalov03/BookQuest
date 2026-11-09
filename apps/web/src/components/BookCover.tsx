@@ -3,6 +3,8 @@ interface BookCoverProps {
   author: string;
   /** `book.coverUrl` — a real photograph when an admin has set one, `null` for the seeded quest. */
   coverUrl: string | null;
+  /** Below the fold or one of many (archive cards): load when scrolled near. Otherwise it's the screen's hero image. */
+  lazy?: boolean;
 }
 
 /**
@@ -18,11 +20,18 @@ interface BookCoverProps {
  * — it is the stage's lighting hitting the object, not part of the cover's
  * content, so it belongs over a photo exactly as much as over the drawing.
  */
-export function BookCover({ title, author, coverUrl }: BookCoverProps) {
+export function BookCover({ title, author, coverUrl, lazy = false }: BookCoverProps) {
   if (coverUrl) {
     return (
       <div className="cover">
-        <img className="cover__image" draggable={false} src={coverUrl} alt={`${title} cover`} />
+        <img
+          className="cover__image"
+          draggable={false}
+          src={coverUrl}
+          alt={`${title} cover`}
+          decoding="async"
+          {...(lazy ? { loading: 'lazy' as const } : { fetchPriority: 'high' as const })}
+        />
         <div className="cover__sheen" />
       </div>
     );

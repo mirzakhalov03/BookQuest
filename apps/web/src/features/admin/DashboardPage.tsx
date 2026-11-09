@@ -86,12 +86,14 @@ function StatCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-// Placeholder destinations: each gets its own admin page later.
-const QUICK_ACTIONS: { to: string; label: string; icon: LucideIcon }[] = [
-  { to: '/admin/quizzes', label: 'Quizzes', icon: CircleHelp },
-  { to: '/admin/certificates', label: 'Certificates', icon: Award },
-  { to: '/admin/posters', label: 'Posters', icon: Image },
+// No `to` yet means the page isn't built: shown as "Soon" rather than linking to "Nothing here".
+const QUICK_ACTIONS: { to?: string; label: string; icon: LucideIcon }[] = [
+  { label: 'Quizzes', icon: CircleHelp },
+  { label: 'Certificates', icon: Award },
+  { label: 'Posters', icon: Image }
 ];
+
+const TILE = 'flex min-w-0 flex-col items-center gap-2 rounded-box border px-2 py-4';
 
 /** Phase-aware next step first, then the go-to shortcuts. */
 function NextSteps({ quest, now }: { quest: Quest; now: Date }) {
@@ -124,16 +126,33 @@ function NextSteps({ quest, now }: { quest: Quest; now: Date }) {
       <h2 className="type-label m-0">Quick actions</h2>
       {content && <div className="flex flex-wrap items-center gap-3">{content}</div>}
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        {QUICK_ACTIONS.map(({ to, label, icon: Icon }) => (
-          <Link
-            key={to}
-            to={to}
-            className="flex min-w-0 flex-col items-center gap-2 rounded-box border border-amber/60 bg-ash-hi px-2 py-4 text-amber shadow-[0_2px_0_var(--color-void)] transition hover:bg-[color:var(--color-taupe-dim)]/30 active:translate-y-px active:shadow-none"
-          >
-            <Icon className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
-            <span className="max-w-full truncate text-xs font-medium">{label}</span>
-          </Link>
-        ))}
+        {QUICK_ACTIONS.map(({ to, label, icon: Icon }) =>
+          to ? (
+            <Link
+              key={label}
+              to={to}
+              className={`${TILE} border-amber/60 bg-ash-hi text-amber shadow-[0_2px_0_var(--color-void)] transition hover:bg-[color:var(--color-taupe-dim)]/30 active:translate-y-px active:shadow-none`}
+            >
+              <Icon className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
+              <span className="max-w-full truncate text-xs font-medium">{label}</span>
+            </Link>
+          ) : (
+            <div
+              key={label}
+              aria-disabled="true"
+              className={`${TILE} border-dashed border-[color:var(--rule)] text-taupe`}
+            >
+              <Icon className="h-6 w-6 opacity-60" strokeWidth={1.75} aria-hidden="true" />
+              <span className="max-w-full truncate text-xs font-medium">
+                {label}
+                <span className="sr-only">, coming soon</span>
+              </span>
+              <span aria-hidden="true" className="type-label text-[0.5625rem]">
+                Soon
+              </span>
+            </div>
+          )
+        )}
       </div>
     </section>
   );

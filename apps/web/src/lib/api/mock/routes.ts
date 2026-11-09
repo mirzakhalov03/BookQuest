@@ -475,28 +475,6 @@ function switchCurrent(target: Quest): void {
   });
 }
 
-/**
- * Swapping the current quest sends the roster with the edition it belongs to,
- * so the incoming one starts empty — which is what a new edition is.
- * `mockApi.reset()` puts the fixtures back.
- */
-function makeQuestCurrent(context: Context): Result {
-  requireAdmin(context);
-
-  const state = getState();
-  const id = context.params.id ?? '';
-  const target = findQuestById(state, id);
-  if (!target) throw new MockError(404, 'not_found', 'No such quest.');
-
-  if (state.questRunning && state.quest.id === target.id) {
-    return ok(readQuest(target, state.participants.length));
-  }
-
-  switchCurrent(target);
-
-  return ok(readQuest(target, countFor(getState(), target)));
-}
-
 /** A session-lived blob URL stands in for the GridFS URL — enough for the picker to work end to end. */
 function uploadCover(context: Context): Result {
   requireAdmin(context);
@@ -592,7 +570,6 @@ const routes: Route[] = [
   { method: 'POST', path: '/admin/broadcasts', handle: sendBroadcast },
   { method: 'POST', path: '/admin/covers', handle: uploadCover },
   { method: 'POST', path: '/admin/quests', handle: createQuest },
-  { method: 'POST', path: '/admin/quests/:id/make-current', handle: makeQuestCurrent },
   { method: 'PATCH', path: '/admin/quests/:id', handle: updateQuest }
 ];
 

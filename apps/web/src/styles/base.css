@@ -89,3 +89,10 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Set by main.tsx while the app is hidden: nothing is on screen to animate (P8). */
+:root[data-hidden] *,
+:root[data-hidden] *::before,
+:root[data-hidden] *::after {
+  animation-play-state: paused !important;
+}

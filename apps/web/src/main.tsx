@@ -6,6 +6,13 @@ import './styles/index.css';
 
 initTelegram();
 
+// A minimised Mini App can stay "visible" to the WebView; pausing the stage's endless loops saves battery there.
+function syncHiddenFlag(): void {
+  document.documentElement.toggleAttribute('data-hidden', document.hidden);
+}
+document.addEventListener('visibilitychange', syncHiddenFlag);
+syncHiddenFlag();
+
 if ('serviceWorker' in navigator) {
   void navigator.serviceWorker.register('/sw.js');
 }

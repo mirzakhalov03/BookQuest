@@ -1,7 +1,8 @@
+import type { ComponentType } from 'react';
 import { Navigate, createBrowserRouter } from 'react-router';
 import { AppLayout } from '@/layouts/AppLayout';
-import { Screen } from '@/components/layout/Screen';
-import { EmptyState } from '@/components/feedback/EmptyState';
+import { LoadingState } from '@/components/feedback/LoadingState';
+import { NotFoundScreen } from '@/components/feedback/NotFoundScreen';
 import { HomePage } from '@/features/home/HomePage';
 import { SuccessScreen } from '@/features/registration/SuccessScreen';
 import { BookPage } from '@/features/book/BookPage';
@@ -11,23 +12,23 @@ import { ResultsPage } from '@/features/results/ResultsPage';
 import { QuizPage } from '@/features/quiz/QuizPage';
 import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
-import { AdminLayout } from '@/layouts/AdminLayout';
-import { DashboardPage } from '@/features/admin/DashboardPage';
-import { ParticipantsPage } from '@/features/admin/ParticipantsPage';
-import { QuestEditorPage } from '@/features/admin/quest/QuestEditorPage';
-import { NewEditionPage } from '@/features/admin/quest/NewEditionPage';
-import { ResultsInspectionPage } from '@/features/admin/ResultsInspectionPage';
-import { BroadcastPage } from '@/features/admin/broadcast/BroadcastPage';
 import { RequireAdmin, RequireAuth } from '@/lib/auth/guards';
 import { RouteErrorBoundary } from './RouteErrorBoundary';
+
+type AdminScreens = typeof import('@/features/admin/screens');
+
+// Every admin route loads the same module, so the whole area is one chunk fetched on first visit.
+const adminScreen = (name: keyof AdminScreens) => ({
+  lazy: async () => ({ Component: (await import('@/features/admin/screens'))[name] as ComponentType })
+});
 
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
-    // On the root route, not each leaf: a thrown render or loader error
-    // anywhere in the tree below bubbles up to this one boundary, so a
-    // screen added later gets it for free instead of wiring its own.
+    // On the root, so every screen below, including future ones, gets it for free.
     errorElement: <RouteErrorBoundary />,
+    // Shown while a lazy route loads on a cold open of /admin.
+    hydrateFallbackElement: <LoadingState label="Opening the organiser desk…" />,
     children: [
       // Public.
       { path: '/', element: <HomePage /> },
@@ -44,8 +45,7 @@ export const router = createBrowserRouter([
       { path: '/quiz', element: <QuizPage /> },
       { path: '/results', element: <ResultsPage /> },
 
-      // The session-only tree. Its screens mount as `children` of this route,
-      // so they inherit the guard by position and nobody has to remember it.
+      // Session-only: children inherit the guard by position.
       {
         path: '/me',
         element: <RequireAuth />,
@@ -55,55 +55,34 @@ export const router = createBrowserRouter([
         ]
       },
 
-      // A notification is always someone's own — there is no session-less
-      // version of this screen the way `/results` has one, so it gets the
-      // same guard as `/me` rather than the earlier draft's public route.
+      // Always someone's own, so guarded like `/me`.
       {
         path: '/notifications',
         element: <RequireAuth />,
         children: [{ index: true, element: <NotificationsPage /> }]
       },
 
-      // The admin tree, same shape: /admin/* children hang off this one.
-      // `RequireAdmin` is the guard (UX only — see its own doc comment);
-      // `AdminLayout` is the shell every admin screen shares underneath it.
-      // Both are layout routes, so a screen added here inherits the guard
-      // and the nav by position, same as `/me`.
+      // Admin: inherits the guard (UX only; the API enforces) and the shell by position. The guard stays eager.
       {
         path: '/admin',
         element: <RequireAdmin />,
         children: [
           {
-            element: <AdminLayout />,
+            ...adminScreen('AdminLayout'),
             children: [
-              { index: true, element: <DashboardPage /> },
-              { path: 'participants', element: <ParticipantsPage /> },
-              { path: 'quest', element: <QuestEditorPage /> },
-              { path: 'quest/new', element: <NewEditionPage /> },
-              { path: 'results', element: <ResultsInspectionPage /> },
-              { path: 'broadcast', element: <BroadcastPage /> }
+              { index: true, ...adminScreen('DashboardPage') },
+              { path: 'participants', ...adminScreen('ParticipantsPage') },
+              { path: 'quest', ...adminScreen('QuestEditorPage') },
+              { path: 'quest/new', ...adminScreen('NewEditionPage') },
+              { path: 'results', ...adminScreen('ResultsInspectionPage') },
+              { path: 'broadcast', ...adminScreen('BroadcastPage') }
             ]
           }
         ]
       },
 
-      // Anything else. Without this, an unmatched path — a typo, a stale
-      // bookmark — raised React Router's own `ErrorResponse`, which
-      // `RouteErrorBoundary` had no special case for, so `ErrorState`'s
-      // fallback told a mistyped URL to "check your connection" — a network
-      // apology for a page that simply doesn't exist.
-      { path: '*', element: <NotFoundPage /> }
+      // Without it a typo raises an ErrorResponse and reads as a network failure.
+      { path: '*', element: <NotFoundScreen /> }
     ]
   }
 ]);
-
-function NotFoundPage() {
-  return (
-    <Screen>
-      <EmptyState
-        title="Nothing here"
-        body="That page doesn't exist. Check the address, or head back to the stage."
-      />
-    </Screen>
-  );
-}

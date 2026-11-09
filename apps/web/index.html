@@ -14,7 +14,8 @@
       href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..700&display=swap"
       rel="stylesheet"
     />
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- defer: runs before the module entry, so initTelegram() still finds window.Telegram, without blocking first paint. -->
+    <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
   </head>
   <body>
     <div id="root"></div>
