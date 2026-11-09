@@ -2,28 +2,35 @@ import type { BotUserUpsertPayload } from '@bookquest/shared';
 import { env } from '../config/env.js';
 import { logger } from '../config/logger.js';
 
+const UPSERT_TIMEOUT_MS = 5000;
+
 /**
  * The bot's only write path (spec, Approach A) — everything goes through
- * the existing Express API, never a direct database connection.
+ * the existing Express API, never a direct database connection. Never throws:
+ * recording the profile must not stop the user getting the "open the app"
+ * button, and the Mini App's own sign-in records them again anyway.
  */
 export async function upsertUser(profile: BotUserUpsertPayload): Promise<void> {
-  const response = await fetch(`${env.API_BASE_URL}/bot/users`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Bot-Service-Token': env.BOT_SERVICE_TOKEN
-    },
-    body: JSON.stringify(profile)
-  });
+  try {
+    const response = await fetch(`${env.API_BASE_URL}/bot/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Bot-Service-Token': env.BOT_SERVICE_TOKEN
+      },
+      body: JSON.stringify(profile),
+      signal: AbortSignal.timeout(UPSERT_TIMEOUT_MS)
+    });
 
-  if (!response.ok) {
-    // Recording the profile failing must never stop the user from getting
-    // the "open the app" button — the Mini App's own sign-in records them
-    // again anyway. Log it and move on rather than throwing into ctx.reply.
-    logger.error(
-      { status: response.status, telegramUserId: profile.telegramUserId },
-      'Failed to upsert user from bot'
-    );
+    if (!response.ok) {
+      logger.error(
+        { status: response.status, telegramUserId: profile.telegramUserId },
+        'Failed to upsert user from bot'
+      );
+    }
+  } catch (error) {
+    // Unreachable API, DNS failure, reset connection or the timeout.
+    logger.error({ err: error, telegramUserId: profile.telegramUserId }, 'API unreachable from bot');
   }
 }
 
