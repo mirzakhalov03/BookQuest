@@ -32,6 +32,8 @@ export const API_ERROR_CODES = [
   /** Understood, but can't be done for this account — e.g. no Telegram to send a code to. */
   'unprocessable',
   'rate_limited',
+  /** The request body is over the size limit. */
+  'payload_too_large',
   'internal_error'
 ] as const;
 
