@@ -1,0 +1,59 @@
+apps/web/index.html
+  s_4d0ff12abf98f3::t_3d955adac17d6c 17-18
+apps/web/src/app/RouteErrorBoundary.tsx
+  s_4d0ff12abf98f3::t_9982f9b24c47e0 2,5,9,13
+apps/web/src/app/router.tsx
+  s_4d0ff12abf98f3::t_99a197d943328c 1,4-5,18-24,28,30-31,48,58,65,71,73-78,84-85
+apps/web/src/components/BookCover.tsx
+  s_4d0ff12abf98f3::t_2c5dd736fdf723 6-7,23,27-34
+apps/web/src/components/feedback/NotFoundScreen.tsx
+  s_4d0ff12abf98f3::t_a49566d7dcae60 1-14
+apps/web/src/components/layout/TopBar.tsx
+  s_4d0ff12abf98f3::t_18404f809e83e3 48
+apps/web/src/features/admin/DashboardPage.tsx
+  s_4d0ff12abf98f3::t_1f6f53a65e3d47 89-93,96-97,129-155
+apps/web/src/features/admin/quest/NewEditionPage.tsx
+  s_4d0ff12abf98f3::t_0d68dfbcd2eb84 23,79,88-89
+apps/web/src/features/admin/quest/QuestEditorPage.tsx
+  s_4d0ff12abf98f3::t_aca86e89c39eb7 1,24-25,60,68-69,117
+apps/web/src/features/admin/quest/components/CoverPicker.tsx
+  s_4d0ff12abf98f3::t_1aa97a1c29af32 8,24,53-54,56-60,62-65,131
+apps/web/src/features/admin/quest/components/QuestFormFields.tsx
+  s_4d0ff12abf98f3::t_755948f10a2e72 1,21-22,69
+apps/web/src/features/admin/quest/components/QuestPreview.tsx
+  s_4d0ff12abf98f3::t_43f99d6649a613 2,56-60
+apps/web/src/features/admin/quest/useQuestChanges.ts
+  s_4d0ff12abf98f3::t_17c2510fdaabea 1-23
+apps/web/src/features/admin/screens.ts
+  s_4d0ff12abf98f3::t_abfc6854c60595 1-8
+apps/web/src/features/notifications/NotificationsPage.tsx
+  s_4d0ff12abf98f3::t_bf2fefc826c5df 18,31
+apps/web/src/features/notifications/api/useMarkNotificationRead.ts
+  s_4d0ff12abf98f3::t_c8c40ab5d6e98c 2,11-20
+apps/web/src/features/notifications/api/useNotifications.ts
+  s_4d0ff12abf98f3::t_d149ff5b7d6fed 2,10
+apps/web/src/features/prizes/components/QuestSummaryCard.tsx
+  s_4d0ff12abf98f3::t_91e22e8bd4ec53 37
+apps/web/src/lib/downscaleImage.ts
+  s_4d0ff12abf98f3::t_e3cf17e50669a4 1-47
+apps/web/src/main.tsx
+  s_4d0ff12abf98f3::t_2a2f45add0c036 9-15
+apps/web/src/styles/base.css
+  s_4d0ff12abf98f3::t_a50c2e3de86a2d 92-98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "da578b2f06f5cd4683e90f155fd445c88692e710",
+  "prompts": {},
+  "sessions": {
+    "s_4d0ff12abf98f3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "57d76d3d-38e0-41cf-a319-765620c7097a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
