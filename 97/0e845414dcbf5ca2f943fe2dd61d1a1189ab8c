@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-11-09-bot-interaction-log-design.md
+  s_c5b5fb09ae5b3b::t_25e5e54355c7e7 1-354
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "970e845414dcbf5ca2f943fe2dd61d1a1189ab8c",
+  "prompts": {},
+  "sessions": {
+    "s_c5b5fb09ae5b3b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ac188cfc-8948-4ac7-b712-1e2d1d3aa6c8",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
