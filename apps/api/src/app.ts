@@ -2,7 +2,7 @@ import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
-import { corsOrigins, isProduction } from './config/env.js';
+import { corsOrigins, env, isProduction } from './config/env.js';
 import { logger } from './config/logger.js';
 import { apiRoutes } from './routes/index.js';
 import { globalRateLimit } from './middlewares/rate-limit.middleware.js';
@@ -15,7 +15,7 @@ export function createApp(): Express {
   /* Behind a host's TLS terminator, req.ip is the proxy unless we say so — and
      an IP-keyed rate limit that sees one address for everyone is useless. Off
      in development, where there is no proxy to trust. */
-  app.set('trust proxy', isProduction ? 1 : false);
+  app.set('trust proxy', isProduction ? env.TRUST_PROXY_HOPS : false);
 
   app.use(helmet());
   app.use(cors({ origin: corsOrigins, credentials: true }));

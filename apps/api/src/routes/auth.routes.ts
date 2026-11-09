@@ -2,7 +2,11 @@ import { Router } from 'express';
 import * as authController from '../controllers/auth.controllers.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { requireUser } from '../middlewares/auth.middleware.js';
-import { authRateLimit } from '../middlewares/rate-limit.middleware.js';
+import {
+  authRateLimit,
+  loginCodeRateLimit,
+  telegramAuthRateLimit
+} from '../middlewares/rate-limit.middleware.js';
 import {
   telegramAuthBody,
   telegramWidgetAuthBody,
@@ -19,7 +23,7 @@ export const authRoutes: Router = Router();
 // rate limit is the only thing standing in front of it.
 authRoutes.post(
   '/telegram',
-  authRateLimit,
+  telegramAuthRateLimit,
   validate(telegramAuthBody),
   authController.signInWithTelegram
 );
@@ -43,6 +47,7 @@ authRoutes.post('/login', authRateLimit, validate(phoneLoginBody), authControlle
 authRoutes.post(
   '/telegram-code/request',
   authRateLimit,
+  loginCodeRateLimit,
   validate(telegramCodeRequestBody),
   authController.requestTelegramCode
 );

@@ -3,6 +3,7 @@ import { isValidObjectId } from 'mongoose';
 import {
   parsePhoneNumber,
   parseTelegramUsername,
+  toCanonicalPhone,
   type Session,
   type TelegramCodeChallenge
 } from '@bookquest/shared';
@@ -28,7 +29,9 @@ const MAX_FAILURES_PER_DAY = 15;
 const REG_NUMBER = /^#?\d{1,4}$/;
 const USERNAME_LIKE = /^[A-Za-z][A-Za-z0-9_]{4,31}$/;
 
-const NO_MATCH = "We couldn't find anyone with that.";
+// One reply for no match, several matches and no Telegram linked, so the form can't reveal who has an account.
+const CANNOT_SEND =
+  "We couldn't send a code to that. Try your reg number or @username, or log in with your password.";
 const EXPIRED = 'That code expired. Send a new one.';
 // Code login only; the Mini App and password log-in don't go through these budgets.
 const LOCKED =
@@ -82,10 +85,8 @@ async function findCandidateUserIds(identifier: string): Promise<string[]> {
 
   const phone = parsePhoneNumber(raw);
   if (!phone.ok) throw invalidIdentifier(phone.message);
-  const digits = phone.value.replace(/\D/g, '');
   const [users, participants] = await Promise.all([
-    // Phone accounts store what the login form accepted: with or without the `+`.
-    UserModel.find({ phoneNumber: { $in: [`+${digits}`, digits] } }, '_id'),
+    UserModel.find({ phoneNumber: toCanonicalPhone(phone.value) }, '_id'),
     ParticipantModel.find({ 'contact.method': 'phone', 'contact.value': phone.value }, 'user')
   ]);
   return userIds(users, participants);
@@ -94,16 +95,10 @@ async function findCandidateUserIds(identifier: string): Promise<string[]> {
 async function resolveLoginUser(identifier: string): Promise<UserDocument & { telegramUserId: string }> {
   const ids = await findCandidateUserIds(identifier);
 
-  if (ids.length === 0) throw ApiError.notFound(NO_MATCH);
-  // A shared family phone — guessing whose Telegram gets the code would be worse than asking.
-  if (ids.length > 1) {
-    throw ApiError.conflict('That matches more than one person — try your reg number or @username.');
-  }
-
-  const user = await UserModel.findById(ids[0]);
-  if (!user) throw ApiError.notFound(NO_MATCH);
-  if (!user.telegramUserId) {
-    throw ApiError.unprocessable("That account isn't connected to Telegram — log in with your password.");
+  // Several matches (a shared family phone): guessing whose Telegram gets the code would be worse.
+  const user = ids.length === 1 ? await UserModel.findById(ids[0]) : null;
+  if (!user?.telegramUserId) {
+    throw new ApiError(404, 'not_found', CANNOT_SEND, { identifier: CANNOT_SEND });
   }
   return user as UserDocument & { telegramUserId: string };
 }
