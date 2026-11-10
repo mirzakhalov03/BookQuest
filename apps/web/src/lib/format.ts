@@ -53,6 +53,18 @@ export function formatCompactDate(value: string | Date): string {
   return `${COMPACT_DATE.format(date)}, ${TIME.format(date)}`;
 }
 
+const MINUTE_MS = 60_000;
+
+/** "just now", "12 min ago", "3 h ago" inside a day; the compact date past that. Exact time goes in a `title`. */
+export function formatTimeAgo(value: string | Date, now = new Date()): string {
+  const date = typeof value === 'string' ? new Date(value) : value;
+  const minutes = Math.floor((now.getTime() - date.getTime()) / MINUTE_MS);
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes} min ago`;
+  if (minutes < 24 * 60) return `${Math.floor(minutes / 60)} h ago`;
+  return formatCompactDate(date);
+}
+
 /** "5 Apr" — a date inside a one-line summary, where year and time are noise. */
 export function formatShortDate(value: string | Date): string {
   return SHORT_DATE.format(typeof value === 'string' ? new Date(value) : value);

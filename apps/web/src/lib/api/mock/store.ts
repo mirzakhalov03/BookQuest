@@ -2,6 +2,7 @@ import { PARTICIPANT_NUMBER_MIN } from '@bookquest/shared';
 import type { Participant, Quest, QuestPhase, Role, SessionUser } from '@bookquest/shared';
 import { CURRENT_QUEST, PAST_EDITIONS, SESSION_USER, type PastEdition } from './fixtures';
 import { buildRoster } from './people';
+import { addMockMessage } from './interactions';
 
 /**
  * The mock's world, and the controls that bend it.
@@ -137,6 +138,8 @@ export interface MockControls {
   publishResults: () => void;
   /** Back to the fixtures: not registered, admin, reading phase. */
   reset: () => void;
+  /** A new bot message on the admin Messages page, without a reload — the "N new" pill picks it up. */
+  addMessage: (text?: string) => void;
 }
 
 export const mockControls: MockControls = {
@@ -170,7 +173,9 @@ export const mockControls: MockControls = {
   reset: () =>
     commit((draft) => {
       Object.assign(draft, initialState());
-    })
+    }),
+
+  addMessage: (text) => addMockMessage(text)
 };
 
 /**

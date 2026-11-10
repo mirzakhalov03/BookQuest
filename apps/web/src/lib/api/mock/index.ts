@@ -23,7 +23,7 @@ export function installMockApi(): void {
 
   console.info(
     '%c[mock]%c BookQuest is answering from fixtures — none of this data is real.\n' +
-      'Controls: window.mockApi.setRole(…), .setPhase(…), .setQuestRunning(…), .publishResults(), .reset(), .state()',
+      'Controls: window.mockApi.setRole(…), .setPhase(…), .setQuestRunning(…), .publishResults(), .addMessage(…), .reset(), .state()',
     'font-weight:700;color:#e0a458',
     'color:inherit'
   );

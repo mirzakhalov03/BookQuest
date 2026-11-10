@@ -25,6 +25,7 @@ import type {
   SessionUser
 } from '@bookquest/shared';
 import { objectId, questSummary } from './fixtures';
+import { listMockInteractions, mockInteractionFacets } from './interactions';
 import { buildCertificate, buildResults } from './people';
 import {
   areResultsPublished,
@@ -565,6 +566,22 @@ const routes: Route[] = [
   { method: 'GET', path: '/participants/:number', handle: participantByNumber },
 
   { method: 'GET', path: '/admin/participants', handle: adminParticipants },
+  {
+    method: 'GET',
+    path: '/admin/interactions/facets',
+    handle: (context) => {
+      requireAdmin(context);
+      return ok(mockInteractionFacets(context.query));
+    }
+  },
+  {
+    method: 'GET',
+    path: '/admin/interactions',
+    handle: (context) => {
+      requireAdmin(context);
+      return ok(listMockInteractions(context.query));
+    }
+  },
   { method: 'GET', path: '/admin/stats', handle: adminStats },
   { method: 'GET', path: '/admin/broadcasts', handle: listBroadcasts },
   { method: 'POST', path: '/admin/broadcasts', handle: sendBroadcast },
