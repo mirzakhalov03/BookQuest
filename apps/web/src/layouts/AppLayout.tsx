@@ -18,7 +18,7 @@ import { Toast } from '@/components/ui/Toast';
 export function AppLayout() {
   const { pathname } = useLocation();
   // Chrome-less routes: no *participant* bottom tab bar. The admin area
-  // (`AdminLayout`) renders its own bottom tab bar for its own five
+  // (`AdminLayout`) renders its own bottom tab bar for its own six
   // destinations, so it stays off this one rather than getting two. The
   // number reveal is the one participant screen the design never puts a tab
   // bar under — nothing should pull the eye off the number.

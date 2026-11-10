@@ -1,8 +1,8 @@
-import { Copy, Phone } from 'lucide-react';
+import { Phone } from 'lucide-react';
 import type { Participant } from '@bookquest/shared';
 import { TelegramIcon } from '@/components/ui/TelegramIcon';
 import { openTelegramLink } from '@/lib/telegram';
-import { useUiStore } from '@/stores/ui.store';
+import { CopyButton } from './CopyButton';
 
 type Contact = Participant['contact'];
 
@@ -14,17 +14,7 @@ function contactHref(contact: Contact): string {
 
 /** Reaching someone is why this screen exists: one tap opens the chat or dials, one more copies. */
 export function ContactLink({ contact }: { contact: Contact }) {
-  const showToast = useUiStore((state) => state.showToast);
   const href = contactHref(contact);
-
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(contact.value);
-      showToast('Copied.');
-    } catch {
-      showToast("Couldn't copy. Long-press the contact to select it.");
-    }
-  }
 
   return (
     <span className="inline-flex min-w-0 items-center gap-1">
@@ -45,14 +35,7 @@ export function ContactLink({ contact }: { contact: Contact }) {
         )}
         {contact.value}
       </a>
-      <button
-        type="button"
-        aria-label={`Copy ${contact.value}`}
-        onClick={() => void copy()}
-        className="grid h-9 w-9 shrink-0 place-items-center text-taupe hover:text-paper"
-      >
-        <Copy aria-hidden className="h-4 w-4" />
-      </button>
+      <CopyButton value={contact.value} label={`Copy ${contact.value}`} />
     </span>
   );
 }

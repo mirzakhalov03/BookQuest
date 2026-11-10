@@ -75,11 +75,15 @@ export const router = createBrowserRouter([
               { path: 'quest', ...adminScreen('QuestEditorPage') },
               { path: 'quest/new', ...adminScreen('NewEditionPage') },
               { path: 'results', ...adminScreen('ResultsInspectionPage') },
-              { path: 'broadcast', ...adminScreen('BroadcastPage') }
+              { path: 'broadcast', ...adminScreen('BroadcastPage') },
+              { path: 'messages', ...adminScreen('MessagesPage') }
             ]
           }
         ]
       },
+
+      // The URL first asked for; the page lives under /admin for the guard and the admin chunk.
+      { path: '/all-usermessages', element: <Navigate to="/admin/messages" replace /> },
 
       // Without it a typo raises an ErrorResponse and reads as a network failure.
       { path: '*', element: <NotFoundScreen /> }

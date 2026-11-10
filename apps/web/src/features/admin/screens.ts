@@ -6,3 +6,4 @@ export { QuestEditorPage } from './quest/QuestEditorPage';
 export { NewEditionPage } from './quest/NewEditionPage';
 export { ResultsInspectionPage } from './ResultsInspectionPage';
 export { BroadcastPage } from './broadcast/BroadcastPage';
+export { MessagesPage } from './interactions/MessagesPage';

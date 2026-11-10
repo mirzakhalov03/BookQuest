@@ -165,7 +165,12 @@
   bottom: 0;
   z-index: 4;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  /* Any number of tabs: the participant bar has five, admin six. */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  /* The active tab's 92px glow would poke past the screen edge on an end tab; clip only sideways, so the
+     desktop notch above the bar stays visible. */
+  overflow-x: clip;
   align-items: stretch;
   height: calc(var(--tabbar-h) + var(--safe-b));
   padding-bottom: var(--safe-b);
@@ -189,6 +194,15 @@
      state (spec §5). This is the whole difference that costs. */
   text-decoration: none;
   transition: color 180ms linear;
+}
+
+/* Six admin tabs at 360px: a long label ellipsises instead of running into its neighbour. */
+.tab span {
+  max-width: 100%;
+  padding-inline: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tab__icon {
