@@ -196,7 +196,6 @@ For each batch:
    not per item.
 3. **Membership side effect:** a `blocked` event sets `User.dmBlockedAt` and `unblocked` clears it,
    so broadcasts stop retrying people who blocked the bot before the next send even finds out.
-   *(Small and directly useful; drop it if you'd rather keep this feature read-only.)*
 4. `insertMany(items, { ordered: false })`, ignoring duplicate-key errors via `isDuplicateKeyError`.
 
 ### Endpoints
@@ -319,8 +318,6 @@ TIME        PERSON                     KIND        CONTENT
 | Admin access unaccounted for | `auditAdmin(req, 'interactions.list', { filterKeys })` on each list call: which filters, never their values, same as existing audit lines |
 
 **Before launch (your decision, not code):**
-- Tell users their messages to the bot are stored. A line in the privacy text, or in `/start`, is
-  enough.
 - Uzbekistan's personal-data law requires data about Uzbek citizens to be stored on servers inside
   the country. That already applies to the `users` collection. This feature adds message content, so
   it's worth confirming where your Mongo cluster lives.
