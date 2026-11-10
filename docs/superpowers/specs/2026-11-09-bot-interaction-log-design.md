@@ -338,6 +338,27 @@ to the next broadcast are captured even if the page lands a week later.
 
 ---
 
+## Implementation notes (10 Nov 2026)
+
+Built per `docs/superpowers/plans/2026-11-10-bot-interaction-log.md`. Where it differs from the text above:
+
+- **Body limit:** the 256 kb parser for `/bot/interactions` is mounted in `app.ts`, ahead of the global
+  100 kb parser. A route-level parser would never run, because the global one rejects the body first.
+- **Bot:** `bot.launch` passes `allowedUpdates` explicitly. Otherwise Telegram reuses the last caller's
+  list, which may lack `my_chat_member`. `shutdown` stops polling first and then flushes (bounded at
+  3 s). A `callback_query` has no `date`, so its `sentAt` is the time the bot received it.
+  `my_chat_member` is recorded for private chats only, and `unblocked` only when the old status was
+  `kicked`.
+- **Membership side effect** is time-guarded: `blocked` sets `dmBlockedAt = sentAt` only if that is
+  newer, and `unblocked` clears it only if `dmBlockedAt ≤ sentAt`. A late retried batch can't undo a
+  newer state.
+- **New-rows poll:** list responses carry `headCursor`, and the list accepts `since=<cursor>`. Tapping
+  "N new" resets the query to its first page rather than refetching all pages, which would duplicate
+  rows at the page seams.
+- **Audit:** `interactions.list` is audited on the first page only, not on load-more or the 30 s poll.
+- **Ranges:** the web sends range presets as `from=YYYY-MM-DD` computed in `Asia/Tashkent`.
+- **Admin tab bar:** a sixth tab. At 360 px, long labels ellipsise ("Particip…").
+
 ## Later (designed for, not built)
 - **Reply from the page:** the API already holds the bot token (`sendTelegramMessage`). Add a
   `direction: 'in' | 'out'` field and log admin replies as `out` rows in the same timeline.
