@@ -5,6 +5,7 @@ import { adminQuestRoutes } from './quest.routes.js';
 import { adminStatsRoutes } from './stats.routes.js';
 import { adminBroadcastRoutes } from './broadcast.routes.js';
 import { adminCoverRoutes } from './cover.routes.js';
+import { adminInteractionRoutes } from './interaction.routes.js';
 
 export const adminRoutes: Router = Router();
 
@@ -17,3 +18,4 @@ adminRoutes.use('/quests', adminQuestRoutes);
 adminRoutes.use('/stats', adminStatsRoutes);
 adminRoutes.use('/broadcasts', adminBroadcastRoutes);
 adminRoutes.use('/covers', adminCoverRoutes);
+adminRoutes.use('/interactions', adminInteractionRoutes);
