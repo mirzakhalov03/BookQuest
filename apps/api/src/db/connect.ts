@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { env } from '../config/env.js';
 import { logger } from '../config/logger.js';
 import { UserModel } from '../models/user.model.js';
+import { BotInteractionModel } from '../models/bot-interaction.model.js';
 
 /**
  * One connection for the process lifetime. Mongoose pools internally, so
@@ -28,6 +29,8 @@ export async function connectToDatabase(): Promise<void> {
    * large enough for an index rebuild to be felt on every boot.
    */
   await UserModel.syncIndexes();
+  // Also rebuilds the TTL index when INTERACTION_RETENTION_DAYS changes.
+  await BotInteractionModel.syncIndexes();
 }
 
 export async function disconnectFromDatabase(): Promise<void> {

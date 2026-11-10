@@ -20,6 +20,8 @@ export function createApp(): Express {
 
   app.use(helmet());
   app.use(cors({ origin: corsOrigins, credentials: true }));
+  // Bigger bodies for the bot's batches only. Must run before the global parser, which would 413 them first.
+  app.use('/api/v1/bot/interactions', express.json({ limit: '256kb' }));
   app.use(express.json({ limit: '100kb' }));
   app.use(pinoHttp({ logger }));
 
