@@ -1,8 +1,9 @@
-import type { BotUserUpsertPayload } from '@bookquest/shared';
+import type { BotUserUpsertPayload, InteractionInput } from '@bookquest/shared';
 import { env } from '../config/env.js';
 import { logger } from '../config/logger.js';
 
 const UPSERT_TIMEOUT_MS = 5000;
+const INTERACTIONS_TIMEOUT_MS = 5000;
 
 /**
  * The bot's only write path (spec, Approach A) — everything goes through
@@ -55,4 +56,31 @@ export function toBotUserUpsertPayload(from: {
     photoUrl: null,
     languageCode: from.language_code ?? null
   };
+}
+
+/**
+ * Never throws. 'drop' = the API refused the batch itself (4xx), so retrying
+ * can't help. Logs counts and status only — never what people wrote.
+ */
+export async function postInteractions(
+  items: InteractionInput[]
+): Promise<'ok' | 'retry' | 'drop'> {
+  try {
+    const response = await fetch(`${env.API_BASE_URL}/bot/interactions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Bot-Service-Token': env.BOT_SERVICE_TOKEN
+      },
+      body: JSON.stringify({ items }),
+      signal: AbortSignal.timeout(INTERACTIONS_TIMEOUT_MS)
+    });
+    if (response.ok) return 'ok';
+    logger.warn({ status: response.status, count: items.length }, 'Interaction batch not accepted');
+    const refused = response.status >= 400 && response.status < 500 && response.status !== 429;
+    return refused ? 'drop' : 'retry';
+  } catch (error) {
+    logger.warn({ err: error, count: items.length }, 'API unreachable for interaction batch');
+    return 'retry';
+  }
 }
