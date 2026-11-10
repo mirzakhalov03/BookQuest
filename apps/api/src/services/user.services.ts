@@ -67,7 +67,9 @@ export async function createUserWithPhone(
  * `.env` edit takes effect immediately. Phone admins must also have proven the
  * shared admin password, which is what a stored `role: 'admin'` records.
  */
-export function isAdmin(user: UserDocument): boolean {
+type AdminCheckable = Pick<UserDocument, 'telegramUserId' | 'role' | 'phoneNumber'>;
+
+export function isAdmin(user: AdminCheckable): boolean {
   if (user.telegramUserId && adminTelegramIds.has(user.telegramUserId)) return true;
   return user.role === 'admin' && !!user.phoneNumber && adminPhoneNumbers.has(user.phoneNumber);
 }

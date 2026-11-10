@@ -4,6 +4,7 @@ import { ResultModel } from '../models/result.model.js';
 import { QuestModel } from '../models/quest.model.js';
 import { env } from '../config/env.js';
 import { ApiError } from '../utils/api-error.js';
+import { escapeRegex } from '../utils/regex.js';
 import { startOfDayIn } from '../utils/time-zone.js';
 import { requireCurrentQuestDocument, resolvePhase } from './quest.services.js';
 import { toParticipantDto } from './participant.services.js';
@@ -85,9 +86,4 @@ export async function getStats(): Promise<AdminStats> {
   ]);
 
   return { participants, registeredToday, quizSubmitted, phase: resolvePhase(quest) };
-}
-
-/** A name is user input; a regex built from user input is an outage. */
-function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

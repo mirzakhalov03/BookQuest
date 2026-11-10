@@ -32,3 +32,18 @@ export function startOfDayIn(timeZone: string, now = new Date()): Date {
   const midnightAsUtc = Date.UTC(p.year!, p.month! - 1, p.day!);
   return new Date(midnightAsUtc - offsetMs(new Date(midnightAsUtc), timeZone));
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Noon UTC falls on the same calendar day in every zone within ±11 h, Tashkent included.
+const noonUtc = (ymd: string): Date => new Date(`${ymd}T12:00:00Z`);
+
+/** Midnight starting `ymd` (YYYY-MM-DD) in `timeZone`. */
+export function dayStartIn(timeZone: string, ymd: string): Date {
+  return startOfDayIn(timeZone, noonUtc(ymd));
+}
+
+/** Midnight ending `ymd` in `timeZone` — the exclusive upper bound of an inclusive day. */
+export function dayEndIn(timeZone: string, ymd: string): Date {
+  return startOfDayIn(timeZone, new Date(noonUtc(ymd).getTime() + DAY_MS));
+}

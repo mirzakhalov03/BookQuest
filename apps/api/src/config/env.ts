@@ -60,6 +60,9 @@ const envSchema = z.object({
     .default('Asia/Tashkent')
     .refine(isTimeZone, 'ORGANISER_TIME_ZONE must be an IANA zone, e.g. Asia/Tashkent'),
 
+  /** How long bot interactions are kept. A TTL index enforces it; boot re-syncs the index if this changes. */
+  INTERACTION_RETENTION_DAYS: z.coerce.number().int().positive().max(3650).default(365),
+
   /** Absolute URL of the web app, for certificate links and bot messages. */
   WEB_APP_URL: z.string().url().optional(),
   /** Absolute base of this API as browsers reach it — cover URLs are built from it per response. */

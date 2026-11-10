@@ -1,4 +1,3 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
 import bcrypt from 'bcrypt';
 import type {
   PhoneLoginPayload,
@@ -12,6 +11,7 @@ import { adminPhoneNumbers, env } from '../config/env.js';
 import { logger } from '../config/logger.js';
 import type { UserDocument } from '../models/user.model.js';
 import { ApiError } from '../utils/api-error.js';
+import { safeEqual } from '../utils/crypto.js';
 import { signSessionToken } from '../utils/token.js';
 import { verifyInitData, verifyLoginWidget } from '../utils/telegram.js';
 import { findParticipantForUser } from './participant.services.js';
@@ -27,11 +27,8 @@ import {
 const INCORRECT_CREDENTIALS = 'Incorrect phone number or password.';
 const DEFAULT_ADMIN_NAME = 'Organiser';
 
-const sha256 = (value: string): Buffer => createHash('sha256').update(value).digest();
-
-// Hashing both sides first gives equal lengths, so the compare leaks nothing about the length either.
 function isAdminPassword(password: string): boolean {
-  return !!env.ADMIN_PASSWORD && timingSafeEqual(sha256(password), sha256(env.ADMIN_PASSWORD));
+  return !!env.ADMIN_PASSWORD && safeEqual(password, env.ADMIN_PASSWORD);
 }
 
 /** Admin numbers only ever sign in with the shared password — from either tab, same failure as any login. */
