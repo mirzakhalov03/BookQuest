@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { useParams } from 'react-router';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Lock } from 'lucide-react';
+import { Eye, Lock } from 'lucide-react';
 import { saveQuizSchema, type QuizAdmin } from '@bookquest/shared';
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
@@ -20,7 +20,7 @@ import { QuestionList } from './components/QuestionList';
 import { QuizDetailsSection } from './components/QuizDetailsSection';
 import { QuizSettingsSection } from './components/QuizSettingsSection';
 import { QuizSummaryBar } from './components/QuizSummaryBar';
-import { toQuizFormState, type QuizFormState } from './quizForm';
+import { readDraft, toQuizFormState, type QuizDraftState, type QuizFormState } from './quizForm';
 import { applyQuizServerErrors } from './serverErrors';
 
 const QUIZ_FORM_ID = 'quiz-form';
@@ -56,7 +56,9 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
     defaultValues: toQuizFormState(quiz),
     mode: 'onChange'
   });
-  const { handleSubmit, reset, setError, formState } = form;
+  const { handleSubmit, reset, setError, getValues, formState } = form;
+  const navigate = useNavigate();
+  const returnedDraft = readDraft(useLocation().state);
   const [formError, setFormError] = useState<string | null>(null);
   const [isStale, setIsStale] = useState(false);
   const showToast = useUiStore((state) => state.showToast);
@@ -64,6 +66,20 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
   const locked = quiz.locked;
   const isDirty = formState.isDirty;
   const guard = useUnsavedChangesGuard(isDirty);
+
+  // Coming back from the preview: restore the edits it carried, still dirty against the saved quiz.
+  useEffect(() => {
+    if (returnedDraft?.revision === quiz.revision) reset(returnedDraft, { keepDefaultValues: true });
+    // Once per mount: later saves reset the form themselves.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function openPreview() {
+    // The preview carries the edits in router state; the guard would otherwise ask to discard them.
+    guard.bypass();
+    const state: QuizDraftState = { draft: getValues() };
+    void navigate(`/admin/quizzes/${quiz.id}/preview`, { state });
+  }
 
   const submit = handleSubmit(async (valid) => {
     setFormError(null);
@@ -96,7 +112,15 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
   return (
     <FormProvider {...form}>
       <AdminScreen className="max-w-3xl">
-        <AdminPageHeader eyebrow="Quiz" title={quiz.title} />
+        <AdminPageHeader
+          eyebrow="Quiz"
+          title={quiz.title}
+          actions={
+            <Button type="button" variant="quiet" onClick={openPreview} className="min-h-11 gap-2 px-3">
+              <Eye className="h-4 w-4" aria-hidden /> Preview
+            </Button>
+          }
+        />
 
         {locked && (
           <p role="status" className="m-0 flex items-start gap-2 rounded-box border border-amber/40 p-3 text-sm text-amber">

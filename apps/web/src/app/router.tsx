@@ -80,6 +80,7 @@ export const router = createBrowserRouter([
               { path: 'quest/new', ...adminScreen('NewEditionPage') },
               { path: 'quizzes', ...adminScreen('QuizzesPage') },
               { path: 'quizzes/:id', ...adminScreen('QuizEditorPage') },
+              { path: 'quizzes/:id/preview', ...adminScreen('QuizPreviewPage') },
               { path: 'results', ...adminScreen('ResultsInspectionPage') },
               { path: 'broadcast', ...adminScreen('BroadcastPage') },
               { path: 'messages', ...adminScreen('MessagesPage') }

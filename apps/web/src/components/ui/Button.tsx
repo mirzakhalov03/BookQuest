@@ -8,6 +8,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   /** Renders as a `Link` to this route instead of a `<button>`, same styles. */
   to?: string;
+  /** Router state carried with a `to` link. */
+  state?: unknown;
 }
 
 const VARIANTS: Record<Variant, string> = {
@@ -24,12 +26,12 @@ const BASE_CLASSES =
  * The filled button is the only solid surface in the interface, which is what
  * makes it read as the action. Keep it rare.
  */
-export function Button({ variant = 'primary', className = '', to, children, ...props }: ButtonProps) {
+export function Button({ variant = 'primary', className = '', to, state, children, ...props }: ButtonProps) {
   const classes = `${BASE_CLASSES} ${VARIANTS[variant]} ${className}`;
 
   if (to) {
     return (
-      <Link to={to} className={classes}>
+      <Link to={to} state={state} className={classes}>
         {children}
       </Link>
     );

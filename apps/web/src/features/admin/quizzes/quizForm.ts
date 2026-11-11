@@ -40,3 +40,13 @@ export function newQuestion(previous?: QuizQuestion): QuizQuestion {
     explanation: null
   };
 }
+
+/** Router state handed between the editor and its preview, so unsaved edits survive the round trip. */
+export interface QuizDraftState {
+  draft: QuizFormState;
+}
+
+export function readDraft(state: unknown): QuizFormState | null {
+  const draft = (state as Partial<QuizDraftState> | null)?.draft;
+  return draft && Array.isArray(draft.questions) && draft.settings ? draft : null;
+}
