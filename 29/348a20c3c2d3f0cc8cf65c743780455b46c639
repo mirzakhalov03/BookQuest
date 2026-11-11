@@ -1,0 +1,27 @@
+apps/api/src/middlewares/error.middleware.ts
+  s_9c243050d10f30::t_f089ce75650ab4 30-31
+apps/api/src/utils/api-error.ts
+  s_9c243050d10f30::t_af131c9bedc339 12,18-19,26,33-34,37-41
+apps/web/src/lib/api/client.ts
+  s_9c243050d10f30::t_671fc5be20929d 27-39,45-46,65-66,86-103,107-136,162-164,178-179
+apps/web/src/lib/api/retry.ts
+  s_9c243050d10f30::t_0ae36ca4fd02d5 1-33
+packages/shared/src/api.ts
+  s_9c243050d10f30::t_65f4b5f40ea942 18-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "29348a20c3c2d3f0cc8cf65c743780455b46c639",
+  "prompts": {},
+  "sessions": {
+    "s_9c243050d10f30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "52c21a19-4dca-4d71-a046-ac31f18a1a0c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
