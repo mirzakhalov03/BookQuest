@@ -9,3 +9,4 @@ export * from './admin.js';
 export * from './bot.js';
 export * from './notification.js';
 export * from './interaction.js';
+export * from './quiz.js';
