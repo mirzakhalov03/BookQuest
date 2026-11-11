@@ -1,4 +1,4 @@
-import { Types, type UpdateQuery } from 'mongoose';
+import { Types, type ClientSession, type UpdateQuery } from 'mongoose';
 import {
   QUIZ_ANSWER_GRACE_MS,
   TRUE_FALSE_OPTION_IDS,
@@ -15,6 +15,7 @@ import {
   type QuizOverviewState,
   type QuizQuestion
 } from '@bookquest/shared';
+import { quizDrillCrashAfterFinalize } from '../config/env.js';
 import { logger } from '../config/logger.js';
 import type { QuestDocument, QuestRow } from '../models/quest.model.js';
 import { QuizAttemptModel, type AttemptItemRow, type AttemptRow } from '../models/quiz-attempt.model.js';
@@ -129,7 +130,10 @@ function closeOut(attempt: AttemptRow): Promise<unknown> {
     $set[itemPath(k, 'isCorrect')] = false;
     $set[itemPath(k, 'elapsedMs')] = attempt.items[k]!.timeLimitMs;
   }
-  return QuizAttemptModel.updateOne({ _id: attempt._id, status: 'in_progress', cursor: attempt.cursor }, { $set });
+  const filter: Record<string, unknown> = { _id: attempt._id, status: 'in_progress', cursor: attempt.cursor };
+  // An item served a moment ago must not be overwritten as unserved; a miss reloads and settles it instead.
+  if (attempt.cursor < attempt.items.length) filter[itemPath(attempt.cursor, 'servedAt')] = IS_NULL;
+  return QuizAttemptModel.updateOne(filter, { $set });
 }
 
 /** The next conditional write settle owes this attempt, or null when it is settled. */
@@ -169,6 +173,28 @@ export async function settleAttempt(
 
 /* ── Finalise (§13.4) ───────────────────────────────────────────────────── */
 
+type FinalizedAttempt = Pick<AttemptRow, '_id' | 'quest' | 'participant'> & {
+  score: number;
+  total: number;
+  durationMs: number;
+  completedAt: Date;
+};
+
+/** Steps 2–3 of finalise, shared with repair: idempotent upsert, then the repair marker. */
+async function writeResult(attempt: FinalizedAttempt, answered: number, session?: ClientSession): Promise<void> {
+  // Tapping Start and answering nothing earns no Result (and so no rank or certificate).
+  if (answered >= 1) {
+    const { score, total, durationMs, completedAt } = attempt;
+    await ResultModel.updateOne(
+      { quest: attempt.quest, participant: attempt.participant },
+      { $set: { score, total, durationMs, submittedAt: completedAt } },
+      { upsert: true, session }
+    );
+  }
+  // Set even without a Result, so the repair sweep skips this attempt.
+  await QuizAttemptModel.updateOne({ _id: attempt._id }, { $set: { resultWrittenAt: new Date() } }, { session });
+}
+
 export async function finalizeAttempt(attemptId: Types.ObjectId, by: FinalizedBy): Promise<void> {
   const outcome = await withTransaction(async (session) => {
     const attempt = await QuizAttemptModel.findById(attemptId)
@@ -196,20 +222,79 @@ export async function finalizeAttempt(attemptId: Types.ObjectId, by: FinalizedBy
     // Someone else finalised it.
     if (!done) return null;
 
-    // Tapping Start and answering nothing earns no Result (and so no rank or certificate).
-    if (answered >= 1) {
-      await ResultModel.updateOne(
-        { quest: done.quest, participant: done.participant },
-        { $set: { score, total, durationMs, submittedAt: now } },
-        { upsert: true, session }
-      );
+    if (quizDrillCrashAfterFinalize) {
+      logger.fatal({ attemptId: String(attemptId) }, 'QUIZ_DRILL_CRASH_AFTER_FINALIZE: exiting before the Result write');
+      process.exit(1);
     }
-    // Set even without a Result, so the repair sweep skips this attempt.
-    await QuizAttemptModel.updateOne({ _id: attemptId }, { $set: { resultWrittenAt: now } }, { session });
+
+    await writeResult({ ...done, score, total, durationMs, completedAt: now }, answered, session);
     return { score, total };
   });
 
   if (outcome) logger.info({ attemptId: String(attemptId), finalizedBy: by, ...outcome }, 'quiz attempt finalised');
+}
+
+/* ── Sweep, ranking guard & repair (§13.5) ──────────────────────────────── */
+
+const SWEEP_BATCH = 50;
+
+/** Settles and finalises every open attempt once the window plus grace is over; returns how many completed. */
+export async function finalizeOpenAttempts(
+  quest: QuestDocument,
+  now = new Date(),
+  by: 'sweep' | 'ranking' = 'sweep'
+): Promise<number> {
+  if (now.getTime() < quest.quizClosesAt.getTime() + G) return 0;
+
+  let finalized = 0;
+  let failed = 0;
+  const open = QuizAttemptModel.find({ quest: quest._id, status: 'in_progress' })
+    .lean<AttemptRow[]>()
+    .cursor({ batchSize: SWEEP_BATCH });
+  for await (const attempt of open as AsyncIterable<AttemptRow>) {
+    try {
+      const settled = await settleAttempt(attempt, quest, now, by);
+      if (settled.status === 'completed') finalized += 1;
+    } catch (error) {
+      // One bad attempt must not stall the rest of the sweep.
+      failed += 1;
+      logger.error({ err: error, attemptId: String(attempt._id), by }, 'quiz attempt could not be finalised');
+    }
+  }
+  // Ranking an incomplete field would freeze wrong ranks; fail so the next read retries.
+  if (failed > 0 && by === 'ranking') throw new Error(`${failed} quiz attempt(s) could not be finalised before ranking`);
+  return finalized;
+}
+
+/** Completed attempts whose Result write never landed (crash, or a standalone dev DB). */
+export async function repairMissingResults(quest: QuestDocument): Promise<number> {
+  let repaired = 0;
+  const pending = QuizAttemptModel.find({ quest: quest._id, status: 'completed', resultWrittenAt: null })
+    .lean<AttemptRow[]>()
+    .cursor({ batchSize: SWEEP_BATCH });
+  for await (const attempt of pending as AsyncIterable<AttemptRow>) {
+    await writeResult(
+      {
+        ...attempt,
+        score: attempt.score ?? 0,
+        total: attempt.total ?? 0,
+        durationMs: attempt.durationMs ?? 0,
+        completedAt: attempt.completedAt ?? attempt.updatedAt
+      },
+      scoreItems(attempt.items).answered
+    );
+    repaired += 1;
+  }
+  return repaired;
+}
+
+/** The 60 s timer and the boot pass: current quest only. */
+export async function runQuizSweep(now = new Date()): Promise<void> {
+  const quest = await findCurrentQuestDocument();
+  if (!quest) return;
+  const finalized = await finalizeOpenAttempts(quest, now, 'sweep');
+  const repaired = await repairMissingResults(quest);
+  if (finalized > 0 || repaired > 0) logger.info({ edition: quest.edition, finalized, repaired }, 'quiz sweep');
 }
 
 /* ── Mapping (never spreads an item: answers must not leak) ─────────────── */
@@ -374,7 +459,7 @@ function buildItems({ settings, questions }: QuizContent, voidedQuestionIds: rea
     voided: voidedQuestionIds.includes(question.id),
     difficulty: question.difficulty,
     timeLimitMs: effectiveTimeLimitSec(question, settings) * 1000,
-    // Explicit nulls: positional filters like `items.3.lockedAt: null` must see a real field.
+    // Explicit nulls: positional `$type: 'null'` filters (IS_NULL) only match a real stored null.
     servedAt: null,
     deadlineAt: null,
     selectedOptionId: null,

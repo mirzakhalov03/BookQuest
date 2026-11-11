@@ -3,8 +3,8 @@ import { Schema, model, type InferSchemaType, type HydratedDocument, type Types 
 
 const optionSchema = new Schema({ id: { type: String, required: true }, text: { type: String, default: '' } }, { _id: false });
 
-/* Every nullable field defaults to null: positional filters like
-   `items.3.lockedAt: null` must match an item the snapshot never wrote. */
+/* Every nullable field defaults to null: positional `$type: 'null'` filters
+   (IS_NULL in quiz-scoring) need a real stored null, never a missing field. */
 const itemSchema = new Schema(
   {
     questionId: { type: String, required: true },

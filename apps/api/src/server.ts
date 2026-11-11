@@ -5,8 +5,14 @@ import { connectToDatabase, disconnectFromDatabase } from './db/connect.js';
 import { markInterruptedBroadcasts } from './services/broadcast.services.js';
 import { markInterruptedCertificateDeliveries } from './services/certificate-delivery.services.js';
 import { sweepOrphanCovers } from './services/cover.services.js';
+import { runQuizSweep } from './services/quiz-attempt.services.js';
 
 const SWEEP_EVERY_MS = 6 * 60 * 60 * 1000;
+const QUIZ_SWEEP_EVERY_MS = 60_000;
+
+function sweepQuiz(): Promise<void> {
+  return runQuizSweep().catch((error: unknown) => logger.error({ err: error }, 'Quiz sweep failed'));
+}
 
 function sweepCovers(): void {
   sweepOrphanCovers()
@@ -24,6 +30,10 @@ async function start(): Promise<void> {
   if (interruptedCertificates > 0) {
     logger.warn('Marked a certificate delivery left mid-send as interrupted — press Send again to finish it');
   }
+
+  // Before listening: attempts an interrupted process left open or without a Result.
+  await sweepQuiz();
+  setInterval(() => void sweepQuiz(), QUIZ_SWEEP_EVERY_MS).unref();
 
   sweepCovers();
   // unref: the timer must not keep a shutting-down process alive.

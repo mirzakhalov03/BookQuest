@@ -66,7 +66,13 @@ const envSchema = z.object({
   /** Absolute URL of the web app, for certificate links and bot messages. */
   WEB_APP_URL: z.string().url().optional(),
   /** Absolute base of this API as browsers reach it — cover URLs are built from it per response. */
-  PUBLIC_API_URL: z.string().url().optional()
+  PUBLIC_API_URL: z.string().url().optional(),
+
+  /** Dev drill only: exit right after finalise's first write, so crash repair can be exercised. */
+  QUIZ_DRILL_CRASH_AFTER_FINALIZE: z
+    .string()
+    .optional()
+    .transform((value) => value === 'true' || value === '1')
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -80,6 +86,8 @@ if (!parsed.success) {
 
 export const env = parsed.data;
 export const isProduction = env.NODE_ENV === 'production';
+/** Never honoured in production: a crash switch has no business there. */
+export const quizDrillCrashAfterFinalize = env.QUIZ_DRILL_CRASH_AFTER_FINALIZE && !isProduction;
 
 /** Comma-separated list, so preview deployments can be added without a code change. */
 export const corsOrigins = env.CORS_ORIGIN.split(',').map((origin) => origin.trim());
@@ -135,4 +143,8 @@ if (isProduction && !env.WEB_APP_URL) {
   configWarnings.push(
     'WEB_APP_URL is not set — certificate QR codes and links will be wrong, and sending certificates is disabled.'
   );
+}
+
+if (isProduction && env.QUIZ_DRILL_CRASH_AFTER_FINALIZE) {
+  configWarnings.push('QUIZ_DRILL_CRASH_AFTER_FINALIZE is set in production — ignored. Remove it.');
 }
