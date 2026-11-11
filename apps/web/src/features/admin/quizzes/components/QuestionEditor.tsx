@@ -87,7 +87,7 @@ export function QuestionEditor({ index, issues, onRemove }: QuestionEditorProps)
         correctOptionId={question.correctOptionId}
         {...(optionsMessage ? { error: optionsMessage } : {})}
       />
-      <div className="grid grid-cols-2 items-start gap-4">
+      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
         <Field
           label="Time limit (s)"
           type="number"

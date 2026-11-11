@@ -81,6 +81,7 @@ function seed(): QuizAdmin[] {
       }
     ]
   });
+  ready.usedIn = [3];
   const draft = blank(objectId('quiz:draft'), 'Draft: themes', {
     description: null,
     questions: [
@@ -131,6 +132,7 @@ function summarise(quiz: QuizAdmin): QuizSummaryAdmin {
     isComplete: quiz.issues === null,
     issueCount: Object.keys(quiz.issues ?? {}).length,
     attachment: quiz.attachment,
+    usedIn: quiz.usedIn,
     locked: quiz.locked,
     revision: quiz.revision,
     updatedAt: quiz.updatedAt

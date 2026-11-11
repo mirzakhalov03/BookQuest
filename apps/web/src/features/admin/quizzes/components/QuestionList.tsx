@@ -37,13 +37,25 @@ function issuesFor(all: Record<string, string> | null, index: number): Record<st
   );
 }
 
-export function QuestionList({ locked }: { locked: boolean }) {
+interface QuestionListProps {
+  locked: boolean;
+  /** The save bar is showing, so the dock must sit above it. */
+  raised: boolean;
+  /** Notices and the summary, stacked under the add button in the sticky dock. */
+  dock?: ReactNode;
+}
+
+export function QuestionList({ locked, raised, dock }: QuestionListProps) {
   const {
     control,
     getValues,
     formState: { errors, submitCount }
   } = useFormContext<QuizFormState>();
-  const { fields, append, remove, move } = useFieldArray({ control, name: 'questions', keyName: 'key' });
+  const { fields, append, remove, move } = useFieldArray({
+    control,
+    name: 'questions',
+    keyName: 'key'
+  });
   const [questions, settings] = useWatch({ control, name: ['questions', 'settings'] });
   const [openId, setOpenId] = useState<string | null>(null);
   const issues = findQuizIssues({ questions, settings });
@@ -78,61 +90,67 @@ export function QuestionList({ locked }: { locked: boolean }) {
   }
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="type-label m-0">Questions</h2>
-      {settings.shuffleQuestions && (
-        <p className="m-0 text-sm text-taupe">
-          Order is shuffled for each participant; this order is used in preview and review.
-        </p>
-      )}
-      {issues?.questions && fields.length === 0 && <p className="m-0 text-sm text-amber">{issues.questions}</p>}
+    <>
+      <section className="flex flex-col gap-3">
+        <h2 className="type-label m-0">Questions</h2>
+        {settings.shuffleQuestions && (
+          <p className="m-0 text-sm text-taupe">
+            Order is shuffled for each participant; this order is used in preview and review.
+          </p>
+        )}
+        {issues?.questions && fields.length === 0 && (
+          <p className="m-0 text-sm text-amber">{issues.questions}</p>
+        )}
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-        <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
-          <ol className="m-0 flex list-none flex-col gap-2 p-0">
-            {fields.map((field, index) => {
-              const question = questions[index];
-              if (!question) return null;
-              const rowIssues = issuesFor(issues, index);
-              return (
-                <SortableRow
-                  key={field.id}
-                  id={field.id}
-                  index={index}
-                  count={fields.length}
-                  question={question}
-                  defaultTime={settings.defaultTimeLimitSec}
-                  hasError={Boolean(errors.questions?.[index]) || Object.keys(rowIssues).length > 0}
-                  open={openId === field.id}
-                  locked={locked}
-                  onToggle={() => setOpenId(openId === field.id ? null : field.id)}
-                  onMove={(to) => move(index, to)}
-                >
-                  <fieldset disabled={locked} className="m-0 min-w-0 border-0 p-0">
-                    <QuestionEditor
-                      index={index}
-                      issues={rowIssues}
-                      onRemove={() => {
-                        remove(index);
-                        setOpenId(null);
-                      }}
-                    />
-                  </fieldset>
-                </SortableRow>
-              );
-            })}
-          </ol>
-        </SortableContext>
-      </DndContext>
-
-      {!locked && (
-        <div className="sticky bottom-[calc(var(--tabbar-h)+var(--safe-b)+4.5rem)] z-[3] flex justify-center">
-          <Button type="button" onClick={addQuestion} className="min-h-11 px-5">
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
+            <ol className="m-0 flex list-none flex-col gap-2 p-0">
+              {fields.map((field, index) => {
+                const question = questions[index];
+                if (!question) return null;
+                const rowIssues = issuesFor(issues, index);
+                return (
+                  <SortableRow
+                    key={field.id}
+                    id={field.id}
+                    index={index}
+                    count={fields.length}
+                    question={question}
+                    defaultTime={settings.defaultTimeLimitSec}
+                    hasError={
+                      Boolean(errors.questions?.[index]) || Object.keys(rowIssues).length > 0
+                    }
+                    open={openId === field.id}
+                    locked={locked}
+                    onToggle={() => setOpenId(openId === field.id ? null : field.id)}
+                    onMove={(to) => move(index, to)}
+                  >
+                    <fieldset disabled={locked} className="m-0 min-w-0 border-0 p-0">
+                      <QuestionEditor
+                        index={index}
+                        issues={rowIssues}
+                        onRemove={() => {
+                          remove(index);
+                          setOpenId(null);
+                        }}
+                      />
+                    </fieldset>
+                  </SortableRow>
+                );
+              })}
+            </ol>
+          </SortableContext>
+        </DndContext>
+      </section>
+      <div className={`admin-dock ${raised ? 'is-raised' : ''}`}>
+        {!locked && (
+          <Button type="button" onClick={addQuestion} className="min-h-11 self-center px-5">
             <Plus className="h-4 w-4" aria-hidden /> Question
           </Button>
-        </div>
-      )}
-    </section>
+        )}
+        {dock}
+      </div>
+    </>
   );
 }
 
@@ -164,8 +182,15 @@ function SortableRow({
   onMove,
   children
 }: SortableRowProps) {
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
-    useSortable({ id, disabled: locked });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id, disabled: locked });
   const seconds = question.timeLimitSec ?? defaultTime;
 
   return (
@@ -198,13 +223,23 @@ function SortableRow({
           <span className="shrink-0 rounded-full border border-[color:var(--rule)] px-1.5 text-xs text-taupe">
             {TYPE_LABEL[question.type]}
           </span>
-          <span className={`min-w-0 flex-1 truncate ${question.prompt.trim() ? 'text-paper' : 'text-taupe'}`}>
+          <span
+            className={`min-w-0 flex-1 truncate ${question.prompt.trim() ? 'text-paper' : 'text-taupe'}`}
+          >
             {question.prompt.trim() || 'Untitled question'}
           </span>
-          <span aria-label={question.difficulty} className={`h-2 w-2 shrink-0 rounded-full ${DIFFICULTY_DOT[question.difficulty]}`} />
+          <span
+            aria-label={question.difficulty}
+            className={`h-2 w-2 shrink-0 rounded-full ${DIFFICULTY_DOT[question.difficulty]}`}
+          />
           <span className="shrink-0 text-xs tabular-nums text-taupe">{seconds}s</span>
-          {hasError && <AlertTriangle aria-label="Needs attention" className="h-4 w-4 shrink-0 text-error" />}
-          <ChevronDown className={`h-4 w-4 shrink-0 text-taupe transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
+          {hasError && (
+            <AlertTriangle aria-label="Needs attention" className="h-4 w-4 shrink-0 text-error" />
+          )}
+          <ChevronDown
+            className={`h-4 w-4 shrink-0 text-taupe transition-transform ${open ? 'rotate-180' : ''}`}
+            aria-hidden
+          />
         </button>
         <button
           type="button"

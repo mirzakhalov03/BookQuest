@@ -52,12 +52,26 @@ async function findAttachment(quizId: Types.ObjectId | string): Promise<Attachme
   return { questEdition: quest.edition, groupLabel: groupLabel(quest.quizConfig?.distribution, index) };
 }
 
-async function findUsedInEditions(quizId: Types.ObjectId | string): Promise<number[]> {
-  const quests = await QuestModel.find({ isCurrent: { $ne: true }, 'quizConfig.quizzes': new Types.ObjectId(String(quizId)) }, { edition: 1 })
+/** Past editions that referenced each quiz, from one query; pass `quizId` to narrow it to one. */
+async function loadUsedInEditions(quizId?: Types.ObjectId | string): Promise<Map<string, number[]>> {
+  const filter = quizId
+    ? { isCurrent: { $ne: true }, 'quizConfig.quizzes': new Types.ObjectId(String(quizId)) }
+    : { isCurrent: { $ne: true }, 'quizConfig.quizzes.0': { $exists: true } };
+  const quests = await QuestModel.find(filter, { edition: 1, 'quizConfig.quizzes': 1 })
     .setOptions(LOOSE)
     .sort({ edition: 1 })
-    .lean<{ edition: number }[]>();
-  return quests.map((q) => q.edition);
+    .lean<QuestQuizRef[]>();
+  const byQuiz = new Map<string, number[]>();
+  for (const quest of quests) {
+    for (const id of quest.quizConfig?.quizzes ?? []) {
+      byQuiz.set(String(id), [...(byQuiz.get(String(id)) ?? []), quest.edition]);
+    }
+  }
+  return byQuiz;
+}
+
+async function findUsedInEditions(quizId: Types.ObjectId | string): Promise<number[]> {
+  return (await loadUsedInEditions(quizId)).get(String(quizId)) ?? [];
 }
 
 export async function isQuizLocked(quizId: Types.ObjectId | string): Promise<boolean> {
@@ -134,10 +148,11 @@ async function loadQuizOrThrow(id: string): Promise<QuizRow> {
 /* ── Library ────────────────────────────────────────────────────────────── */
 
 export async function listQuizzes(): Promise<QuizSummaryAdmin[]> {
-  const [quizzes, lockedIds, quests] = await Promise.all([
+  const [quizzes, lockedIds, quests, usedIn] = await Promise.all([
     QuizModel.find().sort({ updatedAt: -1 }).lean<QuizRow[]>(),
     QuizAttemptModel.distinct('quiz'),
-    QuestModel.findOne({ isCurrent: true }).setOptions(LOOSE).lean<QuestQuizRef>()
+    QuestModel.findOne({ isCurrent: true }).setOptions(LOOSE).lean<QuestQuizRef>(),
+    loadUsedInEditions()
   ]);
   const locked = new Set(lockedIds.map(String));
   const attached = new Map<string, Attachment>();
@@ -157,6 +172,7 @@ export async function listQuizzes(): Promise<QuizSummaryAdmin[]> {
       isComplete: issues === null,
       issueCount: issues ? Object.keys(issues).length : 0,
       attachment: attached.get(String(quiz._id)) ?? null,
+      usedIn: usedIn.get(String(quiz._id)) ?? [],
       locked: locked.has(String(quiz._id)),
       revision: quiz.revision,
       updatedAt: quiz.updatedAt.toISOString()

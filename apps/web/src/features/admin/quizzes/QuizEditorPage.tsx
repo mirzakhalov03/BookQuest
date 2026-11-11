@@ -39,7 +39,11 @@ export function QuizEditorPage() {
         <QuizEditorForm
           key={quiz.id}
           quiz={quiz}
-          reload={async () => (await query.refetch()).data}
+          reload={async () => {
+            const result = await query.refetch();
+            // A failed refetch still carries the old cached quiz; only a fresh success may replace the form.
+            return result.isSuccess && !result.isRefetchError ? result.data : undefined;
+          }}
         />
       )}
     </AdminQuery>
@@ -78,7 +82,7 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
 
   async function reloadLatest() {
     const latest = await reload();
-    if (!latest) return;
+    if (!latest) return showToast("Couldn't reload the quiz. Your edits are kept; try again.");
     reset(toQuizFormState(latest));
     setIsStale(false);
     setFormError(null);
@@ -112,22 +116,28 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
               <QuizSettingsSection />
             </div>
           </fieldset>
-          <QuestionList locked={locked} />
-
-          {isStale && (
-            <div role="alert" className="flex flex-wrap items-center gap-3 rounded-box border border-amber/40 p-3 text-sm text-amber">
-              <span className="flex-1">{STALE_MESSAGE}</span>
-              <Button type="button" variant="quiet" onClick={() => void reloadLatest()} className="min-h-11 px-3 text-amber">
-                Reload
-              </Button>
-            </div>
-          )}
-          {formError && (
-            <p role="alert" className="m-0 text-sm text-error">
-              {formError}
-            </p>
-          )}
-          <QuizSummaryBar raised={isDirty} />
+          <QuestionList
+            locked={locked}
+            raised={isDirty}
+            dock={
+              <>
+                {isStale && (
+                  <div role="alert" className="flex flex-wrap items-center gap-3 rounded-box border border-amber/40 bg-[color:var(--color-ink)] p-3 text-sm text-amber">
+                    <span className="flex-1">{STALE_MESSAGE}</span>
+                    <Button type="button" variant="quiet" onClick={() => void reloadLatest()} className="min-h-11 px-3 text-amber">
+                      Reload
+                    </Button>
+                  </div>
+                )}
+                {formError && (
+                  <p role="alert" className="m-0 rounded-box border border-error-line bg-[color:var(--color-ink)] p-3 text-sm text-error">
+                    {formError}
+                  </p>
+                )}
+                <QuizSummaryBar />
+              </>
+            }
+          />
         </form>
 
         {isDirty && <div aria-hidden className="h-20" />}

@@ -212,6 +212,7 @@ export const quizSummaryAdminSchema = z.object({
   isComplete: z.boolean(),
   issueCount: z.number().int().nonnegative(),
   attachment: attachmentSchema.nullable(),
+  usedIn: z.array(z.number().int()),
   locked: z.boolean(),
   revision: z.number().int().nonnegative(),
   updatedAt: isoString

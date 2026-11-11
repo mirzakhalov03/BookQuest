@@ -16,6 +16,7 @@ function chipsFor(quiz: QuizSummaryAdmin): Chip[] {
       tone: 'plain'
     });
   }
+  if (quiz.usedIn.length > 0) chips.push({ label: `Used in ${quiz.usedIn.map((e) => `Edition ${e}`).join(', ')}`, tone: 'plain' });
   if (quiz.locked) chips.push({ label: 'Locked', tone: 'plain' });
   return chips;
 }
