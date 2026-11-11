@@ -90,9 +90,12 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
       );
       if (error instanceof ApiRequestError && error.reason === 'quiz_locked') {
         setQuizLockMessage(error.message);
-        // The setup can't change now: drop that edit and its error so the rest of the form can still save.
-        form.setValue('quizConfig', toFormState(quest).quizConfig);
-        form.clearErrors('quizConfig');
+        // Revert the fields the server froze (their error messages stay) so the other edits can save.
+        const saved = toFormState(quest);
+        if ('quizConfig' in error.fields) form.setValue('quizConfig', saved.quizConfig);
+        for (const key of ['quizOpensAt', 'quizClosesAt'] as const) {
+          if (key in error.fields) form.setValue(`dates.${key}`, saved.dates[key]);
+        }
       }
     }
   }
@@ -163,6 +166,7 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
         open={pendingPatch !== null}
         lines={pendingPatch ? describeRiskyChanges(quest, pendingPatch, quizTitle) : []}
         participantCount={quest.participantCount}
+        isUpcoming={quest.phase === 'upcoming'}
         onCancel={() => setPendingPatch(null)}
         onConfirm={() => {
           const patch = pendingPatch;

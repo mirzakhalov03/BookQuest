@@ -7,16 +7,18 @@ interface ReviewChangesSheetProps {
   open: boolean;
   lines: ChangeLine[];
   participantCount: number;
+  /** Before launch nobody has seen the quest, so the "live" framing would be wrong. */
+  isUpcoming: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export function ReviewChangesSheet({ open, lines, participantCount, onConfirm, onCancel }: ReviewChangesSheetProps) {
+export function ReviewChangesSheet({ open, lines, participantCount, isUpcoming, onConfirm, onCancel }: ReviewChangesSheetProps) {
   return (
     <Sheet
       open={open}
       onClose={onCancel}
-      title="Change a live quest?"
+      title={isUpcoming ? 'Review your changes' : 'Change a live quest?'}
       actions={
         <>
           <Button type="button" variant="quiet" onClick={onCancel}>
@@ -37,9 +39,11 @@ export function ReviewChangesSheet({ open, lines, participantCount, onConfirm, o
           </li>
         ))}
       </ul>
-      <p className="m-0 text-sm text-taupe">
-        {formatCount(participantCount)} {participantCount === 1 ? 'participant sees' : 'participants see'} this straight away.
-      </p>
+      {!isUpcoming && (
+        <p className="m-0 text-sm text-taupe">
+          {formatCount(participantCount)} {participantCount === 1 ? 'participant sees' : 'participants see'} this straight away.
+        </p>
+      )}
     </Sheet>
   );
 }

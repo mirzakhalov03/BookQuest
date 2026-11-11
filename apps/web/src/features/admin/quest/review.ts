@@ -14,8 +14,10 @@ const PRIZE_LABEL = { first: 'First prize', second: 'Second prize', third: 'Thir
 
 /** Only edits participants have already planned around get a second look; typos just save. */
 export function needsReview(quest: AdminQuest, patch: UpdateQuestPayload): boolean {
+  // Quiz setup is always reviewed, even before launch (§5.3).
+  if (patch.quizConfig !== undefined) return true;
   if (quest.phase === 'upcoming') return false;
-  return patch.prizes !== undefined || patch.quizConfig !== undefined || QUEST_DATE_FIELDS.some((field) => patch[field] !== undefined);
+  return patch.prizes !== undefined || QUEST_DATE_FIELDS.some((field) => patch[field] !== undefined);
 }
 
 export function describeRiskyChanges(
