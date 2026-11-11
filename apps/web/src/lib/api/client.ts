@@ -24,13 +24,26 @@ export class ApiRequestError extends Error {
   readonly status: number;
   readonly code: string;
   readonly fields: Record<string, string>;
+  /** Machine-readable sub-code; branch on this, never on `message`. */
+  readonly reason: string | null;
+  /** Server-requested wait from `Retry-After`, for the retry helper. */
+  readonly retryAfterMs: number | null;
 
-  constructor(status: number, code: string, message: string, fields: Record<string, string> = {}) {
+  constructor(
+    status: number,
+    code: string,
+    message: string,
+    fields: Record<string, string> = {},
+    reason: string | null = null,
+    retryAfterMs: number | null = null
+  ) {
     super(message);
     this.name = 'ApiRequestError';
     this.status = status;
     this.code = code;
     this.fields = fields;
+    this.reason = reason;
+    this.retryAfterMs = retryAfterMs;
   }
 }
 
@@ -49,6 +62,8 @@ export function isNotFound(error: unknown): error is ApiRequestError {
 
 interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown;
+  /** Aborts the request and throws `ApiRequestError(0, 'timeout')`. */
+  timeoutMs?: number;
 }
 
 /**
@@ -68,25 +83,57 @@ export function registerReauthenticate(fn: Reauthenticate): void {
   reauthenticate = fn;
 }
 
-function send(path: string, options: RequestOptions, token: string | null): Promise<Response> {
-  const { body, headers, ...rest } = options;
+/** Seconds or an HTTP date, per RFC 9110. */
+function parseRetryAfter(header: string | null): number | null {
+  if (!header) return null;
+  const seconds = Number(header);
+  if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
+  const date = Date.parse(header);
+  return Number.isNaN(date) ? null : Math.max(0, date - Date.now());
+}
+
+async function send(
+  path: string,
+  options: RequestOptions,
+  token: string | null
+): Promise<Response> {
+  const { body, headers, timeoutMs, signal: callerSignal, ...rest } = options;
+  const timeoutSignal = timeoutMs === undefined ? null : AbortSignal.timeout(timeoutMs);
+  const signals = [callerSignal, timeoutSignal].filter((s): s is AbortSignal => s != null);
+  const signal = signals.length > 1 ? AbortSignal.any(signals) : signals[0];
   // The browser must write the multipart boundary itself, so FormData gets no Content-Type from us.
   const isForm = body instanceof FormData;
 
-  return fetch(`${BASE_URL}${path}`, {
-    ...rest,
-    headers: {
-      ...(body === undefined || isForm ? {} : { 'Content-Type': 'application/json' }),
-      ...(token === null ? {} : { Authorization: `Bearer ${token}` }),
-      // Free-tier ngrok shows a "Visit Site" interstitial to any request with a
-      // real browser User-Agent — which the Telegram WebView always sends — and
-      // that page has no CORS headers, so fetch() fails before a response ever
-      // arrives. This header is ngrok's own opt-out; harmless off-tunnel.
-      'ngrok-skip-browser-warning': 'true',
-      ...headers
-    },
-    ...(body === undefined ? {} : { body: isForm ? body : JSON.stringify(body) })
-  });
+  try {
+    return await fetch(`${BASE_URL}${path}`, {
+      ...rest,
+      ...(signal ? { signal } : {}),
+      headers: {
+        ...(body === undefined || isForm ? {} : { 'Content-Type': 'application/json' }),
+        ...(token === null ? {} : { Authorization: `Bearer ${token}` }),
+        // Free-tier ngrok shows a "Visit Site" interstitial to any request with a
+        // real browser User-Agent — which the Telegram WebView always sends — and
+        // that page has no CORS headers, so fetch() fails before a response ever
+        // arrives. This header is ngrok's own opt-out; harmless off-tunnel.
+        'ngrok-skip-browser-warning': 'true',
+        ...headers
+      },
+      ...(body === undefined ? {} : { body: isForm ? body : JSON.stringify(body) })
+    });
+  } catch (error) {
+    // A caller-initiated abort (e.g. React Query cancelling) is not a failure to report.
+    if (callerSignal?.aborted) throw error;
+    if (timeoutSignal?.aborted) {
+      throw new ApiRequestError(0, 'timeout', 'The request took too long.');
+    }
+    if (
+      error instanceof TypeError ||
+      (error instanceof DOMException && error.name === 'AbortError')
+    ) {
+      throw new ApiRequestError(0, 'network', 'Could not reach the server.');
+    }
+    throw error;
+  }
 }
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -112,7 +159,9 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
       response.status,
       payload.error.code,
       payload.error.message,
-      payload.error.fields ?? {}
+      payload.error.fields ?? {},
+      payload.error.reason ?? null,
+      parseRetryAfter(response.headers.get('Retry-After'))
     );
   }
 
@@ -126,5 +175,7 @@ export const api = {
   // the server means a partial body is the contract, not a shortcut, so this
   // sends exactly what the caller builds — no merging happens here.
   patch: <T>(path: string, body: unknown) => request<T>(path, { method: 'PATCH', body }),
+  put: <T>(path: string, body: unknown) => request<T>(path, { method: 'PUT', body }),
+  delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
   upload: <T>(path: string, form: FormData) => request<T>(path, { method: 'POST', body: form })
 };

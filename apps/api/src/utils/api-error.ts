@@ -9,30 +9,36 @@ export class ApiError extends Error {
   readonly status: number;
   readonly code: ApiErrorCode;
   readonly fields: Record<string, string> | undefined;
+  readonly reason: string | undefined;
 
   constructor(
     status: number,
     code: ApiErrorCode,
     message: string,
-    fields?: Record<string, string>
+    fields?: Record<string, string>,
+    reason?: string
   ) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
     this.fields = fields;
+    this.reason = reason;
   }
 
   static badRequest(message: string, fields?: Record<string, string>): ApiError {
     return new ApiError(400, 'validation_failed', message, fields);
   }
 
-  static notFound(message = 'Not found'): ApiError {
-    return new ApiError(404, 'not_found', message);
+  static notFound(message = 'Not found', options?: { reason?: string }): ApiError {
+    return new ApiError(404, 'not_found', message, undefined, options?.reason);
   }
 
-  static conflict(message: string): ApiError {
-    return new ApiError(409, 'conflict', message);
+  static conflict(
+    message: string,
+    options?: { reason?: string; fields?: Record<string, string> }
+  ): ApiError {
+    return new ApiError(409, 'conflict', message, options?.fields, options?.reason);
   }
 
   static unauthorized(message = 'Not allowed'): ApiError {

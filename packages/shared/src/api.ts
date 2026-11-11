@@ -15,6 +15,8 @@ export interface ApiFailure {
     message: string;
     /** Field path -> message, for forms. */
     fields?: Record<string, string>;
+    /** Machine-readable sub-code; clients branch on it, never on `message`. */
+    reason?: string;
   };
 }
 
