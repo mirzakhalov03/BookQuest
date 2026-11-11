@@ -7,7 +7,7 @@ import { adminBroadcastRoutes } from './broadcast.routes.js';
 import { adminCoverRoutes } from './cover.routes.js';
 import { adminInteractionRoutes } from './interaction.routes.js';
 import { adminCertificateRoutes } from './certificate.routes.js';
-import { adminQuizRoutes } from './quiz.routes.js';
+import { adminQuizOpsRoutes, adminQuizRoutes } from './quiz.routes.js';
 
 export const adminRoutes: Router = Router();
 
@@ -23,3 +23,4 @@ adminRoutes.use('/covers', adminCoverRoutes);
 adminRoutes.use('/interactions', adminInteractionRoutes);
 adminRoutes.use('/certificates', adminCertificateRoutes);
 adminRoutes.use('/quizzes', adminQuizRoutes);
+adminRoutes.use('/quiz', adminQuizOpsRoutes);

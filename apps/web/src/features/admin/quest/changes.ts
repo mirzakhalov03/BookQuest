@@ -31,10 +31,7 @@ export function summarizeChanges(patch: UpdateQuestPayload | null): ChangeSummar
   tally('resources', resources ? 1 : 0);
   tally('prizes', Object.keys(patch.prizes ?? {}).length);
   tally('dates', QUEST_DATE_FIELDS.filter((field) => patch[field] !== undefined).length);
-  tally(
-    'quiz',
-    (['quizQuestionCount', 'quizDurationMinutes'] as const).filter((key) => patch[key] !== undefined).length
-  );
+  tally('quiz', patch.quizConfig !== undefined ? 1 : 0);
 
   return { count, sections };
 }
@@ -47,7 +44,6 @@ export function sectionsWithErrors(errors: FieldErrors<QuestFormState>): Readonl
   if (resources) sections.add('resources');
   if (errors.prizes) sections.add('prizes');
   if (errors.dates) sections.add('dates');
-  if (errors.quizQuestionCount || errors.quizDurationMinutes) sections.add('quiz');
   return sections;
 }
 

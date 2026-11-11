@@ -1,6 +1,9 @@
 import type { Request, Response } from 'express';
 import type { CreateQuizPayload, SaveQuizPayload } from '@bookquest/shared';
 import * as quizService from '../../services/quiz.services.js';
+import * as quizConfigService from '../../services/quiz-config.services.js';
+import * as questService from '../../services/quest.services.js';
+import type { GroupSizesQuery } from '../../validators/quiz.validators.js';
 import { currentUser } from '../../middlewares/auth.middleware.js';
 import { auditAdmin } from '../../utils/audit.js';
 import { ok } from '../../utils/respond.js';
@@ -44,4 +47,11 @@ export async function deleteQuiz(req: Request, res: Response): Promise<void> {
   await quizService.deleteQuiz(id);
   auditAdmin(req, 'delete-quiz', { quizId: id });
   ok(res, null);
+}
+
+/** GET /api/v1/admin/quiz/group-sizes — the live split the quest editor previews. */
+export async function groupSizes(req: Request, res: Response): Promise<void> {
+  const { distribution, groups } = req.query as unknown as GroupSizesQuery;
+  const quest = await questService.requireCurrentQuestDocument();
+  ok(res, { sizes: await quizConfigService.groupSizes(quest, distribution, groups) });
 }

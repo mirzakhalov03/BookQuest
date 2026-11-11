@@ -25,8 +25,6 @@ export interface QuestFormState {
     quizClosesAt: string;
     resultsAt: string;
   };
-  quizQuestionCount: string;
-  quizDurationMinutes: string;
 }
 
 /** Paths of all five dates, for re-validating them together. */
@@ -57,9 +55,7 @@ export function toFormState(quest: Quest): QuestFormState {
       quizOpensAt: toDateTimeLocalInput(quest.quizOpensAt),
       quizClosesAt: toDateTimeLocalInput(quest.quizClosesAt),
       resultsAt: toDateTimeLocalInput(quest.resultsAt)
-    },
-    quizQuestionCount: quest.quizQuestionCount === null ? '' : String(quest.quizQuestionCount),
-    quizDurationMinutes: quest.quizDurationMinutes === null ? '' : String(quest.quizDurationMinutes)
+    }
   };
 }
 
@@ -94,11 +90,6 @@ export function toResources(drafts: ResourceDraft[]): BookResource[] {
     url: resource.url.trim(),
     kind: resource.kind
   }));
-}
-
-/** Blank → `null` ("undecided"); anything else is already a validated whole number. */
-export function toOptionalCount(value: string): number | null {
-  return value.trim() === '' ? null : Number(value);
 }
 
 export function isValidResourceUrl(value: string): boolean {
@@ -155,14 +146,6 @@ export function buildQuestPatch(initial: Quest, form: QuestFormState): UpdateQue
     if (dates[field].getTime() !== Date.parse(initial[field])) {
       patch[field] = dates[field];
     }
-  }
-
-  const quizQuestionCount = toOptionalCount(form.quizQuestionCount);
-  if (quizQuestionCount !== initial.quizQuestionCount) patch.quizQuestionCount = quizQuestionCount;
-
-  const quizDurationMinutes = toOptionalCount(form.quizDurationMinutes);
-  if (quizDurationMinutes !== initial.quizDurationMinutes) {
-    patch.quizDurationMinutes = quizDurationMinutes;
   }
 
   return Object.keys(patch).length > 0 ? patch : null;

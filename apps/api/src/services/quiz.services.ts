@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import type { Types } from 'mongoose';
 import {
   QUIZ_TEXT_LIMITS,
   findQuizIssues,
@@ -11,17 +11,19 @@ import {
 } from '@bookquest/shared';
 import { QuizModel, type QuizRow } from '../models/quiz.model.js';
 import { QuizAttemptModel } from '../models/quiz-attempt.model.js';
-import { QuestModel } from '../models/quest.model.js';
+import { QuestModel, type QuestRow } from '../models/quest.model.js';
 import type { UserDocument } from '../models/user.model.js';
 import { ApiError } from '../utils/api-error.js';
+import { groupLabels } from '../utils/quiz-group.js';
 import { randomId } from '../utils/random.js';
 
 type Attachment = { questEdition: number; groupLabel: string };
 
-/** Quest fields Task 6 adds; read loosely until then. */
-type QuestQuizRef = { edition: number; quizConfig?: { distribution?: string; quizzes?: Types.ObjectId[] } };
-
-/** Filled by the quest service so this module never imports quests. */
+/* Filled by quiz-config.services so this module never imports quests. */
+export let beforeQuizSave: ((quizId: string, content: QuizContent) => Promise<void>) | null = null;
+export function setBeforeQuizSave(hook: (quizId: string, content: QuizContent) => Promise<void>): void {
+  beforeQuizSave = hook;
+}
 export let onQuizSaved: ((quizId: string) => Promise<void>) | null = null;
 export function setOnQuizSaved(hook: (quizId: string) => Promise<void>): void {
   onQuizSaved = hook;
@@ -32,35 +34,26 @@ const LOCKED_MESSAGE = 'Players have started this quiz, so it can no longer be c
 
 /* ── Attachment ─────────────────────────────────────────────────────────── */
 
-function groupLabel(distribution: string | undefined, index: number): string {
-  if (distribution === 'single') return 'Everyone';
-  if (distribution === 'parity') return index === 0 ? 'Odd numbers' : 'Even numbers';
-  return `Group ${index + 1}`;
+function attachmentIn(quest: QuestRow | null, quizId: Types.ObjectId | string): Attachment | null {
+  const config = quest?.quizConfig;
+  const index = config?.quizzes.findIndex((id) => String(id) === String(quizId)) ?? -1;
+  if (!quest || !config || index < 0) return null;
+  return { questEdition: quest.edition, groupLabel: groupLabels(config.distribution, config.quizzes.length)[index]! };
 }
 
-/* `quizConfig` isn't on the Quest schema yet, and the app-wide strictQuery would
-   silently drop the filter and match the current quest for every quiz. Loose
-   queries also skip casting, so ids must be ObjectIds here. */
-const LOOSE = { strictQuery: false } as const;
-
 async function findAttachment(quizId: Types.ObjectId | string): Promise<Attachment | null> {
-  const quest = await QuestModel.findOne({ isCurrent: true, 'quizConfig.quizzes': new Types.ObjectId(String(quizId)) })
-    .setOptions(LOOSE)
-    .lean<QuestQuizRef>();
-  const index = quest?.quizConfig?.quizzes?.findIndex((id) => String(id) === String(quizId)) ?? -1;
-  if (!quest || index < 0) return null;
-  return { questEdition: quest.edition, groupLabel: groupLabel(quest.quizConfig?.distribution, index) };
+  const quest = await QuestModel.findOne({ isCurrent: true, 'quizConfig.quizzes': quizId }).lean<QuestRow>();
+  return attachmentIn(quest, quizId);
 }
 
 /** Past editions that referenced each quiz, from one query; pass `quizId` to narrow it to one. */
 async function loadUsedInEditions(quizId?: Types.ObjectId | string): Promise<Map<string, number[]>> {
   const filter = quizId
-    ? { isCurrent: { $ne: true }, 'quizConfig.quizzes': new Types.ObjectId(String(quizId)) }
-    : { isCurrent: { $ne: true }, 'quizConfig.quizzes.0': { $exists: true } };
+    ? { isCurrent: { $ne: true }, 'quizConfig.quizzes': quizId }
+    : { isCurrent: { $ne: true }, quizConfig: { $ne: null } };
   const quests = await QuestModel.find(filter, { edition: 1, 'quizConfig.quizzes': 1 })
-    .setOptions(LOOSE)
     .sort({ edition: 1 })
-    .lean<QuestQuizRef[]>();
+    .lean<QuestRow[]>();
   const byQuiz = new Map<string, number[]>();
   for (const quest of quests) {
     for (const id of quest.quizConfig?.quizzes ?? []) {
@@ -81,7 +74,7 @@ export async function isQuizLocked(quizId: Types.ObjectId | string): Promise<boo
 /* ── Mapping ────────────────────────────────────────────────────────────── */
 
 /** Plain-typed content, which is what the shared helpers and the DTO both want. */
-function contentOf(quiz: QuizRow): QuizContent {
+export function contentOf(quiz: QuizRow): QuizContent {
   return {
     settings: {
       shuffleQuestions: quiz.settings.shuffleQuestions,
@@ -148,17 +141,13 @@ async function loadQuizOrThrow(id: string): Promise<QuizRow> {
 /* ── Library ────────────────────────────────────────────────────────────── */
 
 export async function listQuizzes(): Promise<QuizSummaryAdmin[]> {
-  const [quizzes, lockedIds, quests, usedIn] = await Promise.all([
+  const [quizzes, lockedIds, current, usedIn] = await Promise.all([
     QuizModel.find().sort({ updatedAt: -1 }).lean<QuizRow[]>(),
     QuizAttemptModel.distinct('quiz'),
-    QuestModel.findOne({ isCurrent: true }).setOptions(LOOSE).lean<QuestQuizRef>(),
+    QuestModel.findOne({ isCurrent: true }).lean<QuestRow>(),
     loadUsedInEditions()
   ]);
   const locked = new Set(lockedIds.map(String));
-  const attached = new Map<string, Attachment>();
-  quests?.quizConfig?.quizzes?.forEach((id, i) =>
-    attached.set(String(id), { questEdition: quests.edition, groupLabel: groupLabel(quests.quizConfig?.distribution, i) })
-  );
 
   return quizzes.map((quiz) => {
     const shape = quizShape(contentOf(quiz));
@@ -171,7 +160,7 @@ export async function listQuizzes(): Promise<QuizSummaryAdmin[]> {
       difficultyMix: shape.difficulty,
       isComplete: issues === null,
       issueCount: issues ? Object.keys(issues).length : 0,
-      attachment: attached.get(String(quiz._id)) ?? null,
+      attachment: attachmentIn(current, quiz._id),
       usedIn: usedIn.get(String(quiz._id)) ?? [],
       locked: locked.has(String(quiz._id)),
       revision: quiz.revision,
@@ -205,6 +194,8 @@ export async function saveQuiz(id: string, payload: SaveQuizPayload): Promise<Qu
   }
 
   const { revision, ...content } = payload;
+  // Before the write, so a save that breaks variant shape never lands.
+  if (beforeQuizSave) await beforeQuizSave(id, content);
   const updated = await QuizModel.findOneAndUpdate(
     { _id: id, revision },
     { $set: content, $inc: { revision: 1 } },
@@ -249,7 +240,9 @@ export async function deleteQuiz(id: string): Promise<void> {
     findUsedInEditions(id),
     isQuizLocked(id)
   ]);
-  if (attachment) throw ApiError.conflict('Detach this quiz from the quest before deleting it.');
+  if (attachment) {
+    throw ApiError.conflict('Detach this quiz from the quest before deleting it.', { reason: 'quiz_locked' });
+  }
   if (usedIn.length > 0) throw ApiError.conflict('This quiz was used in an earlier edition, so it is kept.', { reason: 'quiz_locked' });
   if (locked) throw ApiError.conflict(LOCKED_MESSAGE, { reason: 'quiz_locked' });
   await QuizModel.deleteOne({ _id: id });

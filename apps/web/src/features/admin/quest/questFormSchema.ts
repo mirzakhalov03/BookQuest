@@ -12,9 +12,6 @@ const required = (message: string, max: number, tooLong: string) =>
 const wholeNumber = (value: string, max: number) =>
   /^\d+$/.test(value.trim()) && Number(value) >= 1 && Number(value) <= max;
 
-const optionalWhole = (max: number, message: string) =>
-  z.string().refine((value) => value.trim() === '' || wholeNumber(value, max), message);
-
 const prize = z.string().refine((value) => value.trim().length <= 200, 'Keep it under 200 characters.');
 const date = z.string().refine((value) => parseLocal(value) !== null, 'Pick a date and time.');
 
@@ -47,9 +44,7 @@ export const questFormSchema = z
       quizOpensAt: date,
       quizClosesAt: date,
       resultsAt: date
-    }),
-    quizQuestionCount: optionalWhole(200, 'A whole number from 1 to 200, or blank.'),
-    quizDurationMinutes: optionalWhole(600, 'Whole minutes up to 600, or blank.')
+    })
   })
   .superRefine((values, ctx) => {
     // Ordering only means something once all five parse; "Pick a date" covers the rest.

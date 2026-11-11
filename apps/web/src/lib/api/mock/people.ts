@@ -154,7 +154,7 @@ export function buildRoster(questId: string, firstNumber: number): Participant[]
  * same list, not a separate one.
  */
 export function buildResults(takers: Participant[], quest: Quest, isFullBoard = true): QuestResults {
-  const total = quest.quizQuestionCount ?? 20;
+  const total = quest.quiz?.questionCount ?? 20;
 
   const entries = takers.map((participant, index) => ({
     number: participant.number,

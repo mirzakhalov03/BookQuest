@@ -12,7 +12,8 @@ import {
   QUIZ_TEXT_LIMITS,
   QUIZ_TIME_LIMIT_SEC,
   TRUE_FALSE_OPTION_IDS,
-  type QuestionDifficulty
+  type QuestionDifficulty,
+  type QuizDistribution
 } from '../constants/quiz.js';
 
 const objectIdString = z.string().regex(/^[a-f0-9]{24}$/i, 'Invalid id.');
@@ -103,6 +104,20 @@ export const quizCorrectionSchema = z.discriminatedUnion('kind', [
   })
 ]);
 export type QuizCorrectionPayload = z.infer<typeof quizCorrectionSchema>;
+
+/** How many quizzes (groups) each distribution takes. Position in `quizIds` is the group. */
+export const QUIZ_GROUP_COUNTS: Record<QuizDistribution, { min: number; max: number }> = {
+  single: { min: 1, max: 1 },
+  parity: { min: 2, max: 2 },
+  random: { min: 2, max: QUIZ_MAX_GROUPS }
+};
+
+/** Here, not in the API, so the quest editor labels unsaved groups the same way. */
+export function groupLabels(distribution: QuizDistribution, count: number): string[] {
+  if (distribution === 'single') return ['Everyone'];
+  if (distribution === 'parity') return ['Odd numbers', 'Even numbers'];
+  return Array.from({ length: count }, (_, i) => `Group ${i + 1}`);
+}
 
 export const quizConfigInputSchema = z.strictObject({
   distribution: z.enum(QUIZ_DISTRIBUTIONS),

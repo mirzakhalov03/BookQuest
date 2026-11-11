@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as adminQuizController from '../../controllers/admin/quiz.controllers.js';
 import { validate } from '../../middlewares/validate.middleware.js';
-import { createQuizBody, quizIdParams, saveQuizBody } from '../../validators/quiz.validators.js';
+import { createQuizBody, groupSizesQuery, quizIdParams, saveQuizBody } from '../../validators/quiz.validators.js';
 
 export const adminQuizRoutes: Router = Router();
 
@@ -11,3 +11,8 @@ adminQuizRoutes.get('/:id', validate(quizIdParams, 'params'), adminQuizControlle
 adminQuizRoutes.put('/:id', validate(quizIdParams, 'params'), validate(saveQuizBody), adminQuizController.saveQuiz);
 adminQuizRoutes.post('/:id/duplicate', validate(quizIdParams, 'params'), adminQuizController.duplicateQuiz);
 adminQuizRoutes.delete('/:id', validate(quizIdParams, 'params'), adminQuizController.deleteQuiz);
+
+/** Mounted at `/admin/quiz`: operations on the current quest's quiz, not the library. */
+export const adminQuizOpsRoutes: Router = Router();
+
+adminQuizOpsRoutes.get('/group-sizes', validate(groupSizesQuery, 'query'), adminQuizController.groupSizes);

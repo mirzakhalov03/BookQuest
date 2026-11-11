@@ -1,5 +1,5 @@
 import { Schema, model, type InferSchemaType, type HydratedDocument, type Types } from 'mongoose';
-import { BOOK_RESOURCE_KINDS } from '@bookquest/shared';
+import { BOOK_RESOURCE_KINDS, QUIZ_DISTRIBUTIONS } from '@bookquest/shared';
 
 /** Where to actually get the book. Admin-editable, ordered as entered. */
 const bookResourceSchema = new Schema(
@@ -33,6 +33,27 @@ const prizesSchema = new Schema(
   { _id: false }
 );
 
+/** One config per quest makes a full partition of participants the only thing expressible (§7.1). */
+const quizConfigSchema = new Schema(
+  {
+    distribution: { type: String, enum: QUIZ_DISTRIBUTIONS, required: true },
+    // Position = group: single [all], parity [odd, even], random [g1..gN].
+    quizzes: { type: [{ type: Schema.Types.ObjectId, ref: 'Quiz' }], required: true },
+    // random only; server-generated and never sent to any client.
+    seed: { type: String, default: null }
+  },
+  { _id: false }
+);
+
+/** Derived whenever the config or an attached quiz changes, so Home never loads a quiz. */
+const quizSummarySchema = new Schema(
+  {
+    questionCount: { type: Number, required: true },
+    totalSeconds: { type: Number, required: true }
+  },
+  { _id: false }
+);
+
 const questSchema = new Schema(
   {
     edition: { type: Number, required: true, unique: true },
@@ -49,9 +70,8 @@ const questSchema = new Schema(
     quizClosesAt: { type: Date, required: true },
     resultsAt: { type: Date, required: true },
 
-    /** Shown as "20 questions in 30 minutes" before the quiz exists. */
-    quizQuestionCount: { type: Number, default: null, min: 1 },
-    quizDurationMinutes: { type: Number, default: null, min: 1 },
+    quizConfig: { type: quizConfigSchema, default: null },
+    quizSummary: { type: quizSummarySchema, default: null },
 
     /** Denormalised so the Home screen never has to count a whole collection. */
     participantCount: { type: Number, default: 0, min: 0 },
@@ -72,6 +92,9 @@ questSchema.index(
 
 // The archive, newest first.
 questSchema.index({ year: -1 });
+
+// "Is this quiz attached anywhere?"
+questSchema.index({ 'quizConfig.quizzes': 1 });
 
 export type QuestAttributes = InferSchemaType<typeof questSchema>;
 export type QuestDocument = HydratedDocument<QuestAttributes>;

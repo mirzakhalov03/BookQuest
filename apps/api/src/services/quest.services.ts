@@ -1,4 +1,5 @@
 import type {
+  AdminQuest,
   CreateQuestPayload,
   CursorPage,
   Quest,
@@ -14,6 +15,8 @@ import { isDuplicateKeyError } from '../utils/mongo.js';
 import { withTransaction } from '../utils/transaction.js';
 import { coverIdFromUrl, discardCover, toPublicCoverUrl, toStoredCoverUrl } from './cover.services.js';
 import { participantsById } from './participant-lookup.services.js';
+import { buildQuizConfig, questHasAttempts } from './quiz-config.services.js';
+import { groupLabels } from '../utils/quiz-group.js';
 
 const ARCHIVE_PAGE_SIZE = 20;
 
@@ -24,6 +27,10 @@ export async function getCurrentQuest(): Promise<Quest> {
 /** Null rather than a throw, for callers where "between editions" is normal. */
 export async function findCurrentQuestDocument(): Promise<QuestDocument | null> {
   return QuestModel.findOne({ isCurrent: true });
+}
+
+export async function getAdminCurrentQuest(): Promise<AdminQuest> {
+  return toAdminQuestDto(await requireCurrentQuestDocument());
 }
 
 export async function requireCurrentQuestDocument(): Promise<QuestDocument> {
@@ -74,13 +81,16 @@ export async function listPastQuests(options: {
 export async function createQuest(payload: CreateQuestPayload): Promise<Quest> {
   const { makeCurrent, ...fields } = payload;
 
-  const issues = findQuestDateIssues({
-    opensAt: fields.opensAt,
-    readingDeadline: fields.readingDeadline,
-    quizOpensAt: fields.quizOpensAt,
-    quizClosesAt: fields.quizClosesAt,
-    resultsAt: fields.resultsAt
-  });
+  const issues = findQuestDateIssues(
+    {
+      opensAt: fields.opensAt,
+      readingDeadline: fields.readingDeadline,
+      quizOpensAt: fields.quizOpensAt,
+      quizClosesAt: fields.quizClosesAt,
+      resultsAt: fields.resultsAt
+    },
+    { requireResultsBuffer: true }
+  );
   if (issues) throw badDates(issues);
 
   if (makeCurrent) {
@@ -115,19 +125,25 @@ export async function createQuest(payload: CreateQuestPayload): Promise<Quest> {
   }
 }
 
-export async function updateQuest(questId: string, payload: UpdateQuestPayload): Promise<Quest> {
+export async function updateQuest(questId: string, payload: UpdateQuestPayload): Promise<AdminQuest> {
   const quest = await QuestModel.findById(questId);
   if (!quest) throw ApiError.notFound('No such quest.');
 
+  if (await questHasAttempts(quest._id)) assertLockedChangesAllowed(quest, payload);
+
   /* Ordering is checked against the merged result, not the payload: a partial
      edit is only valid in the context of the dates it does not touch. */
-  const issues = findQuestDateIssues({
-    opensAt: payload.opensAt ?? quest.opensAt,
-    readingDeadline: payload.readingDeadline ?? quest.readingDeadline,
-    quizOpensAt: payload.quizOpensAt ?? quest.quizOpensAt,
-    quizClosesAt: payload.quizClosesAt ?? quest.quizClosesAt,
-    resultsAt: payload.resultsAt ?? quest.resultsAt
-  });
+  const issues = findQuestDateIssues(
+    {
+      opensAt: payload.opensAt ?? quest.opensAt,
+      readingDeadline: payload.readingDeadline ?? quest.readingDeadline,
+      quizOpensAt: payload.quizOpensAt ?? quest.quizOpensAt,
+      quizClosesAt: payload.quizClosesAt ?? quest.quizClosesAt,
+      resultsAt: payload.resultsAt ?? quest.resultsAt
+    },
+    // Only when this edit moves those dates, so older live quests stay editable (§13.6).
+    { requireResultsBuffer: 'quizClosesAt' in payload || 'resultsAt' in payload }
+  );
   if (issues) throw badDates(issues);
 
   const book =
@@ -156,8 +172,11 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
   for (const [key, value] of Object.entries(payload.prizes ?? {})) {
     update[`prizes.${key}`] = value;
   }
-  if ('quizQuestionCount' in payload) update.quizQuestionCount = payload.quizQuestionCount;
-  if ('quizDurationMinutes' in payload) update.quizDurationMinutes = payload.quizDurationMinutes;
+  if ('quizConfig' in payload) {
+    const { quizConfig, quizSummary } = await buildQuizConfig(quest, payload.quizConfig ?? null);
+    update.quizConfig = quizConfig;
+    update.quizSummary = quizSummary;
+  }
 
   const updated = await QuestModel.findByIdAndUpdate(
     questId,
@@ -167,7 +186,22 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
 
   if (!updated) throw ApiError.notFound('No such quest.');
   if (replacedCoverId) await discardCover(replacedCoverId);
-  return toQuestDto(updated);
+  return toAdminQuestDto(updated);
+}
+
+/** Once anyone has started, the setup and opening are frozen and the window may only grow (§13.6). */
+function assertLockedChangesAllowed(quest: QuestDocument, payload: UpdateQuestPayload): void {
+  const locked = (field: string, message: string) =>
+    ApiError.conflict(message, { reason: 'quiz_locked', fields: { [field]: message } });
+  const frozen = 'Participants have started — the quiz setup can no longer change.';
+
+  if ('quizConfig' in payload) throw locked('quizConfig', frozen);
+  if (payload.quizOpensAt && payload.quizOpensAt.getTime() !== quest.quizOpensAt.getTime()) {
+    throw locked('quizOpensAt', frozen);
+  }
+  if (payload.quizClosesAt && payload.quizClosesAt < quest.quizClosesAt) {
+    throw locked('quizClosesAt', 'The quiz can only be extended once people have started.');
+  }
 }
 
 /**
@@ -210,9 +244,25 @@ export function toQuestDto(quest: QuestDocument): Quest {
     quizOpensAt: quest.quizOpensAt.toISOString(),
     quizClosesAt: quest.quizClosesAt.toISOString(),
     resultsAt: quest.resultsAt.toISOString(),
-    quizQuestionCount: quest.quizQuestionCount ?? null,
-    quizDurationMinutes: quest.quizDurationMinutes ?? null,
+    quiz: quest.quizSummary
+      ? { questionCount: quest.quizSummary.questionCount, totalSeconds: quest.quizSummary.totalSeconds }
+      : null,
     participantCount: quest.participantCount
+  };
+}
+
+/** Admin-only: the editor needs the setup, which public `/quests/current` must never carry. */
+export function toAdminQuestDto(quest: QuestDocument): AdminQuest {
+  const config = quest.quizConfig;
+  return {
+    ...toQuestDto(quest),
+    quizConfig: config
+      ? {
+          distribution: config.distribution,
+          quizIds: config.quizzes.map(String),
+          groupLabels: groupLabels(config.distribution, config.quizzes.length)
+        }
+      : null
   };
 }
 

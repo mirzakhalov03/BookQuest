@@ -18,6 +18,7 @@ export const adminKeys = {
   quizzes: () => [...adminKeys.all, 'quizzes'] as const,
   quiz: (id: string) => [...adminKeys.all, 'quizzes', id] as const,
   latestQuest: () => [...adminKeys.all, 'latestQuest'] as const,
+  currentQuest: () => [...adminKeys.all, 'currentQuest'] as const,
   broadcasts: () => [...adminKeys.all, 'broadcasts'] as const,
   certificateDelivery: () => [...adminKeys.all, 'certificateDelivery'] as const,
   interactions: (params: object) => [...adminKeys.all, 'interactions', 'list', params] as const,

@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { BookOpen, CalendarDays, CircleHelp, Link2, Trophy } from 'lucide-react';
+import { BookOpen, CalendarDays, Link2, Trophy } from 'lucide-react';
 import type { DateInputs } from '../../dates';
 import { sectionsWithErrors, type ChangeSummary, type EditorSectionId } from '../changes';
 import type { QuestFormState } from '../questForm';
@@ -9,7 +9,6 @@ import { BookFieldsSection } from './BookFieldsSection';
 import { ResourceListEditor } from './ResourceListEditor';
 import { PrizeFieldsSection } from './PrizeFieldsSection';
 import { DateTimelineField } from './DateTimelineField';
-import { QuizMetaFieldsSection } from './QuizMetaFieldsSection';
 
 interface QuestFormFieldsProps {
   changes: ChangeSummary;
@@ -61,8 +60,7 @@ export const QuestFormFields = memo(function QuestFormFields({
     ),
     tab('resources', 'Resources', Link2, <ResourceListEditor />),
     tab('prizes', 'Prizes', Trophy, <PrizeFieldsSection />),
-    tab('dates', 'Dates', CalendarDays, <DateTimelineField savedDates={savedDates} />),
-    tab('quiz', 'Quiz', CircleHelp, <QuizMetaFieldsSection />)
+    tab('dates', 'Dates', CalendarDays, <DateTimelineField savedDates={savedDates} />)
   ];
 
   return <SectionTabs tabs={tabs} active={active} onChange={setActive} />;

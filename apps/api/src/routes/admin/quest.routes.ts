@@ -9,6 +9,7 @@ import {
 
 export const adminQuestRoutes: Router = Router();
 
+adminQuestRoutes.get('/current', adminQuestController.getCurrentQuest);
 adminQuestRoutes.post('/', validate(createQuestBody), adminQuestController.createQuest);
 
 adminQuestRoutes.patch(

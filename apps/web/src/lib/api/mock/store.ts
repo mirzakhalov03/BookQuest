@@ -1,5 +1,5 @@
 import { PARTICIPANT_NUMBER_MIN } from '@bookquest/shared';
-import type { Participant, QuizAdmin, Quest, QuestPhase, Role, SessionUser } from '@bookquest/shared';
+import type { AdminQuest, Participant, QuizAdmin, Quest, QuestPhase, Role, SessionUser } from '@bookquest/shared';
 import { CURRENT_QUEST, PAST_EDITIONS, SESSION_USER, type PastEdition } from './fixtures';
 import { buildRoster } from './people';
 import { addMockMessage } from './interactions';
@@ -34,6 +34,8 @@ export interface MockState {
   certificatesSent?: boolean;
   /** The admin quiz library; seeded on first read (see `quiz.ts`). */
   quizzes?: QuizAdmin[];
+  /** The current quest's quiz setup (admin-only). Optional: older saved state lacks it. */
+  quizConfig?: AdminQuest['quizConfig'];
 }
 
 const DAY = 24 * 60 * 60 * 1000;

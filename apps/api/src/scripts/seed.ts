@@ -34,8 +34,6 @@ const QUEST = {
   quizOpensAt: new Date('2026-10-11T13:00:00Z'),
   quizClosesAt: new Date('2026-10-11T15:00:00Z'),
   resultsAt: new Date('2026-10-12T07:00:00Z'),
-  quizQuestionCount: 20,
-  quizDurationMinutes: 30,
   isCurrent: true
 };
 

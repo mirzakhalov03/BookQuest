@@ -5,6 +5,11 @@ import * as resultService from '../../services/result.services.js';
 import { auditAdmin } from '../../utils/audit.js';
 import { ok } from '../../utils/respond.js';
 
+/** GET /api/v1/admin/quests/current — with the quiz setup the public DTO leaves out. */
+export async function getCurrentQuest(_req: Request, res: Response): Promise<void> {
+  ok(res, await questService.getAdminCurrentQuest());
+}
+
 /** POST /api/v1/admin/quests */
 export async function createQuest(req: Request, res: Response): Promise<void> {
   const payload = req.body as CreateQuestPayload;

@@ -1,6 +1,6 @@
 import type { CreateQuestPayload, Quest } from '@bookquest/shared';
 import { defaultDates, plusOneYear } from '../dates';
-import { formDates, toFormState, toOptionalCount, toResources, trimmedOrNull, type QuestFormState } from './questForm';
+import { formDates, toFormState, toResources, trimmedOrNull, type QuestFormState } from './questForm';
 
 export interface EditionDraft {
   edition: number;
@@ -17,9 +17,10 @@ const EMPTY_BOOK: QuestFormState['book'] = {
 };
 
 /**
- * Prizes, quiz settings and the schedule carry over (a year later); the book
- * is new every year, so it starts blank. A source old enough that "a year
- * later" is still past falls back to a fresh schedule.
+ * Prizes and the schedule carry over (a year later); the book is new every
+ * year, so it starts blank, and so does the quiz setup (quizzes are
+ * book-specific). A source old enough that "a year later" is still past falls
+ * back to a fresh schedule.
  */
 export function nextEditionDraft(source: Quest | null, now: Date): EditionDraft {
   if (!source) {
@@ -28,9 +29,7 @@ export function nextEditionDraft(source: Quest | null, now: Date): EditionDraft 
       values: {
         book: EMPTY_BOOK,
         prizes: { first: '', second: '', third: '' },
-        dates: defaultDates(now),
-        quizQuestionCount: '',
-        quizDurationMinutes: ''
+        dates: defaultDates(now)
       }
     };
   }
@@ -75,8 +74,6 @@ export function buildCreatePayload(edition: number, values: QuestFormState): Cre
       third: trimmedOrNull(values.prizes.third)
     },
     ...dates,
-    quizQuestionCount: toOptionalCount(values.quizQuestionCount),
-    quizDurationMinutes: toOptionalCount(values.quizDurationMinutes),
     makeCurrent: true
   };
 }

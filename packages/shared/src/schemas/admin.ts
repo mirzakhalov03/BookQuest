@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { QuestPhase } from '../constants/quest.js';
-import { bookResourceSchema } from './quest.js';
+import { QUIZ_DISTRIBUTIONS } from '../constants/quiz.js';
+import { bookResourceSchema, questSchema } from './quest.js';
+import { quizConfigInputSchema } from './quiz.js';
 
 /**
  * Admin-editable content. `edition`, `year` and `participantCount` are absent
@@ -31,17 +33,12 @@ const questDateFields = {
   resultsAt: z.coerce.date()
 };
 
-const quizMetaFields = {
-  quizQuestionCount: z.number().int().positive().max(200).nullable(),
-  quizDurationMinutes: z.number().int().positive().max(600).nullable()
-};
-
 export const updateQuestSchema = z
   .strictObject({
     book: z.strictObject(bookFields).partial().optional(),
     prizes: z.strictObject(prizeFields).partial().optional(),
     ...questDateFields,
-    ...quizMetaFields
+    quizConfig: quizConfigInputSchema.nullable()
   })
   .partial()
   .refine((value) => Object.keys(value).length > 0, {
@@ -61,13 +58,24 @@ export const createQuestSchema = z.strictObject({
   }),
   prizes: z.strictObject(prizeFields).partial().optional(),
   ...questDateFields,
-  quizQuestionCount: quizMetaFields.quizQuestionCount.default(null),
-  quizDurationMinutes: quizMetaFields.quizDurationMinutes.default(null),
   /** Swap the current edition in the same transaction, so "created but not live" can't happen. */
   makeCurrent: z.boolean().default(false)
 });
 
 export type CreateQuestPayload = z.infer<typeof createQuestSchema>;
+
+/** The quest as the admin editor reads it: the public DTO plus the quiz setup, never the seed. */
+export const adminQuestSchema = questSchema.extend({
+  quizConfig: z
+    .object({
+      distribution: z.enum(QUIZ_DISTRIBUTIONS),
+      quizIds: z.array(z.string()),
+      groupLabels: z.array(z.string())
+    })
+    .nullable()
+});
+
+export type AdminQuest = z.infer<typeof adminQuestSchema>;
 
 /** What the admin dashboard reads. */
 export interface AdminStats {

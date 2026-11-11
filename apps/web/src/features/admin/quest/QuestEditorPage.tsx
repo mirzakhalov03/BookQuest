@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { Quest, UpdateQuestPayload } from '@bookquest/shared';
-import { useCurrentQuest } from '@/lib/api/quest';
+import type { AdminQuest, UpdateQuestPayload } from '@bookquest/shared';
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
@@ -11,6 +10,7 @@ import { ApiRequestError } from '@/lib/api/client';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 import { useUiStore } from '@/stores/ui.store';
+import { useAdminCurrentQuest } from '../api/useAdminCurrentQuest';
 import { useUpdateQuest } from '../api/useUpdateQuest';
 import { AdminQuery } from '../components/AdminQuery';
 import { AdminPageHeader } from '../components/AdminPageHeader';
@@ -30,7 +30,7 @@ export const QUEST_FORM_ID = 'quest-form';
 
 /** `/admin/quest` — the current quest's book, resources, prizes, dates and quiz settings. */
 export function QuestEditorPage() {
-  const quest = useCurrentQuest();
+  const quest = useAdminCurrentQuest();
 
   return (
     <AdminQuery
@@ -51,7 +51,7 @@ export function QuestEditorPage() {
   );
 }
 
-function QuestEditorForm({ quest }: { quest: Quest }) {
+function QuestEditorForm({ quest }: { quest: AdminQuest }) {
   const form = useForm<QuestFormState>({
     resolver: zodResolver(questFormSchema),
     defaultValues: toFormState(quest),

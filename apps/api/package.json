@@ -12,6 +12,8 @@
     "seed": "tsx --env-file-if-exists=../../.env src/scripts/seed.ts",
     "seed:results": "tsx --env-file-if-exists=../../.env src/scripts/seed-results.ts",
     "migrate:audit": "tsx --env-file-if-exists=../../.env src/scripts/migrate-audit-fixes.ts",
+    "migrate:quiz": "tsx --env-file-if-exists=../../.env src/scripts/migrate-quiz.ts",
+    "seed:quiz": "tsx --env-file-if-exists=../../.env src/scripts/seed-quiz.ts",
     "reclassify:interactions": "tsx --env-file-if-exists=../../.env src/scripts/reclassify-interactions.ts",
     "clean": "rm -rf dist .turbo"
   },

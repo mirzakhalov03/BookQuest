@@ -6,12 +6,14 @@ import {
   createQuestSchema,
   createQuizSchema,
   findQuestDateIssues,
+  groupLabels,
   registerParticipantSchema,
   saveQuizSchema,
   updateProfileSchema,
   updateQuestSchema
 } from '@bookquest/shared';
 import type {
+  AdminQuest,
   AdminStats,
   ApiErrorCode,
   ApiResponse,
@@ -25,7 +27,8 @@ import type {
   QuestDates,
   QuestSummary,
   Session,
-  SessionUser
+  SessionUser,
+  UpdateQuestPayload
 } from '@bookquest/shared';
 import { objectId, questSummary } from './fixtures';
 import { listMockInteractions, mockInteractionFacets } from './interactions';
@@ -420,17 +423,14 @@ function updateQuest(context: Context): Result {
   if (!parsed.success) throw validationError(parsed.error.issues);
 
   const patch = parsed.data;
+  const isCurrent = target.id === state.quest.id;
+  const config = patch.quizConfig === undefined || !isCurrent ? undefined : mockQuizConfig(patch.quizConfig);
   const merged: Quest = {
     ...target,
     book: { ...target.book, ...defined(patch.book) },
     prizes: { ...target.prizes, ...defined(patch.prizes) },
     ...isoDates(patch),
-    ...(patch.quizQuestionCount === undefined
-      ? {}
-      : { quizQuestionCount: patch.quizQuestionCount }),
-    ...(patch.quizDurationMinutes === undefined
-      ? {}
-      : { quizDurationMinutes: patch.quizDurationMinutes })
+    ...(config === undefined ? {} : { quiz: config.quiz })
   };
 
   // Ordering is checked against the merged result, not the patch — half an
@@ -446,6 +446,7 @@ function updateQuest(context: Context): Result {
   }
 
   updateState((draft) => {
+    if (config !== undefined) draft.quizConfig = config.quizConfig;
     if (draft.quest.id === merged.id) draft.quest = merged;
     else {
       draft.archive = draft.archive.map((entry) =>
@@ -454,8 +455,27 @@ function updateQuest(context: Context): Result {
     }
   });
 
-  return ok(readQuest(merged, countFor(getState(), merged)));
+  return ok(toAdminQuest(readQuest(merged, countFor(getState(), merged))));
 }
+
+/** Stores the setup without the API's readiness and shape rules; the summary follows the first quiz. */
+function mockQuizConfig(input: UpdateQuestPayload['quizConfig']): {
+  quizConfig: AdminQuest['quizConfig'];
+  quiz: Quest['quiz'];
+} {
+  if (!input) return { quizConfig: null, quiz: null };
+  const first = quizzes.listQuizzes().find((quiz) => quiz.id === input.quizIds[0]);
+  if (!first) throw new MockError(400, 'validation_failed', 'One of those quizzes no longer exists.', { quizConfig: 'One of those quizzes no longer exists.' });
+  return {
+    quizConfig: { ...input, groupLabels: groupLabels(input.distribution, input.quizIds.length) },
+    quiz: { questionCount: first.questionCount, totalSeconds: first.totalSeconds }
+  };
+}
+
+const toAdminQuest = (quest: Quest): AdminQuest => ({
+  ...quest,
+  quizConfig: quest.id === getState().quest.id ? (getState().quizConfig ?? null) : null
+});
 
 function createQuest(context: Context): Result {
   requireAdmin(context);
@@ -480,8 +500,7 @@ function createQuest(context: Context): Result {
     quizOpensAt: input.quizOpensAt.toISOString(),
     quizClosesAt: input.quizClosesAt.toISOString(),
     resultsAt: input.resultsAt.toISOString(),
-    quizQuestionCount: input.quizQuestionCount,
-    quizDurationMinutes: input.quizDurationMinutes,
+    quiz: null,
     participantCount: 0
   };
 
@@ -526,6 +545,8 @@ function switchCurrent(target: Quest): void {
     draft.participants = draft.participants.filter((entry) => entry.questId === target.id);
     draft.myParticipantId = null;
     draft.questRunning = true;
+    // Quizzes are book-specific; a new edition starts unconfigured.
+    draft.quizConfig = null;
   });
 }
 
@@ -681,6 +702,14 @@ const routes: Route[] = [
     method: 'POST',
     path: '/admin/quizzes/:id/duplicate',
     handle: (c) => quizCall(c, () => quizzes.duplicateQuiz(quizId(c)), 201)
+  },
+  {
+    method: 'GET',
+    path: '/admin/quests/current',
+    handle: (c) => {
+      requireAdmin(c);
+      return ok(toAdminQuest(requireCurrentQuest()));
+    }
   },
   { method: 'POST', path: '/admin/quests', handle: createQuest },
   { method: 'PATCH', path: '/admin/quests/:id', handle: updateQuest }

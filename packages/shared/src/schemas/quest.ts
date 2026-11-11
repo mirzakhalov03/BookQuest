@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { BOOK_RESOURCE_KINDS, QUEST_PHASES } from '../constants/quest.js';
+import { QUIZ_RESULTS_BUFFER_MS } from '../constants/quiz.js';
 
 // `.url()` alone admits javascript: and data: links, which participants would tap. A regex because shared has no URL global in its types.
 const isHttpUrl = (value: string): boolean => /^https?:\/\//i.test(value);
@@ -52,12 +53,21 @@ export const questSchema = z.object({
   quizOpensAt: z.string(),
   quizClosesAt: z.string(),
   resultsAt: z.string(),
-  quizQuestionCount: z.number().int().positive().nullable(),
-  quizDurationMinutes: z.number().int().positive().nullable(),
+  /** Derived from the attached quiz; null until one is attached. */
+  quiz: z
+    .object({
+      questionCount: z.number().int().nonnegative(),
+      totalSeconds: z.number().int().nonnegative()
+    })
+    .nullable(),
   participantCount: z.number().int().nonnegative()
 });
 
 export type Quest = z.infer<typeof questSchema>;
+
+export function isResultsOut(quest: { resultsAt: string }, now = new Date()): boolean {
+  return now >= new Date(quest.resultsAt);
+}
 
 /** The archive list. Enough to render a card, nothing more. */
 export const questSummarySchema = z.object({
@@ -88,12 +98,17 @@ export type QuestDates = Record<QuestDateField, Date>;
 
 /**
  * `opensAt < readingDeadline <= quizOpensAt < quizClosesAt <= resultsAt`.
+ * `requireResultsBuffer` also demands `resultsAt >= quizClosesAt + QUIZ_RESULTS_BUFFER_MS`;
+ * it's opt-in so quests saved before the rule can still be edited elsewhere (§13.6).
  *
  * A partial admin edit only makes sense against the *merged* result, so this is
  * a plain function the service calls after merging rather than a zod refinement
  * on the request body. The form runs the same function for instant feedback.
  */
-export function findQuestDateIssues(dates: QuestDates): Record<string, string> | null {
+export function findQuestDateIssues(
+  dates: QuestDates,
+  options: { requireResultsBuffer?: boolean } = {}
+): Record<string, string> | null {
   const issues: Record<string, string> = {};
   const add = (field: QuestDateField, message: string) => {
     issues[field] ??= message;
@@ -110,6 +125,12 @@ export function findQuestDateIssues(dates: QuestDates): Record<string, string> |
   }
   if (dates.resultsAt < dates.quizClosesAt) {
     add('resultsAt', 'Results cannot be published before the quiz closes.');
+  }
+  if (
+    options.requireResultsBuffer &&
+    dates.resultsAt.getTime() < dates.quizClosesAt.getTime() + QUIZ_RESULTS_BUFFER_MS
+  ) {
+    add('resultsAt', 'Results must be at least 5 minutes after the quiz closes.');
   }
 
   return Object.keys(issues).length > 0 ? issues : null;

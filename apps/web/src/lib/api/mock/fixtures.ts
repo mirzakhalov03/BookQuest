@@ -69,8 +69,7 @@ export const CURRENT_QUEST: Quest = {
   quizOpensAt: '2026-10-11T13:00:00.000Z',
   quizClosesAt: '2026-10-11T15:00:00.000Z',
   resultsAt: '2026-10-12T07:00:00.000Z',
-  quizQuestionCount: 20,
-  quizDurationMinutes: 30,
+  quiz: { questionCount: 20, totalSeconds: 600 },
   participantCount: 0
 };
 

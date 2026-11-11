@@ -4,7 +4,7 @@ import type { ApiRequestError } from '@/lib/api/client';
 import type { QuestFormState } from './questForm';
 
 const DATE_KEYS = new Set<string>(QUEST_DATE_FIELDS);
-const FORM_ROOTS = new Set(['book', 'prizes', 'dates', 'quizQuestionCount', 'quizDurationMinutes']);
+const FORM_ROOTS = new Set(['book', 'prizes', 'dates']);
 
 /** The API keys dates at the top level; the form nests them under `dates`. */
 export function toFormPath(serverKey: string): string {

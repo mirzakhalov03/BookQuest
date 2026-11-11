@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CreateQuizPayload, QuizAdmin, QuizSummaryAdmin, SaveQuizPayload } from '@bookquest/shared';
 import { api } from '@/lib/api/client';
+import { questKeys } from '@/lib/api/quest';
 import { adminKeys } from './adminKeys';
 
 export function useQuizzes() {
@@ -39,6 +40,11 @@ export function useSaveQuiz(id: string) {
     onSuccess: (quiz) => {
       queryClient.setQueryData(adminKeys.quiz(id), quiz);
       void refresh();
+      // An attached quiz's save recomputes the quest's quiz summary server-side.
+      if (quiz.attachment) {
+        void queryClient.invalidateQueries({ queryKey: questKeys.current() });
+        void queryClient.invalidateQueries({ queryKey: adminKeys.currentQuest() });
+      }
     }
   });
 }

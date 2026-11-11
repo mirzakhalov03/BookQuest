@@ -45,7 +45,7 @@ export function QuestAction({ quest }: QuestActionProps) {
         <Act>
           {/* `/quiz` is a countdown placeholder until the quiz is built (plan Phase 6). */}
           <PrimaryButton onClick={() => go('/quiz')}>Enter the quiz</PrimaryButton>
-          <p className="act__sub">{quizSubline(quest.quizQuestionCount)}</p>
+          <p className="act__sub">{quizSubline(quest.quiz)}</p>
         </Act>
       );
     }
@@ -83,12 +83,11 @@ export function QuestAction({ quest }: QuestActionProps) {
   );
 }
 
-function quizSubline(questionCount: number | null): string {
-  // `quizQuestionCount` is nullable — an admin can leave the quiz
-  // unconfigured this far from a live edition.
-  return questionCount === null
-    ? 'Speed counts as much as accuracy.'
-    : `${formatCount(questionCount)} questions. Speed counts as much as accuracy.`;
+function quizSubline(quiz: Quest['quiz']): string {
+  // Null until an admin attaches a quiz.
+  if (!quiz) return 'Speed counts as much as accuracy.';
+  const minutes = Math.max(1, Math.round(quiz.totalSeconds / 60));
+  return `${formatCount(quiz.questionCount)} questions · about ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
 }
 
 function Act({ children }: { children: ReactNode }) {
