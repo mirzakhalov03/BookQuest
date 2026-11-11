@@ -1,0 +1,23 @@
+apps/api/src/scripts/quiz-drill.ts
+  s_9c243050d10f30::t_ff81e3a874427e 411-426,429-430,504
+apps/api/src/services/quiz-attempt.services.ts
+  s_9c243050d10f30::t_5e60420602a65a 29,249,257-261,269-271,395,401,456,481-518,536,538,541-555
+apps/api/src/services/quiz.services.ts
+  s_9c243050d10f30::t_e27c88e718c537 8,254-258,260-262,264,266-276,278,281-295,297-301
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "53051bfb726b7fe01720f05017ec71a893c1dcff",
+  "prompts": {},
+  "sessions": {
+    "s_9c243050d10f30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "52c21a19-4dca-4d71-a046-ac31f18a1a0c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
