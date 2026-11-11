@@ -3,8 +3,6 @@ import {
   QUIZ_ANSWER_GRACE_MS,
   TRUE_FALSE_OPTION_IDS,
   effectiveTimeLimitSec,
-  findQuizIssues,
-  quizShape,
   type AttemptQuestion,
   type AttemptState,
   type Participant,
@@ -28,7 +26,7 @@ import { shuffle } from '../utils/random.js';
 import { withTransaction } from '../utils/transaction.js';
 import { findParticipantForUser } from './participant.services.js';
 import { findCurrentQuestDocument } from './quest.services.js';
-import { contentOf, loadQuizForAttempt } from './quiz.services.js';
+import { loadQuizForAttempt } from './quiz.services.js';
 import {
   IS_DATE,
   IS_NULL,
@@ -248,6 +246,7 @@ export async function finalizeOpenAttempts(
 
   let finalized = 0;
   let failed = 0;
+  let unsettled = 0;
   const open = QuizAttemptModel.find({ quest: quest._id, status: 'in_progress' })
     .lean<AttemptRow[]>()
     .cursor({ batchSize: SWEEP_BATCH });
@@ -255,6 +254,11 @@ export async function finalizeOpenAttempts(
     try {
       const settled = await settleAttempt(attempt, quest, now, by);
       if (settled.status === 'completed') finalized += 1;
+      else if (settled.status === 'in_progress') {
+        // Settle ran out of passes: still open, so neither finalised nor safe to rank around.
+        unsettled += 1;
+        logger.warn({ attemptId: String(attempt._id), cursor: settled.cursor, by }, 'quiz attempt still open after settle');
+      }
     } catch (error) {
       // One bad attempt must not stall the rest of the sweep.
       failed += 1;
@@ -262,7 +266,9 @@ export async function finalizeOpenAttempts(
     }
   }
   // Ranking an incomplete field would freeze wrong ranks; fail so the next read retries.
-  if (failed > 0 && by === 'ranking') throw new Error(`${failed} quiz attempt(s) could not be finalised before ranking`);
+  if (failed + unsettled > 0 && by === 'ranking') {
+    throw new Error(`${failed + unsettled} quiz attempt(s) could not be finalised before ranking`);
+  }
   return finalized;
 }
 
@@ -386,13 +392,13 @@ async function overviewQuiz(
   if (!attempt && !config) return null;
 
   const quizId = attempt?.quiz ?? config!.quizzes[groupOf(config!, participant)]!;
-  const quiz = await loadQuizForAttempt(String(quizId));
+  const { quiz, shape: quizWide } = await loadQuizForAttempt(String(quizId));
   const shape = attempt
     ? {
         questionCount: attempt.items.length,
         totalSeconds: Math.round(attempt.items.reduce((sum, item) => sum + item.timeLimitMs, 0) / 1000)
       }
-    : quizShape(contentOf(quiz));
+    : quizWide;
   return {
     title: quiz.title,
     description: quiz.description ?? null,
@@ -447,7 +453,7 @@ function snapshotOptions(question: QuizQuestion, shuffleOptions: boolean): QuizO
   return shuffleOptions ? shuffle(question.options) : question.options;
 }
 
-/** Takes `contentOf(quiz)`, a fresh copy, so the shared cached quiz is never mutated. */
+/** Reads the shared cached content: items may alias its option arrays, so nothing downstream may mutate them. */
 function buildItems({ settings, questions }: QuizContent, voidedQuestionIds: readonly string[]) {
   return (settings.shuffleQuestions ? shuffle(questions) : questions).map((question) => ({
     questionId: question.id,
@@ -472,6 +478,44 @@ function buildItems({ settings, questions }: QuizContent, voidedQuestionIds: rea
   }));
 }
 
+type AttemptStart = Pick<AttemptRow, 'quest' | 'participant' | 'user' | 'quiz' | 'quizRevision' | 'group' | 'startedAt'> & {
+  items: ReturnType<typeof buildItems>;
+};
+
+/* Every schema field, in schema order with its default, so a raw insert stores
+   exactly what `create()` would (checked byte for byte), without hydrating ~20
+   subdocuments per start: most of the start burst's CPU (§15). Items derive from
+   a quiz the schema and `findQuizIssues` already validated. */
+function attemptDocument(start: AttemptStart, now: Date): AttemptRow {
+  return {
+    quest: start.quest,
+    participant: start.participant,
+    user: start.user,
+    quiz: start.quiz,
+    quizRevision: start.quizRevision,
+    group: start.group,
+    status: 'in_progress',
+    cursor: 0,
+    items: start.items,
+    startedAt: start.startedAt,
+    completedAt: null,
+    finalizedBy: null,
+    score: null,
+    total: null,
+    durationMs: null,
+    resultWrittenAt: null,
+    clientIds: [],
+    flags: [],
+    voidReason: null,
+    voidedBy: null,
+    voidedAt: null,
+    _id: new Types.ObjectId(),
+    createdAt: now,
+    updatedAt: now,
+    __v: 0
+  } as unknown as AttemptRow;
+}
+
 async function stateOfExisting(existing: AttemptRow, quest: QuestDocument, now: Date): Promise<AttemptState> {
   if (existing.status === 'completed') throw ApiError.conflict(MSG.completed, { reason: 'already_completed' });
   if (existing.status === 'voided') throw ApiError.conflict(MSG.voided, { reason: 'voided' });
@@ -489,23 +533,26 @@ export async function startAttempt(user: UserDocument): Promise<{ state: Attempt
   if (existing) return { state: await stateOfExisting(existing, quest, now), created: false };
 
   const group = groupOf(config, participant);
-  const quiz = await loadQuizForAttempt(String(config.quizzes[group]));
+  const { quiz, content, valid } = await loadQuizForAttempt(String(config.quizzes[group]));
   // Config validation keeps attached quizzes complete; this guards the invariant, not a user path.
-  const content = contentOf(quiz);
-  if (findQuizIssues(content)) throw ApiError.conflict(MSG.notConfigured, { reason: 'not_configured' });
+  if (!valid) throw ApiError.conflict(MSG.notConfigured, { reason: 'not_configured' });
 
   try {
-    const created = await QuizAttemptModel.create({
-      quest: quest._id,
-      participant: participant.id,
-      user: user._id,
-      quiz: quiz._id,
-      quizRevision: quiz.revision,
-      group,
-      startedAt: now,
-      items: buildItems(content, quiz.voidedQuestionIds)
-    });
-    return { state: toAttemptState(created.toObject() as AttemptRow, quest, now), created: true };
+    const created = attemptDocument(
+      {
+        quest: quest._id,
+        participant: new Types.ObjectId(participant.id),
+        user: user._id,
+        quiz: quiz._id,
+        quizRevision: quiz.revision,
+        group,
+        startedAt: now,
+        items: buildItems(content, quiz.voidedQuestionIds)
+      },
+      now
+    );
+    await QuizAttemptModel.collection.insertOne(created);
+    return { state: toAttemptState(created, quest, now), created: true };
   } catch (error) {
     // Two taps or two tabs: the unique index picked a winner; return theirs.
     if (!isDuplicateKeyError(error)) throw error;

@@ -408,8 +408,26 @@ async function assertRun(takers: Taker[], logs: TakerLog[], burst: Awaited<Retur
 
 /* ── --close ────────────────────────────────────────────────────────────── */
 
+/** --close sweeps and ranks quest-wide, which would freeze ranks onto real Results that cleanup can't undo. */
+async function assertQuestIsDrillOnly(quest: QuestDocument): Promise<void> {
+  const drillUsers = await UserModel.find({ username: DRILL_USERNAME }).distinct('_id');
+  const drillParticipants = await ParticipantModel.find({ quest: quest._id, user: { $in: drillUsers } }).distinct('_id');
+  const outside = { quest: quest._id, participant: { $nin: drillParticipants } };
+  const [results, open] = await Promise.all([
+    ResultModel.countDocuments(outside),
+    QuizAttemptModel.countDocuments({ ...outside, status: 'in_progress' })
+  ]);
+  if (results > 0 || open > 0) {
+    throw new Error(
+      `--close refuses: the current quest has ${results} non-drill Result(s) and ${open} non-drill in-progress attempt(s); sweeping and ranking would permanently change them. Use a quest with drill data only.`
+    );
+  }
+}
+
 async function closeAndRank(takers: Taker[]): Promise<void> {
   const quest = await requireCurrentQuest();
+  // Again here: real data may have arrived while the takers ran.
+  await assertQuestIsDrillOnly(quest);
   const ids = takers.map((t) => t.participantId);
   const openBefore = await QuizAttemptModel.countDocuments({ quest: quest._id, status: 'in_progress' });
   await QuestModel.updateOne({ _id: quest._id }, { $set: { quizClosesAt: new Date(Date.now() - 3_000) } });
@@ -483,6 +501,7 @@ async function drill(): Promise<void> {
   let quest = await requireCurrentQuest();
   ensureQuizAttached(quest);
   quest = await requireCurrentQuest();
+  if (args.close) await assertQuestIsDrillOnly(quest);
   await openWindow(quest);
 
   const runTag = `run-${Date.now()}`;

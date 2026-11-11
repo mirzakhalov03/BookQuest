@@ -5,6 +5,7 @@ import {
   quizShape,
   type CreateQuizPayload,
   type QuizContent,
+  type QuizShape,
   type QuizAdmin,
   type QuizSummaryAdmin,
   type SaveQuizPayload
@@ -250,23 +251,52 @@ export async function deleteQuiz(id: string): Promise<void> {
 
 /* ── Attempt-time loader ────────────────────────────────────────────────── */
 
-const quizCache = new Map<string, QuizRow>();
+type QuizHead = Pick<QuizRow, 'revision' | 'voidedQuestionIds'>;
+
+/** A quiz plus everything derived from it, computed once per revision. Shared: never mutate. */
+export type AttemptQuiz = { quiz: QuizRow; content: QuizContent; valid: boolean; shape: QuizShape };
+
 const CACHE_MAX = 16;
+// Promises, so a start burst shares one read and one derivation per key (§15).
+const quizCache = new Map<string, Promise<AttemptQuiz>>();
+const headReads = new Map<string, Promise<QuizHead | null>>();
 
-/** Keyed by revision and void count, so a save or correction invalidates it by itself. */
-export async function loadQuizForAttempt(quizId: string): Promise<QuizRow> {
-  const head = await QuizModel.findById(quizId, { revision: 1, voidedQuestionIds: 1 }).lean<
-    Pick<QuizRow, 'revision' | 'voidedQuestionIds'>
-  >();
-  if (!head) throw ApiError.notFound('Quiz not found.');
+const cacheKey = (quizId: string, head: QuizHead) => `${quizId}:${head.revision}:${head.voidedQuestionIds.length}`;
 
-  const key = `${quizId}:${head.revision}:${head.voidedQuestionIds.length}`;
-  const hit = quizCache.get(key);
-  if (hit) return hit;
+/** Concurrent callers join one in-flight read; nothing is kept, so the next call reads afresh. */
+function readHead(quizId: string): Promise<QuizHead | null> {
+  const inFlight = headReads.get(quizId);
+  if (inFlight) return inFlight;
+  const read = QuizModel.findById(quizId, { revision: 1, voidedQuestionIds: 1 })
+    .lean<QuizHead>()
+    .exec()
+    .finally(() => headReads.delete(quizId));
+  headReads.set(quizId, read);
+  return read;
+}
 
+async function buildAttemptQuiz(quizId: string, key: string): Promise<AttemptQuiz> {
   const quiz = await QuizModel.findById(quizId).lean<QuizRow>();
   if (!quiz) throw ApiError.notFound('Quiz not found.');
+  // Saved between the head read and this one: serve it, but don't file it under the older key.
+  if (cacheKey(quizId, quiz) !== key) quizCache.delete(key);
+  const content = contentOf(quiz);
+  return { quiz, content, valid: findQuizIssues(content) === null, shape: quizShape(content) };
+}
+
+/** Keyed by revision and void count, read per call, so a save or correction in any process invalidates it. */
+export async function loadQuizForAttempt(quizId: string): Promise<AttemptQuiz> {
+  const head = await readHead(quizId);
+  if (!head) throw ApiError.notFound('Quiz not found.');
+
+  const key = cacheKey(quizId, head);
+  const cached = quizCache.get(key);
+  if (cached) return cached;
+
   if (quizCache.size >= CACHE_MAX) quizCache.delete(quizCache.keys().next().value!);
-  quizCache.set(key, quiz);
-  return quiz;
+  const build = buildAttemptQuiz(quizId, key);
+  quizCache.set(key, build);
+  // A failed read must not be served to everyone after it.
+  build.catch(() => quizCache.delete(key));
+  return build;
 }
