@@ -24,7 +24,7 @@ export async function sendTelegramMessage(telegramUserId: string, text: string):
 
     return await outcomeOf(response, telegramUserId);
   } catch (error) {
-    logger.warn({ telegramUserId, error }, 'Telegram send failed (network error)');
+    logger.warn({ telegramUserId, err: error }, 'Telegram send failed (network error)');
     return { status: 'failed' };
   }
 }
@@ -55,7 +55,7 @@ export async function sendTelegramPhoto(
     });
     return await outcomeOf(response, telegramUserId);
   } catch (error) {
-    logger.warn({ telegramUserId, error }, 'Telegram photo send failed (network error)');
+    logger.warn({ telegramUserId, err: error }, 'Telegram photo send failed (network error)');
     return { status: 'failed' };
   }
 }
