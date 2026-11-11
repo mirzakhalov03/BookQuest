@@ -39,7 +39,7 @@ Verified in that run, rather than assumed:
 |---|---|---|
 | TBD-1 | Read-only web | Registration is a Telegram-only action, which is how the contest is actually run. The widget stays available later with no contract change. |
 | TBD-2 | Registration closes at `readingDeadline` | The prototype's own copy promises it. |
-| TBD-3 | Certificate as JSON, rendered client-side | A headless browser in the API for a once-a-year artifact is not proportionate. |
+| TBD-3 | Certificate rendered server-side as a PNG (satori + resvg) | Revised 2026-11: the bot must send a file and Telegram webviews can't print; satori needs no headless browser. See the certificates spec. |
 | TBD-4 | `book.resources` public | The rest of the quest is public; gating one field would be the odd rule out. |
 | TBD-5 | **Cap kept at 1000** (`3000–3999`) | Zero code change, and it keeps the four-digit number the design is built around. **The prototype's mock `readers: 1204` is now the thing that is wrong** — see below. |
 | TBD-6 | Cover image as a URL field | No storage decision needed yet. |

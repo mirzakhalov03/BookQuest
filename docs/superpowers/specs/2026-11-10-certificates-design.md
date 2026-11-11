@@ -376,6 +376,43 @@ Steps 1–8 don't depend on the design.
 
 ---
 
+## Implementation notes (2026-11-11)
+
+Built per `docs/superpowers/plans/2026-11-11-certificates.md`. Where the build differs from the sections
+above, this list wins:
+
+- **`PUBLIC_API_URL`, not a new `API_PUBLIC_URL`.** It already existed for cover URLs, and `imageUrl` uses it.
+- **`WEB_APP_URL` is enforced when sending, not at boot** (§7). Requiring it at boot would break local dev.
+  Sending returns `409` without it, production logs a warning, and dev falls back to `http://localhost:5173`.
+- **The verify route returns the same `CertificateData`** as `/me`. Nothing in it is private. The
+  "same response time on a miss" idea (§4) was dropped: the status code already says whether a code exists.
+- **Previews are public sample images** at `GET /certificates/preview/:sample.png`, not an admin route
+  (§4, §6). An `<img>` can't send the admin token. The samples have fixed names and a `SAMPLE` stamp, so
+  they can't be used to forge a certificate.
+- **A failed DM is retried by pressing Send again** (§5). `failed` leaves the row pending; `blocked` and
+  `no_telegram` don't, since retrying them is pointless.
+- **Notification idempotency** uses `Result.certificateNotifiedAt`, claimed before the insert. A crash in
+  that gap loses one notification instead of doubling it; the person still has the certificate on `/me`.
+  A crash right after a successful Telegram send re-sends that photo on resume, which affects at most the
+  rows in flight. Both were reproduced by killing the server mid-send: 1 of 240 notifications lost,
+  2 photos duplicated, none missed.
+- **Download filenames use the code** (`BookQuest-2026-BQ4-K7M2QX.png`), not the name, because pino-http
+  logs response headers and names never go in logs.
+- **`Cross-Origin-Resource-Policy: cross-origin`** on the PNG routes. Helmet's `same-origin` default would
+  stop the web app, on another origin, from showing them (covers already did the same).
+- **Rendering is off the event loop and one at a time.** The sync resvg render blocked the event loop
+  ~350 ms per certificate: during a 200-certificate send, `/health` reached 790 ms. `renderAsync` moves
+  rasterising to the libuv pool, and a cap of one concurrent render stops satori and the PNG encode
+  (~60 ms) stacking up. `/health` then averages 21 ms during a send (max 142 ms), at about 5
+  certificates/s, so 1,000 finishers take roughly 3.5 minutes.
+- **Satori defaults to `box-sizing: content-box`.** The template sets `border-box` on its root, or padding
+  and border push the footer off the canvas. Whoever converts the real design (§8) needs to know this.
+- **Fonts:** Archivo (`latin`, `latin-ext`) and Noto Sans (`cyrillic`) from `@fontsource`, as `.woff`.
+  Cyrillic names render correctly through the fallback.
+- **The QR code was checked by decoding the rendered PNG** (jsQR); it resolves to `verifyUrl`.
+- **Seeded finishers use numbers from 3700,** because participant numbers are capped at 3999. They stay
+  clear of real registrations, which count up from 3000.
+
 ## Open questions
 
 | # | Question | Default if unanswered |

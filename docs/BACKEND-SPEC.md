@@ -243,11 +243,14 @@ Per-quest keys, so each edition restarts at 3000.
 | `durationMs` | Number, required | Tiebreaker: speed counts as much as accuracy |
 | `rank` | Number, default null | Computed once at publication, then frozen |
 | `certificateCode` | String, **unique**, sparse | Short public verification code |
+| `certificateSentAt` | Date, default null | Certificate delivery finished for this row (delivered, blocked, or no Telegram). Null = the next send picks it up |
+| `certificateSendError` | `'blocked' \| 'failed' \| 'no_telegram'`, default null | Why it wasn't delivered; `failed` stays pending for a retry |
+| `certificateNotifiedAt` | Date, default null | Claimed before the in-app notification is written, so a resumed send never notifies twice |
 | `submittedAt` | Date, required | |
 
 **Indexes:** `{ quest: 1, participant: 1 }` unique · `{ quest: 1, score: -1, durationMs: 1 }`
 (the leaderboard sort, served entirely from the index) · `{ certificateCode: 1 }` unique **partial**
-on `{ certificateCode: { $type: 'string' } }`.
+on `{ certificateCode: { $type: 'string' } }` · `{ quest: 1, certificateSentAt: 1 }` (certificate delivery's "what's left").
 
 > **Corrected during implementation:** this was specified as `sparse`, which is wrong here. A sparse
 > index skips documents where the field is *absent*, but an unpublished result stores an explicit
@@ -646,16 +649,33 @@ interface ResultEntry {                                     // ⬜ new
   durationMs: number;               // tiebreaker — speed counts
 }
 
-interface CertificateData {                                 // ⬜ new
-  code: string;                     // short public verification code
+interface CertificateData {                                 // ✅
+  code: string;                     // short public verification code, e.g. "BQ4-K7M2QX"
   fullName: string;
   participantNumber: number;
   questEdition: number;
   questYear: number;
   bookTitle: string;
   bookAuthor: string;
-  rank: number | null;              // null = completion certificate, not a placing
+  placing: 1 | 2 | 3 | null;        // podium only; null = completion. Full ranks stay on the leaderboard
+  tier: 'gold' | 'silver' | 'bronze' | 'participant';
+  finishedCount: number;            // how many finished, for "among 412 readers"
   issuedAt: string;
+  imageUrl: string;                 // absolute: GET /certificates/:code/image.png
+  verifyUrl: string;                // absolute: {WEB_APP_URL}/verify/:code (the QR code)
+}
+
+interface CertificateDelivery {                             // ✅ admin only
+  status: 'idle' | 'sending' | 'sent' | 'interrupted';
+  total: number;                    // finishers on the current quest
+  delivered: number;                // photo delivered in Telegram
+  inAppOnly: number;                // no Telegram linked: notification + /me only
+  blocked: number;
+  failed: number;                   // Telegram error; the next "send" retries these
+  pending: number;                  // not processed yet (includes failed)
+  pendingReachable: number;         // of pending, how many can be DMed
+  startedAt: string | null;
+  completedAt: string | null;
 }
 ```
 
@@ -848,7 +868,7 @@ forbidden. The frontend shows "Results are published on 22 September".
 
 ---
 
-#### `GET /api/v1/participants/me/certificate` ⬜
+#### `GET /api/v1/participants/me/certificate` ✅
 
 The data a certificate is rendered from. Everyone who completed the quiz gets one.
 
@@ -858,9 +878,48 @@ The data a certificate is rendered from. Everyone who completed the quiz gets on
 
 **Errors:** `401 unauthorized`, `404 not_found` (did not complete the quiz, or results not published).
 
-> **TBD-3 — resolved for now: client-rendered.** Only this JSON endpoint exists. Server-side
-> rendering would put a headless browser in the API for a once-a-year artifact; if it is ever wanted,
-> it is an additional URL, not a change to this one.
+> **TBD-3 — resolved: server-rendered PNG** (`docs/superpowers/specs/2026-11-10-certificates-design.md`).
+> The API renders each certificate with satori + resvg, with no headless browser, because the bot has to
+> send a file and Telegram's webviews can't print. This JSON endpoint is unchanged in purpose; the image
+> is the `imageUrl` it returns.
+
+#### `GET /api/v1/certificates/:code` ✅
+
+Public verification, for any edition (a 2025 certificate still verifies in 2027). Holding the code is
+the permission. The code is normalised first, so `bq4 k7m2qx` works.
+
+**Auth:** none. Rate-limited to 30/min per IP across the `/certificates` routes.
+
+**`200`** → `{ "ok": true, "data": { /* CertificateData */ } }`. Never score, duration, full rank or contact.
+
+**Errors:** `404 not_found`, `429 rate_limited`.
+
+#### `GET /api/v1/certificates/:code/image.png` ✅
+
+The certificate as a 2246 × 1588 PNG (A4 landscape at 2×). `?download=1` switches `Content-Disposition`
+to `attachment`. The filename uses the code, not the name, because response headers are logged.
+`ETag` + `If-None-Match` → `304`. `Cross-Origin-Resource-Policy: cross-origin`, so the web app can embed it.
+
+**Auth:** none. Same rate limit.
+
+#### `GET /api/v1/certificates/preview/:sample.png` ✅
+
+Fixed sample certificates stamped `SAMPLE` (`gold`, `silver`, `bronze`, `participant`, `long`,
+`cyrillic`), for the admin panel. Public because an `<img>` can't send a token, and harmless because
+the data is fixed: there is no name parameter, so it can't be used to forge one.
+
+#### `POST /api/v1/admin/certificates/send` ✅
+
+Starts sending every finisher of the current quest their certificate: an in-app notification for
+everyone, plus a Telegram photo for each person the bot can DM. Answers `202` with `CertificateDelivery`
+and keeps going in the background. Resumable: a second press only picks up what's left (including
+`failed`), so nobody is notified twice.
+
+**Errors:** `409 conflict` (results not published, a send already running, or `WEB_APP_URL` unset).
+
+#### `GET /api/v1/admin/certificates/delivery` ✅
+
+`CertificateDelivery` for the current quest. The panel polls it every 2 s while `status` is `sending`.
 
 ---
 
