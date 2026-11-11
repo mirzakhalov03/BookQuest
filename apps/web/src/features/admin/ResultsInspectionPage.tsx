@@ -7,6 +7,7 @@ import { formatLongDate } from '@/lib/format';
 import { useAdminResultsInspection } from './api/useAdminResultsInspection';
 import { AdminQuery } from './components/AdminQuery';
 import { AdminPageHeader } from './components/AdminPageHeader';
+import { CertificatesPanel } from './certificates/CertificatesPanel';
 
 /**
  * `/admin/results` — read-only, and the same public `GET /quests/current/results`
@@ -46,6 +47,8 @@ export function ResultsInspectionPage() {
                   ))}
                 </ol>
               </section>
+              {/* Only with finishers: with nobody on the board there is nothing to send. */}
+              <CertificatesPanel />
             </>
           )}
         </AdminScreen>

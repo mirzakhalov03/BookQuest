@@ -6,6 +6,13 @@ import { useUiStore } from '@/stores/ui.store';
 
 const ORDINAL = { 1: '1st', 2: '2nd', 3: '3rd' } as const;
 
+/** `?download=1` asks the API for an attachment; set through URL so an existing query survives. */
+function withDownloadFlag(imageUrl: string): string {
+  const url = new URL(imageUrl);
+  url.searchParams.set('download', '1');
+  return url.href;
+}
+
 /**
  * The certificate is the PNG the API renders (spec §3), the same file the bot
  * sent. One design in one place, the satori template; nothing here styles it.
@@ -13,7 +20,7 @@ const ORDINAL = { 1: '1st', 2: '2nd', 3: '3rd' } as const;
 export function Certificate({ data }: { data: CertificateData }) {
   const showToast = useUiStore((state) => state.showToast);
   const inTelegram = isInsideTelegram();
-  const downloadUrl = `${data.imageUrl}?download=1`;
+  const downloadUrl = withDownloadFlag(data.imageUrl);
   const fileName = `BookQuest-${data.questYear}-${data.code}.png`;
 
   function download() {
