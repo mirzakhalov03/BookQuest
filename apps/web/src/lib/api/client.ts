@@ -60,7 +60,7 @@ export function isNotFound(error: unknown): error is ApiRequestError {
   return error instanceof ApiRequestError && error.status === 404 && error.code === 'not_found';
 }
 
-interface RequestOptions extends Omit<RequestInit, 'body'> {
+export interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown;
   /** Aborts the request and throws `ApiRequestError(0, 'timeout')`. */
   timeoutMs?: number;
@@ -95,10 +95,10 @@ function parseRetryAfter(header: string | null): number | null {
 async function send(
   path: string,
   options: RequestOptions,
-  token: string | null
+  token: string | null,
+  timeoutSignal: AbortSignal | null
 ): Promise<Response> {
-  const { body, headers, timeoutMs, signal: callerSignal, ...rest } = options;
-  const timeoutSignal = timeoutMs === undefined ? null : AbortSignal.timeout(timeoutMs);
+  const { body, headers, timeoutMs: _timeoutMs, signal: callerSignal, ...rest } = options;
   const signals = [callerSignal, timeoutSignal].filter((s): s is AbortSignal => s != null);
   const signal = signals.length > 1 ? AbortSignal.any(signals) : signals[0];
   // The browser must write the multipart boundary itself, so FormData gets no Content-Type from us.
@@ -137,7 +137,10 @@ async function send(
 }
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  let response = await send(path, options, readToken());
+  // One deadline for the whole request, body read included.
+  const timeoutSignal =
+    options.timeoutMs === undefined ? null : AbortSignal.timeout(options.timeoutMs);
+  let response = await send(path, options, readToken(), timeoutSignal);
 
   // A 401 means the stored token is dead, whatever it looked like. Drop it and
   // try the sign-in exchange exactly once, then replay. Never a loop: a second
@@ -146,12 +149,16 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   if (response.status === 401 && path !== LOGIN_PATH) {
     clearToken();
     const token = reauthenticate === null ? null : await reauthenticate();
-    if (token !== null) response = await send(path, options, token);
+    if (token !== null) response = await send(path, options, token, timeoutSignal);
   }
 
   const payload = (await response.json().catch(() => null)) as ApiResponse<T> | null;
 
   if (!payload) {
+    // A deadline hit mid-body is a retryable timeout, not a broken server.
+    if (timeoutSignal?.aborted) {
+      throw new ApiRequestError(0, 'timeout', 'The request took too long.');
+    }
     throw new ApiRequestError(response.status, 'internal_error', 'The server sent no answer.');
   }
   if (!payload.ok) {
@@ -168,14 +175,22 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   return payload.data;
 }
 
+type CallOptions = Pick<RequestOptions, 'timeoutMs' | 'signal'>;
+
 export const api = {
-  get: <T>(path: string, init?: Pick<RequestInit, 'cache'>) => request<T>(path, init),
-  post: <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body }),
+  get: <T>(path: string, options?: CallOptions & Pick<RequestOptions, 'cache'>) =>
+    request<T>(path, options),
+  post: <T>(path: string, body: unknown, options?: CallOptions) =>
+    request<T>(path, { ...options, method: 'POST', body }),
   // The admin quest editor is the first caller: `strictObject().partial()` on
   // the server means a partial body is the contract, not a shortcut, so this
   // sends exactly what the caller builds — no merging happens here.
-  patch: <T>(path: string, body: unknown) => request<T>(path, { method: 'PATCH', body }),
-  put: <T>(path: string, body: unknown) => request<T>(path, { method: 'PUT', body }),
-  delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
-  upload: <T>(path: string, form: FormData) => request<T>(path, { method: 'POST', body: form })
+  patch: <T>(path: string, body: unknown, options?: CallOptions) =>
+    request<T>(path, { ...options, method: 'PATCH', body }),
+  put: <T>(path: string, body: unknown, options?: CallOptions) =>
+    request<T>(path, { ...options, method: 'PUT', body }),
+  delete: <T>(path: string, options?: CallOptions) =>
+    request<T>(path, { ...options, method: 'DELETE' }),
+  upload: <T>(path: string, form: FormData, options?: CallOptions) =>
+    request<T>(path, { ...options, method: 'POST', body: form })
 };
