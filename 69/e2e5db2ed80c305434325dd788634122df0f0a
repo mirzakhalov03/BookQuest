@@ -1,0 +1,49 @@
+apps/web/src/features/admin/api/adminKeys.ts
+  s_9c243050d10f30::t_ec21af86f24a6a 20-21
+apps/web/src/features/admin/api/useQuizGroupSizes.ts
+  s_9c243050d10f30::t_5edaab46acca6c 1-15
+apps/web/src/features/admin/quest/QuestEditorPage.tsx
+  s_9c243050d10f30::t_9024b6fe1a909f 14,65-66,77-79,91-96,131,164
+apps/web/src/features/admin/quest/changes.ts
+  s_9c243050d10f30::t_2950b2865f03d7 47
+apps/web/src/features/admin/quest/components/QuestFormFields.tsx
+  s_9c243050d10f30::t_4f2cd9a07b95c6 3-4,13,20-21,28-29,68-78
+apps/web/src/features/admin/quest/components/QuizConfigSection.tsx
+  s_9c243050d10f30::t_ea023741faaff7 1-180
+apps/web/src/features/admin/quest/components/QuizReadinessList.tsx
+  s_9c243050d10f30::t_e93577d3553fad 1-45
+apps/web/src/features/admin/quest/nextEdition.ts
+  s_9c243050d10f30::t_aaa29e0a0ef3af 32-33,52
+apps/web/src/features/admin/quest/questForm.ts
+  s_9c243050d10f30::t_da528d01d61356 2,4,29,39-40,61-62,116-118,123,158-162
+apps/web/src/features/admin/quest/questFormSchema.ts
+  s_9c243050d10f30::t_119801f1623466 2,16-29,61-62
+apps/web/src/features/admin/quest/quizConfig.ts
+  s_9c243050d10f30::t_bfd988347c65cc 1-40
+apps/web/src/features/admin/quest/quizReadiness.ts
+  s_9c243050d10f30::t_6795267527f3e8 1-103
+apps/web/src/features/admin/quest/review.ts
+  s_9c243050d10f30::t_284d4dfcd09636 1,4-5,16,18,21-25,38-44
+apps/web/src/features/admin/quest/serverErrors.ts
+  s_9c243050d10f30::t_52df6d99dcbce5 7
+apps/web/src/features/admin/quest/useQuestChanges.ts
+  s_9c243050d10f30::t_722a79607ecd24 3,7,16
+apps/web/src/lib/api/mock/routes.ts
+  s_9c243050d10f30::t_db42a3a5829249 438-441,464-476,730
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "69e2e5db2ed80c305434325dd788634122df0f0a",
+  "prompts": {},
+  "sessions": {
+    "s_9c243050d10f30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "52c21a19-4dca-4d71-a046-ac31f18a1a0c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
