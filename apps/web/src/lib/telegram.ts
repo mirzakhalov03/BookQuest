@@ -35,6 +35,8 @@ interface TelegramWebApp {
   disableVerticalSwipes?: () => void;
   openLink?: (url: string) => void;
   openTelegramLink?: (url: string) => void;
+  /** Bot API 8.0+. Older clients don't have it, so callers fall back to openLink. */
+  downloadFile?: (params: { url: string; file_name: string }, callback?: (accepted: boolean) => void) => void;
   /** Deliberately unused: the primary action belongs to the stage composition (spec §9). Don't wire it up. */
   MainButton?: unknown;
   BackButton?: TelegramBackButton;
@@ -162,6 +164,21 @@ export function openTelegramLink(url: string): boolean {
 
   try {
     open(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Telegram's own download sheet; `false` means the caller should fall back (older client, or the plain web). */
+export function downloadFile(url: string, fileName: string): boolean {
+  if (!isInsideTelegram()) return false;
+
+  const download = getTelegramWebApp()?.downloadFile;
+  if (!download) return false;
+
+  try {
+    download({ url, file_name: fileName });
     return true;
   } catch {
     return false;

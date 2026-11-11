@@ -1,5 +1,6 @@
 import {
   COVER_MESSAGES,
+  normalizeCertificateCode,
   PARTICIPANT_NUMBER_MAX,
   createBroadcastSchema,
   createQuestSchema,
@@ -288,7 +289,53 @@ function myCertificate(context: Context): Result {
     throw new MockError(404, 'not_found', 'There is no completed quiz to certify yet.');
   }
 
-  return ok(buildCertificate(user.participant, quest, entry.rank));
+  return ok(buildCertificate(user.participant, quest, entry.rank, leaderboard.length));
+}
+
+/** Public, like the API: holding the code is the permission. */
+function certificateByCode(context: Context): Result {
+  const quest = requireCurrentQuest();
+  requirePublishedResults(quest);
+  const code = normalizeCertificateCode(context.params.code ?? '');
+  const { leaderboard } = buildResults(quizTakers(getState()), quest);
+  for (const entry of leaderboard) {
+    const participant = getState().participants.find((row) => row.number === entry.number);
+    if (!participant) continue;
+    const data = buildCertificate(participant, quest, entry.rank, leaderboard.length);
+    if (data.code === code) return ok(data);
+  }
+  throw new MockError(404, 'not_found', 'We couldn’t find a certificate with this code.');
+}
+
+/** A delivery that finishes instantly: about four in five finishers "have Telegram". */
+function certificateDelivery(context: Context): Result {
+  requireAdmin(context);
+  const total = quizTakers(getState()).length;
+  const reachable = Math.round(total * 0.8);
+  const sent = getState().certificatesSent === true;
+  const at = sent ? getState().quest.resultsAt : null;
+  return ok({
+    status: sent ? 'sent' : 'idle',
+    total,
+    delivered: sent ? reachable : 0,
+    inAppOnly: sent ? total - reachable : 0,
+    blocked: 0,
+    failed: 0,
+    pending: sent ? 0 : total,
+    pendingReachable: sent ? 0 : reachable,
+    startedAt: at,
+    completedAt: at
+  });
+}
+
+function sendCertificates(context: Context): Result {
+  requireAdmin(context);
+  requirePublishedResults(requireCurrentQuest());
+  if (getState().certificatesSent) throw new MockError(409, 'conflict', 'Certificates are already being sent.');
+  updateState((draft) => {
+    draft.certificatesSent = true;
+  });
+  return certificateDelivery(context);
 }
 
 function participantByNumber(context: Context): Result {
@@ -564,6 +611,10 @@ const routes: Route[] = [
   { method: 'GET', path: '/participants/me', handle: myParticipant },
   { method: 'GET', path: '/participants/me/certificate', handle: myCertificate },
   { method: 'GET', path: '/participants/:number', handle: participantByNumber },
+
+  { method: 'GET', path: '/certificates/:code', handle: certificateByCode },
+  { method: 'GET', path: '/admin/certificates/delivery', handle: certificateDelivery },
+  { method: 'POST', path: '/admin/certificates/send', handle: sendCertificates },
 
   { method: 'GET', path: '/admin/participants', handle: adminParticipants },
   {

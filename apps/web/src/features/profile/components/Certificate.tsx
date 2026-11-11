@@ -1,60 +1,80 @@
+import { Download, Share2 } from 'lucide-react';
 import type { CertificateData } from '@bookquest/shared';
-import { Rule } from '@/components/ui/Rule';
 import { Button } from '@/components/ui/Button';
-import { formatLongDate, formatOrdinal, formatOrdinalEdition } from '@/lib/format';
+import { downloadFile, isInsideTelegram, openExternalLink } from '@/lib/telegram';
+import { useUiStore } from '@/stores/ui.store';
+
+const ORDINAL = { 1: '1st', 2: '2nd', 3: '3rd' } as const;
 
 /**
- * Rendered straight from `CertificateData` — the same tokens, wide-Archivo
- * display type and gold rules as the rest of the product (plan Phase 5), not
- * a second design language for one document. Its visual design is
- * frontend-owned and static (spec §11): everything that could change between
- * two certificates already arrived as data.
- *
- * `rank: null` is a completion certificate, not a placing, and the copy below
- * is written so neither reads as the lesser of the two (spec, contract) —
- * both are simply what happened.
- *
- * Saving it is `window.print()` plus `.certificate-print` in `results.css`
- * (TBD-3: client-rendered, no new dependency) — the button below is the only
- * "download" this has, and the browser's own print-to-PDF is the file.
+ * The certificate is the PNG the API renders (spec §3), the same file the bot
+ * sent. One design in one place, the satori template; nothing here styles it.
  */
 export function Certificate({ data }: { data: CertificateData }) {
+  const showToast = useUiStore((state) => state.showToast);
+  const inTelegram = isInsideTelegram();
+  const downloadUrl = `${data.imageUrl}?download=1`;
+  const fileName = `BookQuest-${data.questYear}-${data.code}.png`;
+
+  function download() {
+    // Older Telegram clients lack downloadFile; the system viewer can still save an opened image.
+    if (!downloadFile(downloadUrl, fileName)) openExternalLink(data.imageUrl);
+  }
+
+  async function share() {
+    try {
+      const blob = await (await fetch(data.imageUrl)).blob();
+      const file = new File([blob], fileName, { type: blob.type });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'My BookQuest certificate', url: data.verifyUrl });
+        return;
+      }
+    } catch (error) {
+      // Closing the share sheet is a choice, not a failure worth a fallback.
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+    }
+    try {
+      await navigator.clipboard.writeText(data.verifyUrl);
+      showToast('Verification link copied.');
+    } catch {
+      showToast(data.verifyUrl);
+    }
+  }
+
   return (
-    <div className="certificate-print flex flex-col items-start gap-4">
-      <div className="certificate">
-        <p className="certificate__eyebrow type-label">
-          BookQuest · {formatOrdinalEdition(data.questEdition)} edition · {data.questYear}
-        </p>
-
-        <Rule variant="gold" />
-
-        <p className="certificate__kind type-label">
-          {data.rank === null ? 'Certificate of completion' : 'Certificate of achievement'}
-        </p>
-        {/* `/me`'s one heading — nothing else on the profile screen is
-            marked up as one. `.certificate__name`'s look comes from the
-            class, not the tag. */}
-        <h2 className="certificate__name type-display">{data.fullName}</h2>
-        <p className="certificate__body">
-          {data.rank === null
-            ? 'completed BookQuest, reading '
-            : `finished ${formatOrdinal(data.rank)} in BookQuest, reading `}
-          <em>{data.bookTitle}</em> by {data.bookAuthor}.
-        </p>
-
-        <Rule variant="gold" />
-
-        <div className="certificate__footer">
-          <span>Participant {data.participantNumber}</span>
-          <span>{formatLongDate(data.issuedAt)}</span>
-          <span>{data.code}</span>
-        </div>
+    <div className="flex flex-col items-start gap-3">
+      <img
+        src={data.imageUrl}
+        width={1123}
+        height={794}
+        loading="lazy"
+        alt={`Certificate for ${data.fullName}, BookQuest ${data.questYear}${
+          data.placing ? `, ${ORDINAL[data.placing]} place` : ''
+        }`}
+        className="certificate-image"
+      />
+      <div className="flex flex-wrap gap-2">
+        {inTelegram ? (
+          <Button variant="gold" onClick={download}>
+            <Download className="h-5 w-5" aria-hidden="true" /> Download
+          </Button>
+        ) : (
+          // A real link on the web: the browser saves it, and it works with JavaScript mid-load.
+          <a
+            href={downloadUrl}
+            download={fileName}
+            className="inline-flex min-h-[3.25rem] items-center justify-center gap-3 rounded-box bg-gold px-6 text-base font-semibold text-[#170F09] hover:bg-[#D5AF57]"
+          >
+            <Download className="h-5 w-5" aria-hidden="true" /> Download
+          </a>
+        )}
+        {/* Telegram users share from the bot chat, where the photo already is. */}
+        {!inTelegram && (
+          <Button variant="quiet" onClick={() => void share()}>
+            <Share2 className="h-5 w-5" aria-hidden="true" /> Share
+          </Button>
+        )}
       </div>
-
-      {/* `no-print`: the certificate is the thing being saved, not this button. */}
-      <Button variant="gold" className="no-print" onClick={() => window.print()}>
-        Print certificate
-      </Button>
     </div>
   );
 }

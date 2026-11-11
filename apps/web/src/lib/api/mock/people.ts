@@ -1,4 +1,4 @@
-import { formatPhone } from '@bookquest/shared';
+import { certificateTier, formatPhone } from '@bookquest/shared';
 import type {
   CertificateData,
   Participant,
@@ -7,6 +7,13 @@ import type {
   ResultEntry
 } from '@bookquest/shared';
 import { objectId } from './fixtures';
+import goldArt from '@/assets/certificates/gold.svg';
+import silverArt from '@/assets/certificates/silver.svg';
+import bronzeArt from '@/assets/certificates/bronze.svg';
+import participantArt from '@/assets/certificates/participant.svg';
+
+// The real API renders a PNG; the mock can't run satori, so each tier gets a labelled stand-in.
+const MOCK_ART = { gold: goldArt, silver: silverArt, bronze: bronzeArt, participant: participantArt } as const;
 
 /**
  * The people in the mock: name/contact generation for whoever registers
@@ -188,17 +195,25 @@ function certificateCode(edition: number, seed: string): string {
 export function buildCertificate(
   participant: Participant,
   quest: Quest,
-  rank: number | null
+  rank: number | null,
+  finishedCount: number
 ): CertificateData {
+  const code = certificateCode(quest.edition, String(participant.number));
+  const { placing, tier } = certificateTier(rank);
   return {
-    code: certificateCode(quest.edition, String(participant.number)),
+    code,
     fullName: participant.fullName,
     participantNumber: participant.number,
     questEdition: quest.edition,
     questYear: quest.year,
     bookTitle: quest.book.title,
     bookAuthor: quest.book.author,
-    rank,
-    issuedAt: quest.resultsAt
+    placing,
+    tier,
+    finishedCount,
+    issuedAt: quest.resultsAt,
+    // Absolute, as the API returns: the schema says url, and Download appends ?download=1.
+    imageUrl: new URL(MOCK_ART[tier], window.location.origin).href,
+    verifyUrl: `${window.location.origin}/verify/${code}`
   };
 }

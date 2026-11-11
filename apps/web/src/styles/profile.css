@@ -75,6 +75,14 @@
   background: rgb(200 162 74 / 0.04);
 }
 
+/* The rendered certificate: a fixed-ratio image, never reflowed. */
+.certificate-image {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-box);
+  box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.8);
+}
+
 /* ── The avatar picker: a bottom sheet on `<dialog>` ─────────────── */
 
 .avatar-sheet {

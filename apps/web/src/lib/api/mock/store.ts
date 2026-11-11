@@ -30,6 +30,8 @@ export interface MockState {
   myParticipantId: string | null;
   /** False is the between-editions state: every current-quest route 404s. */
   questRunning: boolean;
+  /** Admin pressed "Send certificates". Optional: state saved before this field existed lacks it. */
+  certificatesSent?: boolean;
 }
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -43,7 +45,8 @@ function initialState(): MockState {
     archive: PAST_EDITIONS,
     participants: buildRoster(CURRENT_QUEST.id, PARTICIPANT_NUMBER_MIN),
     myParticipantId: null,
-    questRunning: true
+    questRunning: true,
+    certificatesSent: false
   };
 }
 
