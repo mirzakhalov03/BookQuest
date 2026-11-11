@@ -1,0 +1,39 @@
+apps/web/src/app/router.tsx
+  s_9c243050d10f30::t_f230bf50179038 83
+apps/web/src/components/quiz/OptionButton.tsx
+  s_9c243050d10f30::t_f572a37e5179f0 1-54
+apps/web/src/components/quiz/ProgressRail.tsx
+  s_9c243050d10f30::t_92b201566c9d01 1-26
+apps/web/src/components/quiz/QuestionCard.tsx
+  s_9c243050d10f30::t_be9510f1cb68c1 1-71
+apps/web/src/components/quiz/QuestionTimer.tsx
+  s_9c243050d10f30::t_2dbb10de5b7d9b 1-46
+apps/web/src/components/quiz/useCountdownTo.ts
+  s_9c243050d10f30::t_f021851e1386a9 1-42
+apps/web/src/components/ui/Button.tsx
+  s_9c243050d10f30::t_0525f443d1923c 11-12,29,34
+apps/web/src/features/admin/quizzes/QuizEditorPage.tsx
+  s_9c243050d10f30::t_1772e5ce925188 1-2,5,23,59-61,70-83,115-123
+apps/web/src/features/admin/quizzes/QuizPreviewPage.tsx
+  s_9c243050d10f30::t_69a85592f16f39 1-139
+apps/web/src/features/admin/quizzes/quizForm.ts
+  s_9c243050d10f30::t_95e8ce3566a573 43-52
+apps/web/src/features/admin/screens.ts
+  s_9c243050d10f30::t_9ec90a473e4b6c 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "cfb8b3bfe6968e30f645096f67726b01b7ed9138",
+  "prompts": {},
+  "sessions": {
+    "s_9c243050d10f30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "52c21a19-4dca-4d71-a046-ac31f18a1a0c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
