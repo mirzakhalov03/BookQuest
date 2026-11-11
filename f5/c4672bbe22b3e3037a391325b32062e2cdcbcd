@@ -1,0 +1,31 @@
+apps/api/src/controllers/quiz.controllers.ts
+  s_9c243050d10f30::t_38cb70c19bbb78 1-33
+apps/api/src/middlewares/rate-limit.middleware.ts
+  s_9c243050d10f30::t_d8ef8fa20cf617 101-108
+apps/api/src/routes/index.ts
+  s_9c243050d10f30::t_a41ab91bfe365e 10,27
+apps/api/src/routes/quiz.routes.ts
+  s_9c243050d10f30::t_194f219c737ecf 1-26
+apps/api/src/services/quiz-attempt.services.ts
+  s_9c243050d10f30::t_5b5f5aa07a9f61 1-539
+apps/api/src/services/quiz-scoring.ts
+  s_9c243050d10f30::t_36c75157f3e158 1-118
+apps/api/src/validators/quiz.validators.ts
+  s_9c243050d10f30::t_766654b38ce81f 2-9,27-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "f5c4672bbe22b3e3037a391325b32062e2cdcbcd",
+  "prompts": {},
+  "sessions": {
+    "s_9c243050d10f30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "52c21a19-4dca-4d71-a046-ac31f18a1a0c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
