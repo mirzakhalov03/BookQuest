@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { QuestionType } from '@bookquest/shared';
 import { OptionButton, type OptionState } from './OptionButton';
 
@@ -17,6 +17,7 @@ const LETTERS = 'ABCDEF';
 const isTypingTarget = (target: EventTarget | null) =>
   target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
 
+/** One interactive card at a time: the 1-6 key listener is window-level. */
 export function QuestionCard({
   question,
   selectedOptionId,
@@ -28,17 +29,24 @@ export function QuestionCard({
   const { type, prompt, options } = question;
   const isTrueFalse = type === 'true_false';
 
+  // Refs keep the listener stable while the parent re-renders every frame.
+  const latest = useRef({ options, onSelect });
+  latest.current = { options, onSelect };
+
   // Keys 1-6 pick an option; skipped while typing elsewhere or when modified (browser shortcuts).
   useEffect(() => {
     if (disabled) return;
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.repeat) return;
       if (event.ctrlKey || event.metaKey || event.altKey || isTypingTarget(event.target)) return;
-      const option = /^[1-6]$/.test(event.key) ? options[Number(event.key) - 1] : undefined;
-      if (option) onSelect(option.id);
+      const option = /^[1-6]$/.test(event.key) ? latest.current.options[Number(event.key) - 1] : undefined;
+      if (!option) return;
+      event.preventDefault();
+      latest.current.onSelect(option.id);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [disabled, options, onSelect]);
+  }, [disabled]);
 
   function stateOf(optionId: string): OptionState {
     if (revealCorrectOptionId) {

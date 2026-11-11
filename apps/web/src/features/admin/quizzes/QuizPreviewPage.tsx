@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useLocation, useParams } from 'react-router';
 import { ArrowLeft, RotateCcw } from 'lucide-react';
 import { effectiveTimeLimitSec } from '@bookquest/shared';
@@ -48,6 +48,16 @@ function Preview({ quizId, content }: { quizId: string; content: QuizFormState }
   const remaining = useCountdownTo(deadline, readNow);
 
   const question = questions[index];
+  // Stable identity: the timer re-renders this every frame.
+  const cardQuestion = useMemo(
+    () =>
+      question && {
+        type: question.type,
+        prompt: question.prompt || 'Untitled question',
+        options: question.options.map((option) => ({ ...option, text: option.text || 'Empty option' }))
+      },
+    [question]
+  );
   const backToEditor = { to: `/admin/quizzes/${quizId}`, state: { draft: content } };
 
   function startQuestion(next: number) {
@@ -98,11 +108,7 @@ function Preview({ quizId, content }: { quizId: string; content: QuizFormState }
       </div>
 
       <QuestionCard
-        question={{
-          type: question.type,
-          prompt: question.prompt || 'Untitled question',
-          options: question.options.map((option) => ({ ...option, text: option.text || 'Empty option' }))
-        }}
+        question={cardQuestion!}
         selectedOptionId={selected}
         revealCorrectOptionId={answers === 'shown' ? question.correctOptionId : null}
         disabled={timeUp}

@@ -10,17 +10,20 @@ const remainingAt = (deadlineMs: number, now: () => number) => Math.max(0, deadl
 export function useCountdownTo(deadlineMs: number | null, now: () => number): number {
   const nowRef = useRef(now);
   nowRef.current = now;
-  const [remaining, setRemaining] = useState(() => (deadlineMs === null ? 0 : remainingAt(deadlineMs, now)));
+  const [state, setState] = useState<{ deadline: number | null; remaining: number }>(() => ({
+    deadline: deadlineMs,
+    remaining: deadlineMs === null ? 0 : remainingAt(deadlineMs, now)
+  }));
 
   useEffect(() => {
     if (deadlineMs === null) {
-      setRemaining(0);
+      setState({ deadline: null, remaining: 0 });
       return;
     }
     let frame = 0;
     const tick = () => {
       const next = remainingAt(deadlineMs, nowRef.current);
-      setRemaining(next);
+      setState({ deadline: deadlineMs, remaining: next });
       // Stop at zero: nothing left to animate.
       if (next > 0) frame = requestAnimationFrame(tick);
     };
@@ -38,5 +41,7 @@ export function useCountdownTo(deadlineMs: number | null, now: () => number): nu
     };
   }, [deadlineMs]);
 
-  return remaining;
+  // Derived during render: state lags one effect behind a new deadline, so never trust it for another one.
+  if (deadlineMs === null) return 0;
+  return state.deadline === deadlineMs ? state.remaining : remainingAt(deadlineMs, now);
 }
