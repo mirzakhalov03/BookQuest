@@ -1,0 +1,39 @@
+apps/api/package.json
+  s_9c243050d10f30::t_afc9faa33f8b49 17
+apps/api/src/config/env.ts
+  s_9c243050d10f30::t_d20fbc920e064e 69-75,89-90,147-150
+apps/api/src/models/quiz-attempt.model.ts
+  s_9c243050d10f30::t_b25099b78730e0 6-7
+apps/api/src/server.ts
+  s_9c243050d10f30::t_121dfc9d532c2e 8,11-15,34-37
+apps/api/src/services/quiz-attempt.services.ts
+  s_9c243050d10f30::t_4d5b6aced128af 1,18,133-136,176-197,225-227,229-230,237-299,462
+apps/api/src/services/result.services.ts
+  s_9c243050d10f30::t_a035d394d9981a 9,121-122
+apps/api/src/scripts/quiz-drill.ts
+  s_2f1b7b8f490ad1::t_37ead7c44394b1 1-536
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "384ae0ead5f33bf51103ccbd211d05ae16cea6d2",
+  "prompts": {},
+  "sessions": {
+    "s_2f1b7b8f490ad1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-aa25484a4142e4bfa",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_9c243050d10f30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "52c21a19-4dca-4d71-a046-ac31f18a1a0c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
