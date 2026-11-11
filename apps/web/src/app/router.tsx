@@ -12,6 +12,7 @@ import { ResultsPage } from '@/features/results/ResultsPage';
 import { QuizPage } from '@/features/quiz/QuizPage';
 import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
+import { VerifyPage } from '@/features/verify/VerifyPage';
 import { RequireAdmin, RequireAuth } from '@/lib/auth/guards';
 import { RouteErrorBoundary } from './RouteErrorBoundary';
 
@@ -44,6 +45,9 @@ export const router = createBrowserRouter([
       // Public countdown until the quiz is built; the quiz itself will need a session.
       { path: '/quiz', element: <QuizPage /> },
       { path: '/results', element: <ResultsPage /> },
+      // What the QR code on a printed certificate opens: public, no session, works outside Telegram.
+      { path: '/verify', element: <VerifyPage /> },
+      { path: '/verify/:code', element: <VerifyPage /> },
 
       // Session-only: children inherit the guard by position.
       {

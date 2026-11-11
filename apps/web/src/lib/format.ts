@@ -47,6 +47,11 @@ export function formatLongDate(value: string | Date): string {
   return `${DATE.format(date)}, ${TIME.format(date)}`;
 }
 
+/** "14 December 2026" — a date that is a fact on a document (a certificate's issue date), not a moment. */
+export function formatDate(value: string | Date): string {
+  return DATE.format(typeof value === 'string' ? new Date(value) : value);
+}
+
 /** "27/09/26, 22:16" — a timestamp in a dense list, where the month name costs too much width. */
 export function formatCompactDate(value: string | Date): string {
   const date = typeof value === 'string' ? new Date(value) : value;
