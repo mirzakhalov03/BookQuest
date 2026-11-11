@@ -3,6 +3,7 @@ import { authRoutes } from './auth.routes.js';
 import { questRoutes } from './quest.routes.js';
 import { coverRoutes } from './cover.routes.js';
 import { participantRoutes } from './participant.routes.js';
+import { certificateRoutes } from './certificate.routes.js';
 import { adminRoutes } from './admin/index.js';
 import { botRoutes } from './bot.routes.js';
 import { notificationRoutes } from './notification.routes.js';
@@ -17,6 +18,8 @@ apiRoutes.use('/auth', authRoutes);
 apiRoutes.use('/quests', questRoutes);
 apiRoutes.use('/covers', coverRoutes);
 apiRoutes.use('/participants', participantRoutes);
+// Public: verification and images by code.
+apiRoutes.use('/certificates', certificateRoutes);
 apiRoutes.use('/admin', adminRoutes);
 apiRoutes.use('/bot', botRoutes);
 apiRoutes.use('/me/notifications', notificationRoutes);

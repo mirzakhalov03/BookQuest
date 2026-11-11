@@ -91,3 +91,10 @@ export const registerRateLimit = limiter({
   message: 'That is a lot of attempts. Try again in a little while.',
   key: (req) => req.currentUser?.id ?? ipKey(req)
 });
+
+/** Verify and image lookups are public; 30/min is plenty for your own certificate and makes guessing codes pointless. */
+export const certificateRateLimit = limiter({
+  windowMs: MINUTE,
+  limit: 30,
+  message: 'Too many lookups. Try again in a minute.'
+});

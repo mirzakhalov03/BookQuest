@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import * as resultService from '../services/result.services.js';
+import * as certificateService from '../services/certificate.services.js';
 import { currentUser } from '../middlewares/auth.middleware.js';
 import { ok } from '../utils/respond.js';
 
@@ -15,5 +16,5 @@ export async function getCurrentResults(req: Request, res: Response): Promise<vo
 
 /** GET /api/v1/participants/me/certificate */
 export async function getMyCertificate(req: Request, res: Response): Promise<void> {
-  ok(res, await resultService.getCertificateForUser(currentUser(req)));
+  ok(res, await certificateService.getCertificateForUser(currentUser(req)));
 }

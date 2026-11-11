@@ -87,6 +87,9 @@ export const corsOrigins = env.CORS_ORIGIN.split(',').map((origin) => origin.tri
 /** Prefixed onto cover paths in responses, so it must be the address browsers use, not an internal one. */
 export const publicApiUrl = (env.PUBLIC_API_URL ?? `http://localhost:${env.PORT}`).replace(/\/+$/, '');
 
+/** Where certificate QR codes and bot buttons point. Dev falls back to Vite's port; sending certificates refuses without the real one. */
+export const webAppUrl = (env.WEB_APP_URL ?? 'http://localhost:5173').replace(/\/+$/, '');
+
 const splitList = (value: string): string[] =>
   value
     .split(',')
@@ -125,5 +128,11 @@ if (adminPhoneNumbers.size > 0 && !env.ADMIN_PASSWORD) {
 if (isProduction && !env.PUBLIC_API_URL) {
   configWarnings.push(
     "PUBLIC_API_URL is not set — cover URLs will point at localhost. Set it to the API's public origin."
+  );
+}
+
+if (isProduction && !env.WEB_APP_URL) {
+  configWarnings.push(
+    'WEB_APP_URL is not set — certificate QR codes and links will be wrong, and sending certificates is disabled.'
   );
 }

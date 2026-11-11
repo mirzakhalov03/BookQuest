@@ -1,11 +1,10 @@
 import crypto from 'node:crypto';
-import type { CertificateData, QuestResults, ResultEntry } from '@bookquest/shared';
+import type { QuestResults, ResultEntry } from '@bookquest/shared';
 import { ResultModel } from '../models/result.model.js';
 import type { QuestDocument } from '../models/quest.model.js';
 import type { UserDocument } from '../models/user.model.js';
 import { ApiError } from '../utils/api-error.js';
 import { findCurrentQuestDocument, requireCurrentQuestDocument } from './quest.services.js';
-import { requireParticipantForUser } from './participant.services.js';
 import { participantsById } from './participant-lookup.services.js';
 
 const PODIUM_SIZE = 3;
@@ -36,29 +35,6 @@ export async function getCurrentQuestResults(viewer: UserDocument | null): Promi
     finishedCount: leaderboard.length,
     isFullBoard,
     publishedAt: quest.resultsAt.toISOString()
-  };
-}
-
-export async function getCertificateForUser(user: UserDocument): Promise<CertificateData> {
-  const quest = await requireCurrentQuestDocument();
-  requirePublished(quest);
-  await ensureRanked(quest);
-
-  const participant = await requireParticipantForUser(user, quest);
-  const result = await ResultModel.findOne({ quest: quest._id, participant: participant.id }).lean();
-
-  if (!result) throw ApiError.notFound('There is no completed quiz to certify yet.');
-
-  return {
-    code: result.certificateCode ?? '',
-    fullName: participant.fullName,
-    participantNumber: participant.number,
-    questEdition: quest.edition,
-    questYear: quest.year,
-    bookTitle: quest.book.title,
-    bookAuthor: quest.book.author,
-    rank: result.rank ?? null,
-    issuedAt: quest.resultsAt.toISOString()
   };
 }
 
@@ -115,7 +91,7 @@ async function buildLeaderboard(quest: QuestDocument): Promise<ResultEntry[]> {
  * Results that do not exist yet are not found, not forbidden — there is nothing
  * being withheld, the date simply has not arrived.
  */
-function requirePublished(quest: QuestDocument, now = new Date()): void {
+export function requirePublished(quest: QuestDocument, now = new Date()): void {
   if (now < quest.resultsAt) {
     throw ApiError.notFound('Results are not published yet.');
   }
@@ -130,7 +106,7 @@ function requirePublished(quest: QuestDocument, now = new Date()): void {
 const rankingInFlight = new Map<string, Promise<void>>();
 
 // One run per quest per process, so the results-day burst does the work once.
-function ensureRanked(quest: QuestDocument): Promise<void> {
+export function ensureRanked(quest: QuestDocument): Promise<void> {
   const key = String(quest._id);
   const running = rankingInFlight.get(key);
   if (running) return running;
