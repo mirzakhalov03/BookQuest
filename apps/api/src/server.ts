@@ -3,6 +3,7 @@ import { configWarnings, env } from './config/env.js';
 import { logger } from './config/logger.js';
 import { connectToDatabase, disconnectFromDatabase } from './db/connect.js';
 import { markInterruptedBroadcasts } from './services/broadcast.services.js';
+import { markInterruptedCertificateDeliveries } from './services/certificate-delivery.services.js';
 import { sweepOrphanCovers } from './services/cover.services.js';
 
 const SWEEP_EVERY_MS = 6 * 60 * 60 * 1000;
@@ -19,6 +20,10 @@ async function start(): Promise<void> {
   await connectToDatabase();
   const interrupted = await markInterruptedBroadcasts();
   if (interrupted > 0) logger.warn({ interrupted }, 'Marked broadcasts left mid-send by the last shutdown as interrupted');
+  const interruptedCertificates = await markInterruptedCertificateDeliveries();
+  if (interruptedCertificates > 0) {
+    logger.warn('Marked a certificate delivery left mid-send as interrupted — press Send again to finish it');
+  }
 
   sweepCovers();
   // unref: the timer must not keep a shutting-down process alive.

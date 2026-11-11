@@ -4,6 +4,7 @@ import { UserModel } from '../models/user.model.js';
 import { BroadcastModel, type BroadcastAttributes, type BroadcastDocument } from '../models/broadcast.model.js';
 import { NotificationModel } from '../models/notification.model.js';
 import { sendTelegramMessage } from '../utils/telegram-send.js';
+import { createRateGate } from '../utils/rate-gate.js';
 import { logger } from '../config/logger.js';
 import type { UserDocument } from '../models/user.model.js';
 
@@ -17,27 +18,6 @@ const MAX_PER_SECOND = 25;
 
 /** Who can be DMed: Telegram linked and not known to have blocked the bot. */
 const DM_REACHABLE = { telegramUserId: { $type: 'string' as const }, dmBlockedAt: null };
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/** Spaces calls across all workers; `pause` pushes every later call back (Telegram's 429). */
-function createRateGate(perSecond: number) {
-  const spacingMs = 1000 / perSecond;
-  let nextAt = 0;
-  return {
-    async wait(): Promise<void> {
-      const now = Date.now();
-      const at = Math.max(now, nextAt);
-      nextAt = at + spacingMs;
-      if (at > now) await sleep(at - now);
-    },
-    pause(ms: number): void {
-      nextAt = Math.max(nextAt, Date.now() + ms);
-    }
-  };
-}
 
 /**
  * Writes the record and every in-app notification, then answers. DMs go out

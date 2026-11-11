@@ -23,6 +23,12 @@ const resultSchema = new Schema(
     /** Short public verification code, assigned at publication. */
     certificateCode: { type: String, default: null },
 
+    /** Set once this certificate is done: delivered, or not deliverable (blocked / no Telegram). Null = the next send picks it up. */
+    certificateSentAt: { type: Date, default: null },
+    certificateSendError: { type: String, enum: ['blocked', 'failed', 'no_telegram', null], default: null },
+    /** Claimed before the in-app notification is written, so a resumed send never notifies twice. */
+    certificateNotifiedAt: { type: Date, default: null },
+
     submittedAt: { type: Date, required: true }
   },
   { timestamps: true }
@@ -42,6 +48,9 @@ resultSchema.index(
   { certificateCode: 1 },
   { unique: true, partialFilterExpression: { certificateCode: { $type: 'string' } } }
 );
+
+// The delivery loop's "what's left" query.
+resultSchema.index({ quest: 1, certificateSentAt: 1 });
 
 export type ResultAttributes = InferSchemaType<typeof resultSchema>;
 export type ResultDocument = HydratedDocument<ResultAttributes>;
