@@ -22,6 +22,8 @@ export function createApp(): Express {
   app.use(cors({ origin: corsOrigins, credentials: true }));
   // Bigger bodies for the bot's batches only. Must run before the global parser, which would 413 them first.
   app.use('/api/v1/bot/interactions', express.json({ limit: '256kb' }));
+  // A 100-question quiz exceeds the global 100kb.
+  app.put(/^\/api\/v1\/admin\/quizzes\/[0-9a-f]{24}$/i, express.json({ limit: '512kb' }));
   app.use(express.json({ limit: '100kb' }));
   app.use(pinoHttp({ logger }));
 
