@@ -1,5 +1,5 @@
 import { PARTICIPANT_NUMBER_MIN } from '@bookquest/shared';
-import type { Participant, Quest, QuestPhase, Role, SessionUser } from '@bookquest/shared';
+import type { Participant, QuizAdmin, Quest, QuestPhase, Role, SessionUser } from '@bookquest/shared';
 import { CURRENT_QUEST, PAST_EDITIONS, SESSION_USER, type PastEdition } from './fixtures';
 import { buildRoster } from './people';
 import { addMockMessage } from './interactions';
@@ -32,6 +32,8 @@ export interface MockState {
   questRunning: boolean;
   /** Admin pressed "Send certificates". Optional: state saved before this field existed lacks it. */
   certificatesSent?: boolean;
+  /** The admin quiz library; seeded on first read (see `quiz.ts`). */
+  quizzes?: QuizAdmin[];
 }
 
 const DAY = 24 * 60 * 60 * 1000;

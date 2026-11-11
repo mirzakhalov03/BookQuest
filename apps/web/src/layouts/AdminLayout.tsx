@@ -7,7 +7,8 @@ import {
   BookOpen,
   BarChart3,
   Megaphone,
-  MessageSquare
+  MessageSquare,
+  ListChecks
 } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router';
 import { FieldSizeContext } from '@/components/ui/fieldSize';
@@ -19,19 +20,20 @@ interface Tab {
 }
 
 /**
- * The six admin destinations, dashboard first. `end` only matters for the
+ * The seven admin destinations, dashboard first. `end` only matters for the
  * dashboard link below — every other tab is already its own exact path.
  * Bottom-positioned and styled with `.tabbar`/`.tab` — the same classes
  * `TabBar` uses (`shell.css`, recomposed for desktop in `stage.css`) — so
  * admin reads as the same product's navigation, not a second one. A separate
  * component rather than reusing `TabBar` itself: that component's doc
  * comment locks it to the participant side's five destinations (spec §4 rule
- * 3), and admin's six are a different set going to different places.
+ * 3), and admin's seven are a different set going to different places.
  */
 const TABS: Tab[] = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/participants', label: 'Participants', icon: Users },
   { to: '/admin/quest', label: 'Quest', icon: BookOpen },
+  { to: '/admin/quizzes', label: 'Quizzes', icon: ListChecks },
   { to: '/admin/results', label: 'Results', icon: BarChart3 },
   { to: '/admin/broadcast', label: 'Broadcast', icon: Megaphone },
   { to: '/admin/messages', label: 'Messages', icon: MessageSquare }

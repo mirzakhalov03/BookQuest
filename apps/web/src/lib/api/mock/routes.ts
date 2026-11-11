@@ -4,8 +4,10 @@ import {
   PARTICIPANT_NUMBER_MAX,
   createBroadcastSchema,
   createQuestSchema,
+  createQuizSchema,
   findQuestDateIssues,
   registerParticipantSchema,
+  saveQuizSchema,
   updateProfileSchema,
   updateQuestSchema
 } from '@bookquest/shared';
@@ -28,6 +30,7 @@ import type {
 import { objectId, questSummary } from './fixtures';
 import { listMockInteractions, mockInteractionFacets } from './interactions';
 import { buildCertificate, buildResults } from './people';
+import * as quizzes from './quiz';
 import {
   areResultsPublished,
   getState,
@@ -50,18 +53,21 @@ class MockError extends Error {
   readonly status: number;
   readonly code: ApiErrorCode;
   readonly fields: Record<string, string> | undefined;
+  readonly reason: string | undefined;
 
   constructor(
     status: number,
     code: ApiErrorCode,
     message: string,
-    fields?: Record<string, string>
+    fields?: Record<string, string>,
+    reason?: string
   ) {
     super(message);
     this.name = 'MockError';
     this.status = status;
     this.code = code;
     this.fields = fields;
+    this.reason = reason;
   }
 }
 
@@ -584,6 +590,27 @@ function sendBroadcast(context: Context): Result {
   return { status: 202, data: broadcast };
 }
 
+/* ── Quizzes ─────────────────────────────────────────────────────────────── */
+
+/** Runs a library call as an admin, translating its failures into the mock's own error. */
+function quizCall(context: Context, run: () => unknown, status = 200): Result {
+  requireAdmin(context);
+  try {
+    return { status, data: run() };
+  } catch (error) {
+    if (!(error instanceof quizzes.QuizFailure)) throw error;
+    throw new MockError(error.status, error.code, error.message, error.fields, error.reason);
+  }
+}
+
+function parseBody<T>(schema: { safeParse: (body: unknown) => { success: true; data: T } | { success: false; error: { issues: readonly Issue[] } } }, body: unknown): T {
+  const parsed = schema.safeParse(body);
+  if (!parsed.success) throw validationError(parsed.error.issues);
+  return parsed.data;
+}
+
+const quizId = (context: Context) => context.params.id ?? '';
+
 /* ── Table ───────────────────────────────────────────────────────────────── */
 
 /** Literal paths sit above their `:param` neighbours — first match wins. */
@@ -637,6 +664,24 @@ const routes: Route[] = [
   { method: 'GET', path: '/admin/broadcasts', handle: listBroadcasts },
   { method: 'POST', path: '/admin/broadcasts', handle: sendBroadcast },
   { method: 'POST', path: '/admin/covers', handle: uploadCover },
+  { method: 'GET', path: '/admin/quizzes', handle: (c) => quizCall(c, quizzes.listQuizzes) },
+  {
+    method: 'POST',
+    path: '/admin/quizzes',
+    handle: (c) => quizCall(c, () => quizzes.createQuiz(parseBody(createQuizSchema, c.body)), 201)
+  },
+  { method: 'GET', path: '/admin/quizzes/:id', handle: (c) => quizCall(c, () => quizzes.getQuiz(quizId(c))) },
+  {
+    method: 'PUT',
+    path: '/admin/quizzes/:id',
+    handle: (c) => quizCall(c, () => quizzes.saveQuiz(quizId(c), parseBody(saveQuizSchema, c.body)))
+  },
+  { method: 'DELETE', path: '/admin/quizzes/:id', handle: (c) => quizCall(c, () => quizzes.deleteQuiz(quizId(c)) ?? null) },
+  {
+    method: 'POST',
+    path: '/admin/quizzes/:id/duplicate',
+    handle: (c) => quizCall(c, () => quizzes.duplicateQuiz(quizId(c)), 201)
+  },
   { method: 'POST', path: '/admin/quests', handle: createQuest },
   { method: 'PATCH', path: '/admin/quests/:id', handle: updateQuest }
 ];
@@ -685,7 +730,8 @@ export function handleRequest(request: MockRequest): MockOutcome {
         error: {
           code: failure.code,
           message: failure.message,
-          ...(failure.fields ? { fields: failure.fields } : {})
+          ...(failure.fields ? { fields: failure.fields } : {}),
+          ...(failure.reason ? { reason: failure.reason } : {})
         }
       }
     };
