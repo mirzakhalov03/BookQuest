@@ -435,7 +435,10 @@ function updateQuest(context: Context): Result {
 
   // Ordering is checked against the merged result, not the patch — half an
   // edit is always in some order or other.
-  const issues = findQuestDateIssues(toDates(merged));
+  // The API only demands the results buffer when the edit moves those dates.
+  const issues = findQuestDateIssues(toDates(merged), {
+    requireResultsBuffer: patch.quizClosesAt !== undefined || patch.resultsAt !== undefined
+  });
   if (issues) {
     throw new MockError(
       400,
@@ -456,6 +459,19 @@ function updateQuest(context: Context): Result {
   });
 
   return ok(toAdminQuest(readQuest(merged, countFor(getState(), merged))));
+}
+
+/** Roster split by the same rule as the API; a random split has no seed to preview. */
+function groupSizes(context: Context): Result {
+  requireAdmin(context);
+  const distribution = context.query.get('distribution');
+  const { participants } = getState();
+  if (distribution === 'single') return ok({ sizes: [participants.length] });
+  if (distribution === 'parity') {
+    const odd = participants.filter((entry) => entry.number % 2 === 1).length;
+    return ok({ sizes: [odd, participants.length - odd] });
+  }
+  return ok({ sizes: null });
 }
 
 /** Stores the setup without the API's readiness and shape rules; the summary follows the first quiz. */
@@ -711,6 +727,7 @@ const routes: Route[] = [
       return ok(toAdminQuest(requireCurrentQuest()));
     }
   },
+  { method: 'GET', path: '/admin/quiz/group-sizes', handle: groupSizes },
   { method: 'POST', path: '/admin/quests', handle: createQuest },
   { method: 'PATCH', path: '/admin/quests/:id', handle: updateQuest }
 ];

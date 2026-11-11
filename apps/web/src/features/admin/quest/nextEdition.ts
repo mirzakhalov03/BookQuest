@@ -29,7 +29,8 @@ export function nextEditionDraft(source: Quest | null, now: Date): EditionDraft 
       values: {
         book: EMPTY_BOOK,
         prizes: { first: '', second: '', third: '' },
-        dates: defaultDates(now)
+        dates: defaultDates(now),
+        quizConfig: null
       }
     };
   }
@@ -48,6 +49,7 @@ export function nextEditionDraft(source: Quest | null, now: Date): EditionDraft 
     values: {
       ...carried,
       book: EMPTY_BOOK,
+      quizConfig: null,
       dates: new Date(shifted.opensAt) > now ? shifted : defaultDates(now)
     }
   };

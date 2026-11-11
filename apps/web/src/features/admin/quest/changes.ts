@@ -44,6 +44,7 @@ export function sectionsWithErrors(errors: FieldErrors<QuestFormState>): Readonl
   if (resources) sections.add('resources');
   if (errors.prizes) sections.add('prizes');
   if (errors.dates) sections.add('dates');
+  if (errors.quizConfig) sections.add('quiz');
   return sections;
 }
 

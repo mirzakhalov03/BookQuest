@@ -1,6 +1,7 @@
 import { QUEST_DATE_FIELDS } from '@bookquest/shared';
-import type { Book, BookResource, Prizes, Quest, QuestDates, UpdateQuestPayload } from '@bookquest/shared';
+import type { AdminQuest, Book, BookResource, Prizes, Quest, QuestDates, UpdateQuestPayload } from '@bookquest/shared';
 import { toDateTimeLocalInput } from '@/lib/format';
+import { quizConfigChanged, type QuizConfigForm } from './quizConfig';
 
 export interface ResourceDraft {
   label: string;
@@ -25,6 +26,7 @@ export interface QuestFormState {
     quizClosesAt: string;
     resultsAt: string;
   };
+  quizConfig: QuizConfigForm | null;
 }
 
 /** Paths of all five dates, for re-validating them together. */
@@ -34,7 +36,8 @@ export const DATE_PATHS = QUEST_DATE_FIELDS.map((key) => `dates.${key}` as const
  * number — so every field in the form is the same kind of controlled input,
  * and blank has one obvious meaning (see `trimmedOrNull` below) instead of
  * `NaN` or `0` standing in for "cleared". */
-export function toFormState(quest: Quest): QuestFormState {
+export function toFormState(quest: Quest | AdminQuest): QuestFormState {
+  const config = 'quizConfig' in quest ? quest.quizConfig : null;
   return {
     book: {
       title: quest.book.title,
@@ -55,7 +58,8 @@ export function toFormState(quest: Quest): QuestFormState {
       quizOpensAt: toDateTimeLocalInput(quest.quizOpensAt),
       quizClosesAt: toDateTimeLocalInput(quest.quizClosesAt),
       resultsAt: toDateTimeLocalInput(quest.resultsAt)
-    }
+    },
+    quizConfig: config && { distribution: config.distribution, quizIds: [...config.quizIds] }
   };
 }
 
@@ -109,11 +113,14 @@ export function isValidResourceUrl(value: string): boolean {
  * field the admin never touched must never appear in the request: sending it
  * back unchanged is indistinguishable, on the wire, from sending it changed.
  *
+ * `quizConfig` is the one key the server rejects outright once participants
+ * have started, even unchanged, so it is sent only when it really moved.
+ *
  * Returns `null` when nothing differs — the caller uses that to keep Save
  * disabled rather than firing a request the server would 400 for having
  * nothing to update.
  */
-export function buildQuestPatch(initial: Quest, form: QuestFormState): UpdateQuestPayload | null {
+export function buildQuestPatch(initial: AdminQuest, form: QuestFormState): UpdateQuestPayload | null {
   const patch: UpdateQuestPayload = {};
 
   const book: Partial<Book> = {};
@@ -146,6 +153,11 @@ export function buildQuestPatch(initial: Quest, form: QuestFormState): UpdateQue
     if (dates[field].getTime() !== Date.parse(initial[field])) {
       patch[field] = dates[field];
     }
+  }
+
+  const savedConfig = toFormState(initial).quizConfig;
+  if (quizConfigChanged(savedConfig, form.quizConfig)) {
+    patch.quizConfig = form.quizConfig && { distribution: form.quizConfig.distribution, quizIds: form.quizConfig.quizIds };
   }
 
   return Object.keys(patch).length > 0 ? patch : null;

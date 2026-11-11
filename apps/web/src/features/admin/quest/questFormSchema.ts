@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BOOK_RESOURCE_KINDS, findQuestDateIssues } from '@bookquest/shared';
+import { BOOK_RESOURCE_KINDS, QUIZ_DISTRIBUTIONS, QUIZ_GROUP_COUNTS, findQuestDateIssues } from '@bookquest/shared';
 import { parseLocal } from '../dates';
 import { formDates, isValidResourceUrl, type QuestFormState } from './questForm';
 
@@ -13,6 +13,20 @@ const wholeNumber = (value: string, max: number) =>
   /^\d+$/.test(value.trim()) && Number(value) >= 1 && Number(value) <= max;
 
 const prize = z.string().refine((value) => value.trim().length <= 200, 'Keep it under 200 characters.');
+const quizConfig = z
+  .object({ distribution: z.enum(QUIZ_DISTRIBUTIONS), quizIds: z.array(z.string()) })
+  .nullable()
+  .superRefine((config, ctx) => {
+    if (!config) return;
+    const { min, max } = QUIZ_GROUP_COUNTS[config.distribution];
+    const picked = config.quizIds.filter((id) => id !== '');
+    let message: string | null = null;
+    if (config.quizIds.length < min || config.quizIds.length > max) message = 'That many groups doesn’t fit this split.';
+    else if (picked.length < config.quizIds.length) message = 'Pick a quiz for every group.';
+    else if (new Set(picked).size !== picked.length) message = 'Pick a different quiz for each group.';
+    if (message) ctx.addIssue({ code: 'custom', message });
+  });
+
 const date = z.string().refine((value) => parseLocal(value) !== null, 'Pick a date and time.');
 
 /**
@@ -44,7 +58,8 @@ export const questFormSchema = z
       quizOpensAt: date,
       quizClosesAt: date,
       resultsAt: date
-    })
+    }),
+    quizConfig
   })
   .superRefine((values, ctx) => {
     // Ordering only means something once all five parse; "Pick a date" covers the rest.

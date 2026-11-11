@@ -11,6 +11,7 @@ import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useSaveShortcut } from '@/hooks/useSaveShortcut';
 import { useUiStore } from '@/stores/ui.store';
 import { useAdminCurrentQuest } from '../api/useAdminCurrentQuest';
+import { useQuizzes } from '../api/useQuizzes';
 import { useUpdateQuest } from '../api/useUpdateQuest';
 import { AdminQuery } from '../components/AdminQuery';
 import { AdminPageHeader } from '../components/AdminPageHeader';
@@ -61,6 +62,8 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
   const [formError, setFormError] = useState<string | null>(null);
   const [pendingPatch, setPendingPatch] = useState<UpdateQuestPayload | null>(null);
   const [isCoverUploading, setIsCoverUploading] = useState(false);
+  const [quizLockMessage, setQuizLockMessage] = useState<string | null>(null);
+  const quizzes = useQuizzes();
   const [now] = useState(() => new Date());
   const showToast = useUiStore((state) => state.showToast);
   const update = useUpdateQuest(quest.id);
@@ -70,6 +73,9 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
   const isDirty = changes.count > 0;
   const errorCount = countErrors(formState.errors);
   const guard = useUnsavedChangesGuard(isDirty);
+
+  const quizTab = useMemo(() => ({ quest, lockMessage: quizLockMessage }), [quest, quizLockMessage]);
+  const quizTitle = (id: string) => quizzes.data?.find((quiz) => quiz.id === id)?.title ?? 'a quiz';
 
   async function save(patch: UpdateQuestPayload) {
     setFormError(null);
@@ -82,6 +88,12 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
       setFormError(
         error instanceof ApiRequestError ? applyServerErrors(error, setError) : FALLBACK_MESSAGE
       );
+      if (error instanceof ApiRequestError && error.reason === 'quiz_locked') {
+        setQuizLockMessage(error.message);
+        // The setup can't change now: drop that edit and its error so the rest of the form can still save.
+        form.setValue('quizConfig', toFormState(quest).quizConfig);
+        form.clearErrors('quizConfig');
+      }
     }
   }
 
@@ -116,6 +128,7 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
             changes={changes}
             savedDates={savedDates}
             onCoverUploadingChange={setIsCoverUploading}
+            quiz={quizTab}
           />
           {formError && (
             <p role="alert" className="m-0 text-sm text-error">
@@ -148,7 +161,7 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
       />
       <ReviewChangesSheet
         open={pendingPatch !== null}
-        lines={pendingPatch ? describeRiskyChanges(quest, pendingPatch) : []}
+        lines={pendingPatch ? describeRiskyChanges(quest, pendingPatch, quizTitle) : []}
         participantCount={quest.participantCount}
         onCancel={() => setPendingPatch(null)}
         onConfirm={() => {

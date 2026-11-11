@@ -1,6 +1,7 @@
 import { memo, useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { BookOpen, CalendarDays, Link2, Trophy } from 'lucide-react';
+import { BookOpen, CalendarDays, CircleHelp, Link2, Trophy } from 'lucide-react';
+import type { AdminQuest } from '@bookquest/shared';
 import type { DateInputs } from '../../dates';
 import { sectionsWithErrors, type ChangeSummary, type EditorSectionId } from '../changes';
 import type { QuestFormState } from '../questForm';
@@ -9,19 +10,23 @@ import { BookFieldsSection } from './BookFieldsSection';
 import { ResourceListEditor } from './ResourceListEditor';
 import { PrizeFieldsSection } from './PrizeFieldsSection';
 import { DateTimelineField } from './DateTimelineField';
+import { QuizConfigSection } from './QuizConfigSection';
 
 interface QuestFormFieldsProps {
   changes: ChangeSummary;
   /** The saved schedule — past dates in it lock. `null` when creating. */
   savedDates: DateInputs | null;
   onCoverUploadingChange: (uploading: boolean) => void;
+  /** The saved quest, once one exists: only then is there a quiz to set up. Absent when creating. */
+  quiz?: { quest: AdminQuest; lockMessage: string | null };
 }
 
 /** Every quest field, grouped. Shared by the editor and the new-edition page through form context. Memoised: fields subscribe themselves. */
 export const QuestFormFields = memo(function QuestFormFields({
   changes,
   savedDates,
-  onCoverUploadingChange
+  onCoverUploadingChange,
+  quiz
 }: QuestFormFieldsProps) {
   const {
     formState: { errors, submitCount }
@@ -60,7 +65,17 @@ export const QuestFormFields = memo(function QuestFormFields({
     ),
     tab('resources', 'Resources', Link2, <ResourceListEditor />),
     tab('prizes', 'Prizes', Trophy, <PrizeFieldsSection />),
-    tab('dates', 'Dates', CalendarDays, <DateTimelineField savedDates={savedDates} />)
+    tab('dates', 'Dates', CalendarDays, <DateTimelineField savedDates={savedDates} />),
+    ...(quiz
+      ? [
+          tab(
+            'quiz',
+            'Quiz',
+            CircleHelp,
+            <QuizConfigSection quest={quiz.quest} lockMessage={quiz.lockMessage} onGoTo={setActive} />
+          )
+        ]
+      : [])
   ];
 
   return <SectionTabs tabs={tabs} active={active} onChange={setActive} />;

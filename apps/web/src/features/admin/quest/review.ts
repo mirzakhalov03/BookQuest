@@ -1,6 +1,8 @@
-import { QUEST_DATE_FIELDS, type Quest, type UpdateQuestPayload } from '@bookquest/shared';
+import { QUEST_DATE_FIELDS, type AdminQuest, type UpdateQuestPayload } from '@bookquest/shared';
 import { formatLongDate } from '@/lib/format';
 import { DATE_LABEL } from '../dates';
+import { toFormState } from './questForm';
+import { describeQuizConfig } from './quizConfig';
 
 export interface ChangeLine {
   label: string;
@@ -11,12 +13,16 @@ export interface ChangeLine {
 const PRIZE_LABEL = { first: 'First prize', second: 'Second prize', third: 'Third prize' } as const;
 
 /** Only edits participants have already planned around get a second look; typos just save. */
-export function needsReview(quest: Quest, patch: UpdateQuestPayload): boolean {
+export function needsReview(quest: AdminQuest, patch: UpdateQuestPayload): boolean {
   if (quest.phase === 'upcoming') return false;
-  return patch.prizes !== undefined || QUEST_DATE_FIELDS.some((field) => patch[field] !== undefined);
+  return patch.prizes !== undefined || patch.quizConfig !== undefined || QUEST_DATE_FIELDS.some((field) => patch[field] !== undefined);
 }
 
-export function describeRiskyChanges(quest: Quest, patch: UpdateQuestPayload): ChangeLine[] {
+export function describeRiskyChanges(
+  quest: AdminQuest,
+  patch: UpdateQuestPayload,
+  quizTitle: (id: string) => string
+): ChangeLine[] {
   const lines: ChangeLine[] = [];
 
   for (const field of QUEST_DATE_FIELDS) {
@@ -28,6 +34,13 @@ export function describeRiskyChanges(quest: Quest, patch: UpdateQuestPayload): C
     if (next !== undefined) {
       lines.push({ label: PRIZE_LABEL[place], before: quest.prizes[place] ?? 'None', after: next ?? 'None' });
     }
+  }
+  if (patch.quizConfig !== undefined) {
+    lines.push({
+      label: 'Quiz setup',
+      before: describeQuizConfig(toFormState(quest).quizConfig, quizTitle),
+      after: describeQuizConfig(patch.quizConfig, quizTitle)
+    });
   }
   return lines;
 }
