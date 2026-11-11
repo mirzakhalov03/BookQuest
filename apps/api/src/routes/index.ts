@@ -7,6 +7,7 @@ import { certificateRoutes } from './certificate.routes.js';
 import { adminRoutes } from './admin/index.js';
 import { botRoutes } from './bot.routes.js';
 import { notificationRoutes } from './notification.routes.js';
+import { quizRoutes } from './quiz.routes.js';
 
 /**
  * The API is versioned at the router, not per route, so a future v2 is a new
@@ -23,5 +24,4 @@ apiRoutes.use('/certificates', certificateRoutes);
 apiRoutes.use('/admin', adminRoutes);
 apiRoutes.use('/bot', botRoutes);
 apiRoutes.use('/me/notifications', notificationRoutes);
-
-// Coming later: /quiz
+apiRoutes.use('/quiz', quizRoutes);

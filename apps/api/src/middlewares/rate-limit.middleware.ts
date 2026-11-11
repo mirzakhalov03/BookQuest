@@ -98,3 +98,11 @@ export const certificateRateLimit = limiter({
   limit: 30,
   message: 'Too many lookups. Try again in a minute.'
 });
+
+/** Every quiz call is cheap and idempotent; this only stops a script hammering the attempt. */
+export const quizRateLimit = limiter({
+  windowMs: MINUTE,
+  limit: 120,
+  message: 'Too many quiz requests — slow down a moment.',
+  key: userOrIpKey
+});
