@@ -226,6 +226,9 @@ export async function voidAttempt(id: string, reason: string, admin: UserDocumen
   }
 
   const voided = await withTransaction(async (session) => {
+    // Result first: a crash between the writes (no transaction on standalone Mongo) then leaves a retryable void, never a voided attempt that is still ranked.
+    await ResultModel.deleteOne({ quest: attempt.quest, participant: attempt.participant }, { session });
+
     // Conditional so two admins voiding at once leave one reason, not a race.
     const updated = await QuizAttemptModel.findOneAndUpdate(
       { _id: attempt._id, status: { $ne: 'voided' } },
@@ -234,7 +237,6 @@ export async function voidAttempt(id: string, reason: string, admin: UserDocumen
     ).lean<AttemptRow>();
     if (!updated) throw ApiError.conflict('This attempt was already voided.');
 
-    await ResultModel.deleteOne({ quest: attempt.quest, participant: attempt.participant }, { session });
     return updated;
   });
 
