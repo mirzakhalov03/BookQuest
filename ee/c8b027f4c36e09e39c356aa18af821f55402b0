@@ -1,0 +1,19 @@
+apps/web/src/components/layout/TopBar.tsx
+  s_fc64477f2dfe3c::t_50632c4bb506fc 25-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "eec8b027f4c36e09e39c356aa18af821f55402b0",
+  "prompts": {},
+  "sessions": {
+    "s_fc64477f2dfe3c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "89899d25-7816-4ea7-b803-212d723e5291",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
