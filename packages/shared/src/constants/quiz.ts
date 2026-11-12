@@ -1,5 +1,5 @@
-/** Grace after a deadline during which a late lock is still accepted (network latency). */
-export const QUIZ_ANSWER_GRACE_MS = 2000;
+/** Grace after a deadline during which a late answer is still accepted: a tap made in time must never lose to a slow network. */
+export const QUIZ_ANSWER_GRACE_MS = 5000;
 export const QUIZ_MAX_QUESTIONS = 100;
 export const QUIZ_TIME_LIMIT_SEC = { min: 5, max: 300, default: 30 } as const;
 export const QUIZ_MCQ_OPTIONS = { min: 2, max: 6 } as const;

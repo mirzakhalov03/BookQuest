@@ -3,7 +3,7 @@ import type { Quest, QuizOverview } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
 import { Countdown } from '@/components/ui/Countdown';
 import { EmptyState } from '@/components/feedback/EmptyState';
-import { formatCount, formatDuration, formatLongDate, formatStopwatch } from '@/lib/format';
+import { formatCount, formatDuration, formatLongDate } from '@/lib/format';
 import { RulesList } from './RulesSheet';
 import { StartCta } from './StartCta';
 
@@ -83,12 +83,7 @@ export function OverviewCard({ overview, quest, onRefresh }: OverviewCardProps) 
     case 'completed':
       return (
         <Card label="Quiz complete" title="Done!">
-          {attempt?.score != null && (
-            <div className="flex items-end justify-center gap-8">
-              <Stat label="Score · provisional" value={`${attempt.score} / ${attempt.total}`} />
-              {attempt.durationMs != null && <Stat label="Time" value={formatStopwatch(attempt.durationMs)} />}
-            </div>
-          )}
+          <p className="m-0 text-paper-dim">Your answers are in. Scores stay sealed until results are announced.</p>
           {quizWindow && <p className="m-0 text-taupe">Results on {formatLongDate(quizWindow.resultsAt)}.</p>}
           {attempt?.reviewAvailable && (
             <Button to="/quiz/review" variant="quiet" className="self-center">
@@ -124,15 +119,6 @@ function Card({ label, title, children }: { label: string; title: string; childr
       </header>
       {children}
     </section>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="type-display text-4xl tabular-nums text-paper">{value}</span>
-      <span className="type-label">{label}</span>
-    </div>
   );
 }
 

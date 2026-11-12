@@ -54,8 +54,9 @@ export function settleServed(item: Item): Settled | null {
   return { outcome, isCorrect: isItemCorrect({ ...item, outcome }), elapsedMs: item.timeLimitMs };
 }
 
-export function resolveExpired(item: Item, now: Date): Settled | null {
-  if (!isOpenServed(item) || now.getTime() <= item.deadlineAt!.getTime() + QUIZ_ANSWER_GRACE_MS) return null;
+/** `graceMs` 0 only when the participant's own client asked to move on, having already flushed its saves. */
+export function resolveExpired(item: Item, now: Date, graceMs = QUIZ_ANSWER_GRACE_MS): Settled | null {
+  if (!isOpenServed(item) || now.getTime() <= item.deadlineAt!.getTime() + graceMs) return null;
   return settleServed(item);
 }
 

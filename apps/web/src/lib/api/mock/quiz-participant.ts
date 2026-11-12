@@ -108,7 +108,8 @@ function score(attempt: MockAttempt) {
   };
 }
 
-function settle(attempt: MockAttempt, closesAt: number, now: number): void {
+/** `graceMs` 0 when the client asked to move on (`/next`), as the API does. */
+function settle(attempt: MockAttempt, closesAt: number, now: number, graceMs = G): void {
   if (attempt.status !== 'in_progress') return;
   const closed = now >= closesAt + G;
   for (;;) {
@@ -119,7 +120,7 @@ function settle(attempt: MockAttempt, closesAt: number, now: number): void {
       return;
     }
     const open = item.servedAt !== null && item.outcome === null && item.lockedAt === null;
-    if (open && (closed || now > item.deadlineAt! + G)) {
+    if (open && (closed || now > item.deadlineAt! + graceMs)) {
       item.outcome = item.selectedOptionId ? 'auto' : 'timeout';
       attempt.cursor += 1;
       continue;
@@ -147,6 +148,7 @@ function toState(attempt: MockAttempt, closesAt: number, now: number, lastAction
             ? 'ready'
             : 'between';
   const totals = score(attempt);
+  const published = now >= window_(getState()).resultsAt;
   return {
     attemptId: attempt.id,
     status: attempt.status,
@@ -165,7 +167,7 @@ function toState(attempt: MockAttempt, closesAt: number, now: number, lastAction
         }
       : null,
     ...(lastAction ? { lastAction } : {}),
-    result: attempt.status === 'completed' ? { score: totals.score, total: totals.total, durationMs: totals.durationMs } : null,
+    result: attempt.status === 'completed' && published ? { score: totals.score, total: totals.total, durationMs: totals.durationMs } : null,
     windowClosesAt: new Date(closesAt).toISOString(),
     serverNow: new Date(now).toISOString()
   };
@@ -240,10 +242,10 @@ export function quizOverview(user: SessionUser): QuizOverview {
             status: attempt.status,
             answered: totals.answered,
             total: totals.total,
-            score: attempt.status === 'completed' ? totals.score : null,
-            durationMs: attempt.status === 'completed' ? totals.durationMs : null,
+            score: attempt.status === 'completed' && now >= resultsAt ? totals.score : null,
+            durationMs: attempt.status === 'completed' && now >= resultsAt ? totals.durationMs : null,
             voidReason: attempt.voidReason,
-            reviewAvailable: attempt.status === 'completed' && now >= closesAt
+            reviewAvailable: attempt.status === 'completed' && now >= resultsAt
           }
         : null
   };
@@ -252,7 +254,7 @@ export function quizOverview(user: SessionUser): QuizOverview {
 export function getReview(user: SessionUser): AttemptReview {
   const state = requireRegistered(user);
   const attempt = state.quizAttempt;
-  if (Date.now() < window_(state).closesAt) throw new QuizFailure(404, 'not_found', 'Answers are shown after the quiz closes.');
+  if (Date.now() < window_(state).resultsAt) throw new QuizFailure(404, 'not_found', 'Answers are shown once results are announced.');
   if (attempt?.status !== 'completed') throw new QuizFailure(404, 'not_found', 'There is no completed attempt to review.');
   const totals = score(attempt);
   return {
@@ -297,20 +299,32 @@ export const getAttempt = (user: SessionUser): AttemptState =>
 
 export const nextQuestion = (user: SessionUser): AttemptState =>
   withAttempt(user, (attempt, closesAt, now) => {
-    const item = attempt.items[attempt.cursor];
+    settle(attempt, closesAt, now, 0);
+    serve(attempt, closesAt, now);
+    return toState(attempt, closesAt, now);
+  });
+
+function serve(attempt: MockAttempt, closesAt: number, now: number): void {
+  settle(attempt, closesAt, now);
+  const item = attempt.items[attempt.cursor];
     if (attempt.status === 'in_progress' && item && item.servedAt === null && now < closesAt) {
       item.servedAt = now;
       item.deadlineAt = Math.min(now + item.timeLimitMs, closesAt);
     }
-    return toState(attempt, closesAt, now);
-  });
+}
 
 export function putItem(user: SessionUser, index: number, body: unknown): AttemptState {
   const parsed = putAttemptItemSchema.safeParse(body);
   if (!parsed.success) throw new QuizFailure(400, 'validation_failed', 'Check the answer and try again.');
-  const { optionId, lock } = parsed.data;
+  const { optionId, lock, next } = parsed.data;
 
   return withAttempt(user, (attempt, closesAt, now) => {
+    const lastAction = answer(attempt, now);
+    if (lock && next && attempt.cursor > index) serve(attempt, closesAt, now);
+    return toState(attempt, closesAt, now, lastAction);
+  });
+
+  function answer(attempt: MockAttempt, now: number): AttemptState['lastAction'] {
     const item = attempt.items[index];
     if (!item) throw new QuizFailure(400, 'validation_failed', 'That question does not exist.');
     if (item.servedAt !== null && !item.options.some((option) => option.id === optionId)) {
@@ -323,14 +337,14 @@ export function putItem(user: SessionUser, index: number, body: unknown): Attemp
         item.outcome = 'locked';
         attempt.cursor += 1;
       }
-      return toState(attempt, closesAt, now, { accepted: true });
+      return { accepted: true };
     }
     if (item.lockedAt !== null) {
-      if (item.selectedOptionId === optionId) return toState(attempt, closesAt, now, { accepted: true });
+      if (item.selectedOptionId === optionId) return { accepted: true };
       throw new QuizFailure(409, 'conflict', 'That answer is already locked in.', 'already_locked');
     }
-    return toState(attempt, closesAt, now, item.outcome !== null ? { accepted: false, reason: 'time_up' } : { accepted: false });
-  });
+    return item.outcome !== null ? { accepted: false, reason: 'time_up' } : { accepted: false };
+  }
 }
 
 /* ── Control: window.mockApi.setQuizState ───────────────────────────────── */

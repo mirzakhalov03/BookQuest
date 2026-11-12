@@ -261,6 +261,14 @@ question N+1 starts only when the client asks for it. If the connection drops ri
 the participant loses no time. Pausing *between* questions reveals nothing, because the next question
 hasn't been sent yet.
 
+> Revision (2026-11-12, after play-testing):
+> - **Continue replaces Confirm / "Locked in".** One tap sends `PUT …/items/:i {lock:true, next:true}`: the server locks and serves the next question in the same request (one round trip instead of two plus a 400 ms hold). The clock still starts at serve time, so this costs the participant nothing the separate `/next` didn't. Questions are still never sent ahead of time.
+> - **Grace is 5 s** (was 2 s): a tap made in time must not lose to a slow network.
+> - **`/next` settles an expired item at its deadline, not after the grace.** The client only calls it after its own in-flight selection has landed, so the longer grace never makes anyone wait. A second tab's in-grace tap can lose to it; acceptable.
+> - **Scores are sealed until `resultsAt`** in `AttemptState.result` and the overview; the completion screen shows the results date instead of a provisional score. **The answer review opens at `resultsAt` too** (was `quizClosesAt`), linked from `/results`.
+> - **Hand-off animation:** the question slides out while the next request runs and the next slides in; a time-out reads "Time's up · your answer was saved" first.
+> - **Screenshot deterrents** (not protection, which the web can't do): participant-number watermark, no selection/copy/long-press, blur while unfocused.
+
 ---
 
 ## 5. Admin user flows

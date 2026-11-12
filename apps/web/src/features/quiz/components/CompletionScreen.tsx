@@ -1,43 +1,38 @@
 import { useEffect, useRef } from 'react';
-import type { AttemptState } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { formatLongDate, formatStopwatch } from '@/lib/format';
+import { formatLongDate } from '@/lib/format';
 
 interface CompletionScreenProps {
-  result: NonNullable<AttemptState['result']>;
   resultsAt: string | null;
   /** Finalised by the window closing rather than the last answer. */
   closedEarly: boolean;
 }
 
-export function CompletionScreen({ result, resultsAt, closedEarly }: CompletionScreenProps) {
+/** No score here: results stay sealed until they're published for everyone at once. */
+export function CompletionScreen({ resultsAt, closedEarly }: CompletionScreenProps) {
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
   return (
     <div className="relative flex flex-1 flex-col items-center justify-center gap-6 text-center">
       {!reducedMotion && <Confetti />}
       <h1 className="type-display m-0 text-5xl text-paper">Done!</h1>
+      <p className="m-0 max-w-sm text-lg text-paper">Your answers are in and safely saved.</p>
       {closedEarly && (
         <p className="m-0 max-w-sm text-taupe">The quiz closed. Unanswered questions were counted as unanswered.</p>
       )}
-      <div className="flex items-end gap-10">
-        <Stat label="Score · provisional" value={`${result.score} / ${result.total}`} />
-        <Stat label="Time" value={formatStopwatch(result.durationMs)} />
-      </div>
-      {resultsAt && <p className="m-0 text-paper-dim">Results are published on {formatLongDate(resultsAt)}.</p>}
+      <p className="m-0 max-w-sm text-paper-dim">
+        {resultsAt ? (
+          <>
+            Results will be announced on <span className="text-paper">{formatLongDate(resultsAt)}</span>.
+          </>
+        ) : (
+          'Results will be announced soon.'
+        )}
+      </p>
       <Button to="/" variant="quiet">
         Back to Stage
       </Button>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="type-display text-4xl tabular-nums text-paper">{value}</span>
-      <span className="type-label">{label}</span>
     </div>
   );
 }

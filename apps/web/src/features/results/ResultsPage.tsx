@@ -12,6 +12,7 @@ import { useQuestResults } from './api/useQuestResults';
 import { ResultsPodium } from '@/components/ResultsPodium';
 import { LeaderboardRow } from '@/components/LeaderboardRow';
 import { FullBoardPrompt } from './components/FullBoardPrompt';
+import { ReviewAnswersLink } from './components/ReviewAnswersLink';
 
 /**
  * `/results` — public (spec §3). Signed out, the API sends only the podium;
@@ -55,6 +56,7 @@ export function ResultsPage() {
       <header className="flex flex-col gap-1">
         <p className="type-label">Results</p>
         <h1 className="type-display text-3xl text-paper">Published {formatLongDate(publishedAt)}</h1>
+        <ReviewAnswersLink />
       </header>
 
       <ResultsPodium entries={podium} />

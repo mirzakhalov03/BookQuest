@@ -3,7 +3,7 @@ import type { AttemptReview } from '@bookquest/shared';
 import { api } from '@/lib/api/client';
 import { quizKeys } from './quizKeys';
 
-/** Own answers with the key; the API 404s until the quiz closes. */
+/** Own answers with the key; the API 404s until results are announced. */
 export function useQuizReview() {
   return useQuery({
     queryKey: quizKeys.review(),

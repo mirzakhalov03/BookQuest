@@ -16,25 +16,30 @@ import { BetweenScreen } from './components/BetweenScreen';
 import { CompletionScreen } from './components/CompletionScreen';
 import { ConnectionBanner } from './components/ConnectionBanner';
 import { QuestionView } from './components/QuestionView';
+import { QuizGuard } from './components/QuizGuard';
 import { useOtherTabNotice } from './components/useOtherTabNotice';
 
-const LOCKED_IN_MS = 400;
+// Matches `.quiz-q-leave` in styles/quiz.css.
+const LEAVE_MS = 260;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** The question on screen while it animates out (`leaving`), then a loader if the next is still on its way. */
+type Hold = { question: AttemptQuestion; stage: 'leaving' | 'waiting' };
 
 /**
  * `/quiz/play` — renders whatever phase the server says. The only local state
- * is the "Locked in" hold and whether to move on by itself, which happens only
- * right after a lock or "I'm ready" in this session, never on a fresh load.
+ * is the hand-off hold and whether to move on by itself, which happens only
+ * right after an answer or "I'm ready" in this session, never on a fresh load.
  */
 export function QuizPlayPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { query, state, next, lock, select, refetch, saveStatus, failingSince } = useAttempt();
+  const { query, state, next, lock, select, flushSelection, refetch, saveStatus, failingSince } = useAttempt();
 
   // A session flag, seeded by "I'm ready"; the router state is cleared so a reload starts from the server's truth.
   const [autoAdvance, setAutoAdvance] = useState(() => (location.state as { autoStart?: boolean } | null)?.autoStart === true);
   const [advancing, setAdvancing] = useState(false);
-  const [hold, setHold] = useState<{ question: AttemptQuestion; optionId: string } | null>(null);
+  const [hold, setHold] = useState<Hold | null>(null);
 
   useEffect(() => {
     if (location.state) navigate(location.pathname, { replace: true, state: null });
@@ -58,19 +63,36 @@ export function QuizPlayPage() {
     else if (autoAdvance && phase === 'question') setAutoAdvance(false);
   }, [autoAdvance, advance, advancing, hold, phase]);
 
-  const confirm = useCallback(
-    async (target: AttemptQuestion, optionId: string) => {
-      setHold({ question: target, optionId });
-      setAutoAdvance(true);
-      const outcome = await lock({ index: target.index, body: { optionId, lock: true, signals: readSignals() } });
-      if (outcome === 'locked') {
-        haptic('reveal');
-        await sleep(LOCKED_IN_MS);
-      }
-      // Every other outcome already holds the server's state in the cache; just render it.
+  /**
+   * Slides `target` out while `request` fetches what comes next. The new question renders only once
+   * both are done, so the exit always plays in full; a slow request shows a loader after it.
+   */
+  const handOff = useCallback(async (target: AttemptQuestion, request: () => Promise<unknown>) => {
+    setHold({ question: target, stage: 'leaving' });
+    let landed = false;
+    const exit = sleep(LEAVE_MS).then(() => {
+      if (!landed) setHold({ question: target, stage: 'waiting' });
+    });
+    try {
+      await request();
+    } finally {
+      landed = true;
+      await exit;
+      // Whatever the outcome, the cache holds the server's state by now; just render it.
       setHold(null);
+    }
+  }, []);
+
+  // One request answers and serves the next question; `autoAdvance` covers a reply that stops at `between`.
+  const onContinue = useCallback(
+    (target: AttemptQuestion, optionId: string) => {
+      haptic('reveal');
+      setAutoAdvance(true);
+      void handOff(target, () =>
+        lock({ index: target.index, body: { optionId, lock: true, next: true, signals: readSignals() } })
+      );
     },
-    [lock, readSignals]
+    [handOff, lock, readSignals]
   );
 
   const onSelect = useCallback(
@@ -80,13 +102,15 @@ export function QuizPlayPage() {
   );
 
   const onExpire = useCallback(
-    (seenLive: boolean) => {
-      // Watched it run out: `next` settles it and serves the following question.
+    async (target: AttemptQuestion, seenLive: boolean) => {
       // Opened onto a dead clock: a read settles it and lands on the between screen instead.
-      if (seenLive) void advance();
-      else void refetch();
+      if (!seenLive) return void refetch();
+      // Watched it run out: let a tap still in flight land first, then `next` settles it and serves the following one.
+      await flushSelection();
+      setAutoAdvance(false);
+      await handOff(target, next);
     },
-    [advance, refetch]
+    [flushSelection, handOff, next, refetch]
   );
 
   useQuestionBackButton(phase === 'question' || hold !== null);
@@ -117,19 +141,23 @@ export function QuizPlayPage() {
       return <LoadingState label="Opening your quiz…" />;
     }
 
+    if (hold?.stage === 'waiting') return <LoadingState label="Next question…" />;
+
     if (question) {
       return (
-        <QuestionView
-          key={`${question.index}:${question.deadlineAt}`}
-          question={question}
-          total={state.position.total}
-          version={state.serverNow}
-          lockedOptionId={hold?.optionId ?? null}
-          saveStatus={saveStatus}
-          onSelect={(optionId) => onSelect(question, optionId)}
-          onConfirm={(optionId) => void confirm(question, optionId)}
-          onExpire={onExpire}
-        />
+        <QuizGuard>
+          <QuestionView
+            key={`${question.index}:${question.deadlineAt}`}
+            question={question}
+            total={state.position.total}
+            version={state.serverNow}
+            leaving={hold !== null}
+            saveStatus={saveStatus}
+            onSelect={(optionId) => onSelect(question, optionId)}
+            onContinue={(optionId) => onContinue(question, optionId)}
+            onExpire={(seenLive) => void onExpire(question, seenLive)}
+          />
+        </QuizGuard>
       );
     }
 
@@ -147,17 +175,16 @@ export function QuizPlayPage() {
           />
         );
       case 'completed':
-        return <Completed closedEarly={Date.parse(state.serverNow) >= Date.parse(state.windowClosesAt)} result={state.result} />;
+        return <Completed closedEarly={Date.parse(state.serverNow) >= Date.parse(state.windowClosesAt)} />;
       case 'voided':
         return <Voided />;
     }
   }
 }
 
-function Completed({ result, closedEarly }: { result: NonNullable<ReturnType<typeof useAttempt>['state']>['result']; closedEarly: boolean }) {
+function Completed({ closedEarly }: { closedEarly: boolean }) {
   const { data: quest } = useCurrentQuest();
-  if (!result) return <LoadingState label="Adding it up…" />;
-  return <CompletionScreen result={result} resultsAt={quest?.resultsAt ?? null} closedEarly={closedEarly} />;
+  return <CompletionScreen resultsAt={quest?.resultsAt ?? null} closedEarly={closedEarly} />;
 }
 
 /** The attempt state carries no reason; the overview does. */

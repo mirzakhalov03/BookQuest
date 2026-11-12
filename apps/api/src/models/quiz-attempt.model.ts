@@ -72,6 +72,8 @@ const quizAttemptSchema = new Schema(
 // One attempt per person per quest: the guarantee behind the start race.
 quizAttemptSchema.index({ quest: 1, participant: 1 }, { unique: true, name: 'quest_participant_unique' });
 quizAttemptSchema.index({ quest: 1, status: 1 }, { name: 'quest_status' });
+// Play requests read the attempt by user, in parallel with the participant lookup.
+quizAttemptSchema.index({ quest: 1, user: 1 }, { name: 'quest_user' });
 quizAttemptSchema.index({ quiz: 1, status: 1 }, { name: 'quiz_status' });
 
 export type AttemptAttributes = InferSchemaType<typeof quizAttemptSchema>;

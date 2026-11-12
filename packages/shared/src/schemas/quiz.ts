@@ -128,6 +128,8 @@ export type QuizConfigInput = z.infer<typeof quizConfigInputSchema>;
 export const putAttemptItemSchema = z.strictObject({
   optionId: idString,
   lock: z.boolean(),
+  /** With `lock`: serve the following question in the same request, so moving on costs one round trip. */
+  next: z.boolean().optional(),
   clientId: z.string().min(8).max(64),
   signals: z
     .strictObject({

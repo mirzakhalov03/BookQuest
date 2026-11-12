@@ -9,6 +9,7 @@ import { quizKeys } from './quizKeys';
 const TIMEOUT_MS = 8000;
 const RESEND_AFTER_MS = 3000;
 const CLIENT_ID_KEY = 'bq.quiz.clientId';
+const PICK_KEY = 'bq.quiz.pick';
 
 /* ── Per-tab client id ──────────────────────────────────────────────────── */
 
@@ -29,6 +30,29 @@ function readClientId(): string {
     return fresh;
   } catch {
     return FALLBACK_CLIENT_ID;
+  }
+}
+
+/* ── Last unacknowledged pick ───────────────────────────────────────────── */
+
+// Local storage, so a tap survives a reload or the webview being killed before the server acked it.
+type StoredPick = { attemptId: string; index: number; optionId: string };
+
+function storePick(pick: StoredPick | null): void {
+  try {
+    if (pick) window.localStorage.setItem(PICK_KEY, JSON.stringify(pick));
+    else window.localStorage.removeItem(PICK_KEY);
+  } catch {
+    // Blocked storage: the in-memory resend still covers this session.
+  }
+}
+
+function readPick(): StoredPick | null {
+  try {
+    const raw = window.localStorage.getItem(PICK_KEY);
+    return raw ? (JSON.parse(raw) as StoredPick) : null;
+  } catch {
+    return null;
   }
 }
 
@@ -216,7 +240,9 @@ export function useAttempt() {
     lockedIndex: number | null;
     /** The latest tap that never got an ack; re-sent on reconnect while its question is live. */
     unsent: Pending | null;
-  }>({ inFlight: false, queued: null, lockedIndex: null, unsent: null });
+    /** Settles when the in-flight selection loop ends; awaited before moving on at time-up. */
+    drained: Promise<void>;
+  }>({ inFlight: false, queued: null, lockedIndex: null, unsent: null, drained: Promise.resolve() });
 
   // A tap that gave up while still online (e.g. 5xx) is retried on a short timer, not only on reconnect.
   const resendTimer = useRef<number | undefined>(undefined);
@@ -232,11 +258,15 @@ export function useAttempt() {
       const lane = selection.current;
       if (lane.lockedIndex === pending.index) return;
       lane.unsent = null;
+      const attemptId = queryClient.getQueryData<AttemptState>(quizKeys.attempt())?.attemptId;
+      if (attemptId) storePick({ attemptId, index: pending.index, optionId: pending.body.optionId });
       if (lane.inFlight) {
         lane.queued = pending;
         return;
       }
       lane.inFlight = true;
+      let drain = () => {};
+      lane.drained = new Promise<void>((resolve) => (drain = resolve));
       let current: Pending | null = pending;
       let last: SendResult | null = null;
       let sentFor: Pending = pending;
@@ -249,15 +279,20 @@ export function useAttempt() {
         lane.queued = null;
       }
       lane.inFlight = false;
-      // A lock that went out meanwhile owns the status line; a newer question owns its own.
-      if (lane.lockedIndex !== null || !isLive(sentFor.index)) return;
+      drain();
       // "Saved" only when the server holds exactly this tap (§6).
       const acked = typeof last === 'object' && last !== null && last.question?.selectedOptionId === sentFor.body.optionId;
+      if (acked || !lane.unsent) storePick(null);
+      // A lock that went out meanwhile owns the status line; a newer question owns its own.
+      if (lane.lockedIndex !== null || !isLive(sentFor.index)) return;
       setSaveStatus(acked ? 'saved' : lane.unsent ? 'retrying' : 'idle');
       if (lane.unsent) scheduleResend();
     },
-    [isLive, send, scheduleResend]
+    [isLive, queryClient, send, scheduleResend]
   );
+
+  /** Waits for the selection in flight (bounded by its cutoff), so moving on never outruns a save. */
+  const flushSelection = useCallback(() => selection.current.drained, []);
 
   const lock = useCallback(
     async (pending: Pending): Promise<LockOutcome> => {
@@ -265,6 +300,7 @@ export function useAttempt() {
       lane.queued = null;
       lane.unsent = null;
       lane.lockedIndex = pending.index;
+      storePick(null);
       setSaveStatus('saving');
       const result = await send(pending);
       setSaveStatus('idle');
@@ -320,8 +356,27 @@ export function useAttempt() {
   onReturn.current = resendUnsent;
   resendRef.current = resendUnsent;
 
+  // After a reload: a pick the server never acked is re-sent while its question is still live.
+  const attemptId = query.data?.attemptId;
+  const liveIndex = query.data?.question?.index;
+  useEffect(() => {
+    const data = queryClient.getQueryData<AttemptState>(quizKeys.attempt());
+    const stored = data && readPick();
+    if (!data || !stored) return;
+    const live = data.question;
+    if (!live || stored.attemptId !== data.attemptId || stored.index !== live.index || live.selectedOptionId === stored.optionId) {
+      // Nothing left to resend: it landed, the question moved on, or it's another attempt.
+      storePick(null);
+      return;
+    }
+    selection.current.unsent = { index: stored.index, body: { optionId: stored.optionId, lock: false } };
+    resendUnsent();
+    // Once per question this page sees.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attemptId, liveIndex]);
+
   // Mirrors withRetry's state onto the status line while a selection keeps failing.
   const status: SaveStatus = saveStatus === 'saving' && failingSince !== null ? 'retrying' : saveStatus;
 
-  return { query, state: query.data, next, put, lock, select, refetch, saveStatus: status, failingSince };
+  return { query, state: query.data, next, put, lock, select, flushSelection, refetch, saveStatus: status, failingSince };
 }

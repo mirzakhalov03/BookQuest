@@ -20,7 +20,7 @@ const OUTCOME_LABEL = {
 
 const chipLabel = (item: ReviewItem): string => (item.voided ? 'Voided' : item.outcome ? OUTCOME_LABEL[item.outcome] : 'Not reached');
 
-/** `/quiz/review` — own answers beside the key, read-only; opens once the quiz has closed. */
+/** `/quiz/review` — own answers beside the key, read-only; opens with the results. */
 export function QuizReviewPage() {
   const { data, error, refetch } = useQuizReview();
 
@@ -57,8 +57,9 @@ export function QuizReviewPage() {
           <ReviewCard key={item.index} item={item} total={data.items.length} />
         ))}
       </ol>
-      <Button to="/quiz" variant="quiet" className="self-center">
-        Back to quiz
+      {/* Only reachable after results, when `/quiz` redirects to `/results` anyway. */}
+      <Button to="/results" variant="quiet" className="self-center">
+        Back to results
       </Button>
     </Screen>
   );

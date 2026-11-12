@@ -40,7 +40,7 @@ import {
   settleServed
 } from './quiz-scoring.js';
 
-type QuizWindow = Pick<QuestRow, 'quizClosesAt'>;
+type QuizWindow = Pick<QuestRow, 'quizClosesAt' | 'resultsAt'>;
 type FinalizedBy = 'participant' | 'sweep' | 'ranking';
 type LastAction = NonNullable<AttemptState['lastAction']>;
 
@@ -60,7 +60,7 @@ const MSG = {
   completed: 'You have already completed the quiz.',
   voided: 'Your attempt was withdrawn by the organisers.',
   locked: 'That answer is already locked in.',
-  reviewLocked: 'Answers are shown after the quiz closes.',
+  reviewLocked: 'Answers are shown once results are announced.',
   reviewUnavailable: 'There is no completed attempt to review.'
 } as const;
 
@@ -69,10 +69,15 @@ const MSG = {
 type ParticipantContext = { quest: QuestDocument; participant: Participant; now: Date };
 type AttemptContext = ParticipantContext & { attempt: AttemptRow };
 
-async function requireParticipantContext(user: UserDocument): Promise<ParticipantContext> {
-  const now = new Date();
+async function requireQuest(): Promise<QuestDocument> {
   const quest = await findCurrentQuestDocument();
   if (!quest) throw ApiError.notFound(MSG.noQuest, { reason: 'not_configured' });
+  return quest;
+}
+
+async function requireParticipantContext(user: UserDocument): Promise<ParticipantContext> {
+  const now = new Date();
+  const quest = await requireQuest();
   const participant = await findParticipantForUser(user, quest);
   if (!participant) throw ApiError.notFound(MSG.notRegistered);
   return { quest, participant, now };
@@ -82,11 +87,17 @@ function findAttempt(questId: Types.ObjectId, participantId: string): Promise<At
   return QuizAttemptModel.findOne({ quest: questId, participant: participantId }).lean<AttemptRow>();
 }
 
+/** Every play request starts here, so the attempt is read by user, in parallel with the participant. */
 async function requireAttemptContext(user: UserDocument): Promise<AttemptContext> {
-  const context = await requireParticipantContext(user);
-  const attempt = await findAttempt(context.quest._id, context.participant.id);
-  if (!attempt) throw ApiError.notFound(MSG.notStarted);
-  return { ...context, attempt };
+  const now = new Date();
+  const quest = await requireQuest();
+  const [participant, attempt] = await Promise.all([
+    findParticipantForUser(user, quest),
+    QuizAttemptModel.findOne({ quest: quest._id, user: user._id }).lean<AttemptRow>()
+  ]);
+  if (!participant) throw ApiError.notFound(MSG.notRegistered);
+  if (!attempt || String(attempt.participant) !== participant.id) throw ApiError.notFound(MSG.notStarted);
+  return { quest, participant, now, attempt };
 }
 
 async function reload(attempt: AttemptRow): Promise<AttemptRow> {
@@ -144,14 +155,15 @@ function nextSettleStep(
   attempt: AttemptRow,
   quest: QuizWindow,
   now: Date,
-  by: FinalizedBy
+  by: FinalizedBy,
+  graceMs: number
 ): (() => Promise<unknown>) | null {
   const index = attempt.cursor;
   const item = itemAt(attempt, index);
   if (!item) return () => finalizeAttempt(attempt._id, by);
 
   const closed = now.getTime() >= quest.quizClosesAt.getTime() + G;
-  const settled = closed ? settleServed(item) : resolveExpired(item, now);
+  const settled = closed ? settleServed(item) : resolveExpired(item, now, graceMs);
   if (settled) return () => settleItem(attempt, index, settled);
   if (closed) return () => closeOut(attempt);
   return null;
@@ -162,11 +174,12 @@ export async function settleAttempt(
   attempt: AttemptRow,
   quest: QuizWindow,
   now: Date,
-  by: FinalizedBy = 'participant'
+  by: FinalizedBy = 'participant',
+  graceMs = G
 ): Promise<AttemptRow> {
   let current = attempt;
   for (let pass = 0; pass < MAX_SETTLE_PASSES && current.status === 'in_progress'; pass++) {
-    const step = nextSettleStep(current, quest, now, by);
+    const step = nextSettleStep(current, quest, now, by, graceMs);
     if (!step) break;
     await step();
     current = await reload(current);
@@ -360,6 +373,8 @@ export function toAttemptState(
 ): AttemptState {
   const item = itemAt(attempt, attempt.cursor);
   const live = attempt.status === 'in_progress' && isLive(item, now);
+  // Scores stay sealed until results day, so nobody compares or reverse-engineers answers meanwhile.
+  const published = now >= quest.resultsAt;
   return {
     attemptId: String(attempt._id),
     status: attempt.status,
@@ -368,7 +383,7 @@ export function toAttemptState(
     question: live ? toQuestion(item!, attempt.cursor) : null,
     ...(lastAction ? { lastAction } : {}),
     result:
-      attempt.status === 'completed'
+      attempt.status === 'completed' && published
         ? { score: attempt.score ?? 0, total: attempt.total ?? 0, durationMs: attempt.durationMs ?? 0 }
         : null,
     windowClosesAt: quest.quizClosesAt.toISOString(),
@@ -423,11 +438,13 @@ async function overviewQuiz(
   };
 }
 
+// With the results, not at close: the key would otherwise give away every score early.
 const reviewOpen = (attempt: AttemptRow, quest: QuizWindow, now: Date): boolean =>
-  attempt.status === 'completed' && now >= quest.quizClosesAt;
+  attempt.status === 'completed' && now >= quest.resultsAt;
 
 function toOverviewAttempt(attempt: AttemptRow, quest: QuizWindow, now: Date): NonNullable<QuizOverview['attempt']> {
-  const completed = attempt.status === 'completed';
+  // Sealed until results day, as in `toAttemptState`.
+  const completed = attempt.status === 'completed' && now >= quest.resultsAt;
   return {
     status: attempt.status,
     answered: scoreItems(attempt.items).answered,
@@ -466,10 +483,10 @@ export async function getOverview(user: UserDocument, now = new Date()): Promise
 
 /* ── Review (§8.1) ──────────────────────────────────────────────────────── */
 
-/** The only participant path that serialises the answer key: gated on close and a completed attempt. */
+/** The only participant path that serialises the answer key: gated on results and a completed attempt. */
 export async function getReview(user: UserDocument, now = new Date()): Promise<AttemptReview> {
   const { quest, attempt } = await requireAttemptContext(user);
-  if (now < quest.quizClosesAt) throw ApiError.notFound(MSG.reviewLocked);
+  if (now < quest.resultsAt) throw ApiError.notFound(MSG.reviewLocked);
   if (attempt.status !== 'completed') throw ApiError.notFound(MSG.reviewUnavailable);
   return {
     items: attempt.items.map((item, index) => ({
@@ -613,13 +630,21 @@ export async function getAttemptState(user: UserDocument): Promise<AttemptState>
   return toAttemptState(await settleAttempt(attempt, quest, now), quest, now);
 }
 
+/**
+ * The client calls this only after its own saves have landed, so an expired question is settled at
+ * its deadline rather than after the grace: moving on never waits out a grace the client doesn't need.
+ */
 export async function serveNext(user: UserDocument): Promise<AttemptState> {
   const { quest, attempt: loaded, now } = await requireAttemptContext(user);
-  let attempt = await settleAttempt(loaded, quest, now);
+  const attempt = await settleAttempt(loaded, quest, now, 'participant', 0);
+  return toAttemptState(await serveFrom(attempt, quest, now), quest, now);
+}
 
+/** Serves `items[cursor]` if it hasn't been yet; a live item is returned unchanged, with its original deadline. */
+async function serveFrom(settled: AttemptRow, quest: QuestDocument, now: Date): Promise<AttemptRow> {
+  let attempt = settled;
   const index = attempt.cursor;
   const item = itemAt(attempt, index);
-  // A served item (live) is returned unchanged, with its original deadline.
   if (attempt.status === 'in_progress' && item && item.servedAt == null) {
     if (now >= quest.quizClosesAt) {
       // Nothing can be served any more, so there is nothing left to wait for.
@@ -640,7 +665,7 @@ export async function serveNext(user: UserDocument): Promise<AttemptState> {
     // Matched or not (another tab served it), the reloaded state is the answer.
     attempt = await settleAttempt(await reload(attempt), quest, now);
   }
-  return toAttemptState(attempt, quest, now);
+  return attempt;
 }
 
 function answerUpdate(
@@ -696,8 +721,10 @@ export async function putItem(user: UserDocument, index: number, body: PutAttemp
     throw ApiError.badRequest('That is not one of the options.', { optionId: 'Not an option for this question.' });
   }
 
+  let lastAction: LastAction | null = null;
   if (attempt.status === 'in_progress' && attempt.cursor === index && isLive(item, now)) {
-    const { matchedCount } = await QuizAttemptModel.updateOne(
+    // Returns the written document, saving the reload round trip on the hot path.
+    const written = await QuizAttemptModel.findOneAndUpdate(
       {
         _id: attempt._id,
         status: 'in_progress',
@@ -706,10 +733,14 @@ export async function putItem(user: UserDocument, index: number, body: PutAttemp
         [itemPath(index, 'servedAt')]: IS_DATE,
         [itemPath(index, 'deadlineAt')]: { $gte: new Date(now.getTime() - G) }
       },
-      answerUpdate(attempt, item, index, body, now)
-    );
-    attempt = await settleAttempt(await reload(attempt), quest, now);
-    if (matchedCount === 1) return toAttemptState(attempt, quest, now, { accepted: true });
+      answerUpdate(attempt, item, index, body, now),
+      { new: true }
+    ).lean<AttemptRow>();
+    attempt = await settleAttempt(written ?? (await reload(attempt)), quest, now);
+    if (written) lastAction = { accepted: true };
   }
-  return toAttemptState(attempt, quest, now, rejectedAction(attempt, index, body));
+  lastAction ??= rejectedAction(attempt, index, body);
+  // "Continue": the question is behind us (locked, or timed out meanwhile), so serve the next one now.
+  if (body.lock && body.next && attempt.cursor > index) attempt = await serveFrom(attempt, quest, now);
+  return toAttemptState(attempt, quest, now, lastAction);
 }

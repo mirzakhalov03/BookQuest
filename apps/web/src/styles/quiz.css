@@ -1,0 +1,81 @@
+/* ── Quiz play: question hand-off ─────────────────────────────────────
+   The old question slides out left and the new one slides in from the right,
+   so a time-out never reads as the same screen silently changing. */
+
+.quiz-q-enter {
+  animation: quiz-q-in 360ms var(--ease-out-quest) both;
+}
+
+.quiz-q-leave {
+  animation: quiz-q-out 260ms var(--ease-soft) both;
+  pointer-events: none;
+}
+
+@keyframes quiz-q-in {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+
+@keyframes quiz-q-out {
+  to {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+}
+
+/* Reduced motion: a plain cross-fade, still noticeable. */
+@media (prefers-reduced-motion: reduce) {
+  .quiz-q-enter,
+  .quiz-q-leave {
+    animation-name: quiz-fade;
+  }
+  .quiz-q-leave {
+    animation-direction: reverse;
+  }
+}
+
+@keyframes quiz-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ── Deterrents (not protection: screenshots can't be blocked on the web) ── */
+
+.quiz-guard {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Blurred while the app is in the background or unfocused (task-switcher previews, desktop capture tools). */
+.quiz-guard[data-obscured='true'] .quiz-guard-content {
+  filter: blur(14px);
+  transition: filter 120ms linear;
+}
+
+.quiz-watermark {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--color-paper);
+  opacity: 0.055;
+}
+
+.quiz-watermark > div {
+  position: absolute;
+  inset: -50%;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 3.5rem 4.5rem;
+  transform: rotate(-24deg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
