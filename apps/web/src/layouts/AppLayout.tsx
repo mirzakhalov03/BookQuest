@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router';
 import { TabBar } from '@/components/layout/TabBar';
 import { Toast } from '@/components/ui/Toast';
+import { useKeyboardFlag } from '@/hooks/useKeyboardFlag';
 
 /**
  * The shell every screen sits in: atmosphere behind, content in the middle,
@@ -17,8 +18,9 @@ import { Toast } from '@/components/ui/Toast';
  */
 export function AppLayout() {
   const { pathname } = useLocation();
+  useKeyboardFlag();
   // Chrome-less routes: no *participant* bottom tab bar. The admin area
-  // (`AdminLayout`) renders its own bottom tab bar for its own six
+  // (`AdminLayout`) renders its own bottom tab bar for its own
   // destinations, so it stays off this one rather than getting two. The
   // number reveal is the one participant screen the design never puts a tab
   // bar under — nothing should pull the eye off the number.

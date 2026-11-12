@@ -4,6 +4,7 @@ import type { SessionUser } from '@bookquest/shared';
 import { getInitData } from '@/lib/telegram';
 import { fetchMe, loginWithTelegram } from './authApi';
 import { clearToken, readToken } from './tokenStore';
+import { forgetPrivateCache } from '@/lib/queryClient';
 
 export const authKeys = {
   all: ['auth'] as const,
@@ -85,6 +86,7 @@ export function useAuth(): Auth {
   const signOut = useCallback(() => {
     clearToken();
     setSessionUser(queryClient, null);
+    forgetPrivateCache();
   }, [queryClient]);
 
   return {

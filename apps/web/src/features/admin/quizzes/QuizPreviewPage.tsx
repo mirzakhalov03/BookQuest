@@ -1,20 +1,22 @@
-import { useMemo, useState } from 'react';
-import { useLocation, useParams } from 'react-router';
-import { ArrowLeft, RotateCcw } from 'lucide-react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { Link, useLocation, useParams } from 'react-router';
+import { ArrowLeft, ChevronLeft, ChevronRight, Eye, EyeOff, RotateCcw } from 'lucide-react';
 import { effectiveTimeLimitSec } from '@bookquest/shared';
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { Button } from '@/components/ui/Button';
-import { Switch } from '@/components/ui/Switch';
 import { ProgressRail } from '@/components/quiz/ProgressRail';
 import { QuestionCard } from '@/components/quiz/QuestionCard';
 import { QuestionTimer } from '@/components/quiz/QuestionTimer';
 import { useCountdownTo } from '@/components/quiz/useCountdownTo';
 import { useQuiz } from '../api/useQuizzes';
-import { AdminPageHeader } from '../components/AdminPageHeader';
 import { AdminQuery } from '../components/AdminQuery';
 import { readDraft, toQuizFormState, type QuizFormState } from './quizForm';
 
-type AnswersMode = 'hidden' | 'shown';
+// 44px squares: the preview's controls are icons, named for screen readers by `aria-label`.
+const ICON_BASE =
+  'flex h-11 w-11 shrink-0 items-center justify-center rounded-box border transition-colors disabled:opacity-30';
+const ICON_BUTTON = `${ICON_BASE} border-[color:var(--rule)] text-paper-dim hover:text-paper`;
+const ICON_BUTTON_ON = `${ICON_BASE} border-gold/50 text-gold-soft`;
 
 /** `/admin/quizzes/:id/preview` — step through a quiz as a participant sees it. Writes nothing. */
 export function QuizPreviewPage() {
@@ -40,7 +42,7 @@ const readNow = () => Date.now();
 function Preview({ quizId, content }: { quizId: string; content: QuizFormState }) {
   const { questions, settings } = content;
   const [index, setIndex] = useState(0);
-  const [answers, setAnswers] = useState<AnswersMode>('hidden');
+  const [showAnswers, setShowAnswers] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [deadline, setDeadline] = useState(() =>
     questions[0] ? Date.now() + effectiveTimeLimitSec(questions[0], settings) * 1000 : null
@@ -71,9 +73,8 @@ function Preview({ quizId, content }: { quizId: string; content: QuizFormState }
   if (!question) {
     return (
       <AdminScreen className="max-w-2xl">
-        <AdminPageHeader eyebrow="Preview" title={content.title} />
+        <PreviewHeader title={content.title} backToEditor={backToEditor} />
         <p className="m-0 text-taupe">This quiz has no questions yet.</p>
-        <BackLink {...backToEditor} />
       </AdminScreen>
     );
   }
@@ -82,21 +83,20 @@ function Preview({ quizId, content }: { quizId: string; content: QuizFormState }
   const timeUp = deadline !== null && remaining === 0;
 
   return (
-    <AdminScreen className="max-w-2xl">
-      <AdminPageHeader
-        eyebrow="Preview · nothing is saved"
+    <AdminScreen className="max-w-2xl gap-5">
+      <PreviewHeader
         title={content.title}
-        titleClassName="text-2xl"
-        actions={
-          <Switch
+        backToEditor={backToEditor}
+        action={
+          <button
+            type="button"
             aria-label="Show answers"
-            options={[
-              { value: 'hidden', label: 'Hide answers' },
-              { value: 'shown', label: 'Show answers' }
-            ]}
-            value={answers}
-            onChange={setAnswers}
-          />
+            aria-pressed={showAnswers}
+            onClick={() => setShowAnswers((shown) => !shown)}
+            className={showAnswers ? ICON_BUTTON_ON : ICON_BUTTON}
+          >
+            {showAnswers ? <Eye className="h-5 w-5" aria-hidden /> : <EyeOff className="h-5 w-5" aria-hidden />}
+          </button>
         }
       />
 
@@ -110,36 +110,58 @@ function Preview({ quizId, content }: { quizId: string; content: QuizFormState }
       <QuestionCard
         question={cardQuestion!}
         selectedOptionId={selected}
-        revealCorrectOptionId={answers === 'shown' ? question.correctOptionId : null}
+        revealCorrectOptionId={showAnswers ? question.correctOptionId : null}
         disabled={timeUp}
         onSelect={setSelected}
       />
 
-      {timeUp && (
-        <p className="m-0 text-amber">Time's up. Participants move on automatically; here you can restart the clock.</p>
-      )}
+      {timeUp && <p className="m-0 text-sm text-amber">Time's up — participants move on automatically.</p>}
 
       <div className="flex items-center justify-between gap-3">
-        <Button type="button" variant="quiet" disabled={index === 0} onClick={() => startQuestion(index - 1)} className="min-h-11 px-3">
-          Back
-        </Button>
-        <Button type="button" variant="quiet" onClick={() => startQuestion(index)} className="min-h-11 gap-2 px-3">
-          <RotateCcw className="h-4 w-4" aria-hidden /> Restart timer
-        </Button>
-        <Button type="button" disabled={index === questions.length - 1} onClick={() => startQuestion(index + 1)} className="min-h-11 px-5">
-          Next
+        <button
+          type="button"
+          aria-label="Previous question"
+          disabled={index === 0}
+          onClick={() => startQuestion(index - 1)}
+          className={ICON_BUTTON}
+        >
+          <ChevronLeft className="h-5 w-5" aria-hidden />
+        </button>
+        <button type="button" aria-label="Restart timer" onClick={() => startQuestion(index)} className={ICON_BUTTON}>
+          <RotateCcw className="h-[1.125rem] w-[1.125rem]" aria-hidden />
+        </button>
+        <Button
+          type="button"
+          aria-label="Next question"
+          disabled={index === questions.length - 1}
+          onClick={() => startQuestion(index + 1)}
+          className="w-11 px-0"
+        >
+          <ChevronRight className="h-5 w-5" aria-hidden />
         </Button>
       </div>
-
-      <BackLink {...backToEditor} />
     </AdminScreen>
   );
 }
 
-function BackLink({ to, state }: { to: string; state: { draft: QuizFormState } }) {
+interface PreviewHeaderProps {
+  title: string;
+  backToEditor: { to: string; state: { draft: QuizFormState } };
+  action?: ReactNode;
+}
+
+/** One quiet row: way back, what this is, the answers toggle. The title matters less once you're inside. */
+function PreviewHeader({ title, backToEditor, action }: PreviewHeaderProps) {
   return (
-    <Button to={to} state={state} variant="quiet" className="min-h-11 gap-2 self-start px-0">
-      <ArrowLeft className="h-4 w-4" aria-hidden /> Back to editor
-    </Button>
+    <header className="flex items-center gap-3">
+      <Link to={backToEditor.to} state={backToEditor.state} aria-label="Back to editor" className={ICON_BUTTON}>
+        <ArrowLeft className="h-5 w-5" aria-hidden />
+      </Link>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <span className="type-label">Preview · not saved</span>
+        <h1 className="m-0 truncate text-base font-semibold text-paper">{title}</h1>
+      </div>
+      {action}
+    </header>
   );
 }

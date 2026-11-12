@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '@/lib/queryClient';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { forgetPrivateCache, persistOptions, queryClient } from '@/lib/queryClient';
 import { ApiRequestError, registerReauthenticate } from '@/lib/api/client';
 import { fetchMe, loginWithTelegram, reauthenticate } from '@/lib/auth/authApi';
 import { clearToken, readToken } from '@/lib/auth/tokenStore';
@@ -10,9 +10,9 @@ import { BootSplash } from './BootSplash';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
       <AuthProvider>{children}</AuthProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
 
@@ -28,6 +28,7 @@ async function resolveSession(): Promise<void> {
       // Inside Telegram as someone other than the stored session: Telegram decides. Fall through to branch 2.
       clearToken();
       queryClient.removeQueries({ queryKey: authKeys.all });
+      forgetPrivateCache();
     } catch (error) {
       // Don't leave the failure cached under the key a later sign-in writes to.
       queryClient.removeQueries({ queryKey: authKeys.all });

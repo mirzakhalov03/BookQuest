@@ -165,7 +165,7 @@
   bottom: 0;
   z-index: 4;
   display: grid;
-  /* Any number of tabs: the participant bar has five, admin six. */
+  /* Any number of tabs: both bars currently have five. */
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
   /* The active tab's 92px glow would poke past the screen edge on an end tab; clip only sideways, so the
@@ -196,7 +196,7 @@
   transition: color 180ms linear;
 }
 
-/* Six admin tabs at 360px: a long label ellipsises instead of running into its neighbour. */
+/* At 360px a long label ellipsises instead of running into its neighbour. */
 .tab span {
   max-width: 100%;
   padding-inline: 2px;
@@ -221,6 +221,19 @@
 
 .tab.is-on {
   color: var(--color-ember);
+}
+
+/* Phones: while the keyboard is up (`useKeyboardFlag`) the bar would ride on top of it. Zeroing the
+   offsets also drops the save bar and dock that sit above the tab bar down to the keyboard's edge. */
+@media (pointer: coarse) and (max-width: 899px) {
+  :root[data-keyboard] {
+    --tabbar-h: 0px;
+    --safe-b: 0px;
+  }
+
+  :root[data-keyboard] .tabbar {
+    display: none;
+  }
 }
 
 /* The bookmark notch, hanging off the top rule of the bar. */

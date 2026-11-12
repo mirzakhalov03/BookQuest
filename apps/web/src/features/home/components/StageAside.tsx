@@ -14,7 +14,6 @@ export function StageAside(props: StageAsideProps) {
   if (props.variant === 'left') {
     return (
       <div className="stage__aside stage__aside--left">
-        <p className="tag">On the stage</p>
         {/* `/`'s one heading — no other element on Home outranks the book
             itself. `.booktitle`'s look comes from the class, not the tag, so
             promoting it from h2 to h1 changes nothing visually. */}

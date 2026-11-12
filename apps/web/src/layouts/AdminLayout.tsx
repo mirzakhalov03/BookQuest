@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   Home,
@@ -8,10 +8,12 @@ import {
   BarChart3,
   Megaphone,
   MessageSquare,
-  ListChecks
+  ListChecks,
+  Ellipsis
 } from 'lucide-react';
-import { Link, NavLink, Outlet } from 'react-router';
+import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { FieldSizeContext } from '@/components/ui/fieldSize';
+import { Sheet } from '@/components/ui/Sheet';
 
 interface Tab {
   to: string;
@@ -20,20 +22,19 @@ interface Tab {
 }
 
 /**
- * The seven admin destinations, dashboard first. `end` only matters for the
- * dashboard link below — every other tab is already its own exact path.
- * Bottom-positioned and styled with `.tabbar`/`.tab` — the same classes
- * `TabBar` uses (`shell.css`, recomposed for desktop in `stage.css`) — so
- * admin reads as the same product's navigation, not a second one. A separate
- * component rather than reusing `TabBar` itself: that component's doc
- * comment locks it to the participant side's five destinations (spec §4 rule
- * 3), and admin's seven are a different set going to different places.
+ * Daily destinations stay on the bar; the rest live behind "More" so five
+ * slots fit a 360px phone without labels ellipsising. Styled with the same
+ * `.tabbar`/`.tab` classes as the participant `TabBar`, but its own component:
+ * that one is locked to the participant side's five destinations (spec §4 rule 3).
  */
-const TABS: Tab[] = [
+const PRIMARY_TABS: Tab[] = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/participants', label: 'Participants', icon: Users },
   { to: '/admin/quest', label: 'Quest', icon: BookOpen },
-  { to: '/admin/quizzes', label: 'Quizzes', icon: ListChecks },
+  { to: '/admin/quizzes', label: 'Quizzes', icon: ListChecks }
+];
+
+const MORE_TABS: Tab[] = [
   { to: '/admin/results', label: 'Results', icon: BarChart3 },
   { to: '/admin/broadcast', label: 'Broadcast', icon: Megaphone },
   { to: '/admin/messages', label: 'Messages', icon: MessageSquare }
@@ -87,20 +88,58 @@ function AdminNav() {
 }
 
 function AdminTabBar() {
+  const { pathname } = useLocation();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const inMore = MORE_TABS.some(({ to }) => pathname.startsWith(to));
+
   return (
-    <nav className="tabbar" aria-label="Admin sections">
-      {TABS.map(({ to, label, icon: Icon }) => (
-        <NavLink
-          key={to}
-          to={to}
-          end={to === '/admin'}
-          className={({ isActive }) => (isActive ? 'tab is-on' : 'tab')}
+    <>
+      <nav className="tabbar" aria-label="Admin sections">
+        {PRIMARY_TABS.map(({ to, label, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === '/admin'}
+            className={({ isActive }) => (isActive ? 'tab is-on' : 'tab')}
+          >
+            <Icon className="tab__icon" aria-hidden="true" />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+        <button
+          type="button"
+          className={inMore ? 'tab is-on' : 'tab'}
+          aria-haspopup="dialog"
+          aria-expanded={moreOpen}
+          onClick={() => setMoreOpen(true)}
         >
-          <Icon className="tab__icon" aria-hidden="true" />
-          <span>{label}</span>
-        </NavLink>
-      ))}
-    </nav>
+          <Ellipsis className="tab__icon" aria-hidden="true" />
+          {/* On a "More" page, name it — the bar alone wouldn't say where you are. */}
+          <span>{MORE_TABS.find(({ to }) => pathname.startsWith(to))?.label ?? 'More'}</span>
+        </button>
+      </nav>
+
+      <Sheet open={moreOpen} onClose={() => setMoreOpen(false)} title="More">
+        <ul className="m-0 flex list-none flex-col gap-1 p-0">
+          {MORE_TABS.map(({ to, label, icon: Icon }) => (
+            <li key={to}>
+              <NavLink
+                to={to}
+                onClick={() => setMoreOpen(false)}
+                className={({ isActive }) =>
+                  `flex min-h-12 items-center gap-3 rounded-box px-3 transition-colors ${
+                    isActive ? 'bg-ash-hi text-ember' : 'text-paper-dim hover:bg-ash-hi'
+                  }`
+                }
+              >
+                <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+                <span className="font-medium">{label}</span>
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </Sheet>
+    </>
   );
 }
 

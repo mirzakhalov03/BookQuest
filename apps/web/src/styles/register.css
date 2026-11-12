@@ -7,14 +7,13 @@
  * became `--ease-out-quest`; colours and fonts moved under `--color-*` /
  * `--font-*` when `theme.css` ported the palette).
  *
- * Self-contained on purpose, the same way `stage.css` restates `.tag`
- * instead of reusing `.type-label`: these classes carry their own type
+ * Self-contained on purpose: these classes carry their own type
  * scale so this file reads the same as the prototype's, line for line.
  *
  * Two rules from the prototype are deliberately NOT ported: `.form .btn`
  * and `.success .btn` only ever set a margin and an animation on a button
- * that, here, is `components/ui/Button` — which never carries a `.btn`
- * class (it's built in Tailwind, like the rest of `components/ui/`). Both
+ * that, here, is `components/ui/Button` — whose `.btn` (base.css) sets
+ * only its size, nothing the prototype rules touched. Both
  * are applied instead as Tailwind utilities directly on the `Button`
  * elements in `RegistrationForm.tsx` / `SuccessScreen.tsx`, using this
  * file's `title-rise`/`view-in` keyframes — same values, right selector.

@@ -78,11 +78,11 @@ function Dashboard({ quest }: { quest: Quest }) {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1 rounded-box border border-[color:var(--rule)] bg-[color:var(--color-ash)] px-2.5 py-3 sm:px-3">
+    <div className="flex min-w-0 flex-col gap-0.5 rounded-box border border-[color:var(--rule)] bg-[color:var(--color-ash)] px-2.5 py-2 sm:px-3 sm:py-3">
       <p className="type-label m-0 truncate text-[0.5625rem] tracking-[0.06em] sm:text-[0.6875rem] sm:tracking-[var(--tracking-label)]">
         {label}
       </p>
-      <p className="type-display m-0 tabular-nums text-xl text-paper sm:text-2xl">{value}</p>
+      <p className="type-display m-0 tabular-nums text-lg text-paper sm:text-2xl">{value}</p>
     </div>
   );
 }

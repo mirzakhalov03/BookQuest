@@ -1,6 +1,5 @@
-import { Bell, ArrowUpRight } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { NavLink } from 'react-router';
-import { isInsideTelegram, openExternalLink } from '@/lib/telegram';
 import { readToken } from '@/lib/auth/tokenStore';
 import { useNotifications } from '@/features/notifications/api/useNotifications';
 
@@ -14,12 +13,9 @@ interface TopBarProps {
   year?: number;
 }
 
-/** Where the Mini App sends people who want the real browser. */
-const WEB_URL = import.meta.env.VITE_WEB_URL;
-
 /**
- * The wordmark and the one link out. Styling is `.topbar` / `.wordmark` /
- * `.weblink` in `styles/stage.css`, ported from the prototype.
+ * The wordmark and the notifications bell. Styling is `.topbar` / `.wordmark`
+ * in `styles/stage.css`, ported from the prototype.
  */
 export function TopBar({ year }: TopBarProps) {
   return (
@@ -28,10 +24,7 @@ export function TopBar({ year }: TopBarProps) {
         <span className="wordmark__name">BookQuest</span>
         {year !== undefined && <span className="wordmark__year">{year}</span>}
       </div>
-      <div className="flex items-center gap-3">
-        <NotificationsBell />
-        <WebLink />
-      </div>
+      <NotificationsBell />
     </header>
   );
 }
@@ -60,33 +53,5 @@ function NotificationsBell() {
         </span>
       )}
     </NavLink>
-  );
-}
-
-/**
- * "Open on web" only means something inside Telegram, where the app is a sheet
- * over a chat and leaving it is a real action. On the web the app already *is*
- * the web, so the link would point at the page it is on — the honest version of
- * that link is no link at all, and the wordmark keeps the bar.
- *
- * It stays an ordinary anchor so it can be middle-clicked, copied and read by
- * assistive tech; the click handler only takes over when Telegram's own
- * `openLink` is there to open it outside the sheet.
- */
-function WebLink() {
-  if (!WEB_URL || !isInsideTelegram()) return null;
-
-  return (
-    <a
-      className="weblink"
-      href={WEB_URL}
-      target="_blank"
-      rel="noreferrer"
-      onClick={(event) => {
-        if (openExternalLink(WEB_URL)) event.preventDefault();
-      }}
-    >
-      Open on web <ArrowUpRight className="inline h-4 w-4 align-[-2px]" aria-hidden="true" />
-    </a>
   );
 }

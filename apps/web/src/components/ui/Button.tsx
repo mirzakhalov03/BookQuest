@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { Link } from 'react-router';
+import { useFieldSize } from './fieldSize';
 
 type Variant = 'primary' | 'gold' | 'quiet';
 
@@ -19,15 +20,18 @@ const VARIANTS: Record<Variant, string> = {
   quiet: 'text-taupe hover:text-paper-dim'
 };
 
+// Size comes from `.btn` / `.btn--compact` (base.css): they sit below the utilities layer, so a `className` size override always wins.
 const BASE_CLASSES =
-  'inline-flex min-h-[3.25rem] items-center justify-center gap-3 rounded-box px-6 text-base font-semibold transition-transform duration-150 active:translate-y-0.5';
+  'btn inline-flex items-center justify-center rounded-box font-semibold transition-transform duration-150 active:translate-y-0.5';
 
 /**
  * The filled button is the only solid surface in the interface, which is what
  * makes it read as the action. Keep it rare.
  */
 export function Button({ variant = 'primary', className = '', to, state, children, ...props }: ButtonProps) {
-  const classes = `${BASE_CLASSES} ${VARIANTS[variant]} ${className}`;
+  // Admin provides `compact`, the same signal its inputs follow.
+  const size = useFieldSize() === 'compact' ? 'btn--compact' : '';
+  const classes = `${BASE_CLASSES} ${size} ${VARIANTS[variant]} ${className}`;
 
   if (to) {
     return (

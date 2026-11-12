@@ -17,8 +17,8 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { AlertTriangle, ArrowDown, ArrowUp, ChevronDown, GripVertical, Plus } from 'lucide-react';
-import { findQuizIssues, type QuizQuestion } from '@bookquest/shared';
-import { Button } from '@/components/ui/Button';
+import { findQuizIssues, quizShape, type QuizQuestion } from '@bookquest/shared';
+import { formatQuizDuration } from '../format';
 import { newQuestion, type QuizFormState } from '../quizForm';
 import { QuestionEditor } from './QuestionEditor';
 
@@ -41,7 +41,7 @@ interface QuestionListProps {
   locked: boolean;
   /** The save bar is showing, so the dock must sit above it. */
   raised: boolean;
-  /** Notices and the summary, stacked under the add button in the sticky dock. */
+  /** Notices (stale copy, save errors) pinned in the sticky dock. */
   dock?: ReactNode;
   voidedIds: readonly string[];
   /** Opens the answer-key correction for a question of a locked quiz. */
@@ -62,6 +62,7 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
   const [questions, settings] = useWatch({ control, name: ['questions', 'settings'] });
   const [openId, setOpenId] = useState<string | null>(null);
   const issues = findQuizIssues({ questions, settings });
+  const shape = quizShape({ questions, settings });
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -95,7 +96,15 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
   return (
     <>
       <section className="flex flex-col gap-3">
-        <h2 className="type-label m-0">Questions</h2>
+        <h2 className="type-label m-0">
+          Questions
+          {shape.questionCount > 0 && (
+            <span className="normal-case tracking-normal text-taupe-dim">
+              {' '}
+              · {shape.questionCount} · {formatQuizDuration(shape.totalSeconds)}
+            </span>
+          )}
+        </h2>
         {settings.shuffleQuestions && (
           <p className="m-0 text-sm text-taupe">
             Order is shuffled for each participant; this order is used in preview and review.
@@ -146,15 +155,19 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
             </ol>
           </SortableContext>
         </DndContext>
-      </section>
-      <div className={`admin-dock ${raised ? 'is-raised' : ''}`}>
+
+        {/* Where the next question lands, so the new row opens right above it. */}
         {!locked && (
-          <Button type="button" onClick={addQuestion} className="min-h-11 self-center px-5">
-            <Plus className="h-4 w-4" aria-hidden /> Question
-          </Button>
+          <button
+            type="button"
+            onClick={addQuestion}
+            className="flex min-h-11 items-center justify-center gap-2 rounded-box border border-dashed border-[color:var(--rule-strong)] text-sm font-medium text-amber transition-colors hover:border-amber/60 hover:bg-ash-hi"
+          >
+            <Plus className="h-4 w-4" aria-hidden /> Add question
+          </button>
         )}
-        {dock}
-      </div>
+      </section>
+      {dock && <div className={`admin-dock ${raised ? 'is-raised' : ''}`}>{dock}</div>}
     </>
   );
 }

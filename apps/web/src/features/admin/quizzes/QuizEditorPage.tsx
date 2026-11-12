@@ -21,7 +21,6 @@ import { CorrectionsLog } from './components/CorrectionsLog';
 import { QuestionList } from './components/QuestionList';
 import { QuizDetailsSection } from './components/QuizDetailsSection';
 import { QuizSettingsSection } from './components/QuizSettingsSection';
-import { QuizSummaryBar } from './components/QuizSummaryBar';
 import { readDraft, toQuizFormState, type QuizDraftState, type QuizFormState } from './quizForm';
 import { applyQuizServerErrors } from './serverErrors';
 
@@ -155,22 +154,23 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
             onCorrect={setCorrectingId}
             raised={isDirty}
             dock={
-              <>
-                {isStale && (
-                  <div role="alert" className="flex flex-wrap items-center gap-3 rounded-box border border-amber/40 bg-[color:var(--color-ink)] p-3 text-sm text-amber">
-                    <span className="flex-1">{STALE_MESSAGE}</span>
-                    <Button type="button" variant="quiet" onClick={() => void reloadLatest()} className="min-h-11 px-3 text-amber">
-                      Reload
-                    </Button>
-                  </div>
-                )}
-                {formError && (
-                  <p role="alert" className="m-0 rounded-box border border-error-line bg-[color:var(--color-ink)] p-3 text-sm text-error">
-                    {formError}
-                  </p>
-                )}
-                <QuizSummaryBar />
-              </>
+              (isStale || formError) && (
+                <>
+                  {isStale && (
+                    <div role="alert" className="flex flex-wrap items-center gap-3 rounded-box border border-amber/40 bg-[color:var(--color-ink)] p-3 text-sm text-amber">
+                      <span className="flex-1">{STALE_MESSAGE}</span>
+                      <Button type="button" variant="quiet" onClick={() => void reloadLatest()} className="min-h-11 px-3 text-amber">
+                        Reload
+                      </Button>
+                    </div>
+                  )}
+                  {formError && (
+                    <p role="alert" className="m-0 rounded-box border border-error-line bg-[color:var(--color-ink)] p-3 text-sm text-error">
+                      {formError}
+                    </p>
+                  )}
+                </>
+              )
             }
           />
         </form>

@@ -74,7 +74,7 @@ export function DateTimelineField({ savedDates }: DateTimelineFieldProps) {
               <>
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="text-paper-dim">{formatLongDate(date)} · passed</span>
-                  <Button type="button" variant="quiet" className="min-h-11 px-2 text-sm" onClick={() => unlockFrom(key)}>
+                  <Button type="button" variant="quiet" className="min-h-11 shrink-0 whitespace-nowrap px-2 text-sm" onClick={() => unlockFrom(key)}>
                     Edit anyway
                   </Button>
                 </div>
@@ -97,6 +97,8 @@ export function DateTimelineField({ savedDates }: DateTimelineFieldProps) {
                   type="datetime-local"
                   label={DATE_LABEL[key]}
                   hideLabel
+                  // "18 Nov 2026 at 09:00" needs ~14rem; full width just stretches the box.
+                  className="w-full max-w-[15rem]"
                   value={field.value}
                   onBlur={field.onBlur}
                   onChange={(event) => change(key, event.target.value)}
