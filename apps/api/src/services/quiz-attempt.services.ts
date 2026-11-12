@@ -28,6 +28,7 @@ import { withTransaction } from '../utils/transaction.js';
 import { findParticipantForUser } from './participant.services.js';
 import { findCurrentQuestDocument } from './quest.services.js';
 import { loadQuizForAttempt } from './quiz.services.js';
+import { alertCappedClaims } from './quiz-alerts.services.js';
 import {
   IS_DATE,
   IS_NULL,
@@ -88,8 +89,7 @@ function findAttempt(questId: Types.ObjectId, participantId: string): Promise<At
 }
 
 /** Every play request starts here, so the attempt is read by user, in parallel with the participant. */
-async function requireAttemptContext(user: UserDocument): Promise<AttemptContext> {
-  const now = new Date();
+async function requireAttemptContext(user: UserDocument, now = new Date()): Promise<AttemptContext> {
   const quest = await requireQuest();
   const [participant, attempt] = await Promise.all([
     findParticipantForUser(user, quest),
@@ -255,10 +255,13 @@ export async function finalizeAttempt(attemptId: Types.ObjectId, by: FinalizedBy
     }
 
     await writeResult({ ...done, score, total, durationMs, completedAt: now }, answered, session);
-    return { score, total };
+    return { score, total, attempt: done };
   });
 
-  if (outcome) logger.info({ attemptId: String(attemptId), finalizedBy: by, ...outcome }, 'quiz attempt finalised');
+  if (!outcome) return;
+  logger.info({ attemptId: String(attemptId), finalizedBy: by, score: outcome.score, total: outcome.total }, 'quiz attempt finalised');
+  // After the commit and off the request path: a slow Telegram never delays the participant's "Done".
+  void alertCappedClaims(outcome.attempt);
 }
 
 /* ── Sweep, ranking guard & repair (§13.5) ──────────────────────────────── */
@@ -535,6 +538,7 @@ function buildItems({ settings, questions }: QuizContent, voidedQuestionIds: rea
     outcome: null,
     isCorrect: null,
     elapsedMs: null,
+    clientElapsedMs: null,
     signals: { hiddenCount: 0, hiddenMs: 0 }
   }));
 }
@@ -634,8 +638,8 @@ export async function getAttemptState(user: UserDocument): Promise<AttemptState>
  * The client calls this only after its own saves have landed, so an expired question is settled at
  * its deadline rather than after the grace: moving on never waits out a grace the client doesn't need.
  */
-export async function serveNext(user: UserDocument): Promise<AttemptState> {
-  const { quest, attempt: loaded, now } = await requireAttemptContext(user);
+export async function serveNext(user: UserDocument, receivedAt?: Date): Promise<AttemptState> {
+  const { quest, attempt: loaded, now } = await requireAttemptContext(user, receivedAt);
   const attempt = await settleAttempt(loaded, quest, now, 'participant', 0);
   return toAttemptState(await serveFrom(attempt, quest, now), quest, now);
 }
@@ -646,23 +650,29 @@ async function serveFrom(settled: AttemptRow, quest: QuestDocument, now: Date): 
   const index = attempt.cursor;
   const item = itemAt(attempt, index);
   if (attempt.status === 'in_progress' && item && item.servedAt == null) {
-    if (now >= quest.quizClosesAt) {
+    // Stamped as late as possible: the clock starts at this write, not when the request came in,
+    // so server work before it (reads, the lock this request may carry) is never charged to the participant.
+    const servedAt = new Date();
+    if (servedAt >= quest.quizClosesAt) {
       // Nothing can be served any more, so there is nothing left to wait for.
       await closeOut(attempt);
     } else {
-      await QuizAttemptModel.updateOne(
+      const served = await QuizAttemptModel.findOneAndUpdate(
         { _id: attempt._id, status: 'in_progress', cursor: index, [itemPath(index, 'servedAt')]: IS_NULL },
         {
           $set: {
-            [itemPath(index, 'servedAt')]: now,
+            [itemPath(index, 'servedAt')]: servedAt,
             [itemPath(index, 'deadlineAt')]: new Date(
-              Math.min(now.getTime() + item.timeLimitMs, quest.quizClosesAt.getTime())
+              Math.min(servedAt.getTime() + item.timeLimitMs, quest.quizClosesAt.getTime())
             )
           }
-        }
-      );
+        },
+        { new: true }
+      ).lean<AttemptRow>();
+      // Fresh from the write, so nothing to settle: skip a round trip the participant's clock would pay for.
+      if (served) return served;
     }
-    // Matched or not (another tab served it), the reloaded state is the answer.
+    // Not matched (another tab served it) or closed out: the reloaded state is the answer.
     attempt = await settleAttempt(await reload(attempt), quest, now);
   }
   return attempt;
@@ -684,7 +694,9 @@ function answerUpdate(
     $set[itemPath(index, 'lockedAt')] = now;
     $set[itemPath(index, 'outcome')] = 'locked';
     $set[itemPath(index, 'isCorrect')] = isItemCorrect({ ...item, selectedOptionId: body.optionId, outcome: 'locked' });
-    $set[itemPath(index, 'elapsedMs')] = lockedElapsed(item, now);
+    const clientElapsedMs = body.clientElapsedMs ?? null;
+    $set[itemPath(index, 'clientElapsedMs')] = clientElapsedMs;
+    $set[itemPath(index, 'elapsedMs')] = lockedElapsed({ ...item, clientElapsedMs }, now);
     update.$inc = { cursor: 1 };
   }
   if (body.signals) {
@@ -709,8 +721,14 @@ function rejectedAction(attempt: AttemptRow, index: number, body: PutAttemptItem
   return { accepted: false };
 }
 
-export async function putItem(user: UserDocument, index: number, body: PutAttemptItemPayload): Promise<AttemptState> {
-  const { quest, attempt: loaded, now } = await requireAttemptContext(user);
+/** `receivedAt` (arrival, before auth) is the answer's time: lock elapsed and the grace check use it. */
+export async function putItem(
+  user: UserDocument,
+  index: number,
+  body: PutAttemptItemPayload,
+  receivedAt?: Date
+): Promise<AttemptState> {
+  const { quest, attempt: loaded, now } = await requireAttemptContext(user, receivedAt);
   if (index >= loaded.items.length) {
     throw ApiError.badRequest('That question does not exist.', { index: 'Out of range.' });
   }

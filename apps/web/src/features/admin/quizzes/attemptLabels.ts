@@ -9,7 +9,8 @@ export const STATUS_LABEL: Record<AttemptStatus, string> = {
 export const FLAG_LABEL: Record<QuizFlag, string> = {
   multi_client: 'Many devices',
   fast: 'Fast',
-  hidden: 'Left the app'
+  hidden: 'Left the app',
+  refund_capped: 'Time claims capped'
 };
 
 export const OUTCOME_LABEL: Record<ItemOutcome, string> = {

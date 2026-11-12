@@ -23,13 +23,13 @@ export async function getAttempt(req: Request, res: Response): Promise<void> {
 
 /** POST /api/v1/quiz/attempt/next */
 export async function next(req: Request, res: Response): Promise<void> {
-  ok(res, await attemptService.serveNext(currentUser(req)));
+  ok(res, await attemptService.serveNext(currentUser(req), req.receivedAt));
 }
 
 /** PUT /api/v1/quiz/attempt/items/:index */
 export async function putItem(req: Request, res: Response): Promise<void> {
   const { index } = req.params as unknown as AttemptItemParams;
-  ok(res, await attemptService.putItem(currentUser(req), index, req.body as PutAttemptItemPayload));
+  ok(res, await attemptService.putItem(currentUser(req), index, req.body as PutAttemptItemPayload, req.receivedAt));
 }
 
 /** GET /api/v1/quiz/attempt/review */

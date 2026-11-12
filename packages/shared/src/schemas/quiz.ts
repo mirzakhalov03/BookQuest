@@ -130,6 +130,8 @@ export const putAttemptItemSchema = z.strictObject({
   lock: z.boolean(),
   /** With `lock`: serve the following question in the same request, so moving on costs one round trip. */
   next: z.boolean().optional(),
+  /** With `lock`: the phone's time from first showing the question to the tap (monotonic clock). */
+  clientElapsedMs: z.number().int().min(0).max(QUIZ_TIME_LIMIT_SEC.max * 1000).optional(),
   clientId: z.string().min(8).max(64),
   signals: z
     .strictObject({

@@ -1,5 +1,6 @@
 import {
   QUIZ_ANSWER_GRACE_MS as G,
+  QUIZ_LATENCY_REFUND_MAX_MS,
   effectiveTimeLimitSec,
   putAttemptItemSchema,
   type AttemptReview,
@@ -28,6 +29,7 @@ interface MockItem {
   deadlineAt: number | null;
   selectedOptionId: string | null;
   lockedAt: number | null;
+  clientElapsedMs: number | null;
   outcome: 'locked' | 'auto' | 'timeout' | 'unserved' | null;
 }
 
@@ -64,6 +66,7 @@ function buildItems(quiz: QuizAdmin): MockItem[] {
     deadlineAt: null,
     selectedOptionId: null,
     lockedAt: null,
+    clientElapsedMs: null,
     outcome: null
   }));
 }
@@ -91,11 +94,13 @@ const window_ = (state: MockState) => ({
 const isLive = (item: MockItem | undefined, now: number): item is MockItem =>
   !!item && item.servedAt !== null && item.lockedAt === null && item.outcome === null && now <= item.deadlineAt! + G;
 
+/** Same clamp as the API's `lockedElapsed`. */
 function elapsed(item: MockItem): number {
-  if (item.outcome === 'locked' && item.lockedAt !== null && item.servedAt !== null) {
-    return Math.min(item.timeLimitMs, item.lockedAt - item.servedAt);
-  }
-  return item.timeLimitMs;
+  if (item.outcome !== 'locked' || item.lockedAt === null || item.servedAt === null) return item.timeLimitMs;
+  const server = Math.max(0, item.lockedAt - item.servedAt);
+  const claimed = item.clientElapsedMs;
+  const counted = claimed === null ? server : Math.min(server, Math.max(server - QUIZ_LATENCY_REFUND_MAX_MS, claimed));
+  return Math.min(counted, item.timeLimitMs);
 }
 
 function score(attempt: MockAttempt) {
@@ -316,7 +321,7 @@ function serve(attempt: MockAttempt, closesAt: number, now: number): void {
 export function putItem(user: SessionUser, index: number, body: unknown): AttemptState {
   const parsed = putAttemptItemSchema.safeParse(body);
   if (!parsed.success) throw new QuizFailure(400, 'validation_failed', 'Check the answer and try again.');
-  const { optionId, lock, next } = parsed.data;
+  const { optionId, lock, next, clientElapsedMs } = parsed.data;
 
   return withAttempt(user, (attempt, closesAt, now) => {
     const lastAction = answer(attempt, now);
@@ -334,6 +339,7 @@ export function putItem(user: SessionUser, index: number, body: unknown): Attemp
       item.selectedOptionId = optionId;
       if (lock) {
         item.lockedAt = now;
+        item.clientElapsedMs = clientElapsedMs ?? null;
         item.outcome = 'locked';
         attempt.cursor += 1;
       }

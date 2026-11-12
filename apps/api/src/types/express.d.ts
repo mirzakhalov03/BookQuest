@@ -9,6 +9,8 @@ declare global {
        * put a value here.
        */
       currentUser?: UserDocument;
+      /** When the request reached the app, before any middleware; the quiz times answers by it. */
+      receivedAt?: Date;
     }
   }
 }

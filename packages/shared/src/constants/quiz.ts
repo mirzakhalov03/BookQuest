@@ -1,5 +1,10 @@
 /** Grace after a deadline during which a late answer is still accepted: a tap made in time must never lose to a slow network. */
-export const QUIZ_ANSWER_GRACE_MS = 5000;
+export const QUIZ_ANSWER_GRACE_MS = 10_000;
+/**
+ * Most a locked answer's time can drop below the server's own measure when the phone reports its
+ * on-screen time: refunds network travel to honest users, caps what a forged report can gain.
+ */
+export const QUIZ_LATENCY_REFUND_MAX_MS = 2000;
 export const QUIZ_MAX_QUESTIONS = 100;
 export const QUIZ_TIME_LIMIT_SEC = { min: 5, max: 300, default: 30 } as const;
 export const QUIZ_MCQ_OPTIONS = { min: 2, max: 6 } as const;
@@ -30,7 +35,7 @@ export type QuizDistribution = (typeof QUIZ_DISTRIBUTIONS)[number];
 export const TRUE_FALSE_OPTION_IDS = ['true', 'false'] as const;
 
 /** Advisory suspicion flags computed at finalise; never an automatic penalty. */
-export const QUIZ_FLAGS = ['multi_client', 'fast', 'hidden'] as const;
+export const QUIZ_FLAGS = ['multi_client', 'fast', 'hidden', 'refund_capped'] as const;
 export type QuizFlag = (typeof QUIZ_FLAGS)[number];
 
 export const ATTEMPT_STATUSES = ['in_progress', 'completed', 'voided'] as const;

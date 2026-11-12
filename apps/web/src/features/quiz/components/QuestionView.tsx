@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { QUIZ_ANSWER_GRACE_MS, type AttemptQuestion } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
 import { ProgressRail } from '@/components/quiz/ProgressRail';
@@ -7,13 +7,11 @@ import { QuestionCard } from '@/components/quiz/QuestionCard';
 import { QuestionTimer } from '@/components/quiz/QuestionTimer';
 import { useCountdownTo } from '@/components/quiz/useCountdownTo';
 import { haptic } from '@/lib/telegram';
-import type { SaveStatus } from '../api/useAttempt';
 import { serverNow } from '../lib/serverClock';
 
-// Long enough to read "Time's up" before the question slides away.
-const TIME_UP_MS = 900;
-// A save that lands faster than this never flashes "Saving…".
-const SAVING_LABEL_DELAY_MS = 300;
+// Taps still count this long after the ring hits 0 (the server accepts them within its grace),
+// so a finger landing on the last frame is never thrown away.
+const TAP_TOLERANCE_MS = 700;
 // The server settles an expired question only after deadline + grace; asking sooner returns it unchanged.
 const SETTLE_MARGIN_MS = 250;
 const WATCHED_WITHIN_MS = 1000;
@@ -25,10 +23,11 @@ interface QuestionViewProps {
   version: string;
   /** Set while this question animates out for the next one. */
   leaving: boolean;
-  saveStatus: SaveStatus;
+  /** A tap this device made that the server may not hold yet; wins over `question.selectedOptionId`. */
+  initialPick: string | null;
   onSelect: (optionId: string) => void;
-  /** Answers and moves on in one step. */
-  onContinue: (optionId: string) => void;
+  /** Answers and moves on in one step; `clientElapsedMs` is this screen's own time on the question. */
+  onContinue: (optionId: string, clientElapsedMs: number) => void;
   /** Once per expiry, after "Time's up" has shown. `seenLive`: the clock ran out on screen, not while hidden. */
   onExpire: (seenLive: boolean) => void;
 }
@@ -38,7 +37,7 @@ export function QuestionView({
   total,
   version,
   leaving,
-  saveStatus,
+  initialPick,
   onSelect,
   onContinue,
   onExpire
@@ -46,16 +45,18 @@ export function QuestionView({
   const deadlineMs = Date.parse(question.deadlineAt);
   const remaining = useCountdownTo(deadlineMs, serverNow);
   const timeUp = remaining === 0;
-  const disabled = leaving || timeUp;
   const isLast = question.index === total - 1;
 
-  // Optimistic highlight; follows the server when it learns of a selection we didn't make (another tab).
-  const [picked, setPicked] = useState(question.selectedOptionId);
-  const saving = saveStatus === 'saving' || saveStatus === 'retrying';
+  // Live from the first frame (its clock is running). Not disabled at 0 either: taps keep counting until
+  // the question actually leaves (TAP_TOLERANCE_MS). A double-tap on Continue lands on the next
+  // question's Continue, disabled until something is picked, never on an option.
+  const disabled = leaving;
+
+  // The screen always shows this device's last tap; a slower server echo of an older tap never overrides it.
+  const [picked, setPicked] = useState(initialPick ?? question.selectedOptionId);
   useEffect(() => {
-    if (!saving) setPicked(question.selectedOptionId);
-    // Only a server change should overwrite the local pick.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Only fills in a selection made elsewhere (another tab) when this device hasn't picked.
+    setPicked((current) => current ?? question.selectedOptionId);
   }, [question.selectedOptionId]);
 
   // Stable identity: the timer re-renders this every frame.
@@ -82,17 +83,27 @@ export function QuestionView({
     lastLiveFrame.current <= deadlineMs &&
     deadlineMs - lastLiveFrame.current <= WATCHED_WITHIN_MS;
 
-  const latest = useRef({ onExpire, onContinue, picked, disabled });
-  latest.current = { onExpire, onContinue, picked, disabled };
+  // On-screen time, from the first painted frame: monotonic, so a device clock change can't skew it.
+  // The server counts it only within its refund window (QUIZ_LATENCY_REFUND_MAX_MS).
+  const shownAt = useRef<number | null>(null);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => (shownAt.current ??= performance.now()));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const submit = (optionId: string) =>
+    onContinue(optionId, Math.round(performance.now() - (shownAt.current ?? performance.now())));
 
-  // At 0: "Time's up" briefly, then the page flushes saves and moves on. Opened onto a dead clock
+  const latest = useRef({ onExpire, submit, picked, disabled });
+  latest.current = { onExpire, submit, picked, disabled };
+
+  // At 0: a short tap tolerance, then the page flushes saves and moves on. Opened onto a dead clock
   // (back from the background), the server settles it only after the grace, so wait that out.
   useEffect(() => {
     if (!timeUp || leaving) return;
     const watched = watchedRunOut();
     const wait = watched
-      ? TIME_UP_MS
-      : Math.max(TIME_UP_MS, deadlineMs + QUIZ_ANSWER_GRACE_MS + SETTLE_MARGIN_MS - serverNow());
+      ? TAP_TOLERANCE_MS
+      : Math.max(TAP_TOLERANCE_MS, deadlineMs + QUIZ_ANSWER_GRACE_MS + SETTLE_MARGIN_MS - serverNow());
     const id = window.setTimeout(() => latest.current.onExpire(watched), wait);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -113,7 +124,7 @@ export function QuestionView({
       if (target?.closest('button, a, input, textarea, select') && target.getAttribute('aria-pressed') !== 'true') return;
       if (disabled || !current) return;
       event.preventDefault();
-      latest.current.onContinue(current);
+      latest.current.submit(current);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
@@ -141,63 +152,13 @@ export function QuestionView({
         onSelect={pick}
       />
 
-      <StatusLine timeUp={timeUp} saveStatus={saveStatus} picked={picked} serverPick={question.selectedOptionId} />
-
       {/* Sticky so Continue stays under the thumb on long questions. */}
       <div className="sticky bottom-0 mt-auto bg-gradient-to-t from-ink via-ink/95 to-transparent pb-[calc(1rem+var(--safe-b))] pt-4">
-        <Button type="button" className="w-full" disabled={!picked || disabled} onClick={() => picked && onContinue(picked)}>
+        <Button type="button" className="w-full" disabled={!picked || disabled} onClick={() => picked && submit(picked)}>
           {!picked ? 'Choose an answer' : isLast ? 'Finish' : 'Continue'}
           {picked && !isLast && <ArrowRight aria-hidden className="h-4 w-4" />}
         </Button>
       </div>
     </div>
   );
-}
-
-interface StatusLineProps {
-  timeUp: boolean;
-  saveStatus: SaveStatus;
-  picked: string | null;
-  /** What the server holds; equal to `picked` means this pick is safe even without a fresh "saved". */
-  serverPick: string | null;
-}
-
-function StatusLine({ timeUp, saveStatus, picked, serverPick }: StatusLineProps) {
-  const saving = saveStatus === 'saving' || saveStatus === 'retrying';
-  const saved = picked !== null && (saveStatus === 'saved' || (!saving && serverPick === picked));
-  const showSaving = useDelayed(saveStatus === 'saving', SAVING_LABEL_DELAY_MS);
-
-  const [text, tone, tick] = timeUp
-    ? !picked
-      ? ["Time's up", 'text-amber', false]
-      : saving
-        ? ["Time's up — saving your answer…", 'text-amber', false]
-        : saved
-          ? ["Time's up · your answer was saved", 'text-taupe', true]
-          : ["Time's up", 'text-amber', false]
-    : saveStatus === 'retrying'
-      ? ['Offline — retrying', 'text-amber', false]
-      : saving
-        ? [showSaving ? 'Saving…' : '', 'text-taupe', false]
-        : saved
-          ? ['Saved', 'text-taupe', true]
-          : ['', '', false];
-
-  return (
-    <p role="status" aria-live="polite" className={`m-0 flex min-h-5 items-center gap-1.5 text-sm ${tone}`}>
-      {tick && <Check aria-hidden className="h-4 w-4" />}
-      {text}
-    </p>
-  );
-}
-
-/** True once `flag` has held for `ms`; false again the moment it drops. */
-function useDelayed(flag: boolean, ms: number): boolean {
-  const [shown, setShown] = useState(false);
-  useEffect(() => {
-    if (!flag) return setShown(false);
-    const id = window.setTimeout(() => setShown(true), ms);
-    return () => window.clearTimeout(id);
-  }, [flag, ms]);
-  return shown;
 }

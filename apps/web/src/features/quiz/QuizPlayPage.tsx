@@ -21,10 +21,15 @@ import { useOtherTabNotice } from './components/useOtherTabNotice';
 
 // Matches `.quiz-q-leave` in styles/quiz.css.
 const LEAVE_MS = 260;
+// The closing "Submitting your answers…" stays at least this long, so it reads as a step, not a flicker.
+const SUBMIT_MIN_MS = 1200;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** The question on screen while it animates out (`leaving`), then a loader if the next is still on its way. */
-type Hold = { question: AttemptQuestion; stage: 'leaving' | 'waiting' };
+/**
+ * The question on screen while it animates out (`leaving`), then a loader if the next is still on its
+ * way (`waiting`), or after the last question, the submitting step before "Done" (`submitting`).
+ */
+type Hold = { question: AttemptQuestion; stage: 'leaving' | 'waiting' | 'submitting' };
 
 /**
  * `/quiz/play` — renders whatever phase the server says. The only local state
@@ -34,7 +39,7 @@ type Hold = { question: AttemptQuestion; stage: 'leaving' | 'waiting' };
 export function QuizPlayPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { query, state, next, lock, select, flushSelection, refetch, saveStatus, failingSince } = useAttempt();
+  const { query, state, next, lock, select, flushSelection, pendingPick, refetch, failingSince } = useAttempt();
 
   // A session flag, seeded by "I'm ready"; the router state is cleared so a reload starts from the server's truth.
   const [autoAdvance, setAutoAdvance] = useState(() => (location.state as { autoStart?: boolean } | null)?.autoStart === true);
@@ -46,6 +51,8 @@ export function QuizPlayPage() {
   }, [location.pathname, location.state, navigate]);
 
   const phase = state?.phase;
+  const total = state?.position.total ?? 0;
+  const isLastQuestion = useCallback((target: AttemptQuestion) => target.index === total - 1, [total]);
   const question = hold?.question ?? (phase === 'question' ? state?.question ?? null : null);
   const readSignals = useHiddenSignals(question ? String(question.index) : null);
 
@@ -64,20 +71,25 @@ export function QuizPlayPage() {
   }, [autoAdvance, advance, advancing, hold, phase]);
 
   /**
-   * Slides `target` out while `request` fetches what comes next. The new question renders only once
-   * both are done, so the exit always plays in full; a slow request shows a loader after it.
+   * Slides `target` out while `request` fetches what comes next, and shows the next question the moment
+   * it lands: its clock is already running on the server, so the app never makes it wait for an animation.
+   * A slow request shows a loader once the exit has played. After the last answer no clock runs, so the
+   * submitting step may hold for a readable minimum.
    */
-  const handOff = useCallback(async (target: AttemptQuestion, request: () => Promise<unknown>) => {
+  const handOff = useCallback(async (target: AttemptQuestion, request: () => Promise<unknown>, last: boolean) => {
     setHold({ question: target, stage: 'leaving' });
     let landed = false;
-    const exit = sleep(LEAVE_MS).then(() => {
-      if (!landed) setHold({ question: target, stage: 'waiting' });
+    void sleep(LEAVE_MS).then(() => {
+      if (!landed) setHold({ question: target, stage: last ? 'submitting' : 'waiting' });
     });
     try {
       await request();
     } finally {
       landed = true;
-      await exit;
+      if (last) {
+        setHold({ question: target, stage: 'submitting' });
+        await sleep(SUBMIT_MIN_MS);
+      }
       // Whatever the outcome, the cache holds the server's state by now; just render it.
       setHold(null);
     }
@@ -85,14 +97,16 @@ export function QuizPlayPage() {
 
   // One request answers and serves the next question; `autoAdvance` covers a reply that stops at `between`.
   const onContinue = useCallback(
-    (target: AttemptQuestion, optionId: string) => {
+    (target: AttemptQuestion, optionId: string, clientElapsedMs: number) => {
       haptic('reveal');
       setAutoAdvance(true);
-      void handOff(target, () =>
-        lock({ index: target.index, body: { optionId, lock: true, next: true, signals: readSignals() } })
+      void handOff(
+        target,
+        () => lock({ index: target.index, body: { optionId, lock: true, next: true, clientElapsedMs, signals: readSignals() } }),
+        isLastQuestion(target)
       );
     },
-    [handOff, lock, readSignals]
+    [handOff, isLastQuestion, lock, readSignals]
   );
 
   const onSelect = useCallback(
@@ -105,12 +119,19 @@ export function QuizPlayPage() {
     async (target: AttemptQuestion, seenLive: boolean) => {
       // Opened onto a dead clock: a read settles it and lands on the between screen instead.
       if (!seenLive) return void refetch();
-      // Watched it run out: let a tap still in flight land first, then `next` settles it and serves the following one.
-      await flushSelection();
+      // Watched it run out: input locks as the slide-out starts, every tap made reaches the server,
+      // then `next` settles the question and serves the following one.
       setAutoAdvance(false);
-      await handOff(target, next);
+      await handOff(
+        target,
+        async () => {
+          await flushSelection();
+          await next();
+        },
+        isLastQuestion(target)
+      );
     },
-    [flushSelection, handOff, next, refetch]
+    [flushSelection, handOff, isLastQuestion, next, refetch]
   );
 
   useQuestionBackButton(phase === 'question' || hold !== null);
@@ -142,6 +163,7 @@ export function QuizPlayPage() {
     }
 
     if (hold?.stage === 'waiting') return <LoadingState label="Next question…" />;
+    if (hold?.stage === 'submitting') return <LoadingState label="Submitting your answers…" className="quiz-q-enter" />;
 
     if (question) {
       return (
@@ -152,9 +174,9 @@ export function QuizPlayPage() {
             total={state.position.total}
             version={state.serverNow}
             leaving={hold !== null}
-            saveStatus={saveStatus}
+            initialPick={pendingPick(question.index)}
             onSelect={(optionId) => onSelect(question, optionId)}
-            onContinue={(optionId) => onContinue(question, optionId)}
+            onContinue={(optionId, clientElapsedMs) => onContinue(question, optionId, clientElapsedMs)}
             onExpire={(seenLive) => void onExpire(question, seenLive)}
           />
         </QuizGuard>

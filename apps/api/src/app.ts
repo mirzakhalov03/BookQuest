@@ -8,6 +8,7 @@ import { logger } from './config/logger.js';
 import { apiRoutes } from './routes/index.js';
 import { globalRateLimit } from './middlewares/rate-limit.middleware.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
+import { stampReceivedAt } from './middlewares/received-at.middleware.js';
 
 export function createApp(): Express {
   const app = express();
@@ -18,6 +19,7 @@ export function createApp(): Express {
      in development, where there is no proxy to trust. */
   app.set('trust proxy', isProduction ? env.TRUST_PROXY_HOPS : false);
 
+  app.use(stampReceivedAt);
   app.use(helmet());
   app.use(cors({ origin: corsOrigins, credentials: true }));
   // Bigger bodies for the bot's batches only. Must run before the global parser, which would 413 them first.

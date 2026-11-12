@@ -3,7 +3,8 @@
    so a time-out never reads as the same screen silently changing. */
 
 .quiz-q-enter {
-  animation: quiz-q-in 360ms var(--ease-out-quest) both;
+  /* Short: the question is readable almost at once, since its clock is already running. */
+  animation: quiz-q-in 200ms var(--ease-out-quest) both;
 }
 
 .quiz-q-leave {
@@ -13,8 +14,8 @@
 
 @keyframes quiz-q-in {
   from {
-    opacity: 0;
-    transform: translateX(28px);
+    opacity: 0.2;
+    transform: translateX(20px);
   }
 }
 
@@ -54,28 +55,4 @@
 .quiz-guard[data-obscured='true'] .quiz-guard-content {
   filter: blur(14px);
   transition: filter 120ms linear;
-}
-
-.quiz-watermark {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
-  color: var(--color-paper);
-  opacity: 0.055;
-}
-
-.quiz-watermark > div {
-  position: absolute;
-  inset: -50%;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  gap: 3.5rem 4.5rem;
-  transform: rotate(-24deg);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
 }

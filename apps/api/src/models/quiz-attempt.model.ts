@@ -27,6 +27,8 @@ const itemSchema = new Schema(
     outcome: { type: String, enum: [...ITEM_OUTCOMES, null], default: null },
     isCorrect: { type: Boolean, default: null },
     elapsedMs: { type: Number, default: null },
+    // Phone-measured on-screen time for a lock; counted only within the latency refund window.
+    clientElapsedMs: { type: Number, default: null },
     // Client-reported, advisory only.
     signals: {
       type: new Schema(

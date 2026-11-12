@@ -1,4 +1,4 @@
-import { QUIZ_ANSWER_GRACE_MS, type QuizFlag } from '@bookquest/shared';
+import { QUIZ_ANSWER_GRACE_MS, QUIZ_LATENCY_REFUND_MAX_MS, type QuizFlag } from '@bookquest/shared';
 import type { AttemptItemRow, AttemptRow } from '../models/quiz-attempt.model.js';
 
 /* Pure attempt maths (§10.2, §11, §12.6): no I/O, so settle, finalise, the
@@ -15,6 +15,7 @@ type Item = Pick<
   | 'lockedAt'
   | 'outcome'
   | 'signals'
+  | 'clientElapsedMs'
 >;
 
 type Settled = { outcome: 'auto' | 'timeout'; isCorrect: boolean; elapsedMs: number };
@@ -40,9 +41,32 @@ export function isItemCorrect(item: Item): boolean {
   );
 }
 
-export function lockedElapsed(item: Pick<Item, 'servedAt' | 'timeLimitMs'>, lockedAt: Date): number {
-  const elapsed = lockedAt.getTime() - (item.servedAt?.getTime() ?? lockedAt.getTime());
-  return Math.min(Math.max(elapsed, 0), item.timeLimitMs);
+/**
+ * A lock's counted time (§11, revised): the phone's own on-screen time, trusted only between the
+ * server's measure (which also holds both network trips) and up to the refund cap below it.
+ */
+export function lockedElapsed(
+  item: Pick<Item, 'servedAt' | 'timeLimitMs' | 'clientElapsedMs'>,
+  lockedAt: Date
+): number {
+  const server = Math.max(0, lockedAt.getTime() - (item.servedAt?.getTime() ?? lockedAt.getTime()));
+  const claimed = item.clientElapsedMs;
+  const counted = claimed == null ? server : Math.min(server, Math.max(server - QUIZ_LATENCY_REFUND_MAX_MS, claimed));
+  return Math.min(counted, item.timeLimitMs);
+}
+
+/**
+ * Gaps (server measure minus phone claim, ms) for every lock that reached or passed the refund cap.
+ * Real network travel rarely costs that much, so each one is surfaced to admins (flag + Telegram alert).
+ */
+export function cappedClaims(items: readonly Item[]): number[] {
+  const gaps: number[] = [];
+  for (const item of items) {
+    if (item.outcome !== 'locked' || !item.lockedAt || !item.servedAt || item.clientElapsedMs == null) continue;
+    const gap = item.lockedAt.getTime() - item.servedAt.getTime() - item.clientElapsedMs;
+    if (gap >= QUIZ_LATENCY_REFUND_MAX_MS) gaps.push(gap);
+  }
+  return gaps;
 }
 
 const isOpenServed = (item: Item): boolean => item.servedAt != null && item.lockedAt == null && item.outcome == null;
@@ -104,6 +128,7 @@ export function computeFlags(attempt: Pick<AttemptRow, 'items' | 'clientIds'>): 
     (item) => item.outcome === 'locked' && item.lockedAt && lockedElapsed(item, item.lockedAt) < FAST_LOCK_MS
   ).length;
   if (fastLocks >= FAST_MIN_LOCKS && total > 0 && score / total >= FAST_MIN_RATIO) flags.push('fast');
+  if (cappedClaims(items).length > 0) flags.push('refund_capped');
 
   let hiddenMs = 0;
   let hiddenCount = 0;
