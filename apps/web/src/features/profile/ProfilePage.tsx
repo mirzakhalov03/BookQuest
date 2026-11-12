@@ -12,6 +12,8 @@ import { AccountList, AccountRow } from './components/AccountRow';
 import { Certificate } from './components/Certificate';
 import { ConnectTelegram } from './components/ConnectTelegram';
 import { ReaderPass } from './components/ReaderPass';
+import { useT } from '@/i18n';
+import { LanguagePicker } from './components/LanguagePicker';
 
 /**
  * `/me` — session-only, mounted under `<RequireAuth>` in the router, so a
@@ -23,9 +25,10 @@ import { ReaderPass } from './components/ReaderPass';
  */
 export function ProfilePage() {
   const { user } = useAuth();
+  const t = useT();
   const participant = useParticipant();
 
-  if (participant.isPending) return <LoadingState label="Finding your number…" />;
+  if (participant.isPending) return <LoadingState label={t.profile.loading} />;
 
   if (participant.error) {
     // Signed in but not in this edition: join right here instead of being sent elsewhere.
@@ -59,9 +62,10 @@ export function ProfilePage() {
  */
 function NotJoined() {
   const { user } = useAuth();
+  const t = useT();
   const quest = useCurrentQuest();
 
-  if (quest.isPending) return <LoadingState label="Setting the stage…" />;
+  if (quest.isPending) return <LoadingState label={t.home.loading} />;
 
   if (quest.data && (quest.data.phase === 'upcoming' || quest.data.phase === 'reading')) {
     return <JoinQuest quest={quest.data} />;
@@ -78,15 +82,15 @@ function NotJoined() {
   return (
     <Screen className="gap-8">
       <ReaderPass
-        name={user?.firstName ?? 'Reader'}
+        name={user?.firstName ?? t.profile.readerFallback}
         avatar={user?.avatar ?? null}
         telegramUsername={user?.telegramUserId ? user.username : null}
         phoneNumber={user?.phoneNumber ?? null}
       />
       <p className="max-w-sm text-taupe-dim">
         {quest.data
-          ? 'Registration for this edition has closed. See you at the next one.'
-          : 'The next edition opens soon.'}
+          ? t.profile.registrationClosed
+          : t.profile.nextEditionSoon}
       </p>
       <AccountSection />
     </Screen>
@@ -100,18 +104,20 @@ function NotJoined() {
  */
 function AccountSection() {
   const { isAdmin, user, signOut } = useAuth();
+  const t = useT();
 
   return (
     <section className="flex flex-col gap-4">
       {!isAdmin && !user?.telegramUserId && <ConnectTelegram />}
+      <LanguagePicker />
       <AccountList>
         {isAdmin && (
           <AccountRow icon={LayoutDashboard} to="/admin">
-            Admin dashboard
+            {t.profile.adminDashboard}
           </AccountRow>
         )}
         <AccountRow icon={LogOut} onClick={signOut}>
-          Log out
+          {t.common.logOut}
         </AccountRow>
       </AccountList>
     </section>
@@ -127,18 +133,19 @@ function AccountSection() {
  */
 function CertificateSection() {
   const { data } = useCertificate();
+  const t = useT().profile;
 
   return (
     <section className="flex flex-col gap-3">
-      <p className="type-label m-0">Certificates & awards</p>
+      <p className="type-label m-0">{t.certificates}</p>
       {data ? (
         <Certificate data={data} />
       ) : (
         <div className="cert-slot">
           <Award className="h-8 w-8 shrink-0 text-gold" strokeWidth={1.5} aria-hidden="true" />
           <div className="flex flex-col gap-0.5">
-            <p className="m-0 text-paper-dim">Your certificate lands here</p>
-            <p className="m-0 text-sm text-taupe-dim">Finish the quiz — it appears once results are published.</p>
+            <p className="m-0 text-paper-dim">{t.certificateSlot}</p>
+            <p className="m-0 text-sm text-taupe-dim">{t.certificateHint}</p>
           </div>
         </div>
       )}

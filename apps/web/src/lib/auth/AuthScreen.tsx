@@ -5,6 +5,7 @@ import { Switch } from '@/components/ui/Switch';
 import { PhoneAuthForm } from './PhoneAuthForm';
 import { TelegramCodeLogin } from './TelegramCodeLogin';
 import { useT } from '@/i18n';
+import { LanguagePicker } from '@/features/profile/components/LanguagePicker';
 
 type Tab = 'new' | 'registered';
 
@@ -52,6 +53,7 @@ export function AuthScreen() {
               <SwapLink onClick={() => setWithPassword(true)}>{t.auth.usePassword}</SwapLink>
             </>
           ))}
+        <LanguagePicker />
       </div>
     </Screen>
   );
