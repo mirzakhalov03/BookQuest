@@ -1,0 +1,53 @@
+apps/api/src/app.ts
+  s_e63fe79adc737d::t_99595b037c4c0a 11,22
+apps/api/src/controllers/quiz.controllers.ts
+  s_e63fe79adc737d::t_32841bf3a7a5f8 26,32
+apps/api/src/middlewares/received-at.middleware.ts
+  s_e63fe79adc737d::t_7be20cceb8aad3 1-7
+apps/api/src/models/quiz-attempt.model.ts
+  s_e63fe79adc737d::t_ced7f3da107486 30-31
+apps/api/src/services/quiz-alerts.services.ts
+  s_e63fe79adc737d::t_526c4dc4d4aeaa 1-38
+apps/api/src/services/quiz-attempt.services.ts
+  s_e63fe79adc737d::t_3bc539e5b5802b 31,92,258,261-264,541,641-642,653-656,660,664,666,669-673,675,697-699,724-731
+apps/api/src/services/quiz-scoring.ts
+  s_e63fe79adc737d::t_c033d398e650f8 1,18,44-69,131
+apps/api/src/types/express.d.ts
+  s_e63fe79adc737d::t_72bf40f936ce7e 12-13
+apps/web/src/features/admin/quizzes/attemptLabels.ts
+  s_e63fe79adc737d::t_fedd5935f3da6e 12-13
+apps/web/src/features/quiz/QuizPlayPage.tsx
+  s_e63fe79adc737d::t_2ee2a738e4e0e1 24-25,28-32,42,54-55,74-77,79,82-83,89-92,100,103-106,109,122-123,125-132,134,166,177,179
+apps/web/src/features/quiz/api/useAttempt.ts
+  s_e63fe79adc737d::t_2a49673c8e6c24 10-11,216,281,284,289-311,390
+apps/web/src/features/quiz/components/QuestionView.tsx
+  s_e63fe79adc737d::t_f3d9534125748f 2,12-14,26-27,29-30,40,50-56,58-59,86-97,99,105-106,127,157
+apps/web/src/features/quiz/components/QuizGuard.tsx
+  s_e63fe79adc737d::t_84e4f23ea2cf08 6-7,14
+apps/web/src/lib/api/mock/quiz-participant.ts
+  s_e63fe79adc737d::t_eb441407f45f6d 3,32,69,97,99-103,324,342
+apps/web/src/styles/quiz.css
+  s_e63fe79adc737d::t_0198b5d715275a 6-7,17-18
+docs/superpowers/specs/2026-11-11-quiz-design.md
+  s_e63fe79adc737d::t_b3a3dfbf80d7fb 266,269-274
+packages/shared/src/constants/quiz.ts
+  s_e63fe79adc737d::t_0f96b2d215f899 2-7,38
+packages/shared/src/schemas/quiz.ts
+  s_e63fe79adc737d::t_de104b3d5f08f4 133-134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "25b57ae61c9852ac5fb5a951964d52584275c039",
+  "prompts": {},
+  "sessions": {
+    "s_e63fe79adc737d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e3dee55f-9c2d-4947-8622-63980c25905a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
