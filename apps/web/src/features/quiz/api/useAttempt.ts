@@ -98,6 +98,7 @@ export type SaveStatus = 'idle' | 'saving' | 'saved' | 'retrying';
 /** What happened to a lock, so the screen knows whether to show "Locked in" or just follow the server. */
 export type LockOutcome = 'locked' | 'time_up' | 'superseded' | 'expired' | 'failed';
 
+type SendResult = AttemptState | 'already_locked' | 'expired' | 'offline' | 'rejected';
 type PutBody = Omit<PutAttemptItemPayload, 'clientId'>;
 type Pending = { index: number; body: PutBody };
 
@@ -143,9 +144,12 @@ export function useAttempt() {
     [queryClient]
   );
 
+  // Assigned below; the listener effect is declared first so it reads the latest.
+  const onReturn = useRef<() => void>(() => {});
+
   // rAF and timers freeze in a hidden tab or a backgrounded webview; catch up the moment we're back.
   useEffect(() => {
-    const onEvent = () => void refetch();
+    const onEvent = () => void refetch().then(() => onReturn.current());
     const onVisible = () => document.visibilityState === 'visible' && onEvent();
     window.addEventListener('focus', onEvent);
     window.addEventListener('online', onEvent);
@@ -177,9 +181,10 @@ export function useAttempt() {
   /* put: retries stop once the answer can no longer count, then the state is refetched */
   const clientId = useRef(readClientId()).current;
   const send = useCallback(
-    async ({ index, body }: Pending): Promise<AttemptState | 'already_locked' | 'expired' | 'failed'> => {
-      const deadline = queryClient.getQueryData<AttemptState>(quizKeys.attempt())?.question?.deadlineAt;
-      const cutoff = deadline ? Date.parse(deadline) + QUIZ_ANSWER_GRACE_MS : Infinity;
+    async ({ index, body }: Pending): Promise<SendResult> => {
+      const question = queryClient.getQueryData<AttemptState>(quizKeys.attempt())?.question;
+      // Not the live question: the server has moved on, so one try and then refetch, never a retry loop.
+      const cutoff = question?.index === index ? Date.parse(question.deadlineAt) + QUIZ_ANSWER_GRACE_MS : -Infinity;
       const pastCutoff = () => serverNow() > cutoff;
       try {
         const state = await call(
@@ -192,37 +197,50 @@ export function useAttempt() {
         // Resolve only once the refetched truth is in the cache, so callers decide from it.
         await refetch();
         if (isAlreadyLocked(error)) return 'already_locked';
-        return isTransient(error) && pastCutoff() ? 'expired' : 'failed';
+        if (!isTransient(error)) return 'rejected';
+        return pastCutoff() ? 'expired' : 'offline';
       }
     },
     [clientId, health, queryClient, refetch]
   );
 
-  const selection = useRef<{ inFlight: boolean; queued: Pending | null; lockedIndex: number | null }>({
-    inFlight: false,
-    queued: null,
-    lockedIndex: null
-  });
+  const isLive = useCallback(
+    (index: number) => queryClient.getQueryData<AttemptState>(quizKeys.attempt())?.question?.index === index,
+    [queryClient]
+  );
+
+  const selection = useRef<{
+    inFlight: boolean;
+    queued: Pending | null;
+    lockedIndex: number | null;
+    /** The latest tap that never got an ack; re-sent on reconnect while its question is live. */
+    unsent: Pending | null;
+  }>({ inFlight: false, queued: null, lockedIndex: null, unsent: null });
 
   const select = useCallback(
     async (pending: Pending) => {
       const lane = selection.current;
       if (lane.lockedIndex === pending.index) return;
+      lane.unsent = null;
       if (lane.inFlight) {
         lane.queued = pending;
         return;
       }
       lane.inFlight = true;
       let current: Pending | null = pending;
+      let last: SendResult | null = null;
       while (current) {
         setSaveStatus('saving');
-        await send(current);
+        last = await send(current);
+        if (last === 'offline' && !lane.queued) lane.unsent = current;
         current = lane.queued;
         lane.queued = null;
       }
       lane.inFlight = false;
       // A lock that went out meanwhile owns the status line.
-      if (lane.lockedIndex === null) setSaveStatus('saved');
+      if (lane.lockedIndex !== null) return;
+      // "Saved" only on a server ack (§6).
+      setSaveStatus(typeof last === 'object' && last !== null ? 'saved' : last === 'offline' ? 'retrying' : 'idle');
     },
     [send]
   );
@@ -231,21 +249,42 @@ export function useAttempt() {
     async (pending: Pending): Promise<LockOutcome> => {
       const lane = selection.current;
       lane.queued = null;
+      lane.unsent = null;
       lane.lockedIndex = pending.index;
       setSaveStatus('saving');
       const result = await send(pending);
       setSaveStatus('idle');
-      if (result === 'already_locked') return 'superseded';
-      if (result === 'expired' || result === 'failed') {
-        // Let the participant try again if the question is somehow still live.
-        lane.lockedIndex = null;
-        return result;
-      }
-      if (result.lastAction?.reason === 'time_up') return 'time_up';
-      return result.lastAction?.accepted === false ? 'failed' : 'locked';
+      const outcome: LockOutcome =
+        result === 'already_locked'
+          ? 'superseded'
+          : result === 'expired'
+            ? 'expired'
+            : typeof result !== 'object'
+              ? 'failed'
+              : result.lastAction?.reason === 'time_up'
+                ? 'time_up'
+                : result.lastAction?.accepted === false
+                  ? 'failed'
+                  : 'locked';
+      // Didn't land and the question is still live (cache is fresh by now): let the participant answer again.
+      if (outcome !== 'locked' && isLive(pending.index)) lane.lockedIndex = null;
+      return outcome;
     },
-    [send]
+    [isLive, send]
   );
+
+  // Back online or visible: resend a tap that never got an ack, if its question is still live.
+  const resendUnsent = useCallback(() => {
+    const lane = selection.current;
+    const pending = lane.unsent;
+    if (!pending || lane.inFlight) return;
+    if (!isLive(pending.index) || lane.lockedIndex === pending.index) {
+      lane.unsent = null;
+      setSaveStatus('idle');
+      return;
+    }
+    void select(pending);
+  }, [isLive, select]);
 
   const put = useCallback(
     (index: number, body: PutBody) => (body.lock ? lock({ index, body }) : select({ index, body })),
@@ -258,8 +297,11 @@ export function useAttempt() {
     // In place: a selection loop still running holds this same object.
     selection.current.queued = null;
     selection.current.lockedIndex = null;
+    selection.current.unsent = null;
     setSaveStatus('idle');
   }, [questionIndex]);
+
+  onReturn.current = resendUnsent;
 
   // Mirrors withRetry's state onto the status line while a selection keeps failing.
   const status: SaveStatus = saveStatus === 'saving' && failingSince !== null ? 'retrying' : saveStatus;

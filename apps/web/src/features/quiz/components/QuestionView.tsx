@@ -13,6 +13,7 @@ import { serverNow } from '../lib/serverClock';
 const TIME_UP_MS = 600;
 // The server settles an expired question only after deadline + grace; asking sooner returns it unchanged.
 const SETTLE_MARGIN_MS = 250;
+const WATCHED_WITHIN_MS = 1000;
 
 interface QuestionViewProps {
   question: AttemptQuestion;
@@ -24,7 +25,7 @@ interface QuestionViewProps {
   saveStatus: SaveStatus;
   onSelect: (optionId: string) => void;
   onConfirm: (optionId: string) => void;
-  /** Once per expiry, after "Time's up" has shown. `seenLive`: this session watched the clock run out. */
+  /** Once per expiry, after "Time's up" has shown. `seenLive`: the clock ran out on screen, not while hidden. */
   onExpire: (seenLive: boolean) => void;
 }
 
@@ -58,8 +59,19 @@ export function QuestionView({
     [question.type, question.prompt, question.options]
   );
 
-  const seenLive = useRef(false);
-  if (remaining > 0) seenLive.current = true;
+  // Last visible frame with time left. A run-out only counts as watched if it came within a second of
+  // the deadline; a tab returning from the background jumps to 0 and must take the refetch path instead.
+  const lastLiveFrame = useRef<number | null>(null);
+  if (remaining > 0 && document.visibilityState === 'visible') lastLiveFrame.current = serverNow();
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') lastLiveFrame.current = null;
+    };
+    document.addEventListener('visibilitychange', onHide);
+    return () => document.removeEventListener('visibilitychange', onHide);
+  }, []);
+  const watchedRunOut = () =>
+    lastLiveFrame.current !== null && deadlineMs - lastLiveFrame.current <= WATCHED_WITHIN_MS;
 
   const latest = useRef({ onExpire, onConfirm, picked, disabled: locked || timeUp });
   latest.current = { onExpire, onConfirm, picked, disabled: locked || timeUp };
@@ -68,14 +80,14 @@ export function QuestionView({
   useEffect(() => {
     if (!timeUp) return;
     const wait = Math.max(TIME_UP_MS, deadlineMs + QUIZ_ANSWER_GRACE_MS + SETTLE_MARGIN_MS - serverNow());
-    const id = window.setTimeout(() => latest.current.onExpire(seenLive.current), wait);
+    const id = window.setTimeout(() => latest.current.onExpire(watchedRunOut()), wait);
     return () => window.clearTimeout(id);
   }, [timeUp, deadlineMs, version]);
 
   // One soft tick at 5 s (§6).
   const seconds = Math.ceil(remaining / 1000);
   useEffect(() => {
-    if (seconds === 5 && seenLive.current) haptic('select');
+    if (seconds === 5 && lastLiveFrame.current !== null) haptic('select');
   }, [seconds]);
 
   // Enter confirms, unless it is activating a control that means something else (an unselected option).
