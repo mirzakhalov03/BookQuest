@@ -1,0 +1,59 @@
+apps/api/src/controllers/admin/quiz.controllers.ts
+  s_9c243050d10f30::t_cc145608086648 2,5-6,8,60-85
+apps/api/src/routes/admin/quiz.routes.ts
+  s_9c243050d10f30::t_a553fa79f53ed4 4-11,26-34
+apps/api/src/services/admin.services.ts
+  s_9c243050d10f30::t_1d9a89eecce067 3,83,86-87,90
+apps/api/src/services/quiz-ops.services.ts
+  s_9c243050d10f30::t_33372dea1b6136 1-242
+apps/api/src/validators/quiz.validators.ts
+  s_9c243050d10f30::t_48da229ac7ee10 3,5,10-11,36-45
+apps/web/src/app/router.tsx
+  s_9c243050d10f30::t_5e69283465a2df 96-97
+apps/web/src/components/ui/Sheet.tsx
+  s_9c243050d10f30::t_9a11dbb735b4e5 10-11,18,38
+apps/web/src/features/admin/DashboardPage.tsx
+  s_9c243050d10f30::t_e5361e04eaadd0 66,70,92
+apps/web/src/features/admin/api/adminKeys.ts
+  s_9c243050d10f30::t_ba84d7def86ca7 20-23
+apps/web/src/features/admin/api/useQuizLive.ts
+  s_9c243050d10f30::t_12321a2bb34a81 1-71
+apps/web/src/features/admin/quizzes/QuizLivePage.tsx
+  s_9c243050d10f30::t_131275ec74eb52 1-175
+apps/web/src/features/admin/quizzes/QuizzesPage.tsx
+  s_9c243050d10f30::t_17c156e421ce0b 2,9,21-25,33-42
+apps/web/src/features/admin/quizzes/attemptLabels.ts
+  s_9c243050d10f30::t_996e5d550f1a78 1-20
+apps/web/src/features/admin/quizzes/components/AttemptSheet.tsx
+  s_9c243050d10f30::t_94a964833970f6 1-130
+apps/web/src/features/admin/quizzes/components/AttemptsTable.tsx
+  s_9c243050d10f30::t_212062bb00877b 1-96
+apps/web/src/features/admin/quizzes/components/LiveGroupTiles.tsx
+  s_9c243050d10f30::t_0ae9411284cdcd 1-44
+apps/web/src/features/admin/quizzes/components/VoidAttemptSheet.tsx
+  s_9c243050d10f30::t_2158d9b0b78cee 1-88
+apps/web/src/features/admin/screens.ts
+  s_9c243050d10f30::t_c11387e9d9d74f 12
+apps/web/src/lib/api/mock/routes.ts
+  s_9c243050d10f30::t_5e6c555d0502d3 411,733-739
+apps/web/src/styles/shell.css
+  s_9c243050d10f30::t_77b635eeaff5a5 291-294
+packages/shared/src/schemas/admin.ts
+  s_9c243050d10f30::t_c25e2d1c8666c2 85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "dc3fd557a639e665051a11d09efa3ebf901d370b",
+  "prompts": {},
+  "sessions": {
+    "s_9c243050d10f30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "52c21a19-4dca-4d71-a046-ac31f18a1a0c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
