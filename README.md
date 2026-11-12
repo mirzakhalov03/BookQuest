@@ -101,7 +101,7 @@ in `components/ui/`.
 | ✅ | Results: `GET /quests/current/results` — ranked once at publication, then frozen |
 | ✅ | Admin: participant roster, quest create / edit / next edition, stats |
 | 🚧 | Registration and Home as React components — currently stubs; the design is in `prototype/` |
-| ⬜ | The quiz. Deliberately unspecified — question delivery, scoring, timing and anti-cheat need their own plan |
+| ✅ | The quiz: library and editor, per-participant variants, server-timed attempts, live monitor, corrections, review. Design: `docs/superpowers/specs/2026-11-11-quiz-design.md` |
 
 Full API contract: the identical section at the end of `BACKEND-SPEC.md` and `FRONTEND-SPEC.md`.
 Phase-by-phase status: `BACKEND-PLAN.md`.
@@ -126,6 +126,9 @@ The bot reads `TELEGRAM_BOT_TOKEN` and `BOT_SERVICE_TOKEN` as references to the 
 (`${{api.…}}`), and reaches it privately at `http://${{api.RAILWAY_PRIVATE_DOMAIN}}:${{api.PORT}}/api/v1`.
 BotFather: `/setdomain bookquest.uz` (web login widget) and the menu button → `https://bookquest.uz`.
 
+**No API deploys during a quiz window** (`quizOpensAt` → `quizClosesAt`). After the first deploy that
+ships the quiz, run `pnpm --filter @bookquest/api migrate:quiz` once against production (idempotent).
+
 ## Scripts
 
 ```bash
@@ -133,4 +136,7 @@ pnpm dev         # every workspace in watch mode
 pnpm build       # shared → api + web
 pnpm typecheck   # the CI gate
 pnpm --filter @bookquest/api seed
+pnpm --filter @bookquest/api migrate:quiz   # quiz fields and indexes; idempotent, run on deploy
+pnpm --filter @bookquest/api seed:quiz      # dev only: two sample quizzes on the current quest
+pnpm --filter @bookquest/api drill:quiz -- --n 150   # dev only: concurrency drill (--check-only, --cleanup)
 ```

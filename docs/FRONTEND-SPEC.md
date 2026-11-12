@@ -146,14 +146,14 @@ apps/web/src/
 | `/quests/:edition` | One past edition | public | |
 | `/results` | Podium + leaderboard | public | Empty state before `resultsAt` |
 | `/me` | Profile, number, certificate | session | |
-| `/quiz` | Quiz | session | **Not in this plan.** Route reserved only. |
+| `/quiz` | Quiz | session | Built; see the Quiz contract. |
 | `/admin` | Dashboard | admin | |
 | `/admin/participants` | Participant table | admin | |
 | `/admin/quest` | Book, dates, prizes | admin | |
 | `/admin/results` | Result inspection | admin | |
 | `/admin/broadcast` | Broadcast composer + sent history | admin | Background delivery, polls while sending. |
 | `/admin/quest/new` | Start the next edition | admin | Only once the current quest is `finished`. |
-| `/admin/quiz` | Quiz management | admin | **Not in this plan.** |
+| `/admin/quiz` | Quiz management | admin | Built: library, editor, live monitor (`/admin/quizzes*`). |
 
 **Route guards are UX, not security.** `<RequireAuth>` and `<RequireAdmin>` exist so people are not
 shown a screen that will fail — they do not protect anything. Every admin screen's data comes from
@@ -490,7 +490,8 @@ and does not travel into the app.
 ```
 
 - `error.message` is safe to show a user verbatim — messages are written for people, not for logs.
-- `error.fields` maps a field path to a message and is present only on `validation_failed`. Forms
+- `error.reason` is an optional stable machine code on some 404/409s (quiz routes); branch on it, not on `message`.
+- `error.fields` maps a field path to a message and is present on `validation_failed` and on a few quiz 409s. Forms
   drop it straight onto inputs.
 
 ### Error codes → status
@@ -501,7 +502,7 @@ and does not travel into the app.
 | `unauthorized` | 401 | No session, or the session is invalid/expired. Client should re-authenticate. |
 | `forbidden` | 403 | Authenticated, but not allowed. Used for admin-only routes. |
 | `not_found` | 404 | No such quest, participant, or route. |
-| `conflict` | 409 | Already registered; quest full; quiz already submitted. |
+| `conflict` | 409 | Already registered; quest full; quiz window closed, attempt finished, or content locked. Often carries `reason`. |
 | `rate_limited` | 429 | Too many attempts. Carries `Retry-After`. |
 | `internal_error` | 500 | Bug. Message is generic in production. |
 
@@ -547,8 +548,7 @@ interface Quest {                                           // 🚧 gains prizes
   quizOpensAt: string;
   quizClosesAt: string;
   resultsAt: string;
-  quizQuestionCount: number | null;                         // ⬜ new — for "20 questions" copy
-  quizDurationMinutes: number | null;                       // ⬜ new
+  quiz: { questionCount: number; totalSeconds: number } | null;   // derived from the attached quiz
   participantCount: number;
 }
 
@@ -942,8 +942,120 @@ Dashboard numbers: registrations today, total, quiz submissions, completion rate
 
 ---
 
-### Not in this contract
+## Quiz
 
-The quiz — question delivery, answer submission, scoring, anti-cheat, timing — is a separate future
-plan. No quiz endpoints are defined here beyond the metadata (`quizOpensAt`, `quizQuestionCount`)
-the Home screen needs to describe it. Neither side should build against an imagined quiz API.
+Design and rationale: `docs/superpowers/specs/2026-11-11-quiz-design.md`. Types and zod schemas:
+`packages/shared/src/schemas/quiz.ts`. Times are ISO strings; durations are integer milliseconds.
+The server is the only timing authority.
+
+**Error `reason`.** A 404/409 may carry `error.reason`, a stable machine code the client branches on
+(`message` stays human): `not_configured`, `window_not_open`, `window_closed`, `already_completed`,
+`voided`, `already_locked`, `quiz_locked`, `stale`.
+
+### Participant — `/api/v1/quiz`
+
+All routes: `requireUser`, 120 requests/min per user, `Cache-Control: no-store`. No response ever
+contains `correctOptionId`, `isCorrect`, `explanation`, `difficulty`, the variant label, or an
+unserved question (until the review, which is gated on close).
+
+**`GET /quiz/me`** → `QuizOverview`
+```ts
+{
+  state: 'no_quest'|'not_registered'|'not_configured'|'upcoming'|'open'|'in_progress'
+        |'completed'|'missed'|'voided'|'results',
+  serverNow: string,
+  window: { opensAt: string, closesAt: string, resultsAt: string } | null,
+  quiz: { title: string, description: string|null, questionCount: number, totalSeconds: number } | null,
+  attempt: { status: 'in_progress'|'completed'|'voided', answered: number, total: number,
+             score: number|null, durationMs: number|null,        // completed only
+             voidReason: string|null, reviewAvailable: boolean } | null
+}
+```
+
+**`POST /quiz/attempt`** — start, idempotent. `201 AttemptState` when created, `200` when it exists
+(a duplicate-key race returns the winner's attempt).
+`404 not_found` (`reason: not_configured` when there is no current quest, or not registered);
+`409 conflict` with `reason`: `window_not_open`, `window_closed`, `not_configured`,
+`already_completed`, `voided`.
+
+**`GET /quiz/attempt`** → `AttemptState`. Settles expired items first; never serves a question.
+
+**`POST /quiz/attempt/next`** → `AttemptState`. Settles an expired current item, then serves the cursor
+item if it is unserved and the window is open. A live served item is returned unchanged (same
+deadline). When nothing is left, or the window has closed, it finalises and returns `completed`.
+
+**`PUT /quiz/attempt/items/:index`** body (strict):
+```ts
+{ optionId: string, lock: boolean, clientId: string /* 8–64 */,
+  signals?: { hiddenCount: number /* 0–1000 */, hiddenMs: number /* 0–3_600_000 */ } }
+```
+→ `AttemptState`. `index` must equal the cursor, the item served and unlocked.
+`lock:false` records the selection; `lock:true` records and locks it. Re-locking the same option is a
+`200` no-op. A different option on a locked item is `409 conflict`, `reason: already_locked`.
+Past `deadlineAt + 2 s` the item settles as timeout and the response is `200` with
+`lastAction: { accepted: false, reason: 'time_up' }`. `400 validation_failed` for an unknown option or
+out-of-range index.
+
+**`AttemptState`**
+```ts
+{
+  attemptId: string,
+  status: 'in_progress'|'completed'|'voided',
+  phase: 'ready'|'question'|'between'|'completed'|'voided',
+  position: { index: number, total: number },              // index = cursor, 0-based
+  question: { index, type: 'true_false'|'mcq', prompt, options: { id, text }[],
+              timeLimitMs, servedAt, deadlineAt, selectedOptionId: string|null } | null,
+  lastAction?: { accepted: boolean, reason?: 'time_up'|'already_locked' },
+  result: { score: number, total: number, durationMs: number } | null,   // provisional until resultsAt
+  windowClosesAt: string,
+  serverNow: string
+}
+```
+
+**`GET /quiz/attempt/review`** → `AttemptReview`, only once `now ≥ quizClosesAt` and the attempt is
+completed (`404` otherwise):
+```ts
+{ items: { index, prompt, options: { id, text }[], selectedOptionId: string|null,
+           correctOptionId: string, outcome: 'locked'|'auto'|'timeout'|null,
+           isCorrect: boolean|null, voided: boolean, elapsedMs: number|null,
+           explanation: string|null }[],
+  score: number, total: number, durationMs: number }
+```
+
+### Admin — quiz library `/api/v1/admin/quizzes`
+
+Auth: `role === 'admin'`. Admin DTOs may carry answers.
+
+| Method & path | Body / query | Returns | Notes |
+|---|---|---|---|
+| `GET /admin/quizzes` | — | `QuizSummaryAdmin[]` `{id,title,questionCount,totalSeconds,difficultyMix:{easy,medium,hard},isComplete,issueCount,attachment:{questEdition,groupLabel}\|null,usedIn:number[],locked,revision,updatedAt}` | No pagination. |
+| `POST /admin/quizzes` | `{title, description?}` | `201 QuizAdmin` | New empty draft. |
+| `GET /admin/quizzes/:id` | — | `QuizAdmin` (answers, `issues`, `locked`, `attachment`, `usedIn`, `corrections`, `voidedQuestionIds`) | |
+| `PUT /admin/quizzes/:id` | `{revision, title, description, settings, questions[]}` strict, 512 kB limit | `QuizAdmin` | `409 reason: stale` on revision mismatch; `409 reason: quiz_locked` once any attempt exists. If attached, must stay complete and keep variant shape (else `400` with `fields`). |
+| `POST /admin/quizzes/:id/duplicate` | — | `201 QuizAdmin` | New question ids, "(copy)" suffix, unattached. |
+| `DELETE /admin/quizzes/:id` | — | `{ ok: true, data: null }` | `409 reason: quiz_locked` if attached, used in an earlier edition, or any attempt exists. |
+| `POST /admin/quizzes/:id/corrections` | `{questionId, kind:'key', correctOptionId, note?}` or `{questionId, kind:'void', note?}` | `{ quiz: QuizAdmin, rescored: number }` | Only while locked and `now < resultsAt`. Re-scores attempts. `409 reason: stale` on a concurrent correction. |
+
+### Admin — live operations `/api/v1/admin/quiz` (current quest)
+
+| Method & path | Body / query | Returns |
+|---|---|---|
+| `GET /admin/quiz/group-sizes` | `distribution`, `groups` (int, within the split's range) | `{ sizes: number[] }` — live split preview for the quest editor |
+| `GET /admin/quiz/live` | — | `QuizLiveStats` `{ groups: [{index,label,quizTitle,assigned,started,inProgress,completed,avgScore,avgDurationMs}], updatedAt }` |
+| `GET /admin/quiz/attempts` | `status?`, `flag?`, `q?` (≤80), `page=1`, `limit=50` (≤200) | `Paginated<AttemptRow>`; row `{id, participant:{number,fullName}, groupLabel, status, answered, total, score, durationMs, flags, startedAt, completedAt}` |
+| `GET /admin/quiz/attempts/:id` | — | `AttemptAdmin`: the row plus `quizId, quizTitle, quizRevision, finalizedBy, clientIdCount, voidReason, voidedAt` and every item with key, timestamps and signals |
+| `POST /admin/quiz/attempts/:id/void` | `{ reason: string 1–300 }` | `AttemptRow`. Only while `now < resultsAt`; deletes the `Result` and marks the attempt voided. |
+
+### Quest quiz fields
+
+`Quest` drops `quizQuestionCount` / `quizDurationMinutes` and gains
+`quiz: { questionCount: number, totalSeconds: number } | null` (derived from the attached quiz; `null`
+until one is attached). `AdminQuest` adds `quizConfig: { distribution: 'single'|'parity'|'random',
+quizIds: string[], groupLabels: string[] } | null` (never the seed).
+`PATCH /admin/quests/:id` accepts `quizConfig: { distribution, quizIds } | null`; `409` with
+`reason: quiz_locked` (and `fields`) once any attempt exists. `AdminStats` gains `quizInProgress`.
+Date ordering when a quiz is attached also requires `resultsAt ≥ quizClosesAt + 5 min`.
+
+> **Operations.** Do not deploy the API during a quiz window: a restart is survivable (state is in
+> MongoDB) but it adds latency at the worst moment. After deploying the quiz release, run
+> `pnpm --filter @bookquest/api migrate:quiz` once against production.

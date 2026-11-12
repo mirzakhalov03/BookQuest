@@ -242,7 +242,7 @@ sequenceDiagram
    the server acknowledges.
 4. **Confirm.** "Confirm" (or Enter) sends `{lock:true}`. The UI shows "Locked in" for about 400 ms
    (haptic `success` in Telegram), then automatically calls `/next`. No correct/incorrect feedback.
-5. **Time runs out.** At 0 the client shows "Time's up" and calls `/next`. The server settles the
+5. **Time runs out.** *(As built: "Time's up" holds until the server has settled the item, about deadline + 2 s grace, instead of 600 ms, because calling `/next` earlier returns the same question.)* At 0 the client shows "Time's up" and calls `/next`. The server settles the
    expired question (counts the last saved selection, or unanswered) and serves the next.
 6. **Last question.** `/next` with nothing left finalises the attempt and returns `completed`. The
    client shows the completion screen.
@@ -560,6 +560,8 @@ All responses use the existing envelope. All `/quiz` routes: `requireUser`, `qui
 
 ### 8.1 Participant — `routes/quiz.routes.ts` mounted at `/api/v1/quiz`
 
+> Implementation note (2026-11-12): the as-built contract is in `docs/BACKEND-SPEC.md` ("Quiz"). 404/409 errors carry a machine `error.reason` (`window_not_open`, `window_closed`, `not_configured`, `already_completed`, `voided`, `already_locked`, `quiz_locked`, `stale`). `reviewAvailable` is true only once `now ≥ quizClosesAt`, and `/attempt/review` is gated on close alone.
+
 **`GET /quiz/me`** → `QuizOverview`
 ```ts
 {
@@ -625,6 +627,8 @@ items.
 elapsedMs, explanation }] , score, total, durationMs }`. `404` before close.
 
 ### 8.2 Admin — `routes/admin/quiz.routes.ts` at `/api/v1/admin/quizzes` and `/admin/quiz`
+
+> Implementation note (2026-11-12): the `/admin/quiz` ops router (`group-sizes`, `live`, `attempts`, `void`) was added in Task 6 with `GET /admin/quiz/group-sizes?distribution&groups`. `QuizSummaryAdmin` and `QuizAdmin` also carry `usedIn: number[]` (the "Used in Edition N" chip); a quiz used in an earlier edition cannot be deleted.
 
 | Method & path | Body / query | Returns | Notes |
 |---|---|---|---|
@@ -791,6 +795,8 @@ Each attempt is **one document**. Every participant write is a **single-document
 Transactions are used only where two collections change together (finalise, void, re-score).
 
 ### 13.2 Write patterns (exact filters)
+
+> Implementation note (2026-11-12): positional null checks use `{$type:'null'}` / `{$type:'date'}` (`IS_NULL` / `IS_DATE` in `quiz-scoring.ts`), not `: null`, which also matches a missing field. The settle filter requires both `lockedAt` and `outcome` null. The attempt insert is a raw (non-Mongoose) insert for latency; new attempt fields must be added to `attemptDocument`.
 - **Start:** `QuizAttempt.create(snapshot)`. A duplicate-key error (`isDuplicateKeyError`) → load
   and return the existing attempt.
 - **Serve `i`:** filter `{_id, status:'in_progress', cursor:i, ['items.'+i+'.servedAt']: null}` →
@@ -868,6 +874,8 @@ withTransaction(session => {
   variants and recomputes the quest's `quizSummary`.
 
 ### 13.7 Answer-key correction / void question (transaction)
+
+> Implementation note (2026-11-12): only the quiz correction record (and drift check) is transactional. The re-score (steps 2-3) runs after it, outside the transaction, because one transaction over hundreds of live attempts aborts on WriteConflict. It is idempotent and repairs drift: re-running the correction finishes a partial re-score.
 1. Update `quiz.questions[q].correctOptionId` or push into `voidedQuestionIds`; append to `corrections`.
 2. For each attempt `{quiz, status:'completed'|'in_progress'}`: update the matching item's
    `correctOptionId`/`voided` and recompute `isCorrect`, then (if completed) `score/total/durationMs`;
@@ -986,6 +994,9 @@ finalise, void and correction logs at `info` with counts.
   finalise uses the corrected key.
 
 **Acceptance criteria (each must be demonstrably true)**
+
+> Implementation note (2026-11-12): results of the 2026-11-12 walk against the local dev DB are in the commit that closes Task 14; criterion 13 on the production tier is owner action C7.
+
 1. No participant response at any time contains `correctOptionId`, `isCorrect`, `explanation`,
    `difficulty`, or an unserved question (checked by inspecting every endpoint's JSON).
 2. Refreshing mid-question returns the same question with the same `deadlineAt` ±0 ms.
