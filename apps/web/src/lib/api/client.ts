@@ -92,6 +92,31 @@ function parseRetryAfter(header: string | null): number | null {
   return Number.isNaN(date) ? null : Math.max(0, date - Date.now());
 }
 
+/* AbortSignal.any (Safari 17.4, Chrome 116) and .timeout (Safari 16, Chrome 103) postdate older Telegram webviews. */
+
+function anySignal(signals: AbortSignal[]): AbortSignal {
+  if (typeof AbortSignal.any === 'function') return AbortSignal.any(signals);
+  const controller = new AbortController();
+  const already = signals.find((s) => s.aborted);
+  if (already) {
+    controller.abort(already.reason);
+    return controller.signal;
+  }
+  const onAbort = (event: Event) => {
+    for (const s of signals) s.removeEventListener('abort', onAbort);
+    controller.abort((event.target as AbortSignal).reason);
+  };
+  for (const s of signals) s.addEventListener('abort', onAbort);
+  return controller.signal;
+}
+
+function timeoutAfter(ms: number): AbortSignal {
+  if (typeof AbortSignal.timeout === 'function') return AbortSignal.timeout(ms);
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(new DOMException('The operation timed out.', 'TimeoutError')), ms);
+  return controller.signal;
+}
+
 async function send(
   path: string,
   options: RequestOptions,
@@ -100,7 +125,7 @@ async function send(
 ): Promise<Response> {
   const { body, headers, timeoutMs: _timeoutMs, signal: callerSignal, ...rest } = options;
   const signals = [callerSignal, timeoutSignal].filter((s): s is AbortSignal => s != null);
-  const signal = signals.length > 1 ? AbortSignal.any(signals) : signals[0];
+  const signal = signals.length > 1 ? anySignal(signals) : signals[0];
   // The browser must write the multipart boundary itself, so FormData gets no Content-Type from us.
   const isForm = body instanceof FormData;
 
@@ -139,7 +164,7 @@ async function send(
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   // One deadline for the whole request, body read included.
   const timeoutSignal =
-    options.timeoutMs === undefined ? null : AbortSignal.timeout(options.timeoutMs);
+    options.timeoutMs === undefined ? null : timeoutAfter(options.timeoutMs);
   let response = await send(path, options, readToken(), timeoutSignal);
 
   // A 401 means the stored token is dead, whatever it looked like. Drop it and

@@ -60,7 +60,7 @@ type Health = { onFail: (error: unknown) => void; onOk: () => void };
 function call<T extends { serverNow: string }>(
   health: Health,
   run: () => Promise<T>,
-  until?: () => boolean
+  cutoff?: { until: () => boolean; remainingMs: () => number }
 ): Promise<T> {
   return withRetry(
     async () => {
@@ -73,7 +73,7 @@ function call<T extends { serverNow: string }>(
         throw error;
       }
     },
-    { until }
+    cutoff ?? {}
   );
 }
 
@@ -191,7 +191,7 @@ export function useAttempt() {
         const state = await call(
           health,
           () => api.put<AttemptState>(`/quiz/attempt/items/${index}`, { ...body, clientId }, { timeoutMs: TIMEOUT_MS }),
-          pastCutoff
+          { until: pastCutoff, remainingMs: () => cutoff - serverNow() }
         );
         return writeState(queryClient, state);
       } catch (error) {
