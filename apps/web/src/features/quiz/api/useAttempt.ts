@@ -7,6 +7,7 @@ import { serverNow, timed } from '../lib/serverClock';
 import { quizKeys } from './quizKeys';
 
 const TIMEOUT_MS = 8000;
+const RESEND_AFTER_MS = 3000;
 const CLIENT_ID_KEY = 'bq.quiz.clientId';
 
 /* ── Per-tab client id ──────────────────────────────────────────────────── */
@@ -217,6 +218,15 @@ export function useAttempt() {
     unsent: Pending | null;
   }>({ inFlight: false, queued: null, lockedIndex: null, unsent: null });
 
+  // A tap that gave up while still online (e.g. 5xx) is retried on a short timer, not only on reconnect.
+  const resendTimer = useRef<number | undefined>(undefined);
+  const resendRef = useRef<() => void>(() => {});
+  const scheduleResend = useCallback(() => {
+    window.clearTimeout(resendTimer.current);
+    resendTimer.current = window.setTimeout(() => resendRef.current(), RESEND_AFTER_MS);
+  }, []);
+  useEffect(() => () => window.clearTimeout(resendTimer.current), []);
+
   const select = useCallback(
     async (pending: Pending) => {
       const lane = selection.current;
@@ -229,20 +239,24 @@ export function useAttempt() {
       lane.inFlight = true;
       let current: Pending | null = pending;
       let last: SendResult | null = null;
+      let sentFor: Pending = pending;
       while (current) {
         setSaveStatus('saving');
+        sentFor = current;
         last = await send(current);
         if (last === 'offline' && !lane.queued) lane.unsent = current;
         current = lane.queued;
         lane.queued = null;
       }
       lane.inFlight = false;
-      // A lock that went out meanwhile owns the status line.
-      if (lane.lockedIndex !== null) return;
-      // "Saved" only on a server ack (§6).
-      setSaveStatus(typeof last === 'object' && last !== null ? 'saved' : last === 'offline' ? 'retrying' : 'idle');
+      // A lock that went out meanwhile owns the status line; a newer question owns its own.
+      if (lane.lockedIndex !== null || !isLive(sentFor.index)) return;
+      // "Saved" only when the server holds exactly this tap (§6).
+      const acked = typeof last === 'object' && last !== null && last.question?.selectedOptionId === sentFor.body.optionId;
+      setSaveStatus(acked ? 'saved' : lane.unsent ? 'retrying' : 'idle');
+      if (lane.unsent) scheduleResend();
     },
-    [send]
+    [isLive, send, scheduleResend]
   );
 
   const lock = useCallback(
@@ -278,13 +292,15 @@ export function useAttempt() {
     const lane = selection.current;
     const pending = lane.unsent;
     if (!pending || lane.inFlight) return;
-    if (!isLive(pending.index) || lane.lockedIndex === pending.index) {
+    const question = queryClient.getQueryData<AttemptState>(quizKeys.attempt())?.question;
+    const countable = question?.index === pending.index && serverNow() <= Date.parse(question.deadlineAt) + QUIZ_ANSWER_GRACE_MS;
+    if (!countable || lane.lockedIndex === pending.index) {
       lane.unsent = null;
-      setSaveStatus('idle');
+      if (question?.index === pending.index) setSaveStatus('idle');
       return;
     }
     void select(pending);
-  }, [isLive, select]);
+  }, [queryClient, select]);
 
   const put = useCallback(
     (index: number, body: PutBody) => (body.lock ? lock({ index, body }) : select({ index, body })),
@@ -302,6 +318,7 @@ export function useAttempt() {
   }, [questionIndex]);
 
   onReturn.current = resendUnsent;
+  resendRef.current = resendUnsent;
 
   // Mirrors withRetry's state onto the status line while a selection keeps failing.
   const status: SaveStatus = saveStatus === 'saving' && failingSince !== null ? 'retrying' : saveStatus;

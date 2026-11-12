@@ -62,7 +62,9 @@ export function QuestionView({
   // Last visible frame with time left. A run-out only counts as watched if it came within a second of
   // the deadline; a tab returning from the background jumps to 0 and must take the refetch path instead.
   const lastLiveFrame = useRef<number | null>(null);
-  if (remaining > 0 && document.visibilityState === 'visible') lastLiveFrame.current = serverNow();
+  // `remaining` can be stale on a render before the first rAF after a freeze, so re-check the clock itself.
+  const frameAt = serverNow();
+  if (remaining > 0 && frameAt < deadlineMs && document.visibilityState === 'visible') lastLiveFrame.current = frameAt;
   useEffect(() => {
     const onHide = () => {
       if (document.visibilityState === 'hidden') lastLiveFrame.current = null;
@@ -71,7 +73,9 @@ export function QuestionView({
     return () => document.removeEventListener('visibilitychange', onHide);
   }, []);
   const watchedRunOut = () =>
-    lastLiveFrame.current !== null && deadlineMs - lastLiveFrame.current <= WATCHED_WITHIN_MS;
+    lastLiveFrame.current !== null &&
+    lastLiveFrame.current <= deadlineMs &&
+    deadlineMs - lastLiveFrame.current <= WATCHED_WITHIN_MS;
 
   const latest = useRef({ onExpire, onConfirm, picked, disabled: locked || timeUp });
   latest.current = { onExpire, onConfirm, picked, disabled: locked || timeUp };
