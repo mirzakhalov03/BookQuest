@@ -22,7 +22,9 @@ export function TopBar({ year }: TopBarProps) {
   return (
     <header className="topbar">
       <div className="wordmark">
-        <span className="wordmark__name">BookQuest</span>
+        <span className="wordmark__name">
+          Book<span className="text-ember">Quest</span>
+        </span>
         {year !== undefined && <span className="wordmark__year">{year}</span>}
       </div>
       <NotificationsBell />
