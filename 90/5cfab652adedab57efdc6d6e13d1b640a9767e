@@ -1,0 +1,425 @@
+apps/api/src/middlewares/upload.middleware.ts
+  s_e45e259000e4e0::t_326b19542101c3 16,20
+apps/api/src/services/auth.services.ts
+  s_e45e259000e4e0::t_a2ef0f093b008b 40,66,81,109,114,133
+apps/api/src/services/certificate-delivery.services.ts
+  s_e45e259000e4e0::t_52b605e481b4b9 44-46,50,61
+apps/api/src/services/certificate.services.ts
+  s_e45e259000e4e0::t_e7276c1c18304c 52,60
+apps/api/src/services/cover.services.ts
+  s_e45e259000e4e0::t_2aa9149f80e7e7 35
+apps/api/src/services/login-code.services.ts
+  s_e45e259000e4e0::t_37b515014aa7ad 48,101,128,136,145,166-167,193,201
+apps/api/src/services/participant.services.ts
+  s_e45e259000e4e0::t_1475082772d817 27,32-34,41,61-62,100
+apps/api/src/services/quest.services.ts
+  s_e45e259000e4e0::t_54f9a3d225e1e7 38,44,100,122
+apps/api/src/services/quiz-attempt.services.ts
+  s_e45e259000e4e0::t_d9eabad04c6a89 83,98-99,105,492-493
+apps/api/src/services/quiz.services.ts
+  s_e45e259000e4e0::t_770bfd979efff8 245,247
+apps/api/src/services/user.services.ts
+  s_e45e259000e4e0::t_6cdb560419f441 46,59,106-108,122-124
+apps/api/src/utils/api-error.ts
+  s_e45e259000e4e0::t_28040e32804c41 29-30,44-45,54-55,58-59,62-63
+apps/web/index.html
+  s_e45e259000e4e0::t_c06b1792b83e9c 13,15
+apps/web/src/app/BootSplash.tsx
+  s_e45e259000e4e0::t_edda3256a57bee 1-2,15,19
+apps/web/src/app/ErrorBoundary.tsx
+  s_e45e259000e4e0::t_8be31237ee3748 3,41
+apps/web/src/app/RouteErrorBoundary.tsx
+  s_e45e259000e4e0::t_8a4eb1c7c2246d 4,9,22
+apps/web/src/app/router.tsx
+  s_e45e259000e4e0::t_acb347b317f59f 20,29-33,40
+apps/web/src/components/BookCover.tsx
+  s_e45e259000e4e0::t_90ce849817e44b 1-2,26,34
+apps/web/src/components/BookHero.tsx
+  s_e45e259000e4e0::t_919737ec364fcb 2-3,23,34,38
+apps/web/src/components/feedback/ErrorState.tsx
+  s_e45e259000e4e0::t_4bfe7433605505 2-3,18-20,27,30
+apps/web/src/components/feedback/NotFoundScreen.tsx
+  s_e45e259000e4e0::t_46abd9ee3001f9 3,7,11-12
+apps/web/src/components/layout/TabBar.tsx
+  s_e45e259000e4e0::t_4af2d9079b8e84 6,23,29-35,50,53
+apps/web/src/components/layout/TopBar.tsx
+  s_e45e259000e4e0::t_91bdfd53441a86 5,41,50
+apps/web/src/components/quiz/ProgressRail.tsx
+  s_e45e259000e4e0::t_e3c94fe37bd2b0 1-2,11,13
+apps/web/src/components/quiz/QuestionCard.tsx
+  s_e45e259000e4e0::t_42a044b6dc41a4 4,32,72-73
+apps/web/src/components/quiz/QuestionTimer.tsx
+  s_e45e259000e4e0::t_6d80717a25509f 1-2,14-16,21,45
+apps/web/src/components/ui/Countdown.tsx
+  s_e45e259000e4e0::t_d5f908f5ffabd3 3,29,32,36-39
+apps/web/src/components/ui/ExpandableText.tsx
+  s_e45e259000e4e0::t_69db9756a25e44 2,18,51,63
+apps/web/src/components/ui/ParticipantNumeral.tsx
+  s_e45e259000e4e0::t_65d9bfb69d1e02 2,24,33
+apps/web/src/components/ui/Segmented.tsx
+  s_e45e259000e4e0::t_1a6fcbe7536b52 2-3,32
+apps/web/src/components/ui/Toast.tsx
+  s_e45e259000e4e0::t_0e32df54bf825e 18
+apps/web/src/features/admin/DashboardPage.tsx
+  s_e45e259000e4e0::t_eddad419afdcbd 16-17,21,27,30-32,52,71-74,95-98,105,110,117,119,124,132,135,138,143,147,153-154,157
+apps/web/src/features/admin/ParticipantsPage.tsx
+  s_e45e259000e4e0::t_ca2baa3948c83a 16,23,43,45-46,54,83-84,91,93,97,104,114
+apps/web/src/features/admin/broadcast/BroadcastPage.tsx
+  s_e45e259000e4e0::t_1c6fdd824141bd 17-18,33-34,47,56,82,85,94,101,106,115,119,122,130
+apps/web/src/features/admin/broadcast/components/BroadcastHistory.tsx
+  s_e45e259000e4e0::t_85cd52521bf0c4 5,13-14,17,19,21,26,29-30,33,40
+apps/web/src/features/admin/broadcast/components/MessagePreview.tsx
+  s_e45e259000e4e0::t_971e8b18933771 1-2,5,8
+apps/web/src/features/admin/broadcast/suggestions.ts
+  s_e45e259000e4e0::t_d588dadb01ff3b 3,15,21-22,28-29,37-38,46-47,52-53
+apps/web/src/features/admin/certificates/CertificatesPanel.tsx
+  s_e45e259000e4e0::t_5579e058a7f162 2,11-12,24-25,33-34,41,52,55,66,76,82,86,89,95,104,108,110,112-114
+apps/web/src/features/admin/components/ContactLink.tsx
+  s_e45e259000e4e0::t_a374a57b40850b 6,18,34,36,40
+apps/web/src/features/admin/components/CopyButton.tsx
+  s_e45e259000e4e0::t_85ce4c7af21f99 3,8,13,15
+apps/web/src/features/admin/components/ForbiddenState.tsx
+  s_e45e259000e4e0::t_4194eed62ae443 3-4,21,24-25
+apps/web/src/features/admin/components/ParticipantControls.tsx
+  s_e45e259000e4e0::t_e999eab04e9af7 2,12-14,16,27-28,32-33,47
+apps/web/src/features/admin/components/ParticipantsTable.tsx
+  s_e45e259000e4e0::t_328007c60f627a 5,18,44-47
+apps/web/src/features/admin/components/QuestTimeline.tsx
+  s_e45e259000e4e0::t_4b1287517cdb63 3-4,23,44,48,52,65,69
+apps/web/src/features/admin/components/SaveBar.tsx
+  s_e45e259000e4e0::t_e0c2472aafb040 3,31,34,38,48
+apps/web/src/features/admin/components/UnsavedChangesSheet.tsx
+  s_e45e259000e4e0::t_ed93fbef2b87bb 4,7,12,16,19,24
+apps/web/src/features/admin/dates.ts
+  s_e45e259000e4e0::t_efac365b65f814 3,18-21
+apps/web/src/features/admin/interactions/InteractionContent.tsx
+  s_e45e259000e4e0::t_58a0524c43a22b 3,5,7,9-10,12,17,25,28,30,37,41,43,45,52,56-57,60,62
+apps/web/src/features/admin/interactions/InteractionFilters.tsx
+  s_e45e259000e4e0::t_526170e60835a2 9-10,37,40,43,47,58,69,71-72,78-79,89,96,103,110,112,117,120-121,133,142,145
+apps/web/src/features/admin/interactions/InteractionsTable.tsx
+  s_e45e259000e4e0::t_882d798fa755cd 8,34,60-63,107-108,124,126,140-141,165
+apps/web/src/features/admin/interactions/KindChip.tsx
+  s_e45e259000e4e0::t_ef22fb503a3953 2,9,16
+apps/web/src/features/admin/interactions/MessagesPage.tsx
+  s_e45e259000e4e0::t_b671c48d88ff49 27,34,74,80,85,99,138,141,143,148,155
+apps/web/src/features/admin/interactions/PersonSheet.tsx
+  s_e45e259000e4e0::t_b8b9ce6b1f39e5 10,23-24,38,49,58,66,68,76,82,89-91,93
+apps/web/src/features/admin/interactions/filters.ts
+  s_e45e259000e4e0::t_3fbbf7ede62b12 14-16,57
+apps/web/src/features/admin/phase.ts
+  s_e45e259000e4e0::t_0282c298014da6 2,4,14,18,22-23,25,27
+apps/web/src/features/admin/quest/NewEditionPage.tsx
+  s_e45e259000e4e0::t_c4c9d08b16a504 29-30,38,42,56,59,62-63,67,89-90,107,111,118,121-122,141,143-144,149,155,159,162,168-169
+apps/web/src/features/admin/quest/QuestEditorPage.tsx
+  s_e45e259000e4e0::t_3b02bbec5bbf68 28-29,35,41,44-46,71,81,89,92,95,124,154-155,158-159
+apps/web/src/features/admin/quest/components/BookFieldsSection.tsx
+  s_e45e259000e4e0::t_976748e849d1e8 6,21,25-26,39,52,54
+apps/web/src/features/admin/quest/components/CoverPicker.tsx
+  s_e45e259000e4e0::t_cd00eb6d96cf18 3,11-12,41-42,62,69,79-80,96,104,110,121,125-126,146,149,156
+apps/web/src/features/admin/quest/components/DateTimelineField.tsx
+  s_e45e259000e4e0::t_5962874b771fc4 8,11,27-28,62,64-65,79,81,101
+apps/web/src/features/admin/quest/components/PrizeFieldsSection.tsx
+  s_e45e259000e4e0::t_09b329f620ce69 4,12,17-20
+apps/web/src/features/admin/quest/components/QuestFormFields.tsx
+  s_e45e259000e4e0::t_1bdb9c5c84ea43 14,37,64,68-70,75
+apps/web/src/features/admin/quest/components/QuestPreview.tsx
+  s_e45e259000e4e0::t_6965f656c9ae76 9,12-14,20-21,27,30-31,49,76,82,87,90
+apps/web/src/features/admin/quest/components/QuizConfigSection.tsx
+  s_e45e259000e4e0::t_1e5c1733314a47 4,13,17,37-40,52,60,71-72,77,81,85,96,106,109,111,125,129,132,142-143,149,174,176
+apps/web/src/features/admin/quest/components/QuizReadinessList.tsx
+  s_e45e259000e4e0::t_88ab8dca755392 4,14,16,20,22
+apps/web/src/features/admin/quest/components/ResourceListEditor.tsx
+  s_e45e259000e4e0::t_626affe32e42ad 10-11,36-37,43,55,73,75,79,81,91,95,101,109,122,153
+apps/web/src/features/admin/quest/components/ReviewChangesSheet.tsx
+  s_e45e259000e4e0::t_dce5d06524e8ce 5,18-19,24,28,31,47
+apps/web/src/features/admin/quest/components/SectionTabs.tsx
+  s_e45e259000e4e0::t_5984237a8e4d46 3,27,53,58
+apps/web/src/features/admin/quest/questFormSchema.ts
+  s_e45e259000e4e0::t_b1ebce5c0a36fe 5,7-12,15-16,21,29,31-33,37,46-48,50,54-55,75-76,78
+apps/web/src/features/admin/quest/quizConfig.ts
+  s_e45e259000e4e0::t_1db2fca76611ea 2,10-11,13-27,45-48
+apps/web/src/features/admin/quest/quizReadiness.ts
+  s_e45e259000e4e0::t_dda7ad8ae43337 4,36-37,44-45,52,54-55,62,66-69,78,80-81,89,94-95
+apps/web/src/features/admin/quest/resources.ts
+  s_e45e259000e4e0::t_6c2111279e9c09 1,3,7-10,46
+apps/web/src/features/admin/quest/review.ts
+  s_e45e259000e4e0::t_ec021a2b801522 5,28-29,33,38,43
+apps/web/src/features/admin/quest/serverErrors.ts
+  s_e45e259000e4e0::t_7c0d6d79d6cf40 5,25,30-31
+apps/web/src/features/admin/quizzes/QuizEditorPage.tsx
+  s_e45e259000e4e0::t_d3305a1a037892 25-26,34,37,66-67,100,103-104,110,125,129,136,141,162,164,186,188-189
+apps/web/src/features/admin/quizzes/QuizLivePage.tsx
+  s_e45e259000e4e0::t_15746fcca08ce1 19,30,35-36,39,43,48-49,68-77,114,117-118,125,127,130,133,138-139,143,152
+apps/web/src/features/admin/quizzes/QuizPreviewPage.tsx
+  s_e45e259000e4e0::t_8f1cd8b7b37b17 14,34,36,47,61-62,64,80,96,121,126,133,138,158,161,165
+apps/web/src/features/admin/quizzes/QuizzesPage.tsx
+  s_e45e259000e4e0::t_542bd34b5039fe 16-17,22,33-34,39,43,48,53-54,72-73,77,85,100,109,113,116,121
+apps/web/src/features/admin/quizzes/components/AttemptsTable.tsx
+  s_e45e259000e4e0::t_54904ec9fe7651 4-5,17,23,32,45,49,61,84-85
+apps/web/src/features/admin/quizzes/components/CorrectionSheet.tsx
+  s_e45e259000e4e0::t_3610d0651818d2 12-14,36-43,50,69,72,80,84,87,96-97,108,127,135,141,149,157
+apps/web/src/features/admin/quizzes/components/CorrectionsLog.tsx
+  s_e45e259000e4e0::t_c65111b176f063 4,7,10-13,19,24,31,34
+apps/web/src/features/admin/quizzes/components/LiveGroupTiles.tsx
+  s_e45e259000e4e0::t_8445845c11a317 3-4,10,19,23-26,30-32,34
+apps/web/src/features/admin/quizzes/components/NewQuizSheet.tsx
+  s_e45e259000e4e0::t_03320fb5853230 8-9,16-17,28,34,39,42,52,55
+apps/web/src/features/admin/quizzes/components/OptionsEditor.tsx
+  s_e45e259000e4e0::t_8a6244e6e190c2 6,21,39,47,53,55,62,71,80,89
+apps/web/src/features/admin/quizzes/components/QuestionEditor.tsx
+  s_e45e259000e4e0::t_2cb3d01501dd9f 19,41-47,73-74,79,96,106,109,111-112,119,139,143,149,153,156,161
+apps/web/src/features/admin/quizzes/components/QuestionList.tsx
+  s_e45e259000e4e0::t_ec4361cc321eb6 24-25,65-66,102,112,168,217-218,232,248,255,257,259,264,273,282
+apps/web/src/features/admin/quizzes/components/QuizCard.tsx
+  s_e45e259000e4e0::t_0ce5258ae6dc65 6-7,11,13,17,21-22,42,52,61,63,71,73,78
+apps/web/src/features/admin/quizzes/components/QuizDetailsSection.tsx
+  s_e45e259000e4e0::t_e7464df232145a 7,16,21,28
+apps/web/src/features/admin/quizzes/components/QuizSettingsSection.tsx
+  s_e45e259000e4e0::t_379463602ce6bf 5,8-9,17,21-22,25,29,38
+apps/web/src/features/admin/quizzes/components/VoidAttemptSheet.tsx
+  s_e45e259000e4e0::t_3a1acb2d4299d4 9-10,28-29,31,44,48,56,60,63,69,72,79
+apps/web/src/features/admin/quizzes/format.ts
+  s_e45e259000e4e0::t_ad54259476cbf5 1-2,7-9
+apps/web/src/features/admin/quizzes/serverErrors.ts
+  s_e45e259000e4e0::t_9181124322395f 4,17,21-22
+apps/web/src/features/book/BookPage.tsx
+  s_e45e259000e4e0::t_f04ca984f54b0f 8,11,23,26,34,58,64
+apps/web/src/features/book/components/ResourceList.tsx
+  s_e45e259000e4e0::t_d946ba73baa4e1 6,24,28,30
+apps/web/src/features/home/HomePage.tsx
+  s_e45e259000e4e0::t_636c2a2604d684 14,16,26,38,51,89,91,121,129,138
+apps/web/src/features/home/components/Book3D.tsx
+  s_e45e259000e4e0::t_24e06bbd967ea1 2,17,19
+apps/web/src/features/home/components/QuestAction.tsx
+  s_e45e259000e4e0::t_3e1deab2ba8623 9,22,37,39,49-50,60-61,72,74,82-83,88,90,92
+apps/web/src/features/home/components/StageAside.tsx
+  s_e45e259000e4e0::t_3b87d8d5891287 2,15,32,36,40
+apps/web/src/features/prizes/QuestEditionPage.tsx
+  s_e45e259000e4e0::t_574561a4b252a7 11,16,19-30,38,52-54,60,70,95,101,104,106-109,116,121
+apps/web/src/features/prizes/components/CurrentPrizes.tsx
+  s_e45e259000e4e0::t_5cbf915edaf0a8 7,11,14,21-22,34-35,41
+apps/web/src/features/prizes/components/PreviousQuests.tsx
+  s_e45e259000e4e0::t_140fb06385574c 7,13,17,20,43,47,65
+apps/web/src/features/prizes/components/PrizePodium.tsx
+  s_e45e259000e4e0::t_23c0185f8806f0 2,5-7,20,22-23,28-29,33
+apps/web/src/features/prizes/components/QuestSummaryCard.tsx
+  s_e45e259000e4e0::t_9c569d0f71e665 6-7,32,43,47,51
+apps/web/src/features/profile/api/useUpdateAvatar.ts
+  s_e45e259000e4e0::t_a7dbd7a5a67d3b 5,26
+apps/web/src/features/profile/avatars.ts
+  s_e45e259000e4e0::t_d9848964ddeaf3 2,21
+apps/web/src/features/profile/components/AvatarPicker.tsx
+  s_e45e259000e4e0::t_466b66e19c2b5f 8,24,56,61,69
+apps/web/src/features/profile/components/Certificate.tsx
+  s_e45e259000e4e0::t_46c8a7fa046e13 6,22,37,46,59,65,74,80
+apps/web/src/features/profile/components/ConnectTelegram.tsx
+  s_e45e259000e4e0::t_d3239477003adb 5,8,24-25,44,74-75,77-78
+apps/web/src/features/profile/components/ReaderPass.tsx
+  s_e45e259000e4e0::t_bb1c2213fbf25d 7,30,42,66,70
+apps/web/src/features/quiz/QuizPage.tsx
+  s_e45e259000e4e0::t_e2829b6aa99260 16,25,31,44,47,53,70,81,89-90,92,94
+apps/web/src/features/quiz/QuizPlayPage.tsx
+  s_e45e259000e4e0::t_4b21e0ac69200b 21,43,147,149,164,167-168,192,216,221-223
+apps/web/src/features/quiz/QuizReviewPage.tsx
+  s_e45e259000e4e0::t_5c78a2d4365ede 9,12,17-18,22,26,30,32,47,51,60,67,71,74,85
+apps/web/src/features/quiz/components/BetweenScreen.tsx
+  s_e45e259000e4e0::t_36d0dc361eaf9d 3,14,19-20,22
+apps/web/src/features/quiz/components/ConnectionBanner.tsx
+  s_e45e259000e4e0::t_16c0ef4c1a5e2d 2,9,24
+apps/web/src/features/quiz/components/QuestionView.tsx
+  s_e45e259000e4e0::t_2de3c954a259a0 11,48,160
+apps/web/src/features/quiz/components/RulesSheet.tsx
+  s_e45e259000e4e0::t_2bc19d42fc4dc1 5,15,17-18,21,35,40,44,47
+apps/web/src/features/quiz/components/StartCta.tsx
+  s_e45e259000e4e0::t_9ee43ac29f53d3 6,15,26,45,53,59,63,66
+apps/web/src/features/registration/JoinQuest.tsx
+  s_e45e259000e4e0::t_830bea0b5a4c26 6,10,13
+apps/web/src/features/registration/SuccessScreen.tsx
+  s_e45e259000e4e0::t_eebaf3ad684d8a 8,24,44,46,51,68,74
+apps/web/src/features/registration/components/EditionMark.tsx
+  s_e45e259000e4e0::t_f73401d03c75b2 1-2,11,15
+apps/web/src/features/registration/components/RegistrationForm.tsx
+  s_e45e259000e4e0::t_09faf743f9447f 11,16,26,39-43,69,80,150,157,160,165,174,178,191,195-196,204,216,226
+apps/web/src/features/results/ResultsPage.tsx
+  s_e45e259000e4e0::t_92b85ce6613770 16,27,29,49-50,59-60,68,94,103,112-113,128-129,133,135
+apps/web/src/features/results/components/FullBoardPrompt.tsx
+  s_e45e259000e4e0::t_24a89cf0f6f7f7 3-4,8,11-12,14
+apps/web/src/features/results/components/ReviewAnswersLink.tsx
+  s_e45e259000e4e0::t_23321f7250e4f5 4,9,15
+apps/web/src/features/verify/VerifyPage.tsx
+  s_e45e259000e4e0::t_214a32510fa706 13,24,28,32,34,39-40,66,72,82,91,97,99-105,111,117
+apps/web/src/layouts/AdminLayout.tsx
+  s_e45e259000e4e0::t_83a4a8f9ab775e 17-19,23,34-37,41-43,76,81,88,96,102-103,111,123,127,129,141
+apps/web/src/lib/auth/AuthScreen.tsx
+  s_e45e259000e4e0::t_82790999f42ffa 7,16,18-25,36,39,47,52
+apps/web/src/lib/auth/PhoneAuthForm.tsx
+  s_e45e259000e4e0::t_1a0c231725cafe 8,11,33,52,72-80,82-83,95,98,108,121,134
+apps/web/src/lib/auth/TelegramCodeLogin.tsx
+  s_e45e259000e4e0::t_dc776511ce97b1 8,12,30,52,54,71,76,96,105,108,119,133,140,142
+apps/web/src/lib/auth/TelegramLoginWidget.tsx
+  s_e45e259000e4e0::t_ded2e6b75237c8 6,29,65,72,74
+apps/web/src/lib/auth/guards.tsx
+  s_e45e259000e4e0::t_86b38ad1946abd 6,53,64-66,68
+apps/web/src/lib/format.ts
+  s_e45e259000e4e0::t_b2c3a945a39533 1-2,5-6,9-39,49-50,55,60-61,68-69,71-73,79,84,112,114-115
+apps/web/src/lib/telegram.ts
+  s_e45e259000e4e0::t_b50ef4fcf5a053 27-28,95-100,104,110-121
+apps/web/src/main.tsx
+  s_e45e259000e4e0::t_e5e9f22b696a28 5,33-35
+apps/web/src/styles/theme.css
+  s_e45e259000e4e0::t_84ceaced7957ab 37-38
+packages/shared/src/schemas/contact.ts
+  s_e45e259000e4e0::t_3925acae82fc61 8-17,20,25-27,31,41-43
+packages/shared/src/schemas/full-name.ts
+  s_e45e259000e4e0::t_aa1fdd166c0b08 62-71,74,84-86,90-91,93,96,102-103
+apps/web/src/features/admin/quizzes/issues.ts
+  s_e45e259000e4e0::t_562d7651c56832 1-20
+apps/web/src/features/profile/components/LanguagePicker.tsx
+  s_e45e259000e4e0::t_aea5a2ba1df9c4 1-27
+apps/web/src/i18n/en/admin.ts
+  s_e45e259000e4e0::t_7149cebb5fc4bf 1-239
+apps/web/src/i18n/en/adminQuest.ts
+  s_e45e259000e4e0::t_e5af41026e1cd6 1-163
+apps/web/src/i18n/en/adminQuiz.ts
+  s_e45e259000e4e0::t_7f7f15ac18af34 1-191
+apps/web/src/i18n/en/auth.ts
+  s_e45e259000e4e0::t_8468d21e3b2954 1-32
+apps/web/src/i18n/en/book.ts
+  s_e45e259000e4e0::t_3dddf58114e92f 1-7
+apps/web/src/i18n/en/common.ts
+  s_e45e259000e4e0::t_b9463a8e3826b2 1-34
+apps/web/src/i18n/en/errors.ts
+  s_e45e259000e4e0::t_6ba084bee8334f 1-71
+apps/web/src/i18n/en/format.ts
+  s_e45e259000e4e0::t_691b9f6e4548d2 1-12
+apps/web/src/i18n/en/home.ts
+  s_e45e259000e4e0::t_ec55128aed570b 1-25
+apps/web/src/i18n/en/index.ts
+  s_e45e259000e4e0::t_f87dc0de934c32 1-42
+apps/web/src/i18n/en/nav.ts
+  s_e45e259000e4e0::t_8695174df9961d 1-13
+apps/web/src/i18n/en/notifications.ts
+  s_e45e259000e4e0::t_1abe9c144df4be 1-6
+apps/web/src/i18n/en/ordinal.ts
+  s_e45e259000e4e0::t_529618830c23e9 1-16
+apps/web/src/i18n/en/prizes.ts
+  s_e45e259000e4e0::t_e88fa057cb38d6 1-24
+apps/web/src/i18n/en/profile.ts
+  s_e45e259000e4e0::t_d53c8ce4c74883 1-38
+apps/web/src/i18n/en/quiz.ts
+  s_e45e259000e4e0::t_61eb1e50d93995 1-79
+apps/web/src/i18n/en/registration.ts
+  s_e45e259000e4e0::t_1aff26ea5f42d0 1-18
+apps/web/src/i18n/en/results.ts
+  s_e45e259000e4e0::t_58967415a5e050 1-18
+apps/web/src/i18n/en/validation.ts
+  s_e45e259000e4e0::t_6a4773bc39661d 1-22
+apps/web/src/i18n/en/verify.ts
+  s_e45e259000e4e0::t_1ae12656d35844 1-22
+apps/web/src/i18n/index.ts
+  s_e45e259000e4e0::t_f104a683a0cf09 1-48
+apps/web/src/i18n/locales.ts
+  s_e45e259000e4e0::t_5df9a395f1cdab 1-43
+apps/web/src/i18n/plural.ts
+  s_e45e259000e4e0::t_bf521244bae7ba 1-10
+apps/web/src/i18n/ru/admin.ts
+  s_e45e259000e4e0::t_6b1fdf8b6d658e 1-236
+apps/web/src/i18n/ru/adminQuest.ts
+  s_e45e259000e4e0::t_11c2c6368be334 1-162
+apps/web/src/i18n/ru/adminQuiz.ts
+  s_e45e259000e4e0::t_f38b0b76192d1c 1-191
+apps/web/src/i18n/ru/auth.ts
+  s_e45e259000e4e0::t_2816e538705f1e 1-34
+apps/web/src/i18n/ru/book.ts
+  s_e45e259000e4e0::t_b01487b081aa1f 1-9
+apps/web/src/i18n/ru/common.ts
+  s_e45e259000e4e0::t_627a812bcab2d3 1-34
+apps/web/src/i18n/ru/errors.ts
+  s_e45e259000e4e0::t_012dd871b4279d 1-69
+apps/web/src/i18n/ru/format.ts
+  s_e45e259000e4e0::t_66dd6ee6486d1b 1-14
+apps/web/src/i18n/ru/home.ts
+  s_e45e259000e4e0::t_36a2d96c20daa6 1-29
+apps/web/src/i18n/ru/index.ts
+  s_e45e259000e4e0::t_32549e3eb80411 1-42
+apps/web/src/i18n/ru/nav.ts
+  s_e45e259000e4e0::t_920294accc11b4 1-15
+apps/web/src/i18n/ru/notifications.ts
+  s_e45e259000e4e0::t_c4865b3670f941 1-8
+apps/web/src/i18n/ru/ordinal.ts
+  s_e45e259000e4e0::t_48b7803df66a88 1-8
+apps/web/src/i18n/ru/prizes.ts
+  s_e45e259000e4e0::t_b214f9897669a3 1-26
+apps/web/src/i18n/ru/profile.ts
+  s_e45e259000e4e0::t_077145cda485fd 1-39
+apps/web/src/i18n/ru/quiz.ts
+  s_e45e259000e4e0::t_542a6bde9ecb02 1-80
+apps/web/src/i18n/ru/registration.ts
+  s_e45e259000e4e0::t_71678a37e15a29 1-19
+apps/web/src/i18n/ru/results.ts
+  s_e45e259000e4e0::t_2742b6af728f14 1-20
+apps/web/src/i18n/ru/validation.ts
+  s_e45e259000e4e0::t_1e55b143a1640f 1-22
+apps/web/src/i18n/ru/verify.ts
+  s_e45e259000e4e0::t_472a6c9b0557b8 1-24
+apps/web/src/i18n/uz/admin.ts
+  s_e45e259000e4e0::t_5ca9c5cc9da016 1-238
+apps/web/src/i18n/uz/adminQuest.ts
+  s_e45e259000e4e0::t_9c64e558a9e7a7 1-161
+apps/web/src/i18n/uz/adminQuiz.ts
+  s_e45e259000e4e0::t_babb5bc96be548 1-190
+apps/web/src/i18n/uz/auth.ts
+  s_e45e259000e4e0::t_4b6db81a435d9a 1-34
+apps/web/src/i18n/uz/book.ts
+  s_e45e259000e4e0::t_7c6e790501c71c 1-9
+apps/web/src/i18n/uz/common.ts
+  s_e45e259000e4e0::t_aa619c1f8c953b 1-33
+apps/web/src/i18n/uz/errors.ts
+  s_e45e259000e4e0::t_495199e99e59e1 1-69
+apps/web/src/i18n/uz/format.ts
+  s_e45e259000e4e0::t_6752a99fc89348 1-14
+apps/web/src/i18n/uz/home.ts
+  s_e45e259000e4e0::t_de8c645b8607ab 1-27
+apps/web/src/i18n/uz/index.ts
+  s_e45e259000e4e0::t_c7fc477342f1ad 1-42
+apps/web/src/i18n/uz/nav.ts
+  s_e45e259000e4e0::t_3a662f0f51e6b2 1-15
+apps/web/src/i18n/uz/notifications.ts
+  s_e45e259000e4e0::t_4f1ea88c11fe47 1-8
+apps/web/src/i18n/uz/ordinal.ts
+  s_e45e259000e4e0::t_e5daa36be8937b 1-8
+apps/web/src/i18n/uz/prizes.ts
+  s_e45e259000e4e0::t_275b6f7fc4fd36 1-26
+apps/web/src/i18n/uz/profile.ts
+  s_e45e259000e4e0::t_d559223ea1159e 1-39
+apps/web/src/i18n/uz/quiz.ts
+  s_e45e259000e4e0::t_78b4dea707c1b0 1-80
+apps/web/src/i18n/uz/registration.ts
+  s_e45e259000e4e0::t_21ee8e9eccd547 1-19
+apps/web/src/i18n/uz/results.ts
+  s_e45e259000e4e0::t_d87893263b7c3c 1-18
+apps/web/src/i18n/uz/validation.ts
+  s_e45e259000e4e0::t_763d9899163e14 1-22
+apps/web/src/i18n/uz/verify.ts
+  s_e45e259000e4e0::t_e50ad44ae4f527 1-24
+apps/web/src/lib/api/errorMessage.ts
+  s_e45e259000e4e0::t_a0e7bbee9855f8 1-29
+apps/web/src/stores/locale.store.ts
+  s_e45e259000e4e0::t_6f7a9b8cc0fc9d 1-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "905cfab652adedab57efdc6d6e13d1b640a9767e",
+  "prompts": {},
+  "sessions": {
+    "s_e45e259000e4e0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f45d92a2-f067-4b26-bb22-5a1185da4a57",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
