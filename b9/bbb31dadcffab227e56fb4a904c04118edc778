@@ -1,0 +1,23 @@
+apps/web/src/features/profile/ProfilePage.tsx
+  s_e45e259000e4e0::t_d7448ba7f1b1b9 15-16,28,31,65,68,85,92-93,107,112,116,120,136,140,147-148
+apps/web/src/features/registration/JoinQuest.tsx
+  s_e45e259000e4e0::t_6320d4b8ebbabe 7,18-20
+apps/web/src/lib/auth/AuthScreen.tsx
+  s_e45e259000e4e0::t_39fc1bb9907977 8,56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "b9bbb31dadcffab227e56fb4a904c04118edc778",
+  "prompts": {},
+  "sessions": {
+    "s_e45e259000e4e0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f45d92a2-f067-4b26-bb22-5a1185da4a57",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
