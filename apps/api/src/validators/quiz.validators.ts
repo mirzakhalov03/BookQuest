@@ -1,11 +1,14 @@
 import { z } from 'zod';
 import {
+  ATTEMPT_STATUSES,
   QUIZ_DISTRIBUTIONS,
+  QUIZ_FLAGS,
   QUIZ_GROUP_COUNTS,
   QUIZ_MAX_QUESTIONS,
   createQuizSchema,
   putAttemptItemSchema,
-  saveQuizSchema
+  saveQuizSchema,
+  voidAttemptSchema
 } from '@bookquest/shared';
 import { objectId } from './common.js';
 
@@ -30,3 +33,13 @@ export const attemptItemParams = z.object({
 });
 export type AttemptItemParams = z.output<typeof attemptItemParams>;
 export const putAttemptItemBody = putAttemptItemSchema;
+
+export const attemptsQuery = z.object({
+  status: z.enum(ATTEMPT_STATUSES).optional(),
+  flag: z.enum(QUIZ_FLAGS).optional(),
+  q: z.string().trim().max(80).optional(),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(200).default(50)
+});
+export type AttemptsQuery = z.output<typeof attemptsQuery>;
+export const voidAttemptBody = voidAttemptSchema;

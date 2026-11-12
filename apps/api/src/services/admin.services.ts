@@ -1,5 +1,6 @@
 import type { AdminStats, ContactMethod, Paginated, Participant } from '@bookquest/shared';
 import { ParticipantModel, type ParticipantRow } from '../models/participant.model.js';
+import { QuizAttemptModel } from '../models/quiz-attempt.model.js';
 import { ResultModel } from '../models/result.model.js';
 import { QuestModel } from '../models/quest.model.js';
 import { env } from '../config/env.js';
@@ -79,11 +80,12 @@ export async function getStats(): Promise<AdminStats> {
 
   const startOfToday = startOfDayIn(env.ORGANISER_TIME_ZONE);
 
-  const [participants, registeredToday, quizSubmitted] = await Promise.all([
+  const [participants, registeredToday, quizSubmitted, quizInProgress] = await Promise.all([
     ParticipantModel.countDocuments({ quest: quest._id }),
     ParticipantModel.countDocuments({ quest: quest._id, createdAt: { $gte: startOfToday } }),
-    ResultModel.countDocuments({ quest: quest._id })
+    ResultModel.countDocuments({ quest: quest._id }),
+    QuizAttemptModel.countDocuments({ quest: quest._id, status: 'in_progress' })
   ]);
 
-  return { participants, registeredToday, quizSubmitted, phase: resolvePhase(quest) };
+  return { participants, registeredToday, quizSubmitted, quizInProgress, phase: resolvePhase(quest) };
 }

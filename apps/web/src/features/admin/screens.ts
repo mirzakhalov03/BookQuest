@@ -9,4 +9,5 @@ export { BroadcastPage } from './broadcast/BroadcastPage';
 export { MessagesPage } from './interactions/MessagesPage';
 export { QuizzesPage } from './quizzes/QuizzesPage';
 export { QuizEditorPage } from './quizzes/QuizEditorPage';
+export { QuizLivePage } from './quizzes/QuizLivePage';
 export { QuizPreviewPage } from './quizzes/QuizPreviewPage';

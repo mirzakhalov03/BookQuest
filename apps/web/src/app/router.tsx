@@ -93,6 +93,8 @@ export const router = createBrowserRouter([
               { path: 'quest', ...adminScreen('QuestEditorPage') },
               { path: 'quest/new', ...adminScreen('NewEditionPage') },
               { path: 'quizzes', ...adminScreen('QuizzesPage') },
+              // Before `:id`, or "live" would load as a quiz id.
+              { path: 'quizzes/live', ...adminScreen('QuizLivePage') },
               { path: 'quizzes/:id', ...adminScreen('QuizEditorPage') },
               { path: 'quizzes/:id/preview', ...adminScreen('QuizPreviewPage') },
               { path: 'results', ...adminScreen('ResultsInspectionPage') },

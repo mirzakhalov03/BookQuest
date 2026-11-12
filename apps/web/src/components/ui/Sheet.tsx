@@ -7,13 +7,15 @@ interface SheetProps {
   children?: ReactNode;
   /** Buttons, primary last — they stack primary-on-top on phones. */
   actions?: ReactNode;
+  /** For dense content (timelines, tables) that outgrows the 28rem dialog. */
+  wide?: boolean;
 }
 
 /**
  * Native `<dialog>`: focus trap, Esc and an inert page behind it come from the
  * browser. A bottom sheet on phones, a centred dialog from `sm` up (`.sheet`).
  */
-export function Sheet({ open, onClose, title, children, actions }: SheetProps) {
+export function Sheet({ open, onClose, title, children, actions, wide }: SheetProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
@@ -33,7 +35,7 @@ export function Sheet({ open, onClose, title, children, actions }: SheetProps) {
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
-      className="sheet"
+      className={wide ? 'sheet sheet--wide' : 'sheet'}
     >
       <div className="flex flex-col gap-4 p-5 pb-[calc(1.25rem+var(--safe-b))]">
         <h2 id={titleId} className="type-display m-0 text-xl text-paper">

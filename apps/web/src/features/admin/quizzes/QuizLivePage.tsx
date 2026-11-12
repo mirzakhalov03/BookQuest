@@ -1,0 +1,175 @@
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
+import { ATTEMPT_STATUSES, QUIZ_FLAGS, type AttemptRow, type AttemptStatus, type QuizFlag } from '@bookquest/shared';
+import { AdminScreen } from '@/layouts/AdminLayout';
+import { EmptyState } from '@/components/feedback/EmptyState';
+import { Button } from '@/components/ui/Button';
+import { SearchInput } from '@/components/ui/SearchInput';
+import { Select } from '@/components/ui/Select';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { useCurrentQuest } from '@/lib/api/quest';
+import { formatCount, formatParticipantNumber } from '@/lib/format';
+import { useQuizAttempts, useQuizLive, type AttemptFilters } from '../api/useQuizLive';
+import { AdminPageHeader } from '../components/AdminPageHeader';
+import { AdminQuery } from '../components/AdminQuery';
+import { FLAG_LABEL, STATUS_LABEL } from './attemptLabels';
+import { AttemptSheet } from './components/AttemptSheet';
+import { AttemptsTable } from './components/AttemptsTable';
+import { LiveGroupTiles } from './components/LiveGroupTiles';
+import { VoidAttemptSheet } from './components/VoidAttemptSheet';
+
+const SEARCH_DEBOUNCE_MS = 350;
+
+const STATUS_OPTIONS = [
+  { value: '' as const, label: 'Any status' },
+  ...ATTEMPT_STATUSES.map((value) => ({ value, label: STATUS_LABEL[value] }))
+];
+const FLAG_OPTIONS = [
+  { value: '' as const, label: 'Any flag' },
+  ...QUIZ_FLAGS.map((value) => ({ value, label: FLAG_LABEL[value] }))
+];
+
+const pick = <T extends string>(value: string | null, allowed: readonly T[]): T | '' =>
+  value !== null && (allowed as readonly string[]).includes(value) ? (value as T) : '';
+
+/** `/admin/quizzes/live` — per-variant progress and every attempt, polled while the tab is visible. */
+export function QuizLivePage() {
+  const live = useQuizLive();
+
+  return (
+    <AdminScreen className="max-w-5xl">
+      <AdminPageHeader
+        eyebrow="Quiz"
+        title="Live"
+        actions={
+          <Button to="/admin/quizzes" variant="quiet" className="min-h-11 px-4">
+            Library
+          </Button>
+        }
+      />
+      <AdminQuery query={live} loadingLabel="Counting heads…">
+        {(stats) =>
+          stats.groups.length === 0 ? (
+            <EmptyState
+              titleAs="h2"
+              title="No quiz is set up for this edition"
+              body="Attach quizzes in the quest editor first."
+              className="flex-1"
+            />
+          ) : (
+            <>
+              <LiveGroupTiles groups={stats.groups} />
+              <Attempts />
+            </>
+          )
+        }
+      </AdminQuery>
+    </AdminScreen>
+  );
+}
+
+/** Filters live in the URL so a refresh, a shared link or Back keeps them. */
+function Attempts() {
+  const [params, setParams] = useSearchParams();
+  const [searchInput, setSearchInput] = useState(() => params.get('q') ?? '');
+  const q = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
+  const filters: AttemptFilters = {
+    status: pick<AttemptStatus>(params.get('status'), ATTEMPT_STATUSES),
+    flag: pick<QuizFlag>(params.get('flag'), QUIZ_FLAGS),
+    q
+  };
+
+  const attempts = useQuizAttempts(filters);
+  const quest = useCurrentQuest();
+  const [open, setOpen] = useState<AttemptRow | null>(null);
+  const [voiding, setVoiding] = useState(false);
+  // The server enforces it too; this only hides a button that would 409.
+  const canVoid = quest.data !== undefined && Date.now() < Date.parse(quest.data.resultsAt);
+
+  function setParam(key: string, value: string) {
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (value) next.set(key, value);
+        else next.delete(key);
+        return next;
+      },
+      { replace: true }
+    );
+  }
+
+  // The box is local until debounced, so typing never waits on the URL.
+  useEffect(() => setParam('q', q), [q]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const items = attempts.data?.pages.flatMap((page) => page.items) ?? [];
+  const total = attempts.data?.pages[0]?.total ?? 0;
+  const filtered = filters.status !== '' || filters.flag !== '' || q !== '';
+  const who = open ? `#${formatParticipantNumber(open.participant.number)} ${open.participant.fullName}` : '';
+
+  return (
+    <section className="flex flex-col gap-4">
+      <h2 className="type-label m-0">Attempts</h2>
+      <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end">
+        <SearchInput
+          aria-label="Search attempts"
+          placeholder="Name or number"
+          maxLength={80}
+          value={searchInput}
+          onChange={setSearchInput}
+          className="col-span-2 w-full sm:max-w-xs"
+        />
+        <Select<AttemptStatus | ''>
+          label="Status"
+          value={filters.status}
+          options={STATUS_OPTIONS}
+          onChange={(status) => setParam('status', status)}
+        />
+        <Select<QuizFlag | ''> label="Flag" value={filters.flag} options={FLAG_OPTIONS} onChange={(flag) => setParam('flag', flag)} />
+      </div>
+
+      <AdminQuery query={attempts} loadingLabel="Gathering attempts…">
+        {() =>
+          items.length === 0 ? (
+            <EmptyState
+              titleAs="h2"
+              title={filtered ? 'No attempts match' : 'No one has started yet'}
+              body={filtered ? 'Try clearing a filter.' : 'Attempts appear here as people begin.'}
+            />
+          ) : (
+            <div className={`flex flex-col gap-4 transition-opacity ${attempts.isPlaceholderData ? 'opacity-60' : ''}`}>
+              <p className="m-0 text-sm text-taupe">{formatCount(total)} {total === 1 ? 'attempt' : 'attempts'}</p>
+              <AttemptsTable attempts={items} onOpen={setOpen} />
+              {attempts.hasNextPage && (
+                <Button
+                  variant="quiet"
+                  className="self-center"
+                  disabled={attempts.isFetchingNextPage}
+                  onClick={() => void attempts.fetchNextPage()}
+                >
+                  {attempts.isFetchingNextPage ? 'Loading…' : `Show more · ${formatCount(total - items.length)} left`}
+                </Button>
+              )}
+            </div>
+          )
+        }
+      </AdminQuery>
+
+      <AttemptSheet
+        id={open?.id ?? null}
+        who={who}
+        canVoid={canVoid}
+        onClose={() => setOpen(null)}
+        onVoid={() => setVoiding(true)}
+      />
+      {open && (
+        <VoidAttemptSheet
+          attemptId={open.id}
+          who={who}
+          open={voiding}
+          onClose={() => setVoiding(false)}
+          onVoided={() => setOpen(null)}
+        />
+      )}
+    </section>
+  );
+}

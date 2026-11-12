@@ -17,6 +17,10 @@ export const adminKeys = {
   results: () => [...adminKeys.all, 'results'] as const,
   quizzes: () => [...adminKeys.all, 'quizzes'] as const,
   quiz: (id: string) => [...adminKeys.all, 'quizzes', id] as const,
+  quizOps: () => [...adminKeys.all, 'quizOps'] as const,
+  quizLive: () => [...adminKeys.quizOps(), 'live'] as const,
+  quizAttempts: (params: object) => [...adminKeys.quizOps(), 'attempts', params] as const,
+  quizAttempt: (id: string) => [...adminKeys.quizOps(), 'attempt', id] as const,
   groupSizes: (distribution: string, groups: number) =>
     [...adminKeys.all, 'groupSizes', distribution, groups] as const,
   latestQuest: () => [...adminKeys.all, 'latestQuest'] as const,

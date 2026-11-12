@@ -82,5 +82,6 @@ export interface AdminStats {
   participants: number;
   registeredToday: number;
   quizSubmitted: number;
+  quizInProgress: number;
   phase: QuestPhase;
 }

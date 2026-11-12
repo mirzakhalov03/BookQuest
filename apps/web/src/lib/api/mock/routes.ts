@@ -408,6 +408,7 @@ function adminStats(context: Context): Result {
       (entry) => Date.parse(entry.registeredAt) >= startOfToday.getTime()
     ).length,
     quizSubmitted: areResultsPublished(quest) ? quizTakers(state).length : 0,
+    quizInProgress: 0,
     phase: quest.phase
   };
   return ok(stats);
@@ -728,6 +729,13 @@ const routes: Route[] = [
     method: 'PUT',
     path: '/quiz/attempt/items/:index',
     handle: (c) => playCall(c, (user) => play.putItem(user, Number(c.params.index), c.body))
+  },
+  // The mock has no attempts to monitor: an empty live board and list keep the screens reachable.
+  { method: 'GET', path: '/admin/quiz/live', handle: (c) => quizCall(c, () => ({ groups: [], updatedAt: new Date().toISOString() })) },
+  {
+    method: 'GET',
+    path: '/admin/quiz/attempts',
+    handle: (c) => quizCall(c, () => ({ items: [], page: 1, limit: 50, total: 0 }))
   },
   { method: 'GET', path: '/admin/quizzes', handle: (c) => quizCall(c, quizzes.listQuizzes) },
   {

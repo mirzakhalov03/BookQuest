@@ -1,9 +1,11 @@
 import type { Request, Response } from 'express';
-import type { CreateQuizPayload, SaveQuizPayload } from '@bookquest/shared';
+import type { CreateQuizPayload, SaveQuizPayload, VoidAttemptPayload } from '@bookquest/shared';
 import * as quizService from '../../services/quiz.services.js';
 import * as quizConfigService from '../../services/quiz-config.services.js';
+import * as quizOpsService from '../../services/quiz-ops.services.js';
+import * as resultService from '../../services/result.services.js';
 import * as questService from '../../services/quest.services.js';
-import type { GroupSizesQuery } from '../../validators/quiz.validators.js';
+import type { AttemptsQuery, GroupSizesQuery } from '../../validators/quiz.validators.js';
 import { currentUser } from '../../middlewares/auth.middleware.js';
 import { auditAdmin } from '../../utils/audit.js';
 import { ok } from '../../utils/respond.js';
@@ -54,4 +56,30 @@ export async function groupSizes(req: Request, res: Response): Promise<void> {
   const { distribution, groups } = req.query as unknown as GroupSizesQuery;
   const quest = await questService.requireCurrentQuestDocument();
   ok(res, { sizes: await quizConfigService.groupSizes(quest, distribution, groups) });
+}
+
+/** GET /api/v1/admin/quiz/live */
+export async function liveStats(_req: Request, res: Response): Promise<void> {
+  ok(res, await quizOpsService.getLiveStats());
+}
+
+/** GET /api/v1/admin/quiz/attempts */
+export async function listAttempts(req: Request, res: Response): Promise<void> {
+  ok(res, await quizOpsService.listAttempts(req.query as unknown as AttemptsQuery));
+}
+
+/** GET /api/v1/admin/quiz/attempts/:id */
+export async function getAttempt(req: Request, res: Response): Promise<void> {
+  ok(res, await quizOpsService.getAttemptAdmin((req.params as { id: string }).id));
+}
+
+/** POST /api/v1/admin/quiz/attempts/:id/void */
+export async function voidAttempt(req: Request, res: Response): Promise<void> {
+  const { id } = req.params as { id: string };
+  const { reason } = req.body as VoidAttemptPayload;
+  const attempt = await quizOpsService.voidAttempt(id, reason, currentUser(req));
+  // The leaderboard cache would still rank the deleted Result.
+  resultService.clearResultsCache();
+  auditAdmin(req, 'void-quiz-attempt', { attemptId: id });
+  ok(res, attempt);
 }

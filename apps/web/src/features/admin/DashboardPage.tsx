@@ -63,10 +63,11 @@ function Dashboard({ quest }: { quest: Quest }) {
         }
       />
 
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
         <StatCard label="Participants" value={count(stats.data?.participants)} />
         <StatCard label="Joined today" value={count(stats.data?.registeredToday)} />
         <StatCard label="Quiz submitted" value={count(stats.data?.quizSubmitted)} />
+        <StatCard label="Quiz in progress" value={count(stats.data?.quizInProgress)} />
       </div>
 
       <NextSteps quest={quest} now={now} />
@@ -88,7 +89,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
 
 // No `to` yet means the page isn't built: shown as "Soon" rather than linking to "Nothing here".
 const QUICK_ACTIONS: { to?: string; label: string; icon: LucideIcon }[] = [
-  { label: 'Quizzes', icon: CircleHelp },
+  { to: '/admin/quizzes', label: 'Quizzes', icon: CircleHelp },
   { label: 'Certificates', icon: Award },
   { label: 'Posters', icon: Image }
 ];

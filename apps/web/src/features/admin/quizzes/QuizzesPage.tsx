@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Activity, Plus } from 'lucide-react';
 import type { QuizSummaryAdmin } from '@bookquest/shared';
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
 import { ApiRequestError } from '@/lib/api/client';
+import { useCurrentQuest } from '@/lib/api/quest';
 import { useUiStore } from '@/stores/ui.store';
 import { useDeleteQuiz, useDuplicateQuiz, useQuizzes } from '../api/useQuizzes';
 import { AdminPageHeader } from '../components/AdminPageHeader';
@@ -17,6 +18,11 @@ import { QuizCard } from './components/QuizCard';
 export function QuizzesPage() {
   const quizzes = useQuizzes();
   const [creating, setCreating] = useState(false);
+  const quest = useCurrentQuest().data;
+  // Live while the quiz is open, and until results go out (void is still possible then).
+  const showLive =
+    quest !== undefined &&
+    (quest.phase === 'quiz' || (quest.phase === 'finished' && Date.now() < Date.parse(quest.resultsAt)));
 
   return (
     <AdminScreen className="max-w-5xl">
@@ -24,9 +30,16 @@ export function QuizzesPage() {
         eyebrow="Library"
         title="Quizzes"
         actions={
-          <Button type="button" onClick={() => setCreating(true)} className="min-h-11 px-4">
-            <Plus className="h-4 w-4" aria-hidden /> New quiz
-          </Button>
+          <>
+            {showLive && (
+              <Button to="/admin/quizzes/live" variant="quiet" className="min-h-11 px-4">
+                <Activity className="h-4 w-4" aria-hidden /> Live
+              </Button>
+            )}
+            <Button type="button" onClick={() => setCreating(true)} className="min-h-11 px-4">
+              <Plus className="h-4 w-4" aria-hidden /> New quiz
+            </Button>
+          </>
         }
       />
       <AdminQuery query={quizzes} loadingLabel="Counting the questions…">

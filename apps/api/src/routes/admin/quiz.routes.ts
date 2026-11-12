@@ -1,7 +1,14 @@
 import { Router } from 'express';
 import * as adminQuizController from '../../controllers/admin/quiz.controllers.js';
 import { validate } from '../../middlewares/validate.middleware.js';
-import { createQuizBody, groupSizesQuery, quizIdParams, saveQuizBody } from '../../validators/quiz.validators.js';
+import {
+  attemptsQuery,
+  createQuizBody,
+  groupSizesQuery,
+  quizIdParams,
+  saveQuizBody,
+  voidAttemptBody
+} from '../../validators/quiz.validators.js';
 
 export const adminQuizRoutes: Router = Router();
 
@@ -16,3 +23,12 @@ adminQuizRoutes.delete('/:id', validate(quizIdParams, 'params'), adminQuizContro
 export const adminQuizOpsRoutes: Router = Router();
 
 adminQuizOpsRoutes.get('/group-sizes', validate(groupSizesQuery, 'query'), adminQuizController.groupSizes);
+adminQuizOpsRoutes.get('/live', adminQuizController.liveStats);
+adminQuizOpsRoutes.get('/attempts', validate(attemptsQuery, 'query'), adminQuizController.listAttempts);
+adminQuizOpsRoutes.get('/attempts/:id', validate(quizIdParams, 'params'), adminQuizController.getAttempt);
+adminQuizOpsRoutes.post(
+  '/attempts/:id/void',
+  validate(quizIdParams, 'params'),
+  validate(voidAttemptBody),
+  adminQuizController.voidAttempt
+);

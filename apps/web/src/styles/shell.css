@@ -288,6 +288,10 @@
     border-bottom: 1px solid var(--rule);
     border-radius: var(--radius-box);
   }
+
+  .sheet.sheet--wide {
+    max-width: 44rem;
+  }
 }
 
 /* ── Admin save bar ────────────────────────────────────────────────
