@@ -329,6 +329,8 @@ Layout follows the quest editor: an `AdminScreen`, a header, `SaveBar` with a ch
   correct answers here.
 - **Void attempt** (with a reason, confirm sheet), allowed before `resultsAt`. This deletes the
   attempt's `Result` and keeps the attempt as `voided` for audit.
+
+> Implementation note (2026-11-12): voids are refused with `409 conflict`, `reason: results_imminent`, once `now ≥ resultsAt − 60 s` (`QUIZ_RESCORE_FREEZE_MS`), and the button hides from then. The `Result` is deleted again after the status flip, so a finalise racing the void can't leave an orphan `Result`.
 - Polls `GET /admin/quiz/live` every 15 s while the page is visible (`refetchInterval` +
   `refetchIntervalInBackground:false`). No other admin page polls.
 
@@ -557,6 +559,8 @@ function resolveGroup(config, participant): number {
 All responses use the existing envelope. All `/quiz` routes: `requireUser`, `quizRateLimit`
 (120/min per user), `Cache-Control: no-store`. Shared zod schemas and DTO types live in
 `packages/shared/src/schemas/quiz.ts`. Times are ISO strings; durations are integer milliseconds.
+
+> Implementation note (2026-11-12): `quizRateLimit` is 300/min per user (was 120): it only stops scripts, and a fast honest reader can pass 120. `error.reason` also includes `results_imminent` (corrections and attempt voids within 60 s of `resultsAt`).
 
 ### 8.1 Participant — `routes/quiz.routes.ts` mounted at `/api/v1/quiz`
 
@@ -815,6 +819,8 @@ Transactions are used only where two collections change together (finalise, void
   `voided`, and never trust the stored `isCorrect`.** A correction landing between a lock's read and
   its write therefore can't leave a stale score.
 
+> Implementation note (2026-11-12): the settle filter is also pinned to the selection it read (`items.i.selectedOptionId` equal to the read value, or `IS_NULL`), so an in-grace select landing between a settle's read and write forces a reload and recompute instead of scoring the stale selection. Finalise also writes the recomputed per-item `isCorrect` for every resolved item in the same `$set` as `score`, so the admin ✓/✗ can't disagree with the score after a lock races a correction.
+
 ### 13.3 Pipeline per request
 `load attempt → settle(now) → apply action (conditional) → if no match: reload, settle, decide → map to
 AttemptState`. At most 2–3 round trips.
@@ -851,6 +857,8 @@ withTransaction(session => {
 - **Ranking guard** (fixes C1): `rankQuest` first runs `finalizeOpenAttempts(quest)` (the same code as
   the sweep), then ranks. The date rule `resultsAt ≥ quizClosesAt + 5 min` means this normally finds
   nothing; the call makes correctness independent of the timer.
+
+> Implementation note (2026-11-12): ranking also runs `repairMissingResults(quest)` after `finalizeOpenAttempts`, so a completed attempt whose `Result` write was lost is ranked without waiting for the sweep.
 - Voided attempts have no `Result`, so they're never ranked.
 
 ### 13.6 Quest config & date validation (in `updateQuest`)
@@ -884,6 +892,8 @@ withTransaction(session => {
 4. In-progress attempts pick up the change at finalise automatically.
 Allowed only while `now < resultsAt`, so ranks are never frozen at this point. Re-running the same
 correction is a no-op.
+
+> Implementation note (2026-11-12): corrections are refused with `409 conflict`, `reason: results_imminent`, once any quest using the quiz has `now ≥ resultsAt − 60 s` (`QUIZ_RESCORE_FREEZE_MS`), so a re-score (which runs outside the transaction) can't still be running when ranks freeze.
 
 ### 13.8 Admin concurrency
 - Quiz save: `findOneAndUpdate({_id, revision}, {$set: …, $inc:{revision:1}})`. No match → `409 stale`.
@@ -966,6 +976,8 @@ finalise, void and correction logs at `info` with counts.
   locked during the window (corrections bump the cache key).
 - Rate limit: new `quizRateLimit` 120/min per user (a fast taker does ~3 calls per question). The global
   300/min stays.
+
+> Implementation note (2026-11-12): `quizRateLimit` is 300/min per user (was 120); it only stops scripts, and a fast honest reader with re-selects, `next` and refetches can exceed 120.
 - Indexes: listed in §7. All participant queries are by `_id` or `{quest, participant}`; the live
   monitor uses `{quest, status}`; correction uses `{quiz, status}`.
 - Scaling past one instance would need a shared rate-limit store; quiz correctness itself is already
@@ -1050,6 +1062,8 @@ acceptance**, not unit tests.
    `migrate-audit-fixes.ts`): `$unset` `quizQuestionCount`/`quizDurationMinutes` on all quests; set
    `quizConfig: null`, `quizSummary: null` where missing; `syncIndexes()` on `Quiz` and `QuizAttempt`.
    Idempotent. Production index creation is a deliberate step (README).
+
+   > Implementation note (2026-11-12): quests get `createIndexes()` (additive), never `syncIndexes()`, which would drop undeclared indexes on the live `quests` collection. `Quiz` and `QuizAttempt` keep `syncIndexes()`.
 2. **Shared schema change:** `Quest.quizQuestionCount/quizDurationMinutes` → `Quest.quiz`. Web
    consumers to update: `features/home/components/QuestAction.tsx` (`quizSubline`), the admin quest
    form files (`questForm.ts`, `questFormSchema.ts`, `changes.ts`, `serverErrors.ts`, `nextEdition.ts`,
