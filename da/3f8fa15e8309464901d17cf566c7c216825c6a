@@ -1,0 +1,71 @@
+apps/web/src/app/router.tsx
+  s_9c243050d10f30::t_83a246e861451f 13,46-60
+apps/web/src/components/layout/TabBar.tsx
+  s_9c243050d10f30::t_80b58a8daa0e5b 4,21-22,27
+apps/web/src/features/quiz/QuizPlayPage.tsx
+  s_9c243050d10f30::t_523f52c867de1a 1-194
+apps/web/src/features/quiz/api/quizKeys.ts
+  s_9c243050d10f30::t_ae43da2c731529 1-5
+apps/web/src/features/quiz/api/useQuizOverview.ts
+  s_9c243050d10f30::t_f6637ec5ac32dd 1-16
+apps/web/src/features/quiz/components/BetweenScreen.tsx
+  s_9c243050d10f30::t_de295606983e1c 1-27
+apps/web/src/features/quiz/components/ConnectionBanner.tsx
+  s_9c243050d10f30::t_d918e3a7420102 1-25
+apps/web/src/features/quiz/components/RulesSheet.tsx
+  s_9c243050d10f30::t_d43bd1b44165a2 1-61
+apps/web/src/features/quiz/components/StartCta.tsx
+  s_9c243050d10f30::t_cff900413a276b 1-67
+apps/web/src/features/quiz/components/useOtherTabNotice.ts
+  s_9c243050d10f30::t_1afd0d7f54338e 1-44
+apps/web/src/features/quiz/lib/serverClock.ts
+  s_9c243050d10f30::t_1d9a5ea81947ff 1-33
+apps/web/src/layouts/AppLayout.tsx
+  s_9c243050d10f30::t_f687918f5f8db4 30-32
+apps/web/src/lib/api/mock/index.ts
+  s_9c243050d10f30::t_719173263eb097 26
+apps/web/src/lib/api/mock/routes.ts
+  s_9c243050d10f30::t_2ff35caee19201 37,567,634-635,637,644-661,723-731
+apps/web/src/lib/api/mock/store.ts
+  s_9c243050d10f30::t_4dcaf25a6683c6 6,40-41,153-154,190-199
+apps/web/src/features/quiz/QuizPage.tsx
+  s_d60139a3382f47::t_5453b7351d67a2 1,3,10,12,14-15,18-20,23,26-27,31,38-74,76-79,87-90
+apps/web/src/features/quiz/api/useAttempt.ts
+  s_d60139a3382f47::t_916e18d818e3c2 1-268
+apps/web/src/features/quiz/components/CompletionScreen.tsx
+  s_d60139a3382f47::t_e76a4bbf7beeb3 1-79
+apps/web/src/features/quiz/components/OverviewCard.tsx
+  s_d60139a3382f47::t_b7bec78b9c620f 1-154
+apps/web/src/features/quiz/components/QuestionView.tsx
+  s_d60139a3382f47::t_356a329a2ac79e 1-155
+apps/web/src/features/quiz/lib/useHiddenSignals.ts
+  s_d60139a3382f47::t_048e3a7691d958 1-39
+apps/web/src/lib/api/mock/quiz-participant.ts
+  s_d60139a3382f47::t_e047f43236236c 1-337
+apps/web/src/lib/format.ts
+  s_d60139a3382f47::t_3c21b09d05f8a1 113-120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "da3f8fa15e8309464901d17cf566c7c216825c6a",
+  "prompts": {},
+  "sessions": {
+    "s_9c243050d10f30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "52c21a19-4dca-4d71-a046-ac31f18a1a0c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_d60139a3382f47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a75d2e2d7e70cb269",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
