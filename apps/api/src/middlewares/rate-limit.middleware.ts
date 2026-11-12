@@ -102,7 +102,8 @@ export const certificateRateLimit = limiter({
 /** Every quiz call is cheap and idempotent; this only stops a script hammering the attempt. */
 export const quizRateLimit = limiter({
   windowMs: MINUTE,
-  limit: 120,
+  // Only stops scripts: a fast honest reader (taps, re-selects, next, refetches) can pass 120.
+  limit: 300,
   message: 'Too many quiz requests — slow down a moment.',
   key: userOrIpKey
 });

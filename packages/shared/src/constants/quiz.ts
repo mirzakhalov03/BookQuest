@@ -6,6 +6,8 @@ export const QUIZ_MCQ_OPTIONS = { min: 2, max: 6 } as const;
 /** Time after `quizClosesAt` the sweep waits before ranking, so in-flight attempts finalise. */
 export const QUIZ_RESULTS_BUFFER_MS = 300_000;
 export const QUIZ_MAX_GROUPS = 4;
+/** Corrections and voids stop this long before `resultsAt`, so no re-score is mid-run when ranks freeze. */
+export const QUIZ_RESCORE_FREEZE_MS = 60_000;
 
 export const QUIZ_TEXT_LIMITS = {
   title: 120,
@@ -46,6 +48,7 @@ export const QUIZ_ERROR_REASONS = [
   'not_configured',
   'already_completed',
   'voided',
-  'already_locked'
+  'already_locked',
+  'results_imminent'
 ] as const;
 export type QuizErrorReason = (typeof QUIZ_ERROR_REASONS)[number];

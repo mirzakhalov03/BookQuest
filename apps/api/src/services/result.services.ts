@@ -6,7 +6,7 @@ import type { UserDocument } from '../models/user.model.js';
 import { ApiError } from '../utils/api-error.js';
 import { findCurrentQuestDocument, requireCurrentQuestDocument } from './quest.services.js';
 import { participantsById } from './participant-lookup.services.js';
-import { finalizeOpenAttempts } from './quiz-attempt.services.js';
+import { finalizeOpenAttempts, repairMissingResults } from './quiz-attempt.services.js';
 
 const PODIUM_SIZE = 3;
 
@@ -120,6 +120,8 @@ export function ensureRanked(quest: QuestDocument): Promise<void> {
 async function rankQuest(quest: QuestDocument): Promise<void> {
   // Correctness must not hang on the sweep timer: open attempts get their Results first.
   await finalizeOpenAttempts(quest, new Date(), 'ranking');
+  // A completed attempt whose Result write was lost would otherwise be missing from the ranks for good.
+  await repairMissingResults(quest);
   const pending = await ResultModel.countDocuments({ quest: quest._id, rank: null });
   if (pending === 0) return;
 

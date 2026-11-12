@@ -1,4 +1,5 @@
 import type { AnyBulkWriteOperation, ClientSession, Types } from 'mongoose';
+import { QUIZ_RESCORE_FREEZE_MS } from '@bookquest/shared';
 import type {
   AttemptAdmin,
   AttemptRow as AttemptRowDto,
@@ -34,6 +35,8 @@ export interface AttemptListQuery {
 }
 
 type QuizConfig = NonNullable<QuestDocument['quizConfig']>;
+
+const MSG_RESULTS_IMMINENT = 'Results go out in under a minute, so scores are frozen now.';
 
 const iso = (date: Date | null | undefined): string | null => (date ? date.toISOString() : null);
 
@@ -229,6 +232,9 @@ export async function voidAttempt(id: string, reason: string, admin: UserDocumen
   if (Date.now() >= quest.resultsAt.getTime()) {
     throw ApiError.conflict('Results are out, so this attempt can no longer be voided.');
   }
+  if (Date.now() >= quest.resultsAt.getTime() - QUIZ_RESCORE_FREEZE_MS) {
+    throw ApiError.conflict(MSG_RESULTS_IMMINENT, { reason: 'results_imminent' });
+  }
 
   const voided = await withTransaction(async (session) => {
     // Result first: a crash between the writes (no transaction on standalone Mongo) then leaves a retryable void, never a voided attempt that is still ranked.
@@ -242,6 +248,8 @@ export async function voidAttempt(id: string, reason: string, admin: UserDocumen
     ).lean<AttemptRow>();
     if (!updated) throw ApiError.conflict('This attempt was already voided.');
 
+    // Again after the flip: a finalise landing between the first delete and the flip would have rewritten the Result.
+    await ResultModel.deleteOne({ quest: attempt.quest, participant: attempt.participant }, { session });
     return updated;
   });
 
@@ -267,6 +275,10 @@ async function requireCorrectable(quizId: string): Promise<QuizRow> {
   }
   if (await QuestModel.exists({ _id: { $in: questIds }, resultsAt: { $lte: new Date() } })) {
     throw ApiError.conflict('Results are out, so the answer key can no longer change.');
+  }
+  const freezeFrom = new Date(Date.now() + QUIZ_RESCORE_FREEZE_MS);
+  if (await QuestModel.exists({ _id: { $in: questIds }, resultsAt: { $lte: freezeFrom } })) {
+    throw ApiError.conflict(MSG_RESULTS_IMMINENT, { reason: 'results_imminent' });
   }
   return quiz;
 }

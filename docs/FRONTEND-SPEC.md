@@ -950,11 +950,11 @@ The server is the only timing authority.
 
 **Error `reason`.** A 404/409 may carry `error.reason`, a stable machine code the client branches on
 (`message` stays human): `not_configured`, `window_not_open`, `window_closed`, `already_completed`,
-`voided`, `already_locked`, `quiz_locked`, `stale`.
+`voided`, `already_locked`, `quiz_locked`, `stale`, `results_imminent`.
 
 ### Participant — `/api/v1/quiz`
 
-All routes: `requireUser`, 120 requests/min per user, `Cache-Control: no-store`. No response ever
+All routes: `requireUser`, 300 requests/min per user, `Cache-Control: no-store`. No response ever
 contains `correctOptionId`, `isCorrect`, `explanation`, `difficulty`, the variant label, or an
 unserved question (until the review, which is gated on close).
 
@@ -1034,7 +1034,7 @@ Auth: `role === 'admin'`. Admin DTOs may carry answers.
 | `PUT /admin/quizzes/:id` | `{revision, title, description, settings, questions[]}` strict, 512 kB limit | `QuizAdmin` | `409 reason: stale` on revision mismatch; `409 reason: quiz_locked` once any attempt exists. If attached, must stay complete and keep variant shape (else `400` with `fields`). |
 | `POST /admin/quizzes/:id/duplicate` | — | `201 QuizAdmin` | New question ids, "(copy)" suffix, unattached. |
 | `DELETE /admin/quizzes/:id` | — | `{ ok: true, data: null }` | `409 reason: quiz_locked` if attached, used in an earlier edition, or any attempt exists. |
-| `POST /admin/quizzes/:id/corrections` | `{questionId, kind:'key', correctOptionId, note?}` or `{questionId, kind:'void', note?}` | `{ quiz: QuizAdmin, rescored: number }` | Only while locked and `now < resultsAt`. Re-scores attempts. `409 reason: stale` on a concurrent correction. |
+| `POST /admin/quizzes/:id/corrections` | `{questionId, kind:'key', correctOptionId, note?}` or `{questionId, kind:'void', note?}` | `{ quiz: QuizAdmin, rescored: number }` | Only while locked and `now < resultsAt − 60 s` (`QUIZ_RESCORE_FREEZE_MS`). Re-scores attempts. `409 reason: stale` on a concurrent correction; `409 reason: results_imminent` in the last minute before `resultsAt`. |
 
 ### Admin — live operations `/api/v1/admin/quiz` (current quest)
 
@@ -1044,7 +1044,7 @@ Auth: `role === 'admin'`. Admin DTOs may carry answers.
 | `GET /admin/quiz/live` | — | `QuizLiveStats` `{ groups: [{index,label,quizTitle,assigned,started,inProgress,completed,avgScore,avgDurationMs}], updatedAt }` |
 | `GET /admin/quiz/attempts` | `status?`, `flag?`, `q?` (≤80), `page=1`, `limit=50` (≤200) | `Paginated<AttemptRow>`; row `{id, participant:{number,fullName}, groupLabel, status, answered, total, score, durationMs, flags, startedAt, completedAt}` |
 | `GET /admin/quiz/attempts/:id` | — | `AttemptAdmin`: the row plus `quizId, quizTitle, quizRevision, finalizedBy, clientIdCount, voidReason, voidedAt` and every item with key, timestamps and signals |
-| `POST /admin/quiz/attempts/:id/void` | `{ reason: string 1–300 }` | `AttemptRow`. Only while `now < resultsAt`; deletes the `Result` and marks the attempt voided. |
+| `POST /admin/quiz/attempts/:id/void` | `{ reason: string 1–300 }` | `AttemptRow`. Only while `now < resultsAt − 60 s` (`409 reason: results_imminent` in the last minute); deletes the `Result` and marks the attempt voided. |
 
 ### Quest quiz fields
 

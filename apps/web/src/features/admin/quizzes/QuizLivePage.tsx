@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { ATTEMPT_STATUSES, QUIZ_FLAGS, type AttemptRow, type AttemptStatus, type QuizFlag } from '@bookquest/shared';
+import { ATTEMPT_STATUSES, QUIZ_FLAGS, QUIZ_RESCORE_FREEZE_MS, type AttemptRow, type AttemptStatus, type QuizFlag } from '@bookquest/shared';
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { Button } from '@/components/ui/Button';
@@ -83,8 +83,8 @@ function Attempts() {
   const quest = useCurrentQuest();
   const [open, setOpen] = useState<AttemptRow | null>(null);
   const [voiding, setVoiding] = useState(false);
-  // The server enforces it too; this only hides a button that would 409.
-  const canVoid = quest.data !== undefined && Date.now() < Date.parse(quest.data.resultsAt);
+  // The server enforces it too (incl. the last-minute freeze); this only hides a button that would 409.
+  const canVoid = quest.data !== undefined && Date.now() < Date.parse(quest.data.resultsAt) - QUIZ_RESCORE_FREEZE_MS;
 
   function setParam(key: string, value: string) {
     setParams(
