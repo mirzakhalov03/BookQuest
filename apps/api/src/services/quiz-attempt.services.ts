@@ -110,7 +110,9 @@ function settleItem(
       status: 'in_progress',
       cursor: index,
       [itemPath(index, 'lockedAt')]: IS_NULL,
-      [itemPath(index, 'outcome')]: IS_NULL
+      [itemPath(index, 'outcome')]: IS_NULL,
+      // Pinned to the selection the outcome was computed from: an in-grace tap landing meanwhile forces a recompute.
+      [itemPath(index, 'selectedOptionId')]: attempt.items[index]?.selectedOptionId ?? IS_NULL
     },
     {
       $set: {
@@ -210,10 +212,16 @@ export async function finalizeAttempt(attemptId: Types.ObjectId, by: FinalizedBy
 
     const now = new Date();
     const { score, total, durationMs, answered } = scoreItems(attempt.items);
+    // Stored per-item isCorrect can predate a correction that raced a lock; rewrite it from the same read as score.
+    const itemCorrect: Record<string, boolean> = {};
+    attempt.items.forEach((item, k) => {
+      if (item.outcome != null) itemCorrect[itemPath(k, 'isCorrect')] = isItemCorrect(item);
+    });
     const done = await QuizAttemptModel.findOneAndUpdate(
       { _id: attemptId, status: 'in_progress', cursor: attempt.items.length },
       {
         $set: {
+          ...itemCorrect,
           status: 'completed',
           completedAt: now,
           score,
