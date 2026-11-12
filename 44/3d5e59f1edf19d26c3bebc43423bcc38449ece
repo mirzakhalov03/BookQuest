@@ -1,0 +1,51 @@
+apps/api/src/controllers/admin/quiz.controllers.ts
+  s_c521f1a3116034::t_7d444b73076aa3 2,46-56
+apps/api/src/routes/admin/quiz.routes.ts
+  s_c521f1a3116034::t_e22882def176a3 6,21-26
+apps/api/src/scripts/quiz-drill.ts
+  s_c521f1a3116034::t_bf1f4ff3ca988f 5,10,26,55,353,356-373,381,388-392,510-522,582
+apps/api/src/services/quiz-attempt.services.ts
+  s_c521f1a3116034::t_15a1e61962bf42 174,181-189,194-195
+apps/api/src/services/quiz-ops.services.ts
+  s_c521f1a3116034::t_98c76a2c92a69e 1,7-8,15,24-26,250-438
+apps/api/src/validators/quiz.validators.ts
+  s_c521f1a3116034::t_a817bbe7ca8bc1 10,19
+apps/web/src/features/admin/api/useQuizCorrection.ts
+  s_c521f1a3116034::t_150df83026cae7 1-19
+apps/web/src/features/admin/quizzes/QuizEditorPage.tsx
+  s_c521f1a3116034::t_41f40393c58b1e 19-20,66,80-85,154-155,178-179,198
+apps/web/src/features/admin/quizzes/components/QuestionEditor.tsx
+  s_c521f1a3116034::t_cab64ed54cc7b3 3,35-38,41,72-77,79-107,109-117,119-146
+apps/web/src/features/admin/quizzes/components/QuestionList.tsx
+  s_c521f1a3116034::t_76dc969cb82fbc 46-48,51,128,132-142,171,187,234-236,240
+packages/shared/src/schemas/quiz.ts
+  s_c521f1a3116034::t_ef7cc7af1b1cb8 261-263
+apps/web/src/features/admin/quizzes/components/CorrectionSheet.tsx
+  s_4dceec8d6833fc::t_0d31593e7415f8 1-169
+apps/web/src/features/admin/quizzes/components/CorrectionsLog.tsx
+  s_4dceec8d6833fc::t_73869b377ea48b 1-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "443d5e59f1edf19d26c3bebc43423bcc38449ece",
+  "prompts": {},
+  "sessions": {
+    "s_4dceec8d6833fc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-aa56fa25da3880784",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_c521f1a3116034": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "08fd38ad-b319-4b37-90f4-1e0cc2a29e95",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
