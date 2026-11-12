@@ -2,10 +2,12 @@
  * Quiz concurrency and load drill (§17). Dev/test databases only.
  *
  *   pnpm --filter @bookquest/api drill:quiz -- --n 150 [--api http://localhost:4100/api/v1] [--close] [--force]
+ *   pnpm --filter @bookquest/api drill:quiz -- --check-only
  *   pnpm --filter @bookquest/api drill:quiz -- --cleanup
  *
  * A run seeds N participants with sessions, opens the window, drives N concurrent
  * takers over HTTP against an API started separately, then asserts from the DB.
+ * --check-only re-runs just the DB assertions over every drill participant (e.g. after a correction).
  * The quest's original dates are saved on the first run and restored by --cleanup.
  */
 import crypto from 'node:crypto';
@@ -21,7 +23,7 @@ import { QuizAttemptModel, type AttemptRow } from '../models/quiz-attempt.model.
 import { ResultModel } from '../models/result.model.js';
 import { UserModel } from '../models/user.model.js';
 import { runQuizSweep } from '../services/quiz-attempt.services.js';
-import { IS_DATE, scoreItems } from '../services/quiz-scoring.js';
+import { IS_DATE, isItemCorrect, scoreItems } from '../services/quiz-scoring.js';
 import { ensureRanked } from '../services/result.services.js';
 import { signSessionToken } from '../utils/token.js';
 
@@ -50,6 +52,7 @@ const args = {
   api: (option('api') ?? `http://localhost:${env.PORT}/api/v1`).replace(/\/+$/, ''),
   close: flag('close'),
   cleanup: flag('cleanup'),
+  checkOnly: flag('check-only'),
   force: flag('force')
 };
 
@@ -347,11 +350,27 @@ async function assertResults(participantIds: Types.ObjectId[]): Promise<void> {
     }
   }
   const completed = attempts.filter((a) => a.status === 'completed').length;
-  check('every completed attempt with answered ≥ 1 has exactly one Result equal to scoreItems', mismatches.length === 0, mismatches.slice(0, 3).join('; ') || `${completed} completed, ${results.length} Results`);
+  check('Result equals rescored items: every completed attempt with answered ≥ 1 has exactly one Result equal to scoreItems', mismatches.length === 0, mismatches.slice(0, 3).join('; ') || `${completed} completed, ${results.length} Results`);
 }
 
-async function assertRun(takers: Taker[], logs: TakerLog[], burst: Awaited<ReturnType<typeof burstProbe>>): Promise<void> {
-  const ids = takers.map((t) => t.participantId);
+/** Stored numbers must equal a fresh re-score, which is what a correction promises (§13.7). */
+async function assertStoredScores(participantIds: Types.ObjectId[]): Promise<void> {
+  const attempts = await QuizAttemptModel.find({ participant: { $in: participantIds }, status: 'completed' }).lean<AttemptRow[]>();
+  const wrong: string[] = [];
+  let staleCorrect = 0;
+  for (const attempt of attempts) {
+    const expected = scoreItems(attempt.items);
+    if (attempt.score !== expected.score || attempt.total !== expected.total || attempt.durationMs !== expected.durationMs) {
+      wrong.push(`${attempt._id}: stored ${attempt.score}/${attempt.total}/${attempt.durationMs} ≠ ${expected.score}/${expected.total}/${expected.durationMs}`);
+    }
+    staleCorrect += attempt.items.filter((item) => item.outcome != null && item.isCorrect !== isItemCorrect(item)).length;
+  }
+  check('completed attempts store score/total/durationMs equal to scoreItems', wrong.length === 0, wrong.slice(0, 3).join('; ') || `${attempts.length} completed`);
+  check('resolved items store isCorrect equal to isItemCorrect', staleCorrect === 0, `${staleCorrect} stale items`);
+}
+
+/** The assertions that read only the DB, shared by a run and --check-only. */
+async function assertDatabase(ids: Types.ObjectId[]): Promise<void> {
   const counts = await QuizAttemptModel.aggregate<{ _id: Types.ObjectId; n: number }>([
     { $match: { participant: { $in: ids } } },
     { $group: { _id: '$participant', n: { $sum: 1 } } }
@@ -359,12 +378,18 @@ async function assertRun(takers: Taker[], logs: TakerLog[], burst: Awaited<Retur
   check('exactly one attempt per participant', counts.length === ids.length && counts.every((c) => c.n === 1), `${counts.length}/${ids.length} participants with attempts`);
 
   await assertResults(ids);
+  await assertStoredScores(ids);
 
   const badLocks = await QuizAttemptModel.countDocuments({
     participant: { $in: ids },
     items: { $elemMatch: { lockedAt: IS_DATE, outcome: { $ne: 'locked' } } }
   });
   check("no item has lockedAt with outcome ≠ 'locked'", badLocks === 0, `${badLocks} attempts`);
+}
+
+async function assertRun(takers: Taker[], logs: TakerLog[], burst: Awaited<ReturnType<typeof burstProbe>>): Promise<void> {
+  const ids = takers.map((t) => t.participantId);
+  await assertDatabase(ids);
 
   check('burst probe: 10 identical concurrent locks advanced cursor exactly once', burst.after - burst.before === 1 && burst.outcome === 'locked', `cursor ${burst.before} → ${burst.after}, outcome ${burst.outcome}`);
 
@@ -482,6 +507,19 @@ async function cleanup(): Promise<void> {
   );
 }
 
+/* ── --check-only ───────────────────────────────────────────────────────── */
+
+/** Every drill participant on the current quest that has an attempt, across all runs. */
+async function checkOnly(): Promise<void> {
+  const quest = await requireCurrentQuest();
+  const users = await UserModel.find({ username: DRILL_USERNAME }).select('_id').lean();
+  const participants = await ParticipantModel.find({ quest: quest._id, user: { $in: users.map((u) => u._id) } }).select('_id').lean();
+  const ids = await QuizAttemptModel.distinct('participant', { participant: { $in: participants.map((p) => p._id) } });
+  if (ids.length === 0) throw new Error('No drill attempts on the current quest. Run the drill first.');
+  console.log(`Check-only: ${ids.length} drill participants with attempts (db ${mongoose.connection.name})`);
+  await assertDatabase(ids);
+}
+
 /* ── Main ───────────────────────────────────────────────────────────────── */
 
 async function waitForApi(token: string): Promise<void> {
@@ -541,6 +579,7 @@ async function main(): Promise<void> {
   if (mongoose.connection.name !== databaseName(env.MONGODB_URI)) throw new Error('Connected to an unexpected database.');
 
   if (args.cleanup) await cleanup();
+  else if (args.checkOnly) await checkOnly();
   else await drill();
 
   await disconnectFromDatabase();

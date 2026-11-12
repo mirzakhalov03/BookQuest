@@ -16,6 +16,8 @@ import { AdminPageHeader } from '../components/AdminPageHeader';
 import { AdminQuery } from '../components/AdminQuery';
 import { SaveBar } from '../components/SaveBar';
 import { UnsavedChangesSheet } from '../components/UnsavedChangesSheet';
+import { CorrectionSheet } from './components/CorrectionSheet';
+import { CorrectionsLog } from './components/CorrectionsLog';
 import { QuestionList } from './components/QuestionList';
 import { QuizDetailsSection } from './components/QuizDetailsSection';
 import { QuizSettingsSection } from './components/QuizSettingsSection';
@@ -61,6 +63,7 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
   const returnedDraft = readDraft(useLocation().state);
   const [formError, setFormError] = useState<string | null>(null);
   const [isStale, setIsStale] = useState(false);
+  const [correctingId, setCorrectingId] = useState<string | null>(null);
   const showToast = useUiStore((state) => state.showToast);
   const save = useSaveQuiz(quiz.id);
   const locked = quiz.locked;
@@ -73,6 +76,12 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
     // Once per mount: later saves reset the form themselves.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // A correction bumps the revision; a locked form holds no edits, so it follows the server.
+  useEffect(() => {
+    if (locked) reset(toQuizFormState(quiz));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quiz.revision]);
 
   function openPreview() {
     // The preview carries the edits in router state; the guard would otherwise ask to discard them.
@@ -142,6 +151,8 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
           </fieldset>
           <QuestionList
             locked={locked}
+            voidedIds={quiz.voidedQuestionIds}
+            onCorrect={setCorrectingId}
             raised={isDirty}
             dock={
               <>
@@ -164,6 +175,8 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
           />
         </form>
 
+        <CorrectionsLog quiz={quiz} />
+
         {isDirty && <div aria-hidden className="h-20" />}
       </AdminScreen>
 
@@ -182,6 +195,7 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
         }}
       />
       <UnsavedChangesSheet blocker={guard.blocker} />
+      {locked && <CorrectionSheet quiz={quiz} questionId={correctingId} onClose={() => setCorrectingId(null)} />}
     </FormProvider>
   );
 }

@@ -43,9 +43,12 @@ interface QuestionListProps {
   raised: boolean;
   /** Notices and the summary, stacked under the add button in the sticky dock. */
   dock?: ReactNode;
+  voidedIds: readonly string[];
+  /** Opens the answer-key correction for a question of a locked quiz. */
+  onCorrect: (questionId: string) => void;
 }
 
-export function QuestionList({ locked, raised, dock }: QuestionListProps) {
+export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: QuestionListProps) {
   const {
     control,
     getValues,
@@ -122,19 +125,21 @@ export function QuestionList({ locked, raised, dock }: QuestionListProps) {
                     }
                     open={openId === field.id}
                     locked={locked}
+                    voided={voidedIds.includes(question.id)}
                     onToggle={() => setOpenId(openId === field.id ? null : field.id)}
                     onMove={(to) => move(index, to)}
                   >
-                    <fieldset disabled={locked} className="m-0 min-w-0 border-0 p-0">
-                      <QuestionEditor
-                        index={index}
-                        issues={rowIssues}
-                        onRemove={() => {
-                          remove(index);
-                          setOpenId(null);
-                        }}
-                      />
-                    </fieldset>
+                    <QuestionEditor
+                      index={index}
+                      issues={rowIssues}
+                      onRemove={() => {
+                        remove(index);
+                        setOpenId(null);
+                      }}
+                      locked={locked}
+                      voided={voidedIds.includes(question.id)}
+                      onCorrect={() => onCorrect(question.id)}
+                    />
                   </SortableRow>
                 );
               })}
@@ -163,6 +168,7 @@ interface SortableRowProps {
   hasError: boolean;
   open: boolean;
   locked: boolean;
+  voided: boolean;
   onToggle: () => void;
   onMove: (to: number) => void;
   children: ReactNode;
@@ -178,6 +184,7 @@ function SortableRow({
   hasError,
   open,
   locked,
+  voided,
   onToggle,
   onMove,
   children
@@ -224,10 +231,13 @@ function SortableRow({
             {TYPE_LABEL[question.type]}
           </span>
           <span
-            className={`min-w-0 flex-1 truncate ${question.prompt.trim() ? 'text-paper' : 'text-taupe'}`}
+            className={`min-w-0 flex-1 truncate ${question.prompt.trim() ? 'text-paper' : 'text-taupe'} ${
+              voided ? 'line-through decoration-taupe' : ''
+            }`}
           >
             {question.prompt.trim() || 'Untitled question'}
           </span>
+          {voided && <span className="shrink-0 text-xs text-amber">Voided</span>}
           <span
             aria-label={question.difficulty}
             className={`h-2 w-2 shrink-0 rounded-full ${DIFFICULTY_DOT[question.difficulty]}`}

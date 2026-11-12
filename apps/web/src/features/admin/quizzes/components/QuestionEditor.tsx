@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { Trash2 } from 'lucide-react';
+import { Ban, PencilLine, Trash2 } from 'lucide-react';
 import {
   QUESTION_DIFFICULTIES,
   QUIZ_TEXT_LIMITS,
@@ -32,9 +32,13 @@ interface QuestionEditorProps {
   /** Live completeness messages for this question, keyed by field. */
   issues: Record<string, string>;
   onRemove: () => void;
+  /** Participants have started: content is read-only and only a correction can change it. */
+  locked: boolean;
+  voided: boolean;
+  onCorrect: () => void;
 }
 
-export function QuestionEditor({ index, issues, onRemove }: QuestionEditorProps) {
+export function QuestionEditor({ index, issues, onRemove, locked, voided, onCorrect }: QuestionEditorProps) {
   const {
     register,
     control,
@@ -65,67 +69,81 @@ export function QuestionEditor({ index, issues, onRemove }: QuestionEditorProps)
 
   return (
     <div className="flex flex-col gap-4 border-t border-[color:var(--rule)] p-4">
-      <Segmented
-        aria-label="Question type"
-        options={TYPE_OPTIONS}
-        value={question.type}
-        onChange={changeType}
-      />
-      <TextArea
-        label="Question"
-        rows={3}
-        {...register(`${base}.prompt`)}
-        head={<CharCount length={question.prompt.length} max={QUIZ_TEXT_LIMITS.prompt} />}
-        status={promptMessage ? 'bad' : undefined}
-        message={promptMessage}
-      />
-      <OptionsEditor
-        // Remounts the field array when the option set is swapped wholesale.
-        key={question.type}
-        index={index}
-        type={question.type}
-        correctOptionId={question.correctOptionId}
-        {...(optionsMessage ? { error: optionsMessage } : {})}
-      />
-      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
-        <Field
-          label="Time limit (s)"
-          type="number"
-          inputMode="numeric"
-          min={QUIZ_TIME_LIMIT_SEC.min}
-          max={QUIZ_TIME_LIMIT_SEC.max}
-          placeholder={String(defaultTime)}
-          {...register(`${base}.timeLimitSec`, {
-            setValueAs: (v: string | number | null) => (v === '' || v == null ? null : Number(v))
-          })}
-          status={fieldErrors?.timeLimitSec ? 'bad' : undefined}
-          message={fieldErrors?.timeLimitSec ? `Use ${QUIZ_TIME_LIMIT_SEC.min}–${QUIZ_TIME_LIMIT_SEC.max}.` : undefined}
+      <fieldset disabled={locked} className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
+        <Segmented
+          aria-label="Question type"
+          options={TYPE_OPTIONS}
+          value={question.type}
+          onChange={changeType}
         />
-        <div className="grid gap-[0.4rem]">
-          <span className="type-label">Difficulty</span>
-          <Segmented
-            aria-label="Difficulty"
-            options={DIFFICULTY_OPTIONS}
-            value={question.difficulty}
-            onChange={(value: QuestionDifficulty) => setValue(`${base}.difficulty`, value, { shouldDirty: true })}
+        <TextArea
+          label="Question"
+          rows={3}
+          {...register(`${base}.prompt`)}
+          head={<CharCount length={question.prompt.length} max={QUIZ_TEXT_LIMITS.prompt} />}
+          status={promptMessage ? 'bad' : undefined}
+          message={promptMessage}
+        />
+        <OptionsEditor
+          // Remounts the field array when the option set is swapped wholesale.
+          key={question.type}
+          index={index}
+          type={question.type}
+          correctOptionId={question.correctOptionId}
+          {...(optionsMessage ? { error: optionsMessage } : {})}
+        />
+        <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+          <Field
+            label="Time limit (s)"
+            type="number"
+            inputMode="numeric"
+            min={QUIZ_TIME_LIMIT_SEC.min}
+            max={QUIZ_TIME_LIMIT_SEC.max}
+            placeholder={String(defaultTime)}
+            {...register(`${base}.timeLimitSec`, {
+              setValueAs: (v: string | number | null) => (v === '' || v == null ? null : Number(v))
+            })}
+            status={fieldErrors?.timeLimitSec ? 'bad' : undefined}
+            message={fieldErrors?.timeLimitSec ? `Use ${QUIZ_TIME_LIMIT_SEC.min}–${QUIZ_TIME_LIMIT_SEC.max}.` : undefined}
           />
+          <div className="grid gap-[0.4rem]">
+            <span className="type-label">Difficulty</span>
+            <Segmented
+              aria-label="Difficulty"
+              options={DIFFICULTY_OPTIONS}
+              value={question.difficulty}
+              onChange={(value: QuestionDifficulty) => setValue(`${base}.difficulty`, value, { shouldDirty: true })}
+            />
+          </div>
         </div>
-      </div>
-      <TextArea
-        label="Explanation (optional, shown in review)"
-        rows={2}
-        {...register(`${base}.explanation`, { setValueAs: (v: string | null) => (v ? v : null) })}
-        head={<CharCount length={question.explanation?.length ?? 0} max={QUIZ_TEXT_LIMITS.explanation} />}
-        status={fieldErrors?.explanation ? 'bad' : undefined}
-        message={fieldErrors?.explanation?.message}
-      />
-      <button
-        type="button"
-        onClick={remove}
-        className="flex min-h-11 items-center gap-2 self-start text-sm text-error hover:text-paper"
-      >
-        <Trash2 className="h-4 w-4" aria-hidden /> Remove question
-      </button>
+        <TextArea
+          label="Explanation (optional, shown in review)"
+          rows={2}
+          {...register(`${base}.explanation`, { setValueAs: (v: string | null) => (v ? v : null) })}
+          head={<CharCount length={question.explanation?.length ?? 0} max={QUIZ_TEXT_LIMITS.explanation} />}
+          status={fieldErrors?.explanation ? 'bad' : undefined}
+          message={fieldErrors?.explanation?.message}
+        />
+        {!locked && (
+          <button
+            type="button"
+            onClick={remove}
+            className="flex min-h-11 items-center gap-2 self-start text-sm text-error hover:text-paper"
+          >
+            <Trash2 className="h-4 w-4" aria-hidden /> Remove question
+          </button>
+        )}
+      </fieldset>
+      {locked &&
+        (voided ? (
+          <p className="m-0 flex items-center gap-2 text-sm text-amber">
+            <Ban className="h-4 w-4 shrink-0" aria-hidden /> Voided: not counted in anyone’s score or total.
+          </p>
+        ) : (
+          <Button type="button" variant="quiet" onClick={onCorrect} className="min-h-11 gap-2 self-start px-3">
+            <PencilLine className="h-4 w-4" aria-hidden /> Correct answer key
+          </Button>
+        ))}
       <Sheet
         open={confirming}
         onClose={() => setConfirming(false)}

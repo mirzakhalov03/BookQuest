@@ -7,6 +7,7 @@ import {
   QUIZ_MAX_QUESTIONS,
   createQuizSchema,
   putAttemptItemSchema,
+  quizCorrectionSchema,
   saveQuizSchema,
   voidAttemptSchema
 } from '@bookquest/shared';
@@ -15,6 +16,7 @@ import { objectId } from './common.js';
 export const quizIdParams = z.object({ id: objectId });
 export const createQuizBody = createQuizSchema;
 export const saveQuizBody = saveQuizSchema;
+export const correctionBody = quizCorrectionSchema;
 
 export const groupSizesQuery = z
   .object({

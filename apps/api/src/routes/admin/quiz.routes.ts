@@ -3,6 +3,7 @@ import * as adminQuizController from '../../controllers/admin/quiz.controllers.j
 import { validate } from '../../middlewares/validate.middleware.js';
 import {
   attemptsQuery,
+  correctionBody,
   createQuizBody,
   groupSizesQuery,
   quizIdParams,
@@ -17,6 +18,12 @@ adminQuizRoutes.post('/', validate(createQuizBody), adminQuizController.createQu
 adminQuizRoutes.get('/:id', validate(quizIdParams, 'params'), adminQuizController.getQuiz);
 adminQuizRoutes.put('/:id', validate(quizIdParams, 'params'), validate(saveQuizBody), adminQuizController.saveQuiz);
 adminQuizRoutes.post('/:id/duplicate', validate(quizIdParams, 'params'), adminQuizController.duplicateQuiz);
+adminQuizRoutes.post(
+  '/:id/corrections',
+  validate(quizIdParams, 'params'),
+  validate(correctionBody),
+  adminQuizController.applyCorrection
+);
 adminQuizRoutes.delete('/:id', validate(quizIdParams, 'params'), adminQuizController.deleteQuiz);
 
 /** Mounted at `/admin/quiz`: operations on the current quest's quiz, not the library. */

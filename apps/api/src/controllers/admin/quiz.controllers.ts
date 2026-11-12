@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import type { CreateQuizPayload, SaveQuizPayload, VoidAttemptPayload } from '@bookquest/shared';
+import type { CreateQuizPayload, QuizCorrectionPayload, SaveQuizPayload, VoidAttemptPayload } from '@bookquest/shared';
 import * as quizService from '../../services/quiz.services.js';
 import * as quizConfigService from '../../services/quiz-config.services.js';
 import * as quizOpsService from '../../services/quiz-ops.services.js';
@@ -41,6 +41,17 @@ export async function duplicateQuiz(req: Request, res: Response): Promise<void> 
   const quiz = await quizService.duplicateQuiz(id, currentUser(req));
   auditAdmin(req, 'duplicate-quiz', { quizId: id, copyId: quiz.id });
   ok(res, quiz, 201);
+}
+
+/** POST /api/v1/admin/quizzes/:id/corrections */
+export async function applyCorrection(req: Request, res: Response): Promise<void> {
+  const { id } = req.params as { id: string };
+  const payload = req.body as QuizCorrectionPayload;
+  const result = await quizOpsService.applyCorrection(id, payload, currentUser(req));
+  // Re-scored Results would otherwise be served from the stale leaderboard cache.
+  if (result.rescored > 0) resultService.clearResultsCache();
+  auditAdmin(req, 'correct-quiz', { quizId: id, questionId: payload.questionId, kind: payload.kind, rescored: result.rescored });
+  ok(res, result);
 }
 
 /** DELETE /api/v1/admin/quizzes/:id */

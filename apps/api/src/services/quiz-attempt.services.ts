@@ -171,23 +171,28 @@ export async function settleAttempt(
 
 /* ── Finalise (§13.4) ───────────────────────────────────────────────────── */
 
-type FinalizedAttempt = Pick<AttemptRow, '_id' | 'quest' | 'participant'> & {
+export type FinalizedAttempt = Pick<AttemptRow, '_id' | 'quest' | 'participant'> & {
   score: number;
   total: number;
   durationMs: number;
   completedAt: Date;
 };
 
+/** The one shape of a Result write, so finalise, repair and re-scoring store identical rows. */
+export function resultWrite(attempt: FinalizedAttempt) {
+  const { score, total, durationMs, completedAt } = attempt;
+  return {
+    filter: { quest: attempt.quest, participant: attempt.participant },
+    update: { $set: { score, total, durationMs, submittedAt: completedAt } }
+  };
+}
+
 /** Steps 2–3 of finalise, shared with repair: idempotent upsert, then the repair marker. */
 async function writeResult(attempt: FinalizedAttempt, answered: number, session?: ClientSession): Promise<void> {
   // Tapping Start and answering nothing earns no Result (and so no rank or certificate).
   if (answered >= 1) {
-    const { score, total, durationMs, completedAt } = attempt;
-    await ResultModel.updateOne(
-      { quest: attempt.quest, participant: attempt.participant },
-      { $set: { score, total, durationMs, submittedAt: completedAt } },
-      { upsert: true, session }
-    );
+    const { filter, update } = resultWrite(attempt);
+    await ResultModel.updateOne(filter, update, { upsert: true, session });
   }
   // Set even without a Result, so the repair sweep skips this attempt.
   await QuizAttemptModel.updateOne({ _id: attempt._id }, { $set: { resultWrittenAt: new Date() } }, { session });

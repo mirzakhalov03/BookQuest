@@ -1,16 +1,18 @@
-import type { Types } from 'mongoose';
+import type { AnyBulkWriteOperation, ClientSession, Types } from 'mongoose';
 import type {
   AttemptAdmin,
   AttemptRow as AttemptRowDto,
   AttemptStatus,
   Paginated,
+  QuizCorrectionPayload,
+  QuizCorrectionResult,
   QuizFlag,
   QuizLiveStats
 } from '@bookquest/shared';
 import { ParticipantModel } from '../models/participant.model.js';
 import { QuestModel, type QuestDocument, type QuestRow } from '../models/quest.model.js';
 import { QuizAttemptModel, type AttemptItemRow, type AttemptRow } from '../models/quiz-attempt.model.js';
-import { QuizModel } from '../models/quiz.model.js';
+import { QuizModel, type QuizRow } from '../models/quiz.model.js';
 import { ResultModel } from '../models/result.model.js';
 import type { UserDocument } from '../models/user.model.js';
 import { ApiError } from '../utils/api-error.js';
@@ -19,6 +21,9 @@ import { escapeRegex } from '../utils/regex.js';
 import { withTransaction } from '../utils/transaction.js';
 import { participantsById, type ParticipantName } from './participant-lookup.services.js';
 import { requireCurrentQuestDocument } from './quest.services.js';
+import { resultWrite } from './quiz-attempt.services.js';
+import { getQuizAdmin } from './quiz.services.js';
+import { isItemCorrect, itemPath, scoreItems } from './quiz-scoring.js';
 
 export interface AttemptListQuery {
   status?: AttemptStatus | undefined;
@@ -241,4 +246,193 @@ export async function voidAttempt(id: string, reason: string, admin: UserDocumen
   });
 
   return rowFor(voided, quest);
+}
+
+/* ── Answer-key correction & void question (§5.5, §13.7) ────────────────── */
+
+const RESCORE_BATCH = 200;
+// Voided attempts are withdrawn: no Result, nothing to re-score.
+const RESCORED_STATUSES = ['in_progress', 'completed'] as const;
+
+/** What every attempt's copy of the question must say once the correction holds. */
+type Target = { questionId: string; correctOptionId: string; voided: boolean };
+
+/** Locked (an attempt exists) and no quest using it has published results. */
+async function requireCorrectable(quizId: string): Promise<QuizRow> {
+  const quiz = await QuizModel.findById(quizId).lean<QuizRow>();
+  if (!quiz) throw ApiError.notFound('Quiz not found.');
+  const questIds = await QuizAttemptModel.distinct('quest', { quiz: quiz._id });
+  if (questIds.length === 0) {
+    throw ApiError.conflict('No one has started this quiz yet, so edit it directly instead.');
+  }
+  if (await QuestModel.exists({ _id: { $in: questIds }, resultsAt: { $lte: new Date() } })) {
+    throw ApiError.conflict('Results are out, so the answer key can no longer change.');
+  }
+  return quiz;
+}
+
+function targetOf(quiz: QuizRow, payload: QuizCorrectionPayload): Target {
+  const question = quiz.questions.find((q) => q.id === payload.questionId);
+  if (!question) throw ApiError.badRequest('That question is not in this quiz.', { questionId: 'Not in this quiz.' });
+  const voided = quiz.voidedQuestionIds.includes(question.id);
+  const current = { questionId: question.id, correctOptionId: question.correctOptionId ?? '', voided };
+
+  if (payload.kind === 'void') {
+    // A quiz where nothing counts would leave every score at 0 / 0.
+    if (!voided && quiz.voidedQuestionIds.length + 1 >= quiz.questions.length) {
+      throw ApiError.badRequest('At least one question must still count.', { questionId: 'This is the last question that counts.' });
+    }
+    return { ...current, voided: true };
+  }
+  if (voided) throw ApiError.conflict('This question is voided, so its answer key no longer counts.');
+  if (!question.options.some((option) => option.id === payload.correctOptionId)) {
+    throw ApiError.badRequest('That is not one of this question’s options.', { correctOptionId: 'Not an option for this question.' });
+  }
+  return { ...current, correctOptionId: payload.correctOptionId };
+}
+
+/** Writes the quiz side; false when it already says this (a repeat, or a concurrent identical void). */
+async function recordCorrection(
+  quiz: QuizRow,
+  payload: QuizCorrectionPayload,
+  target: Target,
+  admin: UserDocument,
+  session?: ClientSession
+): Promise<boolean> {
+  const question = quiz.questions.find((q) => q.id === target.questionId)!;
+  const from = question.correctOptionId ?? null;
+  const note = payload.note || null;
+  const entry = { questionId: target.questionId, kind: payload.kind, note, by: admin._id, at: new Date() };
+  // $inc revision changes the attempt cache key, so new starts snapshot the corrected quiz.
+  const bump = { $inc: { revision: 1 } };
+
+  if (payload.kind === 'void') {
+    if (quiz.voidedQuestionIds.includes(target.questionId)) return false;
+    const { matchedCount } = await QuizModel.updateOne(
+      { _id: quiz._id, 'questions.id': target.questionId, voidedQuestionIds: { $ne: target.questionId } },
+      { $addToSet: { voidedQuestionIds: target.questionId }, $push: { corrections: { ...entry, from: null, to: null } }, ...bump },
+      { session }
+    );
+    return matchedCount === 1;
+  }
+
+  if (from === target.correctOptionId) return false;
+  // Matching the key we read means two admins correcting at once can't log a wrong "from".
+  const { matchedCount } = await QuizModel.updateOne(
+    {
+      _id: quiz._id,
+      questions: { $elemMatch: { id: target.questionId, correctOptionId: from } },
+      voidedQuestionIds: { $ne: target.questionId }
+    },
+    {
+      $set: { 'questions.$.correctOptionId': target.correctOptionId },
+      $push: { corrections: { ...entry, from, to: target.correctOptionId } },
+      ...bump
+    },
+    { session }
+  );
+  if (matchedCount === 0) {
+    throw ApiError.conflict('Someone else just corrected this question. Reload to see their change.', { reason: 'stale' });
+  }
+  return true;
+}
+
+/** Any attempt whose copy of the question disagrees with the target: left by a crash mid-correction. */
+async function hasDrift(quizId: Types.ObjectId, target: Target, session?: ClientSession): Promise<boolean> {
+  const stale = await QuizAttemptModel.exists({
+    quiz: quizId,
+    status: { $in: RESCORED_STATUSES },
+    items: {
+      $elemMatch: {
+        questionId: target.questionId,
+        $or: [{ correctOptionId: { $ne: target.correctOptionId } }, { voided: { $ne: target.voided } }]
+      }
+    }
+  }).session(session ?? null);
+  return stale !== null;
+}
+
+async function rescoreBatch(batch: AttemptRow[], target: Target, session?: ClientSession): Promise<void> {
+  const results: AnyBulkWriteOperation[] = [];
+  const attempts: AnyBulkWriteOperation[] = [];
+  const completedIds: Types.ObjectId[] = [];
+
+  for (const attempt of batch) {
+    const index = attempt.items.findIndex((item) => item.questionId === target.questionId);
+    if (index < 0) continue;
+    const item = { ...attempt.items[index]!, correctOptionId: target.correctOptionId, voided: target.voided };
+    const $set: Record<string, unknown> = {
+      [itemPath(index, 'correctOptionId')]: target.correctOptionId,
+      [itemPath(index, 'voided')]: target.voided
+    };
+    // An unresolved item has no correctness yet; finalise scores it from the new key.
+    if (item.outcome != null) $set[itemPath(index, 'isCorrect')] = isItemCorrect(item);
+
+    if (attempt.status === 'completed') {
+      const { score, total, durationMs, answered } = scoreItems(attempt.items.map((it, k) => (k === index ? item : it)));
+      Object.assign($set, { score, total, durationMs });
+      completedIds.push(attempt._id);
+      if (answered >= 1) {
+        const { filter, update } = resultWrite({ ...attempt, score, total, durationMs, completedAt: attempt.completedAt ?? attempt.updatedAt });
+        results.push({ updateOne: { filter, update, upsert: true } });
+      }
+    }
+    // Status as read: one finalised meanwhile misses here and is re-scored by the completed pass.
+    attempts.push({ updateOne: { filter: { _id: attempt._id, status: attempt.status }, update: { $set } } });
+  }
+
+  // Results first: a crash before the attempt writes leaves drift, which re-running the correction repairs.
+  if (results.length > 0) await ResultModel.bulkWrite(results, { ordered: false, session });
+  if (attempts.length > 0) await QuizAttemptModel.bulkWrite(attempts, { ordered: false, session });
+
+  // Voided meanwhile (standalone Mongo, no transaction): the upsert must not resurrect its Result.
+  if (completedIds.length > 0) {
+    const voided = await QuizAttemptModel.find({ _id: { $in: completedIds }, status: 'voided' }, { quest: 1, participant: 1 })
+      .session(session ?? null)
+      .lean<Pick<AttemptRow, 'quest' | 'participant'>[]>();
+    if (voided.length > 0) {
+      await ResultModel.deleteMany({ $or: voided.map(({ quest, participant }) => ({ quest, participant })) }, { session });
+    }
+  }
+}
+
+/** In-progress first, so one that finalises mid-run is picked up by the completed pass. */
+async function rescoreAttempts(quizId: Types.ObjectId, target: Target, session?: ClientSession): Promise<number> {
+  const touched = new Set<string>();
+  for (const status of RESCORED_STATUSES) {
+    const cursor = QuizAttemptModel.find({ quiz: quizId, status })
+      .session(session ?? null)
+      .lean<AttemptRow[]>()
+      .cursor({ batchSize: RESCORE_BATCH });
+    let batch: AttemptRow[] = [];
+    for await (const attempt of cursor as AsyncIterable<AttemptRow>) {
+      batch.push(attempt);
+      touched.add(String(attempt._id));
+      if (batch.length === RESCORE_BATCH) {
+        await rescoreBatch(batch, target, session);
+        batch = [];
+      }
+    }
+    if (batch.length > 0) await rescoreBatch(batch, target, session);
+  }
+  return touched.size;
+}
+
+/** Changes a question's key or voids it, then re-scores every attempt on the quiz from its stored answers. */
+export async function applyCorrection(
+  quizId: string,
+  payload: QuizCorrectionPayload,
+  admin: UserDocument
+): Promise<QuizCorrectionResult> {
+  const quiz = await requireCorrectable(quizId);
+  const target = targetOf(quiz, payload);
+
+  const rescored = await withTransaction(async (session) => {
+    // Quiz first: without a transaction, a crash after it is repaired by re-running the same correction (drift check).
+    const changed = await recordCorrection(quiz, payload, target, admin, session);
+    if (!changed && !(await hasDrift(quiz._id, target, session))) return 0;
+    return rescoreAttempts(quiz._id, target, session);
+  });
+
+  return { quiz: await getQuizAdmin(quizId), rescored };
 }

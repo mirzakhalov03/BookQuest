@@ -258,6 +258,9 @@ export const quizAdminSchema = z.object({
 });
 export type QuizAdmin = z.infer<typeof quizAdminSchema>;
 
+/** `POST /admin/quizzes/:id/corrections`: the corrected quiz and how many attempts were re-scored. */
+export type QuizCorrectionResult = { quiz: QuizAdmin; rescored: number };
+
 /* ── Participant DTOs (§8.1) ────────────────────────────────────────────── */
 // Strict objects and no answer-bearing fields: these types cannot carry
 // `correctOptionId`, `isCorrect`, `explanation` or `difficulty`.
