@@ -352,7 +352,7 @@ async function hasDrift(quizId: Types.ObjectId, target: Target, session?: Client
   return stale !== null;
 }
 
-async function rescoreBatch(batch: AttemptRow[], target: Target, session?: ClientSession): Promise<void> {
+async function rescoreBatch(batch: AttemptRow[], target: Target): Promise<void> {
   const results: AnyBulkWriteOperation[] = [];
   const attempts: AnyBulkWriteOperation[] = [];
   const completedIds: Types.ObjectId[] = [];
@@ -382,39 +382,42 @@ async function rescoreBatch(batch: AttemptRow[], target: Target, session?: Clien
   }
 
   // Results first: a crash before the attempt writes leaves drift, which re-running the correction repairs.
-  if (results.length > 0) await ResultModel.bulkWrite(results, { ordered: false, session });
-  if (attempts.length > 0) await QuizAttemptModel.bulkWrite(attempts, { ordered: false, session });
+  if (results.length > 0) await ResultModel.bulkWrite(results, { ordered: false });
+  if (attempts.length > 0) await QuizAttemptModel.bulkWrite(attempts, { ordered: false });
 
-  // Voided meanwhile (standalone Mongo, no transaction): the upsert must not resurrect its Result.
+  // Voided meanwhile: the upsert must not resurrect its Result.
   if (completedIds.length > 0) {
     const voided = await QuizAttemptModel.find({ _id: { $in: completedIds }, status: 'voided' }, { quest: 1, participant: 1 })
-      .session(session ?? null)
       .lean<Pick<AttemptRow, 'quest' | 'participant'>[]>();
     if (voided.length > 0) {
-      await ResultModel.deleteMany({ $or: voided.map(({ quest, participant }) => ({ quest, participant })) }, { session });
+      await ResultModel.deleteMany({ $or: voided.map(({ quest, participant }) => ({ quest, participant })) });
     }
   }
 }
 
-/** In-progress first, so one that finalises mid-run is picked up by the completed pass. */
-async function rescoreAttempts(quizId: Types.ObjectId, target: Target, session?: ClientSession): Promise<number> {
-  const touched = new Set<string>();
-  for (const status of RESCORED_STATUSES) {
-    const cursor = QuizAttemptModel.find({ quiz: quizId, status })
-      .session(session ?? null)
-      .lean<AttemptRow[]>()
-      .cursor({ batchSize: RESCORE_BATCH });
-    let batch: AttemptRow[] = [];
-    for await (const attempt of cursor as AsyncIterable<AttemptRow>) {
-      batch.push(attempt);
-      touched.add(String(attempt._id));
-      if (batch.length === RESCORE_BATCH) {
-        await rescoreBatch(batch, target, session);
-        batch = [];
-      }
+// Covers a finalise whose read began just before the correction started.
+const FINALIZE_SLACK_MS = 5_000;
+
+async function rescoreWhere(filter: Record<string, unknown>, target: Target, touched: Set<string>): Promise<void> {
+  const cursor = QuizAttemptModel.find(filter).lean<AttemptRow[]>().cursor({ batchSize: RESCORE_BATCH });
+  let batch: AttemptRow[] = [];
+  for await (const attempt of cursor as AsyncIterable<AttemptRow>) {
+    batch.push(attempt);
+    touched.add(String(attempt._id));
+    if (batch.length === RESCORE_BATCH) {
+      await rescoreBatch(batch, target);
+      batch = [];
     }
-    if (batch.length > 0) await rescoreBatch(batch, target, session);
   }
+  if (batch.length > 0) await rescoreBatch(batch, target);
+}
+
+/** In-progress first, so one that finalises mid-run is picked up by the completed pass. */
+async function rescoreAttempts(quizId: Types.ObjectId, target: Target, since: Date): Promise<number> {
+  const touched = new Set<string>();
+  for (const status of RESCORED_STATUSES) await rescoreWhere({ quiz: quizId, status }, target, touched);
+  // A finalise that scored from the old key can land after the completed pass passed it; it completed after `since`.
+  await rescoreWhere({ quiz: quizId, status: 'completed', completedAt: { $gte: since } }, target, touched);
   return touched.size;
 }
 
@@ -426,13 +429,15 @@ export async function applyCorrection(
 ): Promise<QuizCorrectionResult> {
   const quiz = await requireCorrectable(quizId);
   const target = targetOf(quiz, payload);
+  const since = new Date(Date.now() - FINALIZE_SLACK_MS);
 
-  const rescored = await withTransaction(async (session) => {
-    // Quiz first: without a transaction, a crash after it is repaired by re-running the same correction (drift check).
+  // Quiz first: a crash after it is repaired by re-running the same correction (drift check).
+  const needsRescore = await withTransaction(async (session) => {
     const changed = await recordCorrection(quiz, payload, target, admin, session);
-    if (!changed && !(await hasDrift(quiz._id, target, session))) return 0;
-    return rescoreAttempts(quiz._id, target, session);
+    return changed || (await hasDrift(quiz._id, target, session));
   });
+  // Outside the transaction: one spanning every attempt would abort on any live lock and block participant writes.
+  const rescored = needsRescore ? await rescoreAttempts(quiz._id, target, since) : 0;
 
   return { quiz: await getQuizAdmin(quizId), rescored };
 }
