@@ -24,14 +24,12 @@ async function migrateQuestFields(): Promise<{ metaUnset: number; configAdded: n
   return { metaUnset: meta.modifiedCount, configAdded: config.modifiedCount, summaryAdded: summary.modifiedCount };
 }
 
-async function syncIndexes(): Promise<Record<string, string[]>> {
-  const [quiz, attempt, quest] = await Promise.all([
-    QuizModel.syncIndexes(),
-    QuizAttemptModel.syncIndexes(),
-    QuestModel.syncIndexes()
-  ]);
-  // syncIndexes returns the dropped index names.
-  return { quizDropped: quiz, attemptDropped: attempt, questDropped: quest };
+async function buildIndexes(): Promise<Record<string, string[] | boolean>> {
+  const [quiz, attempt] = await Promise.all([QuizModel.syncIndexes(), QuizAttemptModel.syncIndexes()]);
+  // Additive only: syncIndexes would drop any index on the live quests collection that the schema doesn't declare.
+  await QuestModel.createIndexes();
+  // syncIndexes returns the dropped index names; both collections are new and fully schema-owned.
+  return { quizDropped: quiz, attemptDropped: attempt, questIndexesEnsured: true };
 }
 
 async function warnOnTightResults(): Promise<void> {
@@ -48,7 +46,7 @@ async function main(): Promise<void> {
   await connectToDatabase();
 
   const fields = await migrateQuestFields();
-  const indexes = await syncIndexes();
+  const indexes = await buildIndexes();
   await warnOnTightResults();
 
   logger.info({ ...fields, ...indexes }, 'Quiz migration done');
