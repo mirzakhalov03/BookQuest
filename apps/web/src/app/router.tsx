@@ -10,6 +10,7 @@ import { PrizesPage } from '@/features/prizes/PrizesPage';
 import { QuestEditionPage } from '@/features/prizes/QuestEditionPage';
 import { ResultsPage } from '@/features/results/ResultsPage';
 import { QuizPage } from '@/features/quiz/QuizPage';
+import { QuizPlayPage } from '@/features/quiz/QuizPlayPage';
 import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
 import { VerifyPage } from '@/features/verify/VerifyPage';
@@ -42,8 +43,21 @@ export const router = createBrowserRouter([
       { path: '/quests', element: <Navigate to="/prizes" replace /> },
       { path: '/quests/:edition', element: <QuestEditionPage /> },
 
-      // Public countdown until the quiz is built; the quiz itself will need a session.
-      { path: '/quiz', element: <QuizPage /> },
+      // The overview is public (signed-out readers get the countdown); playing needs a session.
+      {
+        path: '/quiz',
+        children: [
+          { index: true, element: <QuizPage /> },
+          {
+            element: <RequireAuth />,
+            children: [
+              { path: 'play', element: <QuizPlayPage /> },
+              // The review screen lands in Task 13.
+              { path: 'review', element: <Navigate to="/quiz" replace /> }
+            ]
+          }
+        ]
+      },
       { path: '/results', element: <ResultsPage /> },
       // What the QR code on a printed certificate opens: public, no session, works outside Telegram.
       { path: '/verify', element: <VerifyPage /> },

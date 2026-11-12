@@ -110,6 +110,14 @@ export function formatDuration(durationMs: number): string {
     : `${minutes}m ${paddedSeconds}s`;
 }
 
+/** "4:12.3" — a quiz time on the completion screen, where tenths are the tiebreaker made visible. */
+export function formatStopwatch(durationMs: number): string {
+  const tenths = Math.floor(durationMs / 100);
+  const minutes = Math.floor(tenths / 600);
+  const seconds = Math.floor((tenths % 600) / 10);
+  return `${minutes}:${String(seconds).padStart(2, '0')}.${tenths % 10}`;
+}
+
 const ROMAN_TABLE: ReadonlyArray<readonly [number, string]> = [
   [1000, 'M'],
   [900, 'CM'],

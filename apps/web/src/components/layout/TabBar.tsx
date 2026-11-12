@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { Sparkles, BookOpen, Trophy, BarChart3, User, PencilLine } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router';
+import { isResultsOut } from '@bookquest/shared';
 import { useCurrentQuest } from '@/lib/api/quest';
 
 interface Tab {
@@ -17,12 +18,13 @@ const RESULTS_TAB: Tab = { to: '/results', label: 'Results', icon: BarChart3 };
 /**
  * The five destinations. Product knowledge stays limited to where the app goes
  * (spec §4 rule 3) — the one exception is the fourth slot, which follows the
- * API's `quest.phase`: Quiz until the quiz closes, then Results.
+ * quest's `resultsAt`: Quiz until results are published (review and late
+ * states live there until then), then Results.
  */
 function useTabs(): Tab[] {
   const { data: quest, isError } = useCurrentQuest();
   // No current quest means no quiz to point at; the last results are the useful place.
-  const quizOver = quest?.phase === 'finished' || isError;
+  const quizOver = (quest && isResultsOut(quest)) || isError;
 
   return [
     { to: '/', label: 'Stage', icon: Sparkles },

@@ -3,6 +3,7 @@ import type { AdminQuest, Participant, QuizAdmin, Quest, QuestPhase, Role, Sessi
 import { CURRENT_QUEST, PAST_EDITIONS, SESSION_USER, type PastEdition } from './fixtures';
 import { buildRoster } from './people';
 import { addMockMessage } from './interactions';
+import { attemptFor, type MockAttempt, type MockQuizState } from './quiz-participant';
 
 /**
  * The mock's world, and the controls that bend it.
@@ -36,6 +37,8 @@ export interface MockState {
   quizzes?: QuizAdmin[];
   /** The current quest's quiz setup (admin-only). Optional: older saved state lacks it. */
   quizConfig?: AdminQuest['quizConfig'];
+  /** Your quiz attempt on the current quest (see `quiz-participant.ts`). */
+  quizAttempt?: MockAttempt | null;
 }
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -147,6 +150,8 @@ export interface MockControls {
   reset: () => void;
   /** A new bot message on the admin Messages page, without a reload — the "N new" pill picks it up. */
   addMessage: (text?: string) => void;
+  /** Registers you if needed and moves dates and your attempt so `/quiz` shows that state. */
+  setQuizState: (state: MockQuizState) => void;
 }
 
 export const mockControls: MockControls = {
@@ -182,7 +187,16 @@ export const mockControls: MockControls = {
       Object.assign(draft, initialState());
     }),
 
-  addMessage: (text) => addMockMessage(text)
+  addMessage: (text) => addMockMessage(text),
+
+  setQuizState: (kind) =>
+    commit((draft) => {
+      const phase: QuestPhase = kind === 'upcoming' ? 'reading' : kind === 'missed' ? 'finished' : 'quiz';
+      draft.questRunning = true;
+      draft.quest = { ...draft.quest, ...datesForPhase(phase) };
+      draft.myParticipantId ??= draft.participants[0]?.id ?? null;
+      draft.quizAttempt = attemptFor(kind, draft);
+    })
 };
 
 /**

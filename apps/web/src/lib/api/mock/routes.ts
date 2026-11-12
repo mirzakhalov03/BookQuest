@@ -34,6 +34,7 @@ import { objectId, questSummary } from './fixtures';
 import { listMockInteractions, mockInteractionFacets } from './interactions';
 import { buildCertificate, buildResults } from './people';
 import * as quizzes from './quiz';
+import * as play from './quiz-participant';
 import {
   areResultsPublished,
   getState,
@@ -563,6 +564,7 @@ function switchCurrent(target: Quest): void {
     draft.questRunning = true;
     // Quizzes are book-specific; a new edition starts unconfigured.
     draft.quizConfig = null;
+    draft.quizAttempt = null;
   });
 }
 
@@ -629,15 +631,32 @@ function sendBroadcast(context: Context): Result {
 
 /* ── Quizzes ─────────────────────────────────────────────────────────────── */
 
-/** Runs a library call as an admin, translating its failures into the mock's own error. */
-function quizCall(context: Context, run: () => unknown, status = 200): Result {
-  requireAdmin(context);
+/** Translates quiz failures (library or play) into the mock's own error. */
+function translateQuiz<T>(run: () => T): T {
   try {
-    return { status, data: run() };
+    return run();
   } catch (error) {
     if (!(error instanceof quizzes.QuizFailure)) throw error;
     throw new MockError(error.status, error.code, error.message, error.fields, error.reason);
   }
+}
+
+/** Runs a library call as an admin. */
+function quizCall(context: Context, run: () => unknown, status = 200): Result {
+  requireAdmin(context);
+  return { status, data: translateQuiz(run) };
+}
+
+/** Runs a participant quiz call as the signed-in user. */
+function playCall(context: Context, run: (user: SessionUser) => unknown): Result {
+  const user = requireUser(context);
+  return ok(translateQuiz(() => run(user)));
+}
+
+function startQuiz(context: Context): Result {
+  const user = requireUser(context);
+  const { state, created } = translateQuiz(() => play.startAttempt(user));
+  return created ? { status: 201, data: state } : ok(state);
 }
 
 function parseBody<T>(schema: { safeParse: (body: unknown) => { success: true; data: T } | { success: false; error: { issues: readonly Issue[] } } }, body: unknown): T {
@@ -701,6 +720,15 @@ const routes: Route[] = [
   { method: 'GET', path: '/admin/broadcasts', handle: listBroadcasts },
   { method: 'POST', path: '/admin/broadcasts', handle: sendBroadcast },
   { method: 'POST', path: '/admin/covers', handle: uploadCover },
+  { method: 'GET', path: '/quiz/me', handle: (c) => playCall(c, play.quizOverview) },
+  { method: 'POST', path: '/quiz/attempt', handle: startQuiz },
+  { method: 'GET', path: '/quiz/attempt', handle: (c) => playCall(c, play.getAttempt) },
+  { method: 'POST', path: '/quiz/attempt/next', handle: (c) => playCall(c, play.nextQuestion) },
+  {
+    method: 'PUT',
+    path: '/quiz/attempt/items/:index',
+    handle: (c) => playCall(c, (user) => play.putItem(user, Number(c.params.index), c.body))
+  },
   { method: 'GET', path: '/admin/quizzes', handle: (c) => quizCall(c, quizzes.listQuizzes) },
   {
     method: 'POST',

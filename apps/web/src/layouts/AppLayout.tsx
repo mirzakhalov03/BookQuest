@@ -27,7 +27,9 @@ export function AppLayout() {
   const isChromeless =
     pathname === '/admin' ||
     pathname.startsWith('/admin/') ||
-    pathname === '/me/welcome';
+    pathname === '/me/welcome' ||
+    // Nothing should invite a stray navigation mid-question (§6).
+    pathname === '/quiz/play';
 
   return (
     <div className="relative flex min-h-dvh flex-col">
