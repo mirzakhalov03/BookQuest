@@ -65,7 +65,7 @@ export function ResultsPage() {
           <Rule />
           <ol className="flex flex-col">
             {leaderboard.map((entry) => (
-              <LeaderboardRow key={entry.number} entry={entry} />
+              <LeaderboardRow key={entry.number} entry={entry} highlight={entry.rank <= 5} />
             ))}
           </ol>
         </section>

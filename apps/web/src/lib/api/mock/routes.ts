@@ -724,6 +724,7 @@ const routes: Route[] = [
   { method: 'GET', path: '/quiz/me', handle: (c) => playCall(c, play.quizOverview) },
   { method: 'POST', path: '/quiz/attempt', handle: startQuiz },
   { method: 'GET', path: '/quiz/attempt', handle: (c) => playCall(c, play.getAttempt) },
+  { method: 'GET', path: '/quiz/attempt/review', handle: (c) => playCall(c, play.getReview) },
   { method: 'POST', path: '/quiz/attempt/next', handle: (c) => playCall(c, play.nextQuestion) },
   {
     method: 'PUT',

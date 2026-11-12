@@ -31,3 +31,8 @@ export async function putItem(req: Request, res: Response): Promise<void> {
   const { index } = req.params as unknown as AttemptItemParams;
   ok(res, await attemptService.putItem(currentUser(req), index, req.body as PutAttemptItemPayload));
 }
+
+/** GET /api/v1/quiz/attempt/review */
+export async function getReview(req: Request, res: Response): Promise<void> {
+  ok(res, await attemptService.getReview(currentUser(req)));
+}

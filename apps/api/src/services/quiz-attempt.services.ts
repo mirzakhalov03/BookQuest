@@ -4,6 +4,7 @@ import {
   TRUE_FALSE_OPTION_IDS,
   effectiveTimeLimitSec,
   type AttemptQuestion,
+  type AttemptReview,
   type AttemptState,
   type Participant,
   type PutAttemptItemPayload,
@@ -58,7 +59,9 @@ const MSG = {
   notConfigured: 'The quiz is not ready yet.',
   completed: 'You have already completed the quiz.',
   voided: 'Your attempt was withdrawn by the organisers.',
-  locked: 'That answer is already locked in.'
+  locked: 'That answer is already locked in.',
+  reviewLocked: 'Answers are shown after the quiz closes.',
+  reviewUnavailable: 'There is no completed attempt to review.'
 } as const;
 
 /* ── Loading ────────────────────────────────────────────────────────────── */
@@ -412,7 +415,10 @@ async function overviewQuiz(
   };
 }
 
-function toOverviewAttempt(attempt: AttemptRow): NonNullable<QuizOverview['attempt']> {
+const reviewOpen = (attempt: AttemptRow, quest: QuizWindow, now: Date): boolean =>
+  attempt.status === 'completed' && now >= quest.quizClosesAt;
+
+function toOverviewAttempt(attempt: AttemptRow, quest: QuizWindow, now: Date): NonNullable<QuizOverview['attempt']> {
   const completed = attempt.status === 'completed';
   return {
     status: attempt.status,
@@ -421,8 +427,7 @@ function toOverviewAttempt(attempt: AttemptRow): NonNullable<QuizOverview['attem
     score: completed ? (attempt.score ?? 0) : null,
     durationMs: completed ? (attempt.durationMs ?? 0) : null,
     voidReason: attempt.voidReason ?? null,
-    // Task 13 switches this to the review formula.
-    reviewAvailable: false
+    reviewAvailable: reviewOpen(attempt, quest, now)
   };
 }
 
@@ -447,7 +452,33 @@ export async function getOverview(user: UserDocument, now = new Date()): Promise
     serverNow,
     window,
     quiz: await overviewQuiz(quest, participant, attempt),
-    attempt: attempt ? toOverviewAttempt(attempt) : null
+    attempt: attempt ? toOverviewAttempt(attempt, quest, now) : null
+  };
+}
+
+/* ── Review (§8.1) ──────────────────────────────────────────────────────── */
+
+/** The only participant path that serialises the answer key: gated on close and a completed attempt. */
+export async function getReview(user: UserDocument, now = new Date()): Promise<AttemptReview> {
+  const { quest, attempt } = await requireAttemptContext(user);
+  if (now < quest.quizClosesAt) throw ApiError.notFound(MSG.reviewLocked);
+  if (attempt.status !== 'completed') throw ApiError.notFound(MSG.reviewUnavailable);
+  return {
+    items: attempt.items.map((item, index) => ({
+      index,
+      prompt: item.prompt,
+      options: item.options.map(({ id, text }) => ({ id, text })),
+      selectedOptionId: item.selectedOptionId ?? null,
+      correctOptionId: item.correctOptionId,
+      outcome: item.outcome ?? null,
+      isCorrect: item.isCorrect ?? null,
+      voided: item.voided,
+      elapsedMs: item.elapsedMs ?? null,
+      explanation: item.explanation ?? null
+    })),
+    score: attempt.score ?? 0,
+    total: attempt.total ?? 0,
+    durationMs: attempt.durationMs ?? 0
   };
 }
 

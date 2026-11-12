@@ -2,6 +2,7 @@ import {
   QUIZ_ANSWER_GRACE_MS as G,
   effectiveTimeLimitSec,
   putAttemptItemSchema,
+  type AttemptReview,
   type AttemptState,
   type QuizAdmin,
   type QuizOverview,
@@ -242,9 +243,34 @@ export function quizOverview(user: SessionUser): QuizOverview {
             score: attempt.status === 'completed' ? totals.score : null,
             durationMs: attempt.status === 'completed' ? totals.durationMs : null,
             voidReason: attempt.voidReason,
-            reviewAvailable: false
+            reviewAvailable: attempt.status === 'completed' && now >= closesAt
           }
         : null
+  };
+}
+
+export function getReview(user: SessionUser): AttemptReview {
+  const state = requireRegistered(user);
+  const attempt = state.quizAttempt;
+  if (Date.now() < window_(state).closesAt) throw new QuizFailure(404, 'not_found', 'Answers are shown after the quiz closes.');
+  if (attempt?.status !== 'completed') throw new QuizFailure(404, 'not_found', 'There is no completed attempt to review.');
+  const totals = score(attempt);
+  return {
+    items: attempt.items.map((item, index) => ({
+      index,
+      prompt: item.prompt,
+      options: item.options,
+      selectedOptionId: item.selectedOptionId,
+      correctOptionId: item.correctOptionId ?? '',
+      outcome: item.outcome,
+      isCorrect: item.outcome === 'locked' || item.outcome === 'auto' ? item.selectedOptionId === item.correctOptionId : false,
+      voided: false,
+      elapsedMs: elapsed(item),
+      explanation: null
+    })),
+    score: totals.score,
+    total: totals.total,
+    durationMs: totals.durationMs
   };
 }
 

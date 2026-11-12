@@ -101,6 +101,11 @@
   border-bottom: 1px solid var(--rule);
   font-size: 0.875rem;
 }
+.leaderboard-row--top {
+  background: color-mix(in srgb, var(--color-amber) 7%, transparent);
+  box-shadow: inset 2px 0 0 var(--color-amber);
+  padding-inline: 0.6rem;
+}
 .leaderboard-row:last-child {
   border-bottom: none;
 }

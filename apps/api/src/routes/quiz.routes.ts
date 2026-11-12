@@ -17,6 +17,7 @@ quizRoutes.use(requireUser, quizRateLimit);
 quizRoutes.get('/me', quizController.getOverview);
 quizRoutes.post('/attempt', quizController.startAttempt);
 quizRoutes.get('/attempt', quizController.getAttempt);
+quizRoutes.get('/attempt/review', quizController.getReview);
 quizRoutes.post('/attempt/next', quizController.next);
 quizRoutes.put(
   '/attempt/items/:index',

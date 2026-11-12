@@ -10,6 +10,7 @@ import { PrizesPage } from '@/features/prizes/PrizesPage';
 import { QuestEditionPage } from '@/features/prizes/QuestEditionPage';
 import { ResultsPage } from '@/features/results/ResultsPage';
 import { QuizPage } from '@/features/quiz/QuizPage';
+import { QuizReviewPage } from '@/features/quiz/QuizReviewPage';
 import { QuizPlayPage } from '@/features/quiz/QuizPlayPage';
 import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
@@ -52,8 +53,7 @@ export const router = createBrowserRouter([
             element: <RequireAuth />,
             children: [
               { path: 'play', element: <QuizPlayPage /> },
-              // The review screen lands in Task 13.
-              { path: 'review', element: <Navigate to="/quiz" replace /> }
+              { path: 'review', element: <QuizReviewPage /> }
             ]
           }
         ]
