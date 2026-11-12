@@ -1,0 +1,57 @@
+apps/web/package.json
+  s_85ea2ef6b0081f::t_b1de69897a3d4c 19,21
+apps/web/src/app/providers.tsx
+  s_85ea2ef6b0081f::t_ede4954108ec36 2-3,13,15,31
+apps/web/src/components/layout/TopBar.tsx
+  s_85ea2ef6b0081f::t_327299dcbaeae8 1,17-18,27
+apps/web/src/components/ui/Button.tsx
+  s_85ea2ef6b0081f::t_8a01c23d08d65a 3,23,25,32-34
+apps/web/src/features/admin/DashboardPage.tsx
+  s_85ea2ef6b0081f::t_a08cb87d8d8748 81,85
+apps/web/src/features/admin/components/AdminPageHeader.tsx
+  s_85ea2ef6b0081f::t_a03a5d28d5fe99 17-19
+apps/web/src/features/admin/quest/components/DateTimelineField.tsx
+  s_85ea2ef6b0081f::t_e49246466b33da 77,100-101
+apps/web/src/features/admin/quizzes/QuizEditorPage.tsx
+  s_85ea2ef6b0081f::t_1a1455ba98d0d6 157-173
+apps/web/src/features/admin/quizzes/QuizPreviewPage.tsx
+  s_85ea2ef6b0081f::t_72149371b2a90b 1-3,15-19,45,76,86-87,89-92,94-99,113,118,121-140,147-154,156-165
+apps/web/src/features/admin/quizzes/components/QuestionList.tsx
+  s_85ea2ef6b0081f::t_b6fc41f4db8c37 20-21,44,65,99-107,158-159,161-167,169-170
+apps/web/src/hooks/useKeyboardFlag.ts
+  s_85ea2ef6b0081f::t_aee9df64521db2 1-37
+apps/web/src/layouts/AdminLayout.tsx
+  s_85ea2ef6b0081f::t_ba9125188dfff5 1,11-12,14,16,25-28,30,34-37,91-94,96-114,116-142
+apps/web/src/layouts/AppLayout.tsx
+  s_85ea2ef6b0081f::t_2ae63494b6d166 4,21,23
+apps/web/src/lib/auth/useAuth.ts
+  s_85ea2ef6b0081f::t_0f448820b041ae 7,89
+apps/web/src/styles/base.css
+  s_85ea2ef6b0081f::t_01bb15191915a4 43-53,87-110
+apps/web/src/styles/register.css
+  s_85ea2ef6b0081f::t_cb1c179d198a47 10,15-16
+apps/web/src/styles/shell.css
+  s_85ea2ef6b0081f::t_2f91637475d494 168,199,226-238
+apps/web/src/styles/stage.css
+  s_85ea2ef6b0081f::t_73c9ed032fbdee 816-819,821-824,827-828,830-833
+pnpm-lock.yaml
+  s_85ea2ef6b0081f::t_f51cd239157777 154-156,160-162,779-790,2404-2418
+apps/web/src/lib/queryClient.ts
+  s_85ea2ef6b0081f::t_becf9994a3d8f7 2-3,6-7,12-13,23-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "4d4bc77b3c0484f58d836ff3be2a5d3864295fa1",
+  "prompts": {},
+  "sessions": {
+    "s_85ea2ef6b0081f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b84dc1a0-6845-4c3f-8298-448e24227e9e",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
