@@ -229,6 +229,8 @@ function SortableRow({
           disabled={locked}
           {...attributes}
           {...listeners}
+          // A drag from here must never read as an edge pull.
+          data-no-overscroll
           className={`${ROW_BUTTON} touch-none cursor-grab`}
         >
           <GripVertical className="h-4 w-4" aria-hidden />

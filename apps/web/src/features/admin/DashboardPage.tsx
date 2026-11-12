@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { BookCover } from '@/components/BookCover';
 import { Button } from '@/components/ui/Button';
 import { formatCount, formatLongDate } from '@/lib/format';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { useAdminStats } from './api/useAdminStats';
 import { AdminQuery } from './components/AdminQuery';
 import { AdminPageHeader } from './components/AdminPageHeader';
@@ -16,6 +17,7 @@ import { canStartNextEdition } from './phase';
 
 /** `/admin` — where the quest stands and the one or two things worth doing about it. */
 export function DashboardPage() {
+  usePullToRefresh();
   const quest = useCurrentQuest();
 
   return (

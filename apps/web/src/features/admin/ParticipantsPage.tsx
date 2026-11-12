@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { formatCount } from '@/lib/format';
 import { useAdminParticipants } from './api/useAdminParticipants';
 import { AdminQuery } from './components/AdminQuery';
@@ -19,6 +20,7 @@ const SEARCH_DEBOUNCE_MS = 350;
 
 /** `/admin/participants` — the roster with contact, which is why this endpoint is admin-only. */
 export function ParticipantsPage() {
+  usePullToRefresh();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState(() => searchParams.get('q') ?? '');
   const query = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);

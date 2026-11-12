@@ -60,10 +60,13 @@ const MORE_TABS: Tab[] = [
 export function AdminLayout() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col">
-      <AdminNav />
-      <main className="flex flex-1 flex-col px-4 py-6 sm:px-8 sm:py-8">
-        <Outlet />
-      </main>
+      {/* The edge stretch (`useOverscroll`) moves this, never the tab bar below. */}
+      <div className="stretch flex flex-1 flex-col">
+        <AdminNav />
+        <main className="flex flex-1 flex-col px-4 py-6 sm:px-8 sm:py-8">
+          <Outlet />
+        </main>
+      </div>
       <AdminTabBar />
     </div>
   );

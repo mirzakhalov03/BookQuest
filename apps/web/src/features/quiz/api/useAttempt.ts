@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
-import { QUIZ_ANSWER_GRACE_MS, type AttemptState, type PutAttemptItemPayload } from '@bookquest/shared';
+import { QUIZ_ANSWER_GRACE_MS, type AttemptState, type PutAttemptItemPayload, type QuizOverview } from '@bookquest/shared';
 import { api, ApiRequestError } from '@/lib/api/client';
 import { withRetry } from '@/lib/api/retry';
 import { serverNow, timed } from '../lib/serverClock';
@@ -72,10 +72,36 @@ function newest(current: AttemptState | undefined, incoming: AttemptState): Atte
   return incoming;
 }
 
+const OVERVIEW_STATE: Partial<Record<AttemptState['phase'], QuizOverview['state']>> = { completed: 'completed', voided: 'voided' };
+
+/**
+ * Mirrors the attempt into the cached overview, so `/quiz` never paints a stale "Start quiz"
+ * while its refetch is in flight. The refetch then fills in what only the server knows.
+ */
+function syncOverview(queryClient: QueryClient, state: AttemptState): void {
+  queryClient.setQueryData<QuizOverview>(quizKeys.me(), (overview) => {
+    if (!overview) return overview;
+    const answered = state.phase === 'completed' ? state.position.total : state.position.index;
+    return {
+      ...overview,
+      state: OVERVIEW_STATE[state.phase] ?? 'in_progress',
+      attempt: {
+        status: state.status,
+        answered,
+        total: state.position.total,
+        score: state.result?.score ?? null,
+        durationMs: state.result?.durationMs ?? null,
+        voidReason: overview.attempt?.voidReason ?? null,
+        reviewAvailable: overview.attempt?.reviewAvailable ?? false
+      }
+    };
+  });
+}
+
 function writeState(queryClient: QueryClient, state: AttemptState): AttemptState {
   const kept = newest(queryClient.getQueryData<AttemptState>(quizKeys.attempt()), state);
   queryClient.setQueryData(quizKeys.attempt(), kept);
-  // Progress and status changed, so the overview is stale either way.
+  syncOverview(queryClient, kept);
   if (kept.phase === 'completed' || kept.phase === 'voided') void queryClient.invalidateQueries({ queryKey: quizKeys.me() });
   return kept;
 }

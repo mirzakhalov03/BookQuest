@@ -3,6 +3,7 @@ import type { CreateQuizPayload, QuizCorrectionPayload, SaveQuizPayload, VoidAtt
 import * as quizService from '../../services/quiz.services.js';
 import * as quizConfigService from '../../services/quiz-config.services.js';
 import * as quizOpsService from '../../services/quiz-ops.services.js';
+import * as quizSheetService from '../../services/quiz-sheet.services.js';
 import * as resultService from '../../services/result.services.js';
 import * as questService from '../../services/quest.services.js';
 import type { AttemptsQuery, GroupSizesQuery } from '../../validators/quiz.validators.js';
@@ -72,6 +73,19 @@ export async function groupSizes(req: Request, res: Response): Promise<void> {
 /** GET /api/v1/admin/quiz/live */
 export async function liveStats(_req: Request, res: Response): Promise<void> {
   ok(res, await quizOpsService.getLiveStats());
+}
+
+/** GET /api/v1/admin/quiz/standings */
+export async function standings(_req: Request, res: Response): Promise<void> {
+  ok(res, await quizOpsService.getStandings());
+}
+
+/** POST /api/v1/admin/quiz/attempts/:id/sheet — the full answer sheet, to the caller's Telegram. */
+export async function sendAnswerSheet(req: Request, res: Response): Promise<void> {
+  const { id } = req.params as { id: string };
+  await quizSheetService.sendAnswerSheet(id, currentUser(req));
+  auditAdmin(req, 'send-answer-sheet', { attemptId: id });
+  ok(res, null);
 }
 
 /** GET /api/v1/admin/quiz/attempts */

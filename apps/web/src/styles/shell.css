@@ -104,6 +104,153 @@
   animation: view-in 420ms var(--ease-out-quest) backwards;
 }
 
+/* ── Overscroll ────────────────────────────────────────────────────
+   `hooks/useOverscroll.ts`. The edge stretch scales `.stretch` away from the
+   edge being pulled. Gated on the attribute, not set as `scaleY(1)` at rest:
+   any transform makes this the containing block for `position: fixed`
+   descendants (same trap `.view` avoids above), so it exists only mid-pull. */
+:root[data-overscroll] .stretch {
+  transform: scaleY(calc(1 + var(--os, 0)));
+  transform-origin: 50% 0;
+}
+
+:root[data-overscroll='bottom'] .stretch {
+  transform-origin: 50% 100%;
+}
+
+:root[data-overscroll-settle] .stretch {
+  transition: transform 420ms var(--ease-out-quest);
+}
+
+/* Pull-to-refresh: a puck that slides out from under the chrome band
+   (z 6) and opens a book as it comes. `--pull-p` is 0→1 up to the arm point. */
+.pull {
+  position: fixed;
+  top: calc(var(--safe-t) - 3rem);
+  left: 50%;
+  z-index: 5;
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-left: -1.375rem;
+  place-items: center;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  background: var(--color-ash);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.5);
+  pointer-events: none;
+  visibility: hidden;
+  opacity: var(--pull-p, 0);
+  transform: translateY(var(--pull, 0px));
+}
+
+:root[data-pull] .pull {
+  visibility: visible;
+}
+
+:root[data-pull='armed'] .pull,
+:root[data-pull='refreshing'] .pull {
+  border-color: var(--color-amber);
+}
+
+/* Parked short of the arm point, but the book stays fully open. */
+:root[data-pull='refreshing'] .pull,
+:root[data-pull='done'] .pull {
+  --pull-p: 1;
+}
+
+:root[data-pull='refreshing'] .pull {
+  opacity: 1;
+  transition: transform 360ms var(--ease-out-quest);
+}
+
+:root[data-pull='leaving'] .pull,
+:root[data-pull='done'] .pull {
+  opacity: 0;
+  transition:
+    transform 420ms var(--ease-out-quest),
+    opacity 240ms linear;
+}
+
+:root[data-pull='done'] .pull {
+  transform: translateY(var(--pull)) scale(0.4);
+}
+
+.pull__book {
+  position: relative;
+  width: 1.5rem;
+  height: 1.1rem;
+  perspective: 5rem;
+}
+
+/* The spine, and the cover widening under the pages as they open. */
+.pull__book::before,
+.pull__book::after {
+  content: '';
+  position: absolute;
+  background: var(--color-ember);
+}
+
+.pull__book::before {
+  inset: -1px auto -1px calc(50% - 1px);
+  width: 2px;
+}
+
+.pull__book::after {
+  inset: auto 0 -3px;
+  height: 2px;
+  border-radius: 1px;
+  transform: scaleX(var(--pull-p, 0));
+}
+
+.pull__page,
+.pull__leaf {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 3px, rgb(20 16 12 / 0.18) 3px 4px) 0 3px / 70% 100% no-repeat,
+    var(--color-paper);
+}
+
+/* Closed at 0 (both pages folded flat to the spine), open at 1. */
+.pull__page--l {
+  left: 0;
+  border-radius: 2px 0 0 2px;
+  background-position: right 1px top 3px, 0 0;
+  transform-origin: 100% 50%;
+  transform: rotateY(calc((1 - var(--pull-p, 0)) * 88deg));
+}
+
+.pull__page--r {
+  right: 0;
+  border-radius: 0 2px 2px 0;
+  background-position: left 1px top 3px, 0 0;
+  transform-origin: 0 50%;
+  transform: rotateY(calc((var(--pull-p, 0) - 1) * 88deg));
+}
+
+/* While refreshing, a leaf keeps turning from the right page onto the left. */
+.pull__leaf {
+  left: 50%;
+  border-radius: 0 2px 2px 0;
+  background-color: var(--color-paper-dim);
+  transform-origin: 0 50%;
+  opacity: 0;
+}
+
+:root[data-pull='refreshing'] .pull__leaf {
+  opacity: 1;
+  animation: leaf-turn 700ms var(--ease-soft) infinite;
+}
+
+@keyframes leaf-turn {
+  to {
+    transform: rotateY(-180deg);
+  }
+}
+
 /* ── The screen box ────────────────────────────────────────────────
    Consistent padding, a reading measure, and the clearance under the tab bar.
    `.admin-screen` below is the only other place that knows `--tabbar-h` and
@@ -264,6 +411,11 @@
 
 /* ── Sheet ─────────────────────────────────────────────────────────
    `components/ui/Sheet.tsx`. Bottom sheet on phones, dialog from 640px. */
+/* Focused on open only to keep focus off its buttons; the sheet itself needs no ring. */
+.sheet:focus {
+  outline: none;
+}
+
 .sheet {
   margin: auto auto 0;
   width: 100%;

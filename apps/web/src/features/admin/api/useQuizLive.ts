@@ -6,6 +6,7 @@ import type {
   Paginated,
   QuizFlag,
   QuizLiveStats,
+  QuizStandings,
   VoidAttemptPayload
 } from '@bookquest/shared';
 import { api } from '@/lib/api/client';
@@ -13,13 +14,30 @@ import { adminKeys } from './adminKeys';
 
 const LIVE_POLL_MS = 15_000;
 
-/** The only polling admin query (§5.4); it pauses with the tab. */
+/** Polls while the tab is visible (§5.4). */
 export function useQuizLive() {
   return useQuery({
     queryKey: adminKeys.quizLive(),
     queryFn: () => api.get<QuizLiveStats>('/admin/quiz/live'),
     refetchInterval: LIVE_POLL_MS,
     refetchIntervalInBackground: false
+  });
+}
+
+/** Ranked finishers plus who is still solving; polled like the live tiles. */
+export function useQuizStandings() {
+  return useQuery({
+    queryKey: adminKeys.quizStandings(),
+    queryFn: () => api.get<QuizStandings>('/admin/quiz/standings'),
+    refetchInterval: LIVE_POLL_MS,
+    refetchIntervalInBackground: false
+  });
+}
+
+/** DMs the full answer sheet to the signed-in admin's Telegram. */
+export function useSendAnswerSheet() {
+  return useMutation({
+    mutationFn: (attemptId: string) => api.post<null>(`/admin/quiz/attempts/${attemptId}/sheet`, {})
   });
 }
 

@@ -8,6 +8,7 @@ import { Countdown } from '@/components/ui/Countdown';
 import { Rule } from '@/components/ui/Rule';
 import { isNotFound } from '@/lib/api/client';
 import { formatLongDate } from '@/lib/format';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { useQuestResults } from './api/useQuestResults';
 import { ResultsPodium } from '@/components/ResultsPodium';
 import { LeaderboardRow } from '@/components/LeaderboardRow';
@@ -22,6 +23,7 @@ import { ReviewAnswersLink } from './components/ReviewAnswersLink';
  * means no Telegram back button.
  */
 export function ResultsPage() {
+  usePullToRefresh();
   const results = useQuestResults();
 
   if (results.isPending) return <LoadingState label="Tallying the scores…" />;

@@ -1,7 +1,9 @@
 import { Outlet, useLocation } from 'react-router';
 import { TabBar } from '@/components/layout/TabBar';
+import { PullIndicator } from '@/components/layout/PullIndicator';
 import { Toast } from '@/components/ui/Toast';
 import { useKeyboardFlag } from '@/hooks/useKeyboardFlag';
+import { useOverscroll } from '@/hooks/useOverscroll';
 
 /**
  * The shell every screen sits in: atmosphere behind, content in the middle,
@@ -19,6 +21,8 @@ import { useKeyboardFlag } from '@/hooks/useKeyboardFlag';
 export function AppLayout() {
   const { pathname } = useLocation();
   useKeyboardFlag();
+  useOverscroll();
+  const isAdmin = pathname === '/admin' || pathname.startsWith('/admin/');
   // Chrome-less routes: no *participant* bottom tab bar. The admin area
   // (`AdminLayout`) renders its own bottom tab bar for its own
   // destinations, so it stays off this one rather than getting two. The
@@ -27,8 +31,7 @@ export function AppLayout() {
   // Path-gated rather than a second layout root so every chrome-less route
   // still keeps the one atmosphere and the one Toast every other route gets.
   const isChromeless =
-    pathname === '/admin' ||
-    pathname.startsWith('/admin/') ||
+    isAdmin ||
     pathname === '/me/welcome' ||
     // Nothing should invite a stray navigation mid-question (§6).
     pathname === '/quiz/play';
@@ -43,13 +46,15 @@ export function AppLayout() {
           fullscreen buttons and the notch, once, for every screen. */}
       <main className="relative z-[1] flex flex-1 flex-col pt-[var(--safe-t)]">
         {/* Keyed on the path so the enter animation restarts on every
-            navigation — a class alone would only ever run once. */}
-        <div key={pathname} className="view flex flex-1 flex-col">
+            navigation — a class alone would only ever run once. Admin
+            stretches inside `AdminLayout`, minus its in-flow tab bar. */}
+        <div key={pathname} className={`view flex flex-1 flex-col ${isAdmin ? '' : 'stretch'}`}>
           <Outlet />
         </div>
       </main>
 
       {!isChromeless && <TabBar />}
+      <PullIndicator />
       <Toast />
     </div>
   );

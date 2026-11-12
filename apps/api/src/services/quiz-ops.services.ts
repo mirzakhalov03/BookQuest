@@ -8,7 +8,9 @@ import type {
   QuizCorrectionPayload,
   QuizCorrectionResult,
   QuizFlag,
-  QuizLiveStats
+  QuizLiveStats,
+  QuizStandings,
+  StandingRow
 } from '@bookquest/shared';
 import { ParticipantModel } from '../models/participant.model.js';
 import { QuestModel, type QuestDocument, type QuestRow } from '../models/quest.model.js';
@@ -24,6 +26,7 @@ import { participantsById, type ParticipantName } from './participant-lookup.ser
 import { requireCurrentQuestDocument } from './quest.services.js';
 import { resultWrite } from './quiz-attempt.services.js';
 import { getQuizAdmin } from './quiz.services.js';
+import { RANK_ORDER } from './result.services.js';
 import { isItemCorrect, itemPath, scoreItems } from './quiz-scoring.js';
 
 export interface AttemptListQuery {
@@ -126,6 +129,12 @@ function toRow(
   };
 }
 
+// What `toRow` reads.
+const ROW_FIELDS = {
+  participant: 1, group: 1, status: 1, score: 1, total: 1, durationMs: 1, flags: 1, startedAt: 1, completedAt: 1,
+  'items.outcome': 1
+} as const;
+
 const labelsFor = (config: QuizConfig | null | undefined): string[] =>
   config ? groupLabels(config.distribution, config.quizzes.length) : [];
 
@@ -155,10 +164,7 @@ export async function listAttempts(query: AttemptListQuery): Promise<Paginated<A
   if (term) filter.participant = { $in: await participantIdsMatching(quest._id, term) };
 
   const [attempts, total] = await Promise.all([
-    QuizAttemptModel.find(filter, {
-      participant: 1, group: 1, status: 1, score: 1, total: 1, durationMs: 1, flags: 1, startedAt: 1, completedAt: 1,
-      'items.outcome': 1
-    })
+    QuizAttemptModel.find(filter, ROW_FIELDS)
       .sort({ startedAt: -1, _id: -1 })
       .skip((query.page - 1) * query.limit)
       .limit(query.limit)
@@ -173,6 +179,43 @@ export async function listAttempts(query: AttemptListQuery): Promise<Paginated<A
     page: query.page,
     limit: query.limit,
     total
+  };
+}
+
+/** Everyone not voided: ranked finishers first (Result order), then those still solving, most answered first. */
+export async function getStandings(): Promise<QuizStandings> {
+  const quest = await requireCurrentQuestDocument();
+  const [attempts, results] = await Promise.all([
+    QuizAttemptModel.find({ quest: quest._id, status: { $ne: 'voided' } }, ROW_FIELDS)
+      .lean<(AttemptRow & { participant: Types.ObjectId })[]>(),
+    // A Result exists only for a finish with ≥ 1 answer: exactly who gets ranked.
+    ResultModel.find({ quest: quest._id }, { participant: 1, rank: 1 }).sort(RANK_ORDER).lean()
+  ]);
+
+  // Frozen once published; before that, the position the ranker would give.
+  const rankOf = new Map(results.map((result, index) => [String(result.participant), result.rank ?? index + 1]));
+  const people = await participantsById(attempts.map((attempt) => attempt.participant));
+  const labels = labelsFor(quest.quizConfig);
+
+  const rows: StandingRow[] = attempts.map((attempt) => {
+    const key = String(attempt.participant);
+    const rank = attempt.status === 'completed' ? (rankOf.get(key) ?? null) : null;
+    return { ...toRow(attempt, people.get(key), labels), rank };
+  });
+  rows.sort(
+    (a, b) =>
+      (a.rank ?? Infinity) - (b.rank ?? Infinity) ||
+      Number(b.status === 'in_progress') - Number(a.status === 'in_progress') ||
+      b.answered - a.answered
+  );
+
+  return {
+    rows,
+    finished: rows.filter((row) => row.rank !== null).length,
+    solving: rows.filter((row) => row.status === 'in_progress').length,
+    resultsAt: quest.resultsAt.toISOString(),
+    isPublished: Date.now() >= quest.resultsAt.getTime(),
+    updatedAt: new Date().toISOString()
   };
 }
 

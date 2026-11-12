@@ -1,56 +1,56 @@
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { EmptyState } from '@/components/feedback/EmptyState';
-import { Rule } from '@/components/ui/Rule';
-import { ResultsPodium } from '@/components/ResultsPodium';
-import { LeaderboardRow } from '@/components/LeaderboardRow';
-import { formatLongDate } from '@/lib/format';
-import { useAdminResultsInspection } from './api/useAdminResultsInspection';
+import { formatCount, formatLongDate } from '@/lib/format';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { useQuizStandings } from './api/useQuizLive';
 import { AdminQuery } from './components/AdminQuery';
 import { AdminPageHeader } from './components/AdminPageHeader';
+import { RefreshButton } from './components/RefreshButton';
 import { CertificatesPanel } from './certificates/CertificatesPanel';
+import { StandingsTable } from './results/StandingsTable';
 
-/**
- * `/admin/results` — read-only, and the same public `GET /quests/current/results`
- * the participant screen reads (see `useAdminResultsInspection`).
- */
+/** `/admin/results` — live standings while people solve, the frozen board once results are out. */
 export function ResultsInspectionPage() {
-  const results = useAdminResultsInspection();
+  usePullToRefresh();
+  const standings = useQuizStandings();
 
   return (
     <AdminQuery
-      query={results}
+      query={standings}
       loadingLabel="Tallying the scores…"
-      notFound={(error) => (
-        <EmptyState title={error.message} body="Check the quest editor for the results date." className="flex-1" />
-      )}
+      notFound={(error) => <EmptyState title={error.message} body="Create this year's quest first." className="flex-1" />}
     >
-      {({ podium, leaderboard, publishedAt }) => (
-        <AdminScreen className="max-w-3xl">
-          <AdminPageHeader eyebrow="Results" title={`Published ${formatLongDate(publishedAt)}`} />
+      {({ rows, finished, solving, resultsAt, isPublished }) => (
+        <AdminScreen className="max-w-4xl">
+          <AdminPageHeader
+            eyebrow="Results"
+            title={isPublished ? `Published ${formatLongDate(resultsAt)}` : 'Live standings'}
+            actions={
+              <RefreshButton
+                onRefresh={() => void standings.refetch()}
+                refreshing={standings.isFetching}
+                updatedAt={standings.dataUpdatedAt}
+              />
+            }
+          />
+          <p className="m-0 text-sm text-taupe">
+            {formatCount(finished)} finished · {formatCount(solving)} solving
+            {!isPublished && ` · ranks are provisional until ${formatLongDate(resultsAt)}`}
+          </p>
 
-          {leaderboard.length === 0 ? (
+          {rows.length === 0 ? (
             <EmptyState
-              title="No one finished the quiz"
               titleAs="h2"
-              body="The results are in, but nobody submitted an attempt this year."
+              title={isPublished ? 'No one finished the quiz' : 'No one has started yet'}
+              body={isPublished ? 'Nobody submitted an attempt this year.' : 'People appear here the moment they begin.'}
               className="flex-1"
             />
           ) : (
-            <>
-              <ResultsPodium entries={podium} />
-              <section className="flex flex-col gap-1">
-                <p className="type-label">Full leaderboard</p>
-                <Rule />
-                <ol className="flex flex-col">
-                  {leaderboard.map((entry) => (
-                    <LeaderboardRow key={entry.number} entry={entry} highlight={entry.rank <= 5} />
-                  ))}
-                </ol>
-              </section>
-              {/* Only with finishers: with nobody on the board there is nothing to send. */}
-              <CertificatesPanel />
-            </>
+            <StandingsTable rows={rows} />
           )}
+
+          {/* Certificates go out from the final board only. */}
+          {isPublished && finished > 0 && <CertificatesPanel />}
         </AdminScreen>
       )}
     </AdminQuery>

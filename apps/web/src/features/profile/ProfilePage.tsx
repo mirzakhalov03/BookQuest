@@ -1,9 +1,8 @@
 import { Award, LayoutDashboard, LogOut } from 'lucide-react';
 import { Screen } from '@/components/layout/Screen';
 import { LoadingState } from '@/components/feedback/LoadingState';
-import { ErrorState, FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
-import { Button } from '@/components/ui/Button';
-import { ApiRequestError, isNotFound } from '@/lib/api/client';
+import { ErrorState } from '@/components/feedback/ErrorState';
+import { isNotFound } from '@/lib/api/client';
 import { useParticipant } from '@/lib/api/participant';
 import { useCurrentQuest } from '@/lib/api/quest';
 import { useAuth } from '@/lib/auth/useAuth';
@@ -120,51 +119,29 @@ function AccountSection() {
 }
 
 /**
- * `404 not_found` here covers two real states at once (spec, contract): never
- * sat the quiz, or results not published — "today that is everyone." Neither
- * is an error, so this never reaches for `ErrorState`'s retry framing for it.
+ * Never shows a loader: the placeholder stands until a certificate exists (null = not yet:
+ * never sat the quiz, or results not out), and a background refresh swaps it in. A failed
+ * refresh keeps whatever was showing.
  *
- * Heading says "Certificates & Awards" — plural, matching the design — but
- * the backend only ever has the one, current-quest certificate to give it
- * (spec, contract has no awards concept yet). Nothing here fakes a list.
+ * Plural heading per the design; the backend only ever has the one current-quest certificate.
  */
 function CertificateSection() {
-  const certificate = useCertificate();
+  const { data } = useCertificate();
 
   return (
     <section className="flex flex-col gap-3">
       <p className="type-label m-0">Certificates & awards</p>
-
-      {(certificate.isPending || (certificate.error && isNotFound(certificate.error))) && (
+      {data ? (
+        <Certificate data={data} />
+      ) : (
         <div className="cert-slot">
           <Award className="h-8 w-8 shrink-0 text-gold" strokeWidth={1.5} aria-hidden="true" />
           <div className="flex flex-col gap-0.5">
-            <p className="m-0 text-paper-dim">
-              {certificate.isPending ? 'Checking…' : 'Your certificate lands here'}
-            </p>
-            {!certificate.isPending && (
-              <p className="m-0 text-sm text-taupe-dim">
-                Finish the quiz — it appears once results are published.
-              </p>
-            )}
+            <p className="m-0 text-paper-dim">Your certificate lands here</p>
+            <p className="m-0 text-sm text-taupe-dim">Finish the quiz — it appears once results are published.</p>
           </div>
         </div>
       )}
-
-      {certificate.error && !isNotFound(certificate.error) && (
-        <div className="flex flex-col items-start gap-2">
-          <p className="max-w-sm text-paper-dim">
-            {certificate.error instanceof ApiRequestError
-              ? certificate.error.message
-              : FALLBACK_MESSAGE}
-          </p>
-          <Button variant="quiet" onClick={() => certificate.refetch()}>
-            Try again
-          </Button>
-        </div>
-      )}
-
-      {certificate.data && <Certificate data={certificate.data} />}
     </section>
   );
 }

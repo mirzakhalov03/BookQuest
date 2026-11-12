@@ -6,6 +6,7 @@ import { Sheet } from '@/components/ui/Sheet';
 import { formatCompactDate, formatDuration } from '@/lib/format';
 import { useQuizAttempt } from '../../api/useQuizLive';
 import { FLAG_LABEL, OUTCOME_LABEL, STATUS_LABEL } from '../attemptLabels';
+import { SendSheetButton } from './SendSheetButton';
 
 type Item = AttemptAdmin['items'][number];
 
@@ -36,6 +37,7 @@ export function AttemptSheet({ id, who, canVoid, onClose, onVoid }: AttemptSheet
           <Button type="button" variant="quiet" onClick={onClose}>
             Close
           </Button>
+          {id && <SendSheetButton attemptId={id} who={who} look="labelled" />}
           {data && data.status !== 'voided' && canVoid && (
             <Button type="button" onClick={onVoid}>
               Void attempt

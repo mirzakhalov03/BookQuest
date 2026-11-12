@@ -38,6 +38,14 @@ export const TRUE_FALSE_OPTION_IDS = ['true', 'false'] as const;
 export const QUIZ_FLAGS = ['multi_client', 'fast', 'hidden', 'refund_capped'] as const;
 export type QuizFlag = (typeof QUIZ_FLAGS)[number];
 
+/** Shared so the admin UI and the Telegram answer sheet say the same thing. */
+export const QUIZ_FLAG_LABEL: Record<QuizFlag, string> = {
+  multi_client: 'Many devices',
+  fast: 'Fast',
+  hidden: 'Left the app',
+  refund_capped: 'Time claims capped'
+};
+
 export const ATTEMPT_STATUSES = ['in_progress', 'completed', 'voided'] as const;
 export type AttemptStatus = (typeof ATTEMPT_STATUSES)[number];
 

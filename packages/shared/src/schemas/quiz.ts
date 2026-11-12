@@ -438,3 +438,21 @@ export const attemptAdminSchema = attemptRowSchema.extend({
   items: z.array(attemptAdminItemSchema)
 });
 export type AttemptAdmin = z.infer<typeof attemptAdminSchema>;
+
+/* ── Live standings (admin Results) ─────────────────────────────────────── */
+
+export const standingRowSchema = attemptRowSchema.extend({
+  /** Provisional until `resultsAt`, then the frozen rank; null while solving or with no answers. */
+  rank: z.number().int().positive().nullable()
+});
+export type StandingRow = z.infer<typeof standingRowSchema>;
+
+export const quizStandingsSchema = z.object({
+  rows: z.array(standingRowSchema),
+  finished: z.number().int().nonnegative(),
+  solving: z.number().int().nonnegative(),
+  resultsAt: isoString,
+  isPublished: z.boolean(),
+  updatedAt: isoString
+});
+export type QuizStandings = z.infer<typeof quizStandingsSchema>;

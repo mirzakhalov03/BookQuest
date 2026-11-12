@@ -22,7 +22,11 @@ export function Sheet({ open, onClose, title, children, actions, wide }: SheetPr
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
+    if (open && !dialog.open) {
+      dialog.showModal();
+      // showModal focuses the first button, and iOS paints a focus ring on it as if it were selected.
+      dialog.focus();
+    }
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
@@ -30,6 +34,7 @@ export function Sheet({ open, onClose, title, children, actions, wide }: SheetPr
     <dialog
       ref={ref}
       aria-labelledby={titleId}
+      tabIndex={-1}
       onClose={onClose}
       // The inner div fills the dialog, so a click landing on the dialog itself is the backdrop.
       onClick={(event) => {

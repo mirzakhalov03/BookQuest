@@ -12,3 +12,8 @@ export async function listMine(req: Request, res: Response): Promise<void> {
 export async function markRead(req: Request, res: Response): Promise<void> {
   ok(res, await notificationService.markNotificationRead(currentUser(req), req.params.id as string));
 }
+
+/** POST /api/v1/me/notifications/read-all */
+export async function markAllRead(req: Request, res: Response): Promise<void> {
+  ok(res, await notificationService.markAllNotificationsRead(currentUser(req)));
+}

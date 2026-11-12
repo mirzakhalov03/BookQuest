@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { formatCount, formatDuration, formatLongDate } from '@/lib/format';
 import { RulesList } from './RulesSheet';
 import { StartCta } from './StartCta';
+import { CompletionScreen } from './CompletionScreen';
 
 interface OverviewCardProps {
   overview: QuizOverview;
@@ -81,17 +82,7 @@ export function OverviewCard({ overview, quest, onRefresh }: OverviewCardProps) 
       );
 
     case 'completed':
-      return (
-        <Card label="Quiz complete" title="Done!">
-          <p className="m-0 text-paper-dim">Your answers are in. Scores stay sealed until results are announced.</p>
-          {quizWindow && <p className="m-0 text-taupe">Results on {formatLongDate(quizWindow.resultsAt)}.</p>}
-          {attempt?.reviewAvailable && (
-            <Button to="/quiz/review" variant="quiet" className="self-center">
-              Review answers
-            </Button>
-          )}
-        </Card>
-      );
+      return <CompletionScreen resultsAt={quizWindow?.resultsAt ?? null} reviewAvailable={attempt?.reviewAvailable} />;
 
     case 'missed':
       return (

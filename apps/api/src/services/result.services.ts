@@ -10,6 +10,9 @@ import { finalizeOpenAttempts, repairMissingResults } from './quiz-attempt.servi
 
 const PODIUM_SIZE = 3;
 
+/** The one ranking order: live standings sort by it too, so provisional ranks become the published ones. */
+export const RANK_ORDER = { score: -1, durationMs: 1, submittedAt: 1, _id: 1 } as const;
+
 /**
  * Built leaderboards per quest. Ranks are frozen once published, so this only
  * goes stale when a quest is edited or replaced, which clears it. Holds the
@@ -126,7 +129,7 @@ async function rankQuest(quest: QuestDocument): Promise<void> {
   if (pending === 0) return;
 
   const results = await ResultModel.find({ quest: quest._id })
-    .sort({ score: -1, durationMs: 1, submittedAt: 1, _id: 1 })
+    .sort(RANK_ORDER)
     .select('_id')
     .lean();
 

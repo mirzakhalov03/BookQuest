@@ -12,7 +12,9 @@
 export function BootSplash() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-ink px-6 text-center">
-      <p className="type-display animate-breathe text-4xl">BookQuest</p>
+      <p className="type-display animate-breathe text-4xl">
+        Book<span className="text-ember">Quest</span>
+      </p>
       <p className="type-label">One book. One deadline. One quiz.</p>
     </div>
   );

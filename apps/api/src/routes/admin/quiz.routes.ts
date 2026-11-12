@@ -31,8 +31,10 @@ export const adminQuizOpsRoutes: Router = Router();
 
 adminQuizOpsRoutes.get('/group-sizes', validate(groupSizesQuery, 'query'), adminQuizController.groupSizes);
 adminQuizOpsRoutes.get('/live', adminQuizController.liveStats);
+adminQuizOpsRoutes.get('/standings', adminQuizController.standings);
 adminQuizOpsRoutes.get('/attempts', validate(attemptsQuery, 'query'), adminQuizController.listAttempts);
 adminQuizOpsRoutes.get('/attempts/:id', validate(quizIdParams, 'params'), adminQuizController.getAttempt);
+adminQuizOpsRoutes.post('/attempts/:id/sheet', validate(quizIdParams, 'params'), adminQuizController.sendAnswerSheet);
 adminQuizOpsRoutes.post(
   '/attempts/:id/void',
   validate(quizIdParams, 'params'),

@@ -56,3 +56,53 @@
   filter: blur(14px);
   transition: filter 120ms linear;
 }
+
+/* ── Done: the finish-line celebration ─────────────────────────────── */
+
+.done-popper {
+  display: inline-block;
+  animation: done-pop 900ms var(--ease-out-quest) both, done-wiggle 3.2s ease-in-out 1s infinite;
+  transform-origin: 70% 90%;
+}
+
+.done-rise {
+  animation: done-rise 600ms var(--ease-out-quest) both;
+}
+.done-rise--mid {
+  animation-delay: 180ms;
+}
+.done-rise--late {
+  animation-delay: 340ms;
+}
+
+@keyframes done-pop {
+  0% {
+    transform: scale(0.2) rotate(-30deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.18) rotate(8deg);
+    opacity: 1;
+  }
+}
+
+@keyframes done-wiggle {
+  0%,
+  80%,
+  100% {
+    transform: rotate(0deg);
+  }
+  86% {
+    transform: rotate(-12deg) scale(1.06);
+  }
+  93% {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes done-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}

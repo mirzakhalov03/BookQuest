@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
 
 interface SaveBarProps {
@@ -16,7 +17,10 @@ interface SaveBarProps {
   children?: ReactNode;
 }
 
-/** Pinned above the tab bar and present only while there is something to save. */
+/**
+ * Pinned above the tab bar and present only while there is something to save.
+ * Portaled to <body> so the edge stretch's transform can't become its containing block.
+ */
 export function SaveBar({
   visible,
   summary,
@@ -30,7 +34,7 @@ export function SaveBar({
   discardLabel = 'Discard',
   children
 }: SaveBarProps) {
-  return (
+  return createPortal(
     <div
       role="region"
       aria-label="Unsaved changes"
@@ -48,6 +52,7 @@ export function SaveBar({
       <Button type="submit" form={formId} disabled={disabled} className="min-h-11 px-5">
         {isBusy ? busyLabel : submitLabel}
       </Button>
-    </div>
+    </div>,
+    document.body
   );
 }

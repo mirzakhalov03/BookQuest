@@ -39,3 +39,10 @@ export async function markNotificationRead(user: UserDocument, id: string): Prom
   if (!notification) throw ApiError.notFound('No such notification.');
   return toDto(notification);
 }
+
+/** Returns the stamp it used, so the client can patch its feed without a refetch. */
+export async function markAllNotificationsRead(user: UserDocument): Promise<{ readAt: string }> {
+  const readAt = new Date();
+  await NotificationModel.updateMany({ user: user._id, readAt: null }, { $set: { readAt } });
+  return { readAt: readAt.toISOString() };
+}

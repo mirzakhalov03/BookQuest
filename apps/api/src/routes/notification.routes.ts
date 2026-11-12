@@ -7,6 +7,7 @@ import { notificationIdParams } from '../validators/notification.validators.js';
 export const notificationRoutes: Router = Router();
 
 notificationRoutes.get('/', requireUser, notificationController.listMine);
+notificationRoutes.post('/read-all', requireUser, notificationController.markAllRead);
 notificationRoutes.post(
   '/:id/read',
   requireUser,

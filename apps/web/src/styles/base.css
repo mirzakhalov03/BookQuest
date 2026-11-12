@@ -24,7 +24,7 @@
 html,
 body {
   height: 100%;
-  /* No rubber-band past the edges: in the Mini App it reads as the sheet coming loose. */
+  /* No native rubber-band: in the Mini App it reads as the sheet coming loose. `useOverscroll` draws its own stretch. */
   overscroll-behavior-y: none;
 }
 
@@ -51,7 +51,7 @@ input::-webkit-date-and-time-value {
   text-align: left;
 }
 
-:focus-visible:not(input, textarea, select) {
+:focus-visible:not(input, textarea, select, dialog) {
   outline: 2px solid var(--color-amber);
   outline-offset: 3px;
   border-radius: var(--radius-chip);
