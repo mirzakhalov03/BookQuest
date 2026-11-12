@@ -1,0 +1,21 @@
+apps/web/src/features/quiz/api/useAttempt.ts
+  s_9c243050d10f30::t_48c3a79a57bdfb 10,221-229,242,245,252-257,259,295-297,299,303,321
+apps/web/src/features/quiz/components/QuestionView.tsx
+  s_9c243050d10f30::t_be5bf7eef5fb05 65-67,76-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "9186c21db933148d2324fd3fb186dc7ae56df6de",
+  "prompts": {},
+  "sessions": {
+    "s_9c243050d10f30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "52c21a19-4dca-4d71-a046-ac31f18a1a0c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
