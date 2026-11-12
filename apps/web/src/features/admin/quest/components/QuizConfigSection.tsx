@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 import { Lock, Minus, Plus } from 'lucide-react';
-import { QUIZ_GROUP_COUNTS, groupLabels, type AdminQuest, type QuizDistribution } from '@bookquest/shared';
+import { QUIZ_GROUP_COUNTS, type AdminQuest, type QuizDistribution } from '@bookquest/shared';
 import { Segmented } from '@/components/ui/Segmented';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
@@ -10,10 +10,11 @@ import { useQuizGroupSizes } from '../../api/useQuizGroupSizes';
 import { parseLocal } from '../../dates';
 import { formatQuizDuration } from '../../quizzes/format';
 import type { EditorSectionId } from '../changes';
-import { DISTRIBUTION_OPTIONS, resizeQuizIds, type QuizConfigForm } from '../quizConfig';
+import { DISTRIBUTIONS, localGroupLabels, resizeQuizIds, type QuizConfigForm } from '../quizConfig';
 import { checkReadiness, pickableQuizzes } from '../quizReadiness';
 import type { QuestFormState } from '../questForm';
 import { QuizReadinessList } from './QuizReadinessList';
+import { useT } from '@/i18n';
 
 interface QuizConfigSectionProps {
   quest: AdminQuest;
@@ -22,11 +23,6 @@ interface QuizConfigSectionProps {
   onGoTo: (section: EditorSectionId) => void;
 }
 
-const NO_QUIZ_BANNER =
-  'The quiz is open but no quiz is attached — participants see ‘Questions are being prepared’.';
-
-/** "Odd numbers" reads better as "Odd" next to a count. */
-const shortLabel = (label: string) => label.replace(/ numbers$/, '');
 
 export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSectionProps) {
   const { control } = useFormContext<QuestFormState>();
@@ -38,6 +34,10 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
   const quizzes = useQuizzes();
   const sizes = useQuizGroupSizes(config?.distribution ?? null, config?.quizIds.length ?? 0);
   const locked = lockMessage !== null;
+  const { common, adminQuest } = useT();
+  const t = adminQuest.quiz;
+  // "Odd numbers" reads better as "Odd" next to a count.
+  const shortLabel = (label: string) => (label === t.odd ? t.oddShort : label === t.even ? t.evenShort : label);
 
   const set = (next: QuizConfigForm | null) => onChange(next);
   const setDistribution = (distribution: QuizDistribution) => {
@@ -49,7 +49,7 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
   const setQuiz = (index: number, id: string) =>
     config && set({ ...config, quizIds: config.quizIds.map((current, i) => (i === index ? id : current)) });
 
-  const labels = config ? groupLabels(config.distribution, config.quizIds.length) : [];
+  const labels = config ? localGroupLabels(config.distribution, config.quizIds.length) : [];
   const range = config ? QUIZ_GROUP_COUNTS[config.distribution] : null;
   const noQuizYet = quest.quizConfig === null && Date.now() >= Date.parse(quest.quizOpensAt);
 
@@ -57,7 +57,7 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
     <>
       {noQuizYet && (
         <p role="alert" className="m-0 rounded-box border border-error/50 p-3 text-sm text-error">
-          {NO_QUIZ_BANNER}
+          {t.noQuizBanner}
         </p>
       )}
       {locked && (
@@ -68,21 +68,21 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
 
       <fieldset disabled={locked} className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
         <Segmented<QuizDistribution | 'none'>
-          aria-label="How quizzes are given out"
-          options={DISTRIBUTION_OPTIONS}
+          aria-label={t.distributionAria}
+          options={DISTRIBUTIONS.map((value) => ({ value, label: t.distribution[value] }))}
           value={config?.distribution ?? 'none'}
           onChange={(value) => value !== 'none' && setDistribution(value)}
         />
 
-        {!config && <p className="m-0 text-sm text-taupe">Choose how participants are split, then pick the quizzes.</p>}
+        {!config && <p className="m-0 text-sm text-taupe">{t.chooseSplit}</p>}
 
         {config && range && range.min !== range.max && (
           <div className="flex items-center gap-3">
-            <span className="type-label">Groups</span>
+            <span className="type-label">{t.groups}</span>
             <Button
               type="button"
               variant="quiet"
-              aria-label="Fewer groups"
+              aria-label={t.fewer}
               disabled={config.quizIds.length <= range.min}
               onClick={() => setGroupCount(config.quizIds.length - 1)}
               className="min-h-11 w-11 px-0"
@@ -93,7 +93,7 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
             <Button
               type="button"
               variant="quiet"
-              aria-label="More groups"
+              aria-label={t.more}
               disabled={config.quizIds.length >= range.max}
               onClick={() => setGroupCount(config.quizIds.length + 1)}
               className="min-h-11 w-11 px-0"
@@ -103,12 +103,12 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
           </div>
         )}
 
-        {config && quizzes.isPending && <p className="m-0 text-sm text-taupe">Loading quizzes…</p>}
+        {config && quizzes.isPending && <p className="m-0 text-sm text-taupe">{t.loadingQuizzes}</p>}
         {config && quizzes.isError && (
           <p role="alert" className="m-0 text-sm text-error">
-            Couldn’t load the quiz library.{' '}
+            {t.libraryFailed}{' '}
             <button type="button" onClick={() => void quizzes.refetch()} className="text-amber underline">
-              Try again
+              {common.tryAgain}
             </button>
           </p>
         )}
@@ -122,14 +122,14 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
             return (
               <Select
                 key={index}
-                label={labels[index] ?? `Group ${index + 1}`}
+                label={labels[index] ?? t.group(index + 1)}
                 value={id}
                 onChange={(next) => setQuiz(index, next)}
                 options={[
-                  { value: '', label: 'Choose a quiz…' },
+                  { value: '', label: t.chooseQuiz },
                   ...options.map((quiz) => ({
                     value: quiz.id,
-                    label: `${quiz.title} · ${quiz.questionCount} questions · ${formatQuizDuration(quiz.totalSeconds)}${quiz.isComplete ? '' : ' · incomplete'}`
+                    label: t.quizOption(quiz.title, common.questions(quiz.questionCount, String(quiz.questionCount)), formatQuizDuration(quiz.totalSeconds), quiz.isComplete)
                   }))
                 ]}
               />
@@ -139,14 +139,14 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
         {config && sizes.data !== undefined && (
           <p className="m-0 text-sm text-taupe">
             {sizes.data === null
-              ? 'Split evenly at random when saved'
-              : sizes.data.map((count, i) => `${shortLabel(labels[i] ?? `Group ${i + 1}`)}: ${count}`).join(' · ')}
+              ? t.splitRandom
+              : sizes.data.map((count, i) => `${shortLabel(labels[i] ?? t.group(i + 1))}: ${count}`).join(' · ')}
           </p>
         )}
 
         {config && (
           <Button type="button" variant="quiet" onClick={() => set(null)} className="min-h-11 self-start px-3">
-            Detach quizzes
+            {t.detach}
           </Button>
         )}
       </fieldset>
@@ -171,9 +171,9 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
         />
       )}
 
-      <p className="m-0 text-sm text-taupe">Locks when the first participant starts.</p>
+      <p className="m-0 text-sm text-taupe">{t.locksWhen}</p>
       <Link to="/admin/quizzes" className="inline-flex min-h-11 items-center self-start text-sm text-amber underline-offset-2 hover:underline">
-        Open the quiz library
+        {t.openLibrary}
       </Link>
     </>
   );

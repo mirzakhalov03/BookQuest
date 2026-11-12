@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { CreateQuestPayload, Quest } from '@bookquest/shared';
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { EmptyState } from '@/components/feedback/EmptyState';
-import { FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
 import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
 import { ApiRequestError } from '@/lib/api/client';
@@ -27,6 +26,8 @@ import { questFormSchema } from './questFormSchema';
 import { applyServerErrors } from './serverErrors';
 import { canStartNextEdition } from '../phase';
 import type { QuestFormState } from './questForm';
+import { useT } from '@/i18n';
+import { errorMessage } from '@/lib/api/errorMessage';
 
 const FORM_ID = 'new-edition-form';
 
@@ -34,10 +35,11 @@ const FORM_ID = 'new-edition-form';
 export function NewEditionPage() {
   useTelegramBackButton('/admin/quest');
   const latest = useLatestQuest();
+  const t = useT().adminQuest.newEdition;
   const [now] = useState(() => new Date());
 
   return (
-    <AdminQuery query={latest} loadingLabel="Finding the last edition…">
+    <AdminQuery query={latest} loadingLabel={t.loading}>
       {(source) =>
         source?.isCurrent && !canStartNextEdition(source.quest, now) ? (
           <StillRunning quest={source.quest} />
@@ -51,17 +53,18 @@ export function NewEditionPage() {
 
 function StillRunning({ quest }: { quest: Quest }) {
   const awaitingResults = quest.phase === 'finished';
+  const t = useT().adminQuest.newEdition;
   return (
     <EmptyState
-      title={awaitingResults ? `Results for edition ${quest.edition} aren't out yet` : `Edition ${quest.edition} is still running`}
+      title={awaitingResults ? t.resultsNotOut(quest.edition) : t.stillRunning(quest.edition)}
       body={
         awaitingResults
-          ? `Start the next edition after they're published on ${formatLongDate(quest.resultsAt)}.`
-          : 'Start the next edition once its results are out.'
+          ? t.startAfter(formatLongDate(quest.resultsAt))
+          : t.startOnceResults
       }
       action={
         <Button to="/admin/quest" variant="quiet">
-          Back to the quest
+          {t.backToQuest}
         </Button>
       }
       className="flex-1"
@@ -83,6 +86,8 @@ function NewEditionForm({ source }: { source: LatestQuest }) {
   const create = useCreateQuest();
   const navigate = useNavigate();
   const showToast = useUiStore((state) => state.showToast);
+  const { common, adminQuest } = useT();
+  const t = adminQuest.newEdition;
   const guard = useUnsavedChangesGuard(formState.isDirty);
 
   // The preview subscribes itself, so typing doesn't re-render this whole page.
@@ -99,22 +104,22 @@ function NewEditionForm({ source }: { source: LatestQuest }) {
     try {
       await create.mutateAsync(payload);
       guard.bypass();
-      showToast(`Edition ${draft.edition} is live.`);
+      showToast(t.live(draft.edition));
       navigate('/admin/quest');
     } catch (error) {
       setPayload(null);
-      setFormError(error instanceof ApiRequestError ? applyServerErrors(error, setError) : FALLBACK_MESSAGE);
+      setFormError(error instanceof ApiRequestError ? applyServerErrors(error, setError) : errorMessage(error));
     }
   }
 
   return (
     <FormProvider {...form}>
       <AdminScreen className="max-w-5xl">
-        <AdminPageHeader eyebrow="New edition" title={`Edition ${draft.edition}`} actions={<PreviewButton preview={preview} />} />
+        <AdminPageHeader eyebrow={t.eyebrow} title={t.title(draft.edition)} actions={<PreviewButton preview={preview} />} />
         <p className="m-0 text-sm text-taupe">
           {source
-            ? `Prizes, quiz settings and the schedule carry over from edition ${source.quest.edition}, a year later. The book starts blank.`
-            : 'The first edition. The schedule below is a starting point — adjust it to taste.'}
+            ? t.carryOver(source.quest.edition)
+            : t.first}
         </p>
 
         <QuestEditorLayout preview={preview}>
@@ -133,35 +138,35 @@ function NewEditionForm({ source }: { source: LatestQuest }) {
 
       <SaveBar
         visible
-        summary={errorCount > 0 ? `Fix ${errorCount} ${errorCount === 1 ? 'field' : 'fields'}` : `Edition ${draft.edition}, ready when the book is in`}
+        summary={errorCount > 0 ? adminQuest.fixFields(errorCount) : t.ready(draft.edition)}
         tone={errorCount > 0 ? 'bad' : 'neutral'}
-        submitLabel="Create edition"
-        busyLabel="Creating…"
+        submitLabel={t.create}
+        busyLabel={t.creating}
         isBusy={create.isPending}
         disabled={create.isPending || isCoverUploading}
         formId={FORM_ID}
         onDiscard={() => navigate('/admin/quest')}
-        discardLabel="Cancel"
+        discardLabel={common.cancel}
       />
 
       <Sheet
         open={payload !== null}
         onClose={() => setPayload(null)}
-        title={`Make edition ${draft.edition} current?`}
+        title={t.confirmTitle(draft.edition)}
         actions={
           <>
             <Button type="button" variant="quiet" onClick={() => setPayload(null)}>
-              Not yet
+              {t.notYet}
             </Button>
             <Button type="button" onClick={() => void confirm()} disabled={create.isPending}>
-              {create.isPending ? 'Creating…' : 'Create and go live'}
+              {create.isPending ? t.creating : t.createLive}
             </Button>
           </>
         }
       >
         <p className="m-0 text-taupe">
-          {source?.isCurrent ? `Edition ${source.quest.edition} and its results move to the archive. ` : ''}
-          Participants see edition {draft.edition} on the Home screen straight away.
+          {source?.isCurrent ? t.archiveNote(source.quest.edition) : ''}
+          {t.seenAtOnce(draft.edition)}
         </p>
       </Sheet>
 

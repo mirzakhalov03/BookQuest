@@ -1,4 +1,5 @@
 import { AVATARS, type AvatarId } from '@bookquest/shared';
+import { getT } from '@/i18n';
 
 // Bundled rather than in `public/` so each file gets a content hash and caches forever.
 const files = import.meta.glob<string>('../../assets/avatars/*.webp', {
@@ -17,6 +18,5 @@ export const AVATAR_OPTIONS = AVATARS.filter((id) => avatarUrl(id) !== undefined
 
 /** "arctic-fox" → "Arctic fox", for screen readers. */
 export function avatarLabel(id: AvatarId): string {
-  const words = id.replace(/-/g, ' ');
-  return words.charAt(0).toUpperCase() + words.slice(1);
+  return getT().profile.avatars[id];
 }

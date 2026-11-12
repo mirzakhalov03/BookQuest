@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App';
 import { initTelegram } from './lib/telegram';
+import { initI18n } from './i18n';
 import './styles/index.css';
 
 initTelegram();
@@ -28,6 +29,9 @@ async function start(): Promise<void> {
     const { installMockApi } = await import('./lib/api/mock');
     installMockApi();
   }
+
+  // After the mock: the language is read from the Telegram bridge, which the mock may stand in for.
+  initI18n();
 
   const container = document.getElementById('root');
   if (!container) throw new Error('Missing #root element');

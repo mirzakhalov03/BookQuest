@@ -37,7 +37,7 @@ async function authenticateAdminPhone(
   password: string,
   firstName = DEFAULT_ADMIN_NAME
 ): Promise<Session> {
-  if (!isAdminPassword(password)) throw ApiError.unauthorized(INCORRECT_CREDENTIALS);
+  if (!isAdminPassword(password)) throw ApiError.unauthorized(INCORRECT_CREDENTIALS, 'incorrect_credentials');
   return issueSession(await upsertAdminPhoneUser(phoneNumber, firstName));
 }
 
@@ -63,7 +63,7 @@ export async function authenticateWithTelegram(initData: string): Promise<Sessio
 
   if (!verified.ok) {
     logger.warn({ reason: verified.reason }, 'Rejected Telegram initData');
-    throw ApiError.unauthorized('That Telegram sign-in could not be verified.');
+    throw ApiError.unauthorized('That Telegram sign-in could not be verified.', 'telegram_unverified');
   }
 
   const user = await upsertUserFromTelegramProfile(verified.profile);
@@ -78,7 +78,7 @@ export async function authenticateWithTelegramWidget(
 
   if (!verified.ok) {
     logger.warn({ reason: verified.reason }, 'Rejected Telegram widget sign-in');
-    throw ApiError.unauthorized('That Telegram sign-in could not be verified.');
+    throw ApiError.unauthorized('That Telegram sign-in could not be verified.', 'telegram_unverified');
   }
 
   const user = await upsertUserFromTelegramProfile(verified.profile);
@@ -106,12 +106,12 @@ export async function authenticateWithPhone(payload: PhoneLoginPayload): Promise
   const user = await findUserByPhone(payload.phoneNumber);
 
   if (!user || !user.passwordHash) {
-    throw ApiError.unauthorized(INCORRECT_CREDENTIALS);
+    throw ApiError.unauthorized(INCORRECT_CREDENTIALS, 'incorrect_credentials');
   }
 
   const matches = await bcrypt.compare(payload.password, user.passwordHash);
   if (!matches) {
-    throw ApiError.unauthorized(INCORRECT_CREDENTIALS);
+    throw ApiError.unauthorized(INCORRECT_CREDENTIALS, 'incorrect_credentials');
   }
 
   return issueSession(user);
@@ -130,7 +130,7 @@ export async function linkTelegram(
 
   if (!verified.ok) {
     logger.warn({ reason: verified.reason }, 'Rejected Telegram widget sign-in');
-    throw ApiError.unauthorized('That Telegram sign-in could not be verified.');
+    throw ApiError.unauthorized('That Telegram sign-in could not be verified.', 'telegram_unverified');
   }
 
   const linked = await linkTelegramToUser(user, verified.profile);

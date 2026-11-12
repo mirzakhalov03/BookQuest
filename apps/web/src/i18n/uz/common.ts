@@ -1,0 +1,33 @@
+import type { common as En } from '../en/common';
+
+export const common: typeof En = {
+  appTagline: 'Bitta kitob. Bitta muddat. Bitta test.',
+  tryAgain: 'Qayta urinish',
+  backToStart: 'Bosh sahifaga',
+  somethingWentWrong: 'Nimadir xato ketdi',
+  loading: 'Yuklanmoqda…',
+  loadMore: 'Yana ko‘rsatish',
+  close: 'Yopish',
+  cancel: 'Bekor qilish',
+  save: 'Saqlash',
+  saving: 'Saqlanmoqda…',
+  continue: 'Davom etish',
+  back: 'Orqaga',
+  signIn: 'Kirish',
+  logIn: 'Kirish',
+  logOut: 'Chiqish',
+  checking: 'Tekshirilmoqda…',
+  more: 'davomi',
+  less: 'yig‘ish',
+  pages: (_count, n) => `${n} bet`,
+  readers: (_count, n) => `${n} kitobxon`,
+  questions: (_count, n) => `${n} ta savol`,
+  participantAria: (n) => `Ishtirokchi №${n}`,
+  bookCoverAlt: (title) => `«${title}» muqovasi`,
+  editionYear: (edition, year) => `${edition}-mavsum · ${year}`,
+  editionShort: (edition, year) => `${edition}-mavsum · ${year}`,
+  place: (n) => `${n}-o‘rin`,
+  placeShort: (n) => `${n}-o‘rin`,
+  checkBackNextEdition: 'Keyingi mavsum boshlanganda qaytib keling.',
+  noQuest: 'Hozir faol tanlov yo‘q'
+};

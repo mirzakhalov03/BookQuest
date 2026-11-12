@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { TelegramWidgetAuthPayload } from '@bookquest/shared';
 import { setSessionUser } from './useAuth';
 import { loginWithWidget } from './authApi';
+import { useT } from '@/i18n';
 
 declare global {
   interface Window {
@@ -25,6 +26,7 @@ export function TelegramLoginWidget() {
   const containerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const [state, setState] = useState<WidgetState>('idle');
+  const t = useT().auth;
 
   useEffect(() => {
     if (!BOT_USERNAME) {
@@ -60,20 +62,16 @@ export function TelegramLoginWidget() {
 
   if (state === 'script-failed') {
     return (
-      <p className="text-sm text-ember">
-        Telegram sign-in didn't load. Check your connection and reload the page.
-      </p>
+      <p className="text-sm text-ember">{t.widgetFailed}</p>
     );
   }
 
   return (
     <div className="grid gap-2">
       <div ref={containerRef} />
-      {state === 'signing-in' && <p className="text-sm text-paper-dim">Signing in…</p>}
+      {state === 'signing-in' && <p className="text-sm text-paper-dim">{t.signingIn}</p>}
       {state === 'error' && (
-        <p className="text-sm text-ember">
-          Telegram confirmed you, but we couldn't sign you in. Try the button again.
-        </p>
+        <p className="text-sm text-ember">{t.widgetError}</p>
       )}
     </div>
   );

@@ -1,3 +1,5 @@
+import { useT } from '@/i18n';
+
 /**
  * What the app is while it works out who is using it.
  *
@@ -10,12 +12,13 @@
  * later task. This one only ever runs before the router exists.
  */
 export function BootSplash() {
+  const t = useT();
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-ink px-6 text-center">
       <p className="type-display animate-breathe text-4xl">
         Book<span className="text-ember">Quest</span>
       </p>
-      <p className="type-label">One book. One deadline. One quiz.</p>
+      <p className="type-label">{t.common.appTagline}</p>
     </div>
   );
 }

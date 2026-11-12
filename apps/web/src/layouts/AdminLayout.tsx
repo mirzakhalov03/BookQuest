@@ -14,10 +14,13 @@ import {
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { FieldSizeContext } from '@/components/ui/fieldSize';
 import { Sheet } from '@/components/ui/Sheet';
+import { useT, type Messages } from '@/i18n';
+
+type TabKey = keyof Messages['admin']['tabs'];
 
 interface Tab {
   to: string;
-  label: string;
+  key: TabKey;
   icon: LucideIcon;
 }
 
@@ -28,16 +31,16 @@ interface Tab {
  * that one is locked to the participant side's five destinations (spec §4 rule 3).
  */
 const PRIMARY_TABS: Tab[] = [
-  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/admin/participants', label: 'Participants', icon: Users },
-  { to: '/admin/quest', label: 'Quest', icon: BookOpen },
-  { to: '/admin/quizzes', label: 'Quizzes', icon: ListChecks }
+  { to: '/admin', key: 'dashboard', icon: LayoutDashboard },
+  { to: '/admin/participants', key: 'participants', icon: Users },
+  { to: '/admin/quest', key: 'quest', icon: BookOpen },
+  { to: '/admin/quizzes', key: 'quizzes', icon: ListChecks }
 ];
 
 const MORE_TABS: Tab[] = [
-  { to: '/admin/results', label: 'Results', icon: BarChart3 },
-  { to: '/admin/broadcast', label: 'Broadcast', icon: Megaphone },
-  { to: '/admin/messages', label: 'Messages', icon: MessageSquare }
+  { to: '/admin/results', key: 'results', icon: BarChart3 },
+  { to: '/admin/broadcast', key: 'broadcast', icon: Megaphone },
+  { to: '/admin/messages', key: 'messages', icon: MessageSquare }
 ];
 
 /**
@@ -73,18 +76,19 @@ export function AdminLayout() {
 }
 
 function AdminNav() {
+  const t = useT().admin;
   return (
     <header className="flex items-center justify-between gap-3 border-b border-[color:var(--rule)] px-4 pt-4 pb-4 sm:px-8">
       <Link
         to="/"
-        aria-label="Back to the stage"
+        aria-label={t.backToStage}
         className="-ml-2 flex h-9 w-9 items-center justify-center rounded-full text-taupe hover:text-paper-dim"
       >
         <Home className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
       </Link>
       <div className="flex flex-col items-end leading-tight">
         <span className="type-display text-lg text-paper">BookQuest</span>
-        <span className="type-label">Admin</span>
+        <span className="type-label">{t.admin}</span>
       </div>
     </header>
   );
@@ -92,13 +96,14 @@ function AdminNav() {
 
 function AdminTabBar() {
   const { pathname } = useLocation();
+  const t = useT().admin;
   const [moreOpen, setMoreOpen] = useState(false);
   const inMore = MORE_TABS.some(({ to }) => pathname.startsWith(to));
 
   return (
     <>
-      <nav className="tabbar" aria-label="Admin sections">
-        {PRIMARY_TABS.map(({ to, label, icon: Icon }) => (
+      <nav className="tabbar" aria-label={t.sections}>
+        {PRIMARY_TABS.map(({ to, key, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
@@ -106,7 +111,7 @@ function AdminTabBar() {
             className={({ isActive }) => (isActive ? 'tab is-on' : 'tab')}
           >
             <Icon className="tab__icon" aria-hidden="true" />
-            <span>{label}</span>
+            <span>{t.tabs[key]}</span>
           </NavLink>
         ))}
         <button
@@ -118,13 +123,13 @@ function AdminTabBar() {
         >
           <Ellipsis className="tab__icon" aria-hidden="true" />
           {/* On a "More" page, name it — the bar alone wouldn't say where you are. */}
-          <span>{MORE_TABS.find(({ to }) => pathname.startsWith(to))?.label ?? 'More'}</span>
+          <span>{t.tabs[MORE_TABS.find(({ to }) => pathname.startsWith(to))?.key ?? 'more']}</span>
         </button>
       </nav>
 
-      <Sheet open={moreOpen} onClose={() => setMoreOpen(false)} title="More">
+      <Sheet open={moreOpen} onClose={() => setMoreOpen(false)} title={t.tabs.more}>
         <ul className="m-0 flex list-none flex-col gap-1 p-0">
-          {MORE_TABS.map(({ to, label, icon: Icon }) => (
+          {MORE_TABS.map(({ to, key, icon: Icon }) => (
             <li key={to}>
               <NavLink
                 to={to}
@@ -136,7 +141,7 @@ function AdminTabBar() {
                 }
               >
                 <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
-                <span className="font-medium">{label}</span>
+                <span className="font-medium">{t.tabs[key]}</span>
               </NavLink>
             </li>
           ))}

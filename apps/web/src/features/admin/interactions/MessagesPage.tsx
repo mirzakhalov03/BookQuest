@@ -16,7 +16,6 @@ import {
 } from '../api/useAdminInteractions';
 import {
   DEFAULT_FILTERS,
-  RANGE_OPTIONS,
   hasActiveFilters,
   readFilters,
   writeFilters,
@@ -25,12 +24,14 @@ import {
 import { InteractionFiltersBar } from './InteractionFilters';
 import { InteractionsTable } from './InteractionsTable';
 import { PersonSheet } from './PersonSheet';
+import { useT } from '@/i18n';
 
 const SEARCH_DEBOUNCE_MS = 350;
 const LIMIT = 50;
 
 /** `/admin/messages` — what people say to the bot. Filters live in the URL: refresh, Back and shared links keep the view. */
 export function MessagesPage() {
+  const t = useT().admin.messages;
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = useMemo(() => readFilters(searchParams), [searchParams]);
   const [searchInput, setSearchInput] = useState(filters.q);
@@ -70,18 +71,18 @@ export function MessagesPage() {
   };
 
   const person = list.data?.pages[0]?.person;
-  const personName = person ? person.firstName : 'this person';
+  const personName = person ? person.firstName : t.thisPerson;
 
   return (
     <AdminScreen>
       <div className="flex flex-col gap-3">
         <AdminPageHeader
-          title="Messages"
+          title={t.title}
           titleClassName="text-4xl"
           actions={
             newCount > 0 ? (
               <Button variant="gold" onClick={showNew} aria-live="polite">
-                ● {newCount >= 100 ? '99+' : newCount} new
+                ● {t.newCount(newCount >= 100 ? '99+' : String(newCount))}
               </Button>
             ) : undefined
           }
@@ -95,7 +96,7 @@ export function MessagesPage() {
           personName={personName}
         />
       </div>
-      <AdminQuery query={list} loadingLabel="Reading the inbox…">
+      <AdminQuery query={list} loadingLabel={t.loading}>
         {(data) => {
           const items = data.pages.flatMap((page) => page.items);
           if (items.length === 0) {
@@ -134,27 +135,24 @@ interface EmptyProps {
 
 /** Says which filter emptied the list, so "nothing here" is never a mystery. */
 function Empty({ filters, personName, onClear }: EmptyProps) {
-  const what = filters.view === 'messages' ? 'messages' : 'activity';
-  const who = filters.person ? ` from ${personName}` : '';
-  const range = RANGE_OPTIONS.find((option) => option.value === filters.range);
-  const when = filters.range === 'all' || !range ? '' : ` ${range.label.toLowerCase()}`;
+  const t = useT().admin.messages;
   const narrowed = !!(filters.q || filters.kind || filters.command || filters.broadcast);
   const body = narrowed
-    ? 'Search or filters are narrowing this down.'
+    ? t.narrowed
     : filters.view === 'messages'
-      ? 'Switch to Everything to see /start taps and button presses too.'
+      ? t.switchToAll
       : undefined;
 
   return (
     <EmptyState
-      title={`No ${what}${who}${when}`}
+      title={t.emptyTitle(filters.view, filters.person ? personName : null, filters.range)}
       titleAs="h2"
       body={body}
       className="flex-1"
       action={
         hasActiveFilters(filters) || filters.order !== DEFAULT_FILTERS.order ? (
           <Button variant="quiet" onClick={onClear}>
-            Clear filters
+            {t.clearFilters}
           </Button>
         ) : undefined
       }

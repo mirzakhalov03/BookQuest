@@ -2,6 +2,7 @@ import type { QuizOverview } from '@bookquest/shared';
 import { Sheet } from '@/components/ui/Sheet';
 import { Button } from '@/components/ui/Button';
 import { formatCount } from '@/lib/format';
+import { useT } from '@/i18n';
 
 interface RulesSheetProps {
   open: boolean;
@@ -11,21 +12,13 @@ interface RulesSheetProps {
   onReady: () => void;
 }
 
-/** The four rules (§4.2 step 1). Also used as the rules card, so the wording lives once. */
-export function quizRules(quiz: RulesSheetProps['quiz']): string[] {
-  const count = quiz ? `${formatCount(quiz.questionCount)} questions` : 'A set of questions';
-  return [
-    `${count}, one at a time.`,
-    'Each question has its own timer. When it runs out, the quiz moves on.',
-    'No going back: a confirmed answer is final.',
-    'The timer keeps running if you leave, so find a quiet moment first.'
-  ];
-}
-
+/** The four rules (§4.2 step 1), shared by the sheet and the rules card so the wording lives once. */
 export function RulesList({ quiz }: { quiz: RulesSheetProps['quiz'] }) {
+  const t = useT();
+  const rules = t.quiz.rules(quiz ? t.common.questions(quiz.questionCount, formatCount(quiz.questionCount)) : null);
   return (
     <ol className="m-0 flex list-none flex-col gap-3 p-0">
-      {quizRules(quiz).map((rule, i) => (
+      {rules.map((rule, i) => (
         <li key={rule} className="flex gap-3 text-paper-dim">
           <span aria-hidden className="type-label mt-0.5 w-4 shrink-0 text-ember">
             {i + 1}
@@ -39,18 +32,19 @@ export function RulesList({ quiz }: { quiz: RulesSheetProps['quiz'] }) {
 
 /** One confirm step before the clock starts: the only friction, and it stops an accidental start. */
 export function RulesSheet({ open, quiz, busy, onClose, onReady }: RulesSheetProps) {
+  const t = useT().quiz;
   return (
     <Sheet
       open={open}
       onClose={onClose}
-      title="Before you start"
+      title={t.beforeYouStart}
       actions={
         <>
           <Button type="button" variant="quiet" onClick={onClose}>
-            Not yet
+            {t.notYet}
           </Button>
           <Button type="button" disabled={busy} onClick={onReady}>
-            {busy ? 'Starting…' : "I'm ready"}
+            {busy ? t.starting : t.ready}
           </Button>
         </>
       }

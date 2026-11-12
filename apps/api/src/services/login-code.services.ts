@@ -45,7 +45,7 @@ const codeMatches = (hash: string, code: string): boolean =>
   timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(hashCode(code), 'hex'));
 
 function invalidIdentifier(message: string): ApiError {
-  return ApiError.badRequest(message, { identifier: message });
+  return ApiError.badRequest(message, { identifier: message }, 'identifier_invalid');
 }
 
 const userIds = (
@@ -98,7 +98,7 @@ async function resolveLoginUser(identifier: string): Promise<UserDocument & { te
   // Several matches (a shared family phone): guessing whose Telegram gets the code would be worse.
   const user = ids.length === 1 ? await UserModel.findById(ids[0]) : null;
   if (!user?.telegramUserId) {
-    throw new ApiError(404, 'not_found', CANNOT_SEND, { identifier: CANNOT_SEND });
+    throw new ApiError(404, 'not_found', CANNOT_SEND, { identifier: CANNOT_SEND }, 'cannot_send_code');
   }
   return user as UserDocument & { telegramUserId: string };
 }
@@ -125,7 +125,7 @@ export async function requestLoginCode(
   const now = Date.now();
 
   if ((await failuresToday(user._id)) >= MAX_FAILURES_PER_DAY) {
-    throw ApiError.tooManyRequests(LOCKED);
+    throw ApiError.tooManyRequests(LOCKED, 'code_locked');
   }
 
   const sentThisHour = await LoginCodeModel.countDocuments({
@@ -133,7 +133,7 @@ export async function requestLoginCode(
     createdAt: { $gt: new Date(now - HOUR_MS) }
   });
   if (sentThisHour >= MAX_CODES_PER_HOUR) {
-    throw ApiError.tooManyRequests('Too many codes sent to this account. Try again in an hour.');
+    throw ApiError.tooManyRequests('Too many codes sent to this account. Try again in an hour.', 'code_limit');
   }
 
   // Keyed on the requester too, so someone else's requests can't hold yours off.
@@ -142,7 +142,7 @@ export async function requestLoginCode(
     requestIp,
     createdAt: { $gt: new Date(now - RESEND_COOLDOWN_MS) }
   });
-  if (recent) throw ApiError.tooManyRequests('Wait a minute before asking for another code.');
+  if (recent) throw ApiError.tooManyRequests('Wait a minute before asking for another code.', 'code_cooldown');
 
   // Earlier codes stay valid: a challenge id only ever reaches whoever asked for it,
   // so retiring them would only let a stranger's request cancel yours.
@@ -163,7 +163,8 @@ export async function requestLoginCode(
     // Nothing was delivered, so it shouldn't count against the send budget.
     await loginCode.deleteOne();
     throw ApiError.unprocessable(
-      "We couldn't reach your Telegram. Open the BookQuest bot in Telegram, tap Start, then try again."
+      "We couldn't reach your Telegram. Open the BookQuest bot in Telegram, tap Start, then try again.",
+      'telegram_unreachable'
     );
   }
 
@@ -189,7 +190,7 @@ export async function verifyLoginCode(challengeId: string, code: string): Promis
 
   // The daily budget holds across codes, so fresh challenges can't buy more guesses.
   if ((await failuresToday(loginCode.user)) > MAX_FAILURES_PER_DAY) {
-    throw ApiError.tooManyRequests(LOCKED);
+    throw ApiError.tooManyRequests(LOCKED, 'code_locked');
   }
 
   if (!codeMatches(loginCode.codeHash, code)) {
@@ -197,7 +198,7 @@ export async function verifyLoginCode(challengeId: string, code: string): Promis
     const left = MAX_ATTEMPTS - loginCode.attempts;
     if (left <= 0) throw ApiError.gone(EXPIRED);
     const message = `That code isn't right — ${left} ${left === 1 ? 'try' : 'tries'} left.`;
-    throw ApiError.badRequest(message, { code: message });
+    throw ApiError.badRequest(message, { code: message }, 'code_incorrect');
   }
 
   // Claimed atomically, so two parallel right guesses can't both open a session.

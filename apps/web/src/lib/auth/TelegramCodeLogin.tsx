@@ -4,11 +4,12 @@ import type { TelegramCodeChallenge } from '@bookquest/shared';
 import { Field, type FieldStatus } from '@/components/ui/Field';
 import { Button } from '@/components/ui/Button';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
-import { FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
 import { ApiRequestError } from '@/lib/api/client';
+import { errorMessage, fieldErrorMessage } from '@/lib/api/errorMessage';
 import { useCountdown } from '@/hooks/useCountdown';
 import { requestTelegramCode, verifyTelegramCode } from './authApi';
 import { setSessionUser } from './useAuth';
+import { useT } from '@/i18n';
 
 interface FieldState {
   value: string;
@@ -20,15 +21,13 @@ const EMPTY_FIELD: FieldState = { value: '' };
 // Mirrors the server's cooldown so the button unlocks when a resend would succeed.
 const RESEND_COOLDOWN_MS = 60_000;
 
-const messageFor = (error: unknown): string =>
-  error instanceof ApiRequestError ? error.message : FALLBACK_MESSAGE;
-
 /**
  * Passwordless web login for Telegram-made accounts: identify, then type the
  * code the bot sent. Two steps in one component because they share the challenge.
  */
 export function TelegramCodeLogin() {
   const queryClient = useQueryClient();
+  const t = useT();
   const [challenge, setChallenge] = useState<TelegramCodeChallenge | null>(null);
   const [identifier, setIdentifier] = useState<FieldState>(EMPTY_FIELD);
   const [code, setCode] = useState<FieldState>(EMPTY_FIELD);
@@ -50,9 +49,9 @@ export function TelegramCodeLogin() {
       setResendAt(new Date(Date.now() + RESEND_COOLDOWN_MS));
     } catch (error) {
       if (error instanceof ApiRequestError && error.fields.identifier) {
-        setIdentifier((prev) => ({ ...prev, status: 'bad', message: error.fields.identifier }));
+        setIdentifier((prev) => ({ ...prev, status: 'bad', message: fieldErrorMessage(error, 'identifier') }));
       } else {
-        setFormError(messageFor(error));
+        setFormError(errorMessage(error));
       }
     } finally {
       setBusy(false);
@@ -69,12 +68,12 @@ export function TelegramCodeLogin() {
       setSessionUser(queryClient, session.user);
     } catch (error) {
       if (error instanceof ApiRequestError && error.fields.code) {
-        setCode((prev) => ({ ...prev, status: 'bad', message: error.fields.code }));
+        setCode((prev) => ({ ...prev, status: 'bad', message: fieldErrorMessage(error, 'code') }));
         setCodeShake((count) => count + 1);
       } else {
         // 410: expired or out of tries — clear the field; "Send a new code" is right below.
         if (error instanceof ApiRequestError && error.status === 410) setCode(EMPTY_FIELD);
-        setFormError(messageFor(error));
+        setFormError(errorMessage(error));
       }
     } finally {
       setBusy(false);
@@ -94,7 +93,7 @@ export function TelegramCodeLogin() {
             message slot is invisible in the neutral state, so the hint can't live there. */}
         <div className="grid">
           <Field
-            label="Reg number, phone or @username"
+            label={t.auth.identifier}
             name="identifier"
             autoComplete="username"
             placeholder="#0142"
@@ -103,10 +102,10 @@ export function TelegramCodeLogin() {
             message={identifier.message}
             onChange={(event) => setIdentifier({ value: event.target.value })}
           />
-          <p className="form__note">We'll send a code to your Telegram.</p>
+          <p className="form__note">{t.auth.codeHint}</p>
         </div>
         <Button type="submit" className="group mt-[0.3rem]" disabled={busy}>
-          <span>{busy ? 'Sending…' : 'Send code'}</span>
+          <span>{busy ? t.auth.sending : t.auth.sendCode}</span>
           <ArrowIcon />
         </Button>
         {formError && <FormError message={formError} />}
@@ -117,7 +116,7 @@ export function TelegramCodeLogin() {
   return (
     <form className="form" onSubmit={logIn} noValidate>
       <Field
-        label={`Code sent to ${challenge.sentTo}`}
+        label={t.auth.codeSentTo(challenge.sentTo)}
         name="code"
         inputMode="numeric"
         autoComplete="one-time-code"
@@ -131,16 +130,16 @@ export function TelegramCodeLogin() {
         onChange={(event) => setCode({ value: event.target.value.replace(/\D/g, '') })}
       />
       <Button type="submit" className="group mt-[0.3rem]" disabled={busy || code.value.length !== 6}>
-        <span>{busy ? 'Checking…' : 'Log in'}</span>
+        <span>{busy ? t.auth.verifying : t.common.logIn}</span>
         <ArrowIcon />
       </Button>
       {formError && <FormError message={formError} />}
 
       <div className="flex flex-wrap justify-between gap-3">
         <QuietAction onClick={() => void sendCode()} disabled={busy || cooldown > 0}>
-          {cooldown > 0 ? `Send a new code in ${cooldown}s` : 'Send a new code'}
+          {cooldown > 0 ? t.auth.resendIn(cooldown) : t.auth.resend}
         </QuietAction>
-        <QuietAction onClick={startOver}>Use something else</QuietAction>
+        <QuietAction onClick={startOver}>{t.auth.useSomethingElse}</QuietAction>
       </div>
     </form>
   );

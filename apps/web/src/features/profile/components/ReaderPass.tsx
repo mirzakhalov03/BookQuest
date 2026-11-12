@@ -4,6 +4,7 @@ import type { AvatarId } from '@bookquest/shared';
 import { ParticipantNumeral } from '@/components/ui/ParticipantNumeral';
 import { Avatar } from './Avatar';
 import { AvatarPicker } from './AvatarPicker';
+import { useT } from '@/i18n';
 
 interface ReaderPassProps {
   name: string;
@@ -26,6 +27,7 @@ export function ReaderPass({
   phoneNumber
 }: ReaderPassProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const t = useT().profile;
   const contacts = [telegramUsername && `@${telegramUsername}`, phoneNumber].filter(Boolean);
   const hasStub = number !== undefined;
 
@@ -37,7 +39,7 @@ export function ReaderPass({
             <button
               type="button"
               onClick={() => setPickerOpen(true)}
-              aria-label="Change avatar"
+              aria-label={t.changeAvatar}
               className="group relative shrink-0 rounded-full transition-transform duration-150 active:scale-95"
             >
               <Avatar name={name} avatar={avatar} className="w-[clamp(5.5rem,28vw,8.5rem)]" />
@@ -61,11 +63,11 @@ export function ReaderPass({
         {hasStub && (
           <div className="pass__stub pass__stub--bottom flex items-end justify-between gap-4">
             <div className="flex flex-col gap-2">
-              <span className="type-label">Participant number</span>
+              <span className="type-label">{t.participantNumber}</span>
               <ParticipantNumeral value={number} className="pass__number" />
             </div>
             <span className="mb-1 max-w-[9rem] text-right text-xs leading-snug text-taupe-dim">
-              On the leaderboard and your certificate
+              {t.numberHint}
             </span>
           </div>
         )}

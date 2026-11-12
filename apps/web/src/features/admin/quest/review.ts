@@ -1,8 +1,8 @@
 import { QUEST_DATE_FIELDS, type AdminQuest, type UpdateQuestPayload } from '@bookquest/shared';
 import { formatLongDate } from '@/lib/format';
-import { DATE_LABEL } from '../dates';
 import { toFormState } from './questForm';
 import { describeQuizConfig } from './quizConfig';
+import { getT } from '@/i18n';
 
 export interface ChangeLine {
   label: string;
@@ -10,7 +10,6 @@ export interface ChangeLine {
   after: string;
 }
 
-const PRIZE_LABEL = { first: 'First prize', second: 'Second prize', third: 'Third prize' } as const;
 
 /** Only edits participants have already planned around get a second look; typos just save. */
 export function needsReview(quest: AdminQuest, patch: UpdateQuestPayload): boolean {
@@ -26,20 +25,22 @@ export function describeRiskyChanges(
   quizTitle: (id: string) => string
 ): ChangeLine[] {
   const lines: ChangeLine[] = [];
+  const { admin, adminQuest } = getT();
+  const t = adminQuest.review;
 
   for (const field of QUEST_DATE_FIELDS) {
     const next = patch[field];
-    if (next) lines.push({ label: DATE_LABEL[field], before: formatLongDate(quest[field]), after: formatLongDate(next) });
+    if (next) lines.push({ label: admin.dates[field], before: formatLongDate(quest[field]), after: formatLongDate(next) });
   }
   for (const place of ['first', 'second', 'third'] as const) {
     const next = patch.prizes?.[place];
     if (next !== undefined) {
-      lines.push({ label: PRIZE_LABEL[place], before: quest.prizes[place] ?? 'None', after: next ?? 'None' });
+      lines.push({ label: t.prizes[place], before: quest.prizes[place] ?? t.none, after: next ?? t.none });
     }
   }
   if (patch.quizConfig !== undefined) {
     lines.push({
-      label: 'Quiz setup',
+      label: t.quizSetup,
       before: describeQuizConfig(toFormState(quest).quizConfig, quizTitle),
       after: describeQuizConfig(patch.quizConfig, quizTitle)
     });

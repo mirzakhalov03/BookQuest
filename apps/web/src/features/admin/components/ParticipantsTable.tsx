@@ -2,6 +2,7 @@ import type { Participant } from '@bookquest/shared';
 import { ParticipantNumeral } from '@/components/ui/ParticipantNumeral';
 import { ContactLink } from './ContactLink';
 import { formatCompactDate } from '@/lib/format';
+import { useT } from '@/i18n';
 
 /**
  * Two renderings of the same rows, not one table forced to behave at every
@@ -14,6 +15,7 @@ import { formatCompactDate } from '@/lib/format';
  * `sm:hidden` / `hidden sm:table` swap them, no JS branch.
  */
 export function ParticipantsTable({ participants }: { participants: Participant[] }) {
+  const t = useT().admin.participants;
   return (
     <>
       <ul className="flex flex-col gap-2 sm:hidden">
@@ -39,10 +41,10 @@ export function ParticipantsTable({ participants }: { participants: Participant[
         <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-[color:var(--rule-strong)] text-taupe">
-              <th className="type-label py-2 pr-3 font-normal">Number</th>
-              <th className="type-label py-2 pr-3 font-normal">Name</th>
-              <th className="type-label py-2 pr-3 font-normal">Contact</th>
-              <th className="type-label py-2 pr-3 font-normal">Registered</th>
+              <th className="type-label py-2 pr-3 font-normal">{t.colNumber}</th>
+              <th className="type-label py-2 pr-3 font-normal">{t.colName}</th>
+              <th className="type-label py-2 pr-3 font-normal">{t.colContact}</th>
+              <th className="type-label py-2 pr-3 font-normal">{t.colRegistered}</th>
             </tr>
           </thead>
           <tbody>

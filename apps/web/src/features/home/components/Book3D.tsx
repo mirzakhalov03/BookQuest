@@ -1,4 +1,5 @@
 import { BookCover } from '@/components/BookCover';
+import { useT } from '@/i18n';
 
 interface Book3DProps {
   title: string;
@@ -13,8 +14,9 @@ interface Book3DProps {
  * and the spine has to stay brighter than the cover (it faces the light).
  */
 export function Book3D({ title, author, coverUrl }: Book3DProps) {
+  const t = useT();
   return (
-    <div className="book" role="img" aria-label={`${title} by ${author}, standing on a lit podium`}>
+    <div className="book" role="img" aria-label={t.home.bookAria(title, author)}>
       <div className="book__face book__cover">
         <BookCover title={title} author={author} coverUrl={coverUrl} />
       </div>

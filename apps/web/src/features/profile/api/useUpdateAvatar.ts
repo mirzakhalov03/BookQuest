@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AvatarId, SessionUser } from '@bookquest/shared';
 import { updateProfile } from '@/lib/auth/authApi';
 import { authKeys } from '@/lib/auth/useAuth';
+import { getT } from '@/i18n';
 import { useUiStore } from '@/stores/ui.store';
 
 /**
@@ -22,7 +23,7 @@ export function useUpdateAvatar() {
     },
     onError: (_error, _avatar, context) => {
       if (context?.previous) queryClient.setQueryData(authKeys.me(), context.previous);
-      showToast("Couldn't save your avatar. Try again.");
+      showToast(getT().profile.avatarFailed);
     },
     onSuccess: (user) => queryClient.setQueryData(authKeys.me(), user)
   });

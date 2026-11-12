@@ -41,11 +41,13 @@ function notificationBody(data: CertificateData): string {
 
 export async function startCertificateDelivery(startedBy: UserDocument): Promise<CertificateDelivery> {
   if (!env.WEB_APP_URL) {
-    throw ApiError.conflict('Set WEB_APP_URL first — every certificate’s QR code and link point to it.');
+    throw ApiError.conflict('Set WEB_APP_URL first — every certificate’s QR code and link point to it.', {
+      reason: 'web_app_url_missing'
+    });
   }
 
   const quest = await requireCurrentQuestDocument();
-  if (new Date() < quest.resultsAt) throw ApiError.conflict('Results are not published yet.');
+  if (new Date() < quest.resultsAt) throw ApiError.conflict('Results are not published yet.', { reason: 'results_not_published' });
   await ensureRanked(quest);
 
   try {
@@ -56,7 +58,7 @@ export async function startCertificateDelivery(startedBy: UserDocument): Promise
       { upsert: true }
     );
   } catch (error) {
-    if (isDuplicateKeyError(error)) throw ApiError.conflict('Certificates are already being sent.');
+    if (isDuplicateKeyError(error)) throw ApiError.conflict('Certificates are already being sent.', { reason: 'certificates_sending' });
     throw error;
   }
 

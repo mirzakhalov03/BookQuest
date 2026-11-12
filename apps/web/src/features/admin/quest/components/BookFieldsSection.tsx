@@ -3,6 +3,7 @@ import { Field, statusFor } from '@/components/ui/Field';
 import { TextArea } from '@/components/ui/TextArea';
 import type { QuestFormState } from '../questForm';
 import { CoverPicker } from './CoverPicker';
+import { useT } from '@/i18n';
 
 interface BookFieldsSectionProps {
   /** Lets the page hold Save while a cover is still uploading. */
@@ -17,11 +18,12 @@ export function BookFieldsSection({ onCoverUploadingChange }: BookFieldsSectionP
     formState: { errors }
   } = useFormContext<QuestFormState>();
   const e = errors.book;
+  const t = useT().adminQuest.book;
 
   return (
     <>
-      <Field label="Title" {...register('book.title')} {...statusFor(e?.title?.message)} />
-      <Field label="Author" {...register('book.author')} {...statusFor(e?.author?.message)} />
+      <Field label={t.title} {...register('book.title')} {...statusFor(e?.title?.message)} />
+      <Field label={t.author} {...register('book.author')} {...statusFor(e?.author?.message)} />
       <Controller
         control={control}
         name="book.coverUrl"
@@ -34,7 +36,7 @@ export function BookFieldsSection({ onCoverUploadingChange }: BookFieldsSectionP
             onUploadingChange={onCoverUploadingChange}
             aside={
               <Field
-                label="Pages"
+                label={t.pages}
                 className="max-w-32"
                 type="number"
                 inputMode="numeric"
@@ -47,9 +49,9 @@ export function BookFieldsSection({ onCoverUploadingChange }: BookFieldsSectionP
         )}
       />
       <TextArea
-        label="Description"
+        label={t.description}
         rows={4}
-        placeholder="A shepherd boy leaves everything he knows…"
+        placeholder={t.descriptionPlaceholder}
         {...register('book.description')}
         {...statusFor(e?.description?.message)}
       />

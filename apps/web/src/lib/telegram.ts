@@ -24,6 +24,8 @@ interface TelegramWebApp {
   ready: () => void;
   expand: () => void;
   initData: string;
+  /** Unsigned mirror of `initData`; fine for UI choices like the interface language. */
+  initDataUnsafe?: { user?: { language_code?: string } };
   colorScheme: 'light' | 'dark';
   /** Never read (spec §9): the identity is fixed dark; we push our colours *to* Telegram instead. */
   themeParams: Record<string, string>;
@@ -90,16 +92,31 @@ export function getInitData(): string | null {
   return getTelegramWebApp()?.initData || null;
 }
 
-/** Who Telegram says is using the app. Unverified — only for choosing whether to sign in again. */
-export function getInitDataUserId(): string | null {
+interface InitDataUser {
+  id?: unknown;
+  language_code?: unknown;
+}
+
+function getInitDataUser(): InitDataUser | null {
   const initData = getInitData();
   if (!initData) return null;
   try {
-    const user = JSON.parse(new URLSearchParams(initData).get('user') ?? 'null') as { id?: unknown } | null;
-    return user?.id == null ? null : String(user.id);
+    return JSON.parse(new URLSearchParams(initData).get('user') ?? 'null') as InitDataUser | null;
   } catch {
     return null;
   }
+}
+
+/** Who Telegram says is using the app. Unverified — only for choosing whether to sign in again. */
+export function getInitDataUserId(): string | null {
+  const id = getInitDataUser()?.id;
+  return id == null ? null : String(id);
+}
+
+/** The Telegram client's language ("uz", "ru", "en-GB"…), or `null` outside Telegram. */
+export function getTelegramLanguageCode(): string | null {
+  const code = getTelegramWebApp()?.initDataUnsafe?.user?.language_code ?? getInitDataUser()?.language_code;
+  return typeof code === 'string' && code ? code : null;
 }
 
 /** Telegram's header back button; `null` on the web or old clients. Screens use `useTelegramBackButton`. */

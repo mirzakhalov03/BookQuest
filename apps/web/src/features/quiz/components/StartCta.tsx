@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import type { QuizOverview } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
 import { Countdown } from '@/components/ui/Countdown';
+import { errorMessage } from '@/lib/api/errorMessage';
 import { ApiRequestError } from '@/lib/api/client';
 import { haptic } from '@/lib/telegram';
 import { useCountdown } from '@/hooks/useCountdown';
@@ -11,6 +12,7 @@ import { formatLongDate } from '@/lib/format';
 import { useStartAttempt } from '../api/useAttempt';
 import { serverNow } from '../lib/serverClock';
 import { RulesSheet } from './RulesSheet';
+import { useT } from '@/i18n';
 
 interface StartCtaProps {
   window: NonNullable<QuizOverview['window']>;
@@ -21,6 +23,7 @@ interface StartCtaProps {
 /** The `open` hero (§6): readiness should be unmistakable. */
 export function StartCta({ window: quizWindow, quiz, onWindowChange }: StartCtaProps) {
   const navigate = useNavigate();
+  const t = useT().quiz;
   const showToast = useUiStore((s) => s.showToast);
   const start = useStartAttempt();
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -39,7 +42,7 @@ export function StartCta({ window: quizWindow, quiz, onWindowChange }: StartCtaP
       onSuccess: () => navigate('/quiz/play', { state: { autoStart: true } }),
       onError: (error) => {
         setRulesOpen(false);
-        showToast(error instanceof ApiRequestError ? error.message : "Couldn't start the quiz. Try again.");
+        showToast(error instanceof ApiRequestError ? errorMessage(error) : t.startFailed);
         onWindowChange();
       }
     });
@@ -47,20 +50,20 @@ export function StartCta({ window: quizWindow, quiz, onWindowChange }: StartCtaP
 
   return (
     <section className="flex flex-col items-center gap-5 text-center">
-      <p className="type-label text-ember">Quiz is open</p>
+      <p className="type-label text-ember">{t.isOpen}</p>
       <Button
         type="button"
         className="min-h-16 w-full max-w-xs animate-breathe text-lg motion-reduce:animate-none"
         onClick={() => setRulesOpen(true)}
       >
-        Start quiz
+        {t.start}
       </Button>
       {lateStart && (
         <p role="note" className="m-0 max-w-sm text-amber">
-          The quiz closes in {leftMin} min — you may not have time for every question.
+          {t.lateStart(leftMin)}
         </p>
       )}
-      <Countdown label="Quiz closes in" target={closesAt} dateText={formatLongDate(closesAt)} onComplete={onWindowChange} />
+      <Countdown label={t.closesIn} target={closesAt} dateText={formatLongDate(closesAt)} onComplete={onWindowChange} />
       <RulesSheet open={rulesOpen} quiz={quiz} busy={start.isPending} onClose={() => setRulesOpen(false)} onReady={begin} />
     </section>
   );

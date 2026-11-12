@@ -1,4 +1,5 @@
 import { formatCount, formatLongDate } from '@/lib/format';
+import { useT } from '@/i18n';
 
 type StageAsideProps =
   | { variant: 'left'; title: string; author: string }
@@ -11,6 +12,7 @@ type StageAsideProps =
  * the book's title before its facts.
  */
 export function StageAside(props: StageAsideProps) {
+  const t = useT().home;
   if (props.variant === 'left') {
     return (
       <div className="stage__aside stage__aside--left">
@@ -27,15 +29,15 @@ export function StageAside(props: StageAsideProps) {
     <div className="stage__aside stage__aside--right">
       <dl className="facts">
         <div className="facts__row">
-          <dt>Pages</dt>
+          <dt>{t.factPages}</dt>
           <dd>{formatCount(props.pages)}</dd>
         </div>
         <div className="facts__row">
-          <dt>Quiz opens</dt>
+          <dt>{t.factQuizOpens}</dt>
           <dd>{formatLongDate(props.quizOpensAt)}</dd>
         </div>
         <div className="facts__row">
-          <dt>Readers in</dt>
+          <dt>{t.factReaders}</dt>
           <dd>{formatCount(props.participantCount)}</dd>
         </div>
       </dl>

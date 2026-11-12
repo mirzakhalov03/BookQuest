@@ -2,17 +2,23 @@ import { z } from 'zod';
 import { BOOK_RESOURCE_KINDS, QUIZ_DISTRIBUTIONS, QUIZ_GROUP_COUNTS, findQuestDateIssues } from '@bookquest/shared';
 import { parseLocal } from '../dates';
 import { formDates, isValidResourceUrl, type QuestFormState } from './questForm';
+import { getT, type Messages } from '@/i18n';
 
-const required = (message: string, max: number, tooLong: string) =>
+type SchemaWords = Messages['adminQuest']['schema'];
+
+/** Resolved when validation runs, not when the module loads, so messages follow the current language. */
+const msg = (pick: (t: SchemaWords) => string) => ({ error: () => pick(getT().adminQuest.schema) });
+
+const required = (missing: (t: SchemaWords) => string, max: number, tooLong: (t: SchemaWords) => string) =>
   z
     .string()
-    .refine((value) => value.trim() !== '', message)
-    .refine((value) => value.trim().length <= max, tooLong);
+    .refine((value) => value.trim() !== '', msg(missing))
+    .refine((value) => value.trim().length <= max, msg(tooLong));
 
 const wholeNumber = (value: string, max: number) =>
   /^\d+$/.test(value.trim()) && Number(value) >= 1 && Number(value) <= max;
 
-const prize = z.string().refine((value) => value.trim().length <= 200, 'Keep it under 200 characters.');
+const prize = z.string().refine((value) => value.trim().length <= 200, msg((t) => t.prizeTooLong));
 const quizConfig = z
   .object({ distribution: z.enum(QUIZ_DISTRIBUTIONS), quizIds: z.array(z.string()) })
   .nullable()
@@ -20,14 +26,15 @@ const quizConfig = z
     if (!config) return;
     const { min, max } = QUIZ_GROUP_COUNTS[config.distribution];
     const picked = config.quizIds.filter((id) => id !== '');
+    const t = getT().adminQuest.schema;
     let message: string | null = null;
-    if (config.quizIds.length < min || config.quizIds.length > max) message = 'That many groups doesn’t fit this split.';
-    else if (picked.length < config.quizIds.length) message = 'Pick a quiz for every group.';
-    else if (new Set(picked).size !== picked.length) message = 'Pick a different quiz for each group.';
+    if (config.quizIds.length < min || config.quizIds.length > max) message = t.groupsMismatch;
+    else if (picked.length < config.quizIds.length) message = t.pickEveryGroup;
+    else if (new Set(picked).size !== picked.length) message = t.pickDifferent;
     if (message) ctx.addIssue({ code: 'custom', message });
   });
 
-const date = z.string().refine((value) => parseLocal(value) !== null, 'Pick a date and time.');
+const date = z.string().refine((value) => parseLocal(value) !== null, msg((t) => t.pickDate));
 
 /**
  * The client mirror of the API's limits, over the form's string values. The
@@ -36,16 +43,16 @@ const date = z.string().refine((value) => parseLocal(value) !== null, 'Pick a da
 export const questFormSchema = z
   .object({
     book: z.object({
-      title: required('Give the book a title.', 200, 'Keep the title under 200 characters.'),
-      author: required('Who wrote it?', 200, 'Keep the author under 200 characters.'),
-      pages: z.string().refine((value) => wholeNumber(value, 20_000), 'Whole pages, 1 to 20,000.'),
+      title: required((t) => t.titleRequired, 200, (t) => t.titleTooLong),
+      author: required((t) => t.authorRequired, 200, (t) => t.authorTooLong),
+      pages: z.string().refine((value) => wholeNumber(value, 20_000), msg((t) => t.pages)),
       coverUrl: z.string(),
-      description: z.string().refine((value) => value.trim().length <= 4000, 'Keep it under 4,000 characters.'),
+      description: z.string().refine((value) => value.trim().length <= 4000, msg((t) => t.descriptionTooLong)),
       resources: z
         .array(
           z.object({
-            label: required('Name this link.', 80, 'Keep the name under 80 characters.'),
-            url: z.string().refine((value) => isValidResourceUrl(value.trim()), 'That doesn’t look like a full URL.'),
+            label: required((t) => t.linkName, 80, (t) => t.linkNameTooLong),
+            url: z.string().refine((value) => isValidResourceUrl(value.trim()), msg((t) => t.badUrl)),
             kind: z.enum(BOOK_RESOURCE_KINDS)
           })
         )
@@ -65,7 +72,9 @@ export const questFormSchema = z
     // Ordering only means something once all five parse; "Pick a date" covers the rest.
     if (Object.values(values.dates).some((value) => parseLocal(value) === null)) return;
     const issues = findQuestDateIssues(formDates(values));
+    // Each field fails for one reason on the client, so the field names the message.
+    const order: Partial<Record<string, string>> = getT().adminQuest.dates.order;
     for (const [field, message] of Object.entries(issues ?? {})) {
-      ctx.addIssue({ code: 'custom', path: ['dates', field], message });
+      ctx.addIssue({ code: 'custom', path: ['dates', field], message: order[field] ?? message });
     }
   }) satisfies z.ZodType<QuestFormState>;

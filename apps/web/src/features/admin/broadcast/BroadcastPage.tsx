@@ -14,6 +14,8 @@ import { AdminPageHeader } from '../components/AdminPageHeader';
 import { BroadcastHistory } from './components/BroadcastHistory';
 import { MessagePreview } from './components/MessagePreview';
 import { broadcastSuggestions } from './suggestions';
+import { useT } from '@/i18n';
+import { errorMessage } from '@/lib/api/errorMessage';
 
 /** Router state other screens hand over to pre-fill the composer (the Dashboard's next steps). */
 export interface BroadcastLocationState {
@@ -28,6 +30,8 @@ export function BroadcastPage() {
   const quest = useCurrentQuest();
   const send = useSendBroadcast();
   const showToast = useUiStore((state) => state.showToast);
+  const t = useT();
+  const b = t.admin.broadcast;
 
   const trimmed = message.trim();
   const suggestions = quest.data ? broadcastSuggestions(quest.data, new Date()) : [];
@@ -40,7 +44,7 @@ export function BroadcastPage() {
       {
         onSuccess: () => {
           setMessage('');
-          showToast('Broadcast on its way.');
+          showToast(b.sentToast);
         },
         onSettled: () => setConfirming(false)
       }
@@ -49,7 +53,7 @@ export function BroadcastPage() {
 
   return (
     <AdminScreen className="max-w-3xl">
-      <AdminPageHeader eyebrow="Broadcast" title="Message everyone" />
+      <AdminPageHeader eyebrow={b.eyebrow} title={b.title} />
 
       <form
         noValidate
@@ -75,10 +79,10 @@ export function BroadcastPage() {
         )}
 
         <TextArea
-          label="Message"
+          label={b.message}
           rows={5}
           maxLength={BROADCAST_MAX_LENGTH}
-          placeholder="The quiz opens tomorrow at 18:00."
+          placeholder={b.placeholder}
           value={message}
           onChange={(event) => setMessage(event.target.value)}
           head={
@@ -87,19 +91,19 @@ export function BroadcastPage() {
             </span>
           }
           status={send.isError ? 'bad' : undefined}
-          message={send.isError ? send.error.message : undefined}
+          message={send.isError ? errorMessage(send.error) : undefined}
         />
 
         {trimmed && <MessagePreview message={trimmed} />}
 
         {reach && (
           <p className="m-0 text-sm text-taupe">
-            Reaches {formatCount(reach.audience)} people · {formatCount(reach.dmAudience)} on Telegram
+            {b.reach(formatCount(reach.audience), formatCount(reach.dmAudience))}
           </p>
         )}
 
         <Button type="submit" disabled={!trimmed || send.isPending} className="self-stretch sm:self-start">
-          Send to everyone
+          {b.sendToEveryone}
         </Button>
       </form>
 
@@ -108,14 +112,14 @@ export function BroadcastPage() {
       <Sheet
         open={confirming}
         onClose={() => setConfirming(false)}
-        title="Send this to everyone?"
+        title={b.confirmTitle}
         actions={
           <>
             <Button type="button" variant="quiet" onClick={() => setConfirming(false)}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button type="button" onClick={confirmSend} disabled={send.isPending}>
-              {send.isPending ? 'Sending…' : 'Send now'}
+              {send.isPending ? b.sending : b.sendNow}
             </Button>
           </>
         }
@@ -123,8 +127,7 @@ export function BroadcastPage() {
         <MessagePreview message={trimmed} />
         {reach && (
           <p className="m-0 text-sm text-taupe">
-            It reaches {formatCount(reach.audience)} people in the app, {formatCount(reach.dmAudience)} of them on
-            Telegram too. It can't be unsent.
+            {b.confirmBody(formatCount(reach.audience), formatCount(reach.dmAudience))}
           </p>
         )}
       </Sheet>

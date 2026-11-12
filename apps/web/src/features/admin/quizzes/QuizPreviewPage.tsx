@@ -11,6 +11,7 @@ import { useCountdownTo } from '@/components/quiz/useCountdownTo';
 import { useQuiz } from '../api/useQuizzes';
 import { AdminQuery } from '../components/AdminQuery';
 import { readDraft, toQuizFormState, type QuizFormState } from './quizForm';
+import { useT } from '@/i18n';
 
 // 44px squares: the preview's controls are icons, named for screen readers by `aria-label`.
 const ICON_BASE =
@@ -30,8 +31,9 @@ export function QuizPreviewPage() {
 
 function SavedPreview({ quizId }: { quizId: string }) {
   const query = useQuiz(quizId);
+  const t = useT();
   return (
-    <AdminQuery query={query} loadingLabel="Opening the preview…">
+    <AdminQuery query={query} loadingLabel={t.adminQuiz.preview.loading}>
       {(quiz) => <Preview quizId={quizId} content={toQuizFormState(quiz)} />}
     </AdminQuery>
   );
@@ -42,6 +44,7 @@ const readNow = () => Date.now();
 function Preview({ quizId, content }: { quizId: string; content: QuizFormState }) {
   const { questions, settings } = content;
   const [index, setIndex] = useState(0);
+  const t = useT().adminQuiz.preview;
   const [showAnswers, setShowAnswers] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [deadline, setDeadline] = useState(() =>
@@ -55,10 +58,10 @@ function Preview({ quizId, content }: { quizId: string; content: QuizFormState }
     () =>
       question && {
         type: question.type,
-        prompt: question.prompt || 'Untitled question',
-        options: question.options.map((option) => ({ ...option, text: option.text || 'Empty option' }))
+        prompt: question.prompt || t.untitledQuestion,
+        options: question.options.map((option) => ({ ...option, text: option.text || t.emptyOption }))
       },
-    [question]
+    [question, t]
   );
   const backToEditor = { to: `/admin/quizzes/${quizId}`, state: { draft: content } };
 
@@ -74,7 +77,7 @@ function Preview({ quizId, content }: { quizId: string; content: QuizFormState }
     return (
       <AdminScreen className="max-w-2xl">
         <PreviewHeader title={content.title} backToEditor={backToEditor} />
-        <p className="m-0 text-taupe">This quiz has no questions yet.</p>
+        <p className="m-0 text-taupe">{t.noQuestions}</p>
       </AdminScreen>
     );
   }
@@ -90,7 +93,7 @@ function Preview({ quizId, content }: { quizId: string; content: QuizFormState }
         action={
           <button
             type="button"
-            aria-label="Show answers"
+            aria-label={t.showAnswers}
             aria-pressed={showAnswers}
             onClick={() => setShowAnswers((shown) => !shown)}
             className={showAnswers ? ICON_BUTTON_ON : ICON_BUTTON}
@@ -115,24 +118,24 @@ function Preview({ quizId, content }: { quizId: string; content: QuizFormState }
         onSelect={setSelected}
       />
 
-      {timeUp && <p className="m-0 text-sm text-amber">Time's up — participants move on automatically.</p>}
+      {timeUp && <p className="m-0 text-sm text-amber">{t.timeUp}</p>}
 
       <div className="flex items-center justify-between gap-3">
         <button
           type="button"
-          aria-label="Previous question"
+          aria-label={t.previous}
           disabled={index === 0}
           onClick={() => startQuestion(index - 1)}
           className={ICON_BUTTON}
         >
           <ChevronLeft className="h-5 w-5" aria-hidden />
         </button>
-        <button type="button" aria-label="Restart timer" onClick={() => startQuestion(index)} className={ICON_BUTTON}>
+        <button type="button" aria-label={t.restart} onClick={() => startQuestion(index)} className={ICON_BUTTON}>
           <RotateCcw className="h-[1.125rem] w-[1.125rem]" aria-hidden />
         </button>
         <Button
           type="button"
-          aria-label="Next question"
+          aria-label={t.next}
           disabled={index === questions.length - 1}
           onClick={() => startQuestion(index + 1)}
           className="w-11 px-0"
@@ -152,13 +155,14 @@ interface PreviewHeaderProps {
 
 /** One quiet row: way back, what this is, the answers toggle. The title matters less once you're inside. */
 function PreviewHeader({ title, backToEditor, action }: PreviewHeaderProps) {
+  const t = useT().adminQuiz.preview;
   return (
     <header className="flex items-center gap-3">
-      <Link to={backToEditor.to} state={backToEditor.state} aria-label="Back to editor" className={ICON_BUTTON}>
+      <Link to={backToEditor.to} state={backToEditor.state} aria-label={t.backToEditor} className={ICON_BUTTON}>
         <ArrowLeft className="h-5 w-5" aria-hidden />
       </Link>
       <div className="flex min-w-0 flex-1 flex-col">
-        <span className="type-label">Preview · not saved</span>
+        <span className="type-label">{t.notSaved}</span>
         <h1 className="m-0 truncate text-base font-semibold text-paper">{title}</h1>
       </div>
       {action}

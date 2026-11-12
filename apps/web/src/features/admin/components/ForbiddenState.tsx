@@ -1,5 +1,7 @@
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { ApiRequestError } from '@/lib/api/client';
+import { useT } from '@/i18n';
+import { errorMessage } from '@/lib/api/errorMessage';
 
 /**
  * `403 forbidden` is a state every admin screen will actually hit — the
@@ -16,10 +18,11 @@ export function isForbidden(error: unknown): error is ApiRequestError {
 }
 
 export function ForbiddenState({ error }: { error: ApiRequestError }) {
+  const t = useT();
   return (
     <EmptyState
-      title="This account is not an admin"
-      body={error.message}
+      title={t.admin.notAdminTitle}
+      body={errorMessage(error)}
       className="flex-1"
     />
   );

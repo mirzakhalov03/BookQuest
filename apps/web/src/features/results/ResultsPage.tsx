@@ -14,6 +14,7 @@ import { ResultsPodium } from '@/components/ResultsPodium';
 import { LeaderboardRow } from '@/components/LeaderboardRow';
 import { FullBoardPrompt } from './components/FullBoardPrompt';
 import { ReviewAnswersLink } from './components/ReviewAnswersLink';
+import { useT } from '@/i18n';
 
 /**
  * `/results` — public (spec §3). Signed out, the API sends only the podium;
@@ -25,8 +26,9 @@ import { ReviewAnswersLink } from './components/ReviewAnswersLink';
 export function ResultsPage() {
   usePullToRefresh();
   const results = useQuestResults();
+  const t = useT();
 
-  if (results.isPending) return <LoadingState label="Tallying the scores…" />;
+  if (results.isPending) return <LoadingState label={t.results.loading} />;
 
   if (results.error) {
     // Results that don't exist yet are *not yet*, not a failure (spec,
@@ -46,8 +48,8 @@ export function ResultsPage() {
     return (
       <Screen>
         <EmptyState
-          title="No one finished the quiz"
-          body="The results are in, but nobody submitted an attempt this year."
+          title={t.results.nobodyTitle}
+          body={t.results.nobodyBody}
         />
       </Screen>
     );
@@ -56,8 +58,8 @@ export function ResultsPage() {
   return (
     <Screen className="max-w-3xl gap-8">
       <header className="flex flex-col gap-1">
-        <p className="type-label">Results</p>
-        <h1 className="type-display text-3xl text-paper">Published {formatLongDate(publishedAt)}</h1>
+        <p className="type-label">{t.results.label}</p>
+        <h1 className="type-display text-3xl text-paper">{t.results.published(formatLongDate(publishedAt))}</h1>
         <ReviewAnswersLink />
       </header>
 
@@ -65,7 +67,7 @@ export function ResultsPage() {
 
       {isFullBoard ? (
         <section className="flex flex-col gap-1">
-          <p className="type-label">Full leaderboard</p>
+          <p className="type-label">{t.results.fullLeaderboard}</p>
           <Rule />
           <ol className="flex flex-col">
             {leaderboard.map((entry) => (
@@ -91,6 +93,7 @@ export function ResultsPage() {
  */
 function BeforeResults({ onPublished }: { onPublished: () => void }) {
   const quest = useCurrentQuest();
+  const t = useT();
   const refreshQuest = useRefreshCurrentQuest();
 
   // Memoised on the ISO string, exactly like Home's countdown target: a
@@ -99,7 +102,7 @@ function BeforeResults({ onPublished }: { onPublished: () => void }) {
   const resultsAtIso = quest.data ? quest.data.resultsAt : null;
   const target = useMemo(() => (resultsAtIso ? new Date(resultsAtIso) : null), [resultsAtIso]);
 
-  if (quest.isPending) return <LoadingState label="Checking the calendar…" />;
+  if (quest.isPending) return <LoadingState label={t.quiz.loading} />;
 
   if (quest.error) {
     // No quest running at all — there is no `resultsAt` to count down to,
@@ -108,8 +111,8 @@ function BeforeResults({ onPublished }: { onPublished: () => void }) {
       return (
         <Screen>
           <EmptyState
-            title="Nothing to publish yet"
-            body="There's no quest running between editions. Check back once the next one opens."
+            title={t.results.nothingTitle}
+            body={t.results.nothingBody}
           />
         </Screen>
       );
@@ -124,14 +127,14 @@ function BeforeResults({ onPublished }: { onPublished: () => void }) {
   return (
     <Screen className="flex-1 justify-center gap-6">
       <header className="flex flex-col gap-1 text-center">
-        <p className="type-label">Results</p>
-        <h1 className="type-display text-3xl text-paper">Not published yet</h1>
+        <p className="type-label">{t.results.label}</p>
+        <h1 className="type-display text-3xl text-paper">{t.results.notYetTitle}</h1>
       </header>
 
       <Countdown
-        label="Results published in"
+        label={t.results.publishedIn}
         target={target}
-        dateText={`Results are published on ${formatLongDate(quest.data.resultsAt)}`}
+        dateText={t.results.publishedOn(formatLongDate(quest.data.resultsAt))}
         onComplete={() => {
           refreshQuest();
           onPublished();

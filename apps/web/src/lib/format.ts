@@ -1,39 +1,42 @@
+import { INTL_LOCALES, getLocale, getT } from '@/i18n';
+
 /**
  * Every date and number the interface shows is formatted here and nowhere else
- * (spec §4). `Intl` does all of it, which is why there is no date library in
- * this app (spec §10) — the whole surface is three functions.
- *
- * Formatters are built once at module load: constructing an `Intl` formatter is
- * the expensive half, and a countdown row would otherwise build one per tick.
+ * (spec §4). `Intl` does all of it, in the reader's chosen language, which is
+ * why there is no date library in this app (spec §10).
  */
 
-/**
- * `en-GB` for one reason only: it puts the day before the month and the clock
- * on 24 hours, which is the format the design uses. It is not a locale
- * setting — BookQuest ships one language, and the day is not the user's to
- * reorder. `hourCycle` is stated rather than assumed because `en-GB` has
- * quietly changed its default before.
- */
-const DATE = new Intl.DateTimeFormat('en-GB', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric'
-});
+type Kind = 'date' | 'time' | 'compactDate' | 'shortDate' | 'count';
 
-const TIME = new Intl.DateTimeFormat('en-GB', {
-  hour: '2-digit',
-  minute: '2-digit',
-  hourCycle: 'h23'
-});
+const OPTIONS: Record<Kind, Intl.DateTimeFormatOptions | Intl.NumberFormatOptions> = {
+  date: { day: 'numeric', month: 'long', year: 'numeric' },
+  // `hourCycle` is stated rather than assumed: the 24-hour clock is the design, in every language.
+  time: { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' },
+  compactDate: { day: '2-digit', month: '2-digit', year: '2-digit' },
+  shortDate: { day: 'numeric', month: 'short' },
+  count: {}
+};
 
-const COMPACT_DATE = new Intl.DateTimeFormat('en-GB', {
-  day: '2-digit',
-  month: '2-digit',
-  year: '2-digit'
-});
+const cache = new Map<string, Intl.DateTimeFormat | Intl.NumberFormat>();
 
-const COUNT = new Intl.NumberFormat('en-GB');
-const SHORT_DATE = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
+/** One formatter per language and kind, built on first use: constructing one is the expensive half. */
+function formatter(kind: 'count'): Intl.NumberFormat;
+function formatter(kind: Exclude<Kind, 'count'>): Intl.DateTimeFormat;
+function formatter(kind: Kind): Intl.DateTimeFormat | Intl.NumberFormat {
+  const tag = INTL_LOCALES[getLocale()];
+  const key = `${tag}:${kind}`;
+  let built = cache.get(key);
+  if (!built) {
+    built =
+      kind === 'count'
+        ? new Intl.NumberFormat(tag)
+        : new Intl.DateTimeFormat(tag, OPTIONS[kind] as Intl.DateTimeFormatOptions);
+    cache.set(key, built);
+  }
+  return built;
+}
+
+const toDate = (value: string | Date) => (typeof value === 'string' ? new Date(value) : value);
 
 /**
  * "20 September 2026, 23:59" — the deadline, the quiz window, the results time.
@@ -43,41 +46,42 @@ const SHORT_DATE = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'sh
  * they have to compare against their own evening.
  */
 export function formatLongDate(value: string | Date): string {
-  const date = typeof value === 'string' ? new Date(value) : value;
-  return `${DATE.format(date)}, ${TIME.format(date)}`;
+  const date = toDate(value);
+  return `${formatter('date').format(date)}, ${formatter('time').format(date)}`;
 }
 
 /** "14 December 2026" — a date that is a fact on a document (a certificate's issue date), not a moment. */
 export function formatDate(value: string | Date): string {
-  return DATE.format(typeof value === 'string' ? new Date(value) : value);
+  return formatter('date').format(toDate(value));
 }
 
 /** "27/09/26, 22:16" — a timestamp in a dense list, where the month name costs too much width. */
 export function formatCompactDate(value: string | Date): string {
-  const date = typeof value === 'string' ? new Date(value) : value;
-  return `${COMPACT_DATE.format(date)}, ${TIME.format(date)}`;
+  const date = toDate(value);
+  return `${formatter('compactDate').format(date)}, ${formatter('time').format(date)}`;
 }
 
 const MINUTE_MS = 60_000;
 
 /** "just now", "12 min ago", "3 h ago" inside a day; the compact date past that. Exact time goes in a `title`. */
 export function formatTimeAgo(value: string | Date, now = new Date()): string {
-  const date = typeof value === 'string' ? new Date(value) : value;
+  const t = getT().format;
+  const date = toDate(value);
   const minutes = Math.floor((now.getTime() - date.getTime()) / MINUTE_MS);
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes} min ago`;
-  if (minutes < 24 * 60) return `${Math.floor(minutes / 60)} h ago`;
+  if (minutes < 1) return t.justNow;
+  if (minutes < 60) return t.minutesAgo(minutes);
+  if (minutes < 24 * 60) return t.hoursAgo(Math.floor(minutes / 60));
   return formatCompactDate(date);
 }
 
 /** "5 Apr" — a date inside a one-line summary, where year and time are noise. */
 export function formatShortDate(value: string | Date): string {
-  return SHORT_DATE.format(typeof value === 'string' ? new Date(value) : value);
+  return formatter('shortDate').format(toDate(value));
 }
 
 /** "1,204" — a quantity, so it gets thousands separators. Readers, questions, marks. */
 export function formatCount(value: number): string {
-  return COUNT.format(value);
+  return formatter('count').format(value);
 }
 
 /**
@@ -105,9 +109,10 @@ export function formatDuration(durationMs: number): string {
   const seconds = totalSeconds % 60;
   const paddedSeconds = String(seconds).padStart(2, '0');
 
+  const t = getT().format;
   return hours > 0
-    ? `${hours}h ${String(minutes).padStart(2, '0')}m ${paddedSeconds}s`
-    : `${minutes}m ${paddedSeconds}s`;
+    ? t.durationHms(hours, String(minutes).padStart(2, '0'), paddedSeconds)
+    : t.durationMs(minutes, paddedSeconds);
 }
 
 /** "4:12.3" — a quiz time on the completion screen, where tenths are the tiebreaker made visible. */
@@ -172,64 +177,4 @@ export function toDateTimeLocalInput(value: string): string {
   const h = pad(date.getHours());
   const min = pad(date.getMinutes());
   return `${y}-${m}-${d}T${h}:${min}`;
-}
-
-const ORDINAL_WORDS = [
-  'Zeroth',
-  'First',
-  'Second',
-  'Third',
-  'Fourth',
-  'Fifth',
-  'Sixth',
-  'Seventh',
-  'Eighth',
-  'Ninth',
-  'Tenth',
-  'Eleventh',
-  'Twelfth',
-  'Thirteenth',
-  'Fourteenth',
-  'Fifteenth',
-  'Sixteenth',
-  'Seventeenth',
-  'Eighteenth',
-  'Nineteenth',
-  'Twentieth'
-];
-
-/**
- * "1st", "2nd", "3rd", "41st" — a bare ordinal, no spelled-out words. This is
- * the certificate's rank line: "Forty-seventh" is an odd thing for a reading
- * competition to print, unlike the edition mark below, where the spelled-out
- * form is the whole point.
- */
-export function formatOrdinal(value: number): string {
-  const lastTwo = value % 100;
-  const lastDigit = value % 10;
-  const suffix =
-    lastTwo >= 11 && lastTwo <= 13
-      ? 'th'
-      : lastDigit === 1
-        ? 'st'
-        : lastDigit === 2
-          ? 'nd'
-          : lastDigit === 3
-            ? 'rd'
-            : 'th';
-  return `${value}${suffix}`;
-}
-
-/**
- * "Fourth" for 4, "21st" past twenty. The edition mark's other half — "Fourth
- * annual reading competition" — also derives from `quest.edition` rather than
- * being written once and forgotten. Spelling out every future edition
- * ("One hundred and third") is a job for a real number-to-words library,
- * which spec §10 rules out for a label this small; twenty spelled-out words
- * covers this competition for the next two decades, and a numeral ordinal
- * past that ("21st annual…") still reads as correct English indefinitely.
- */
-export function formatOrdinalEdition(edition: number): string {
-  const word = edition >= 1 ? ORDINAL_WORDS[edition] : undefined;
-  return word ?? formatOrdinal(edition);
 }

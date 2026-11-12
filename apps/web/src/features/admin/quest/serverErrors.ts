@@ -2,6 +2,7 @@ import { QUEST_DATE_FIELDS } from '@bookquest/shared';
 import type { FieldPath, UseFormSetError } from 'react-hook-form';
 import type { ApiRequestError } from '@/lib/api/client';
 import type { QuestFormState } from './questForm';
+import { errorMessage, fieldErrorMessage } from '@/lib/api/errorMessage';
 
 const DATE_KEYS = new Set<string>(QUEST_DATE_FIELDS);
 const FORM_ROOTS = new Set(['book', 'prizes', 'dates', 'quizConfig']);
@@ -21,12 +22,13 @@ export function applyServerErrors(
   setError: UseFormSetError<QuestFormState>
 ): string | null {
   const entries = Object.entries(error.fields);
-  if (entries.length === 0) return error.message;
+  if (entries.length === 0) return errorMessage(error);
 
   let formMessage: string | null = null;
   let focused = false;
 
-  for (const [key, message] of entries) {
+  for (const [key, raw] of entries) {
+    const message = fieldErrorMessage(error, key) ?? raw;
     const path = toFormPath(key);
     if (!FORM_ROOTS.has(path.split('.')[0] ?? '')) {
       formMessage ??= message;

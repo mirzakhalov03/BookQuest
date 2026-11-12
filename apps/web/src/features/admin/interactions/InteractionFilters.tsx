@@ -6,8 +6,8 @@ import { Select } from '@/components/ui/Select';
 import { Switch } from '@/components/ui/Switch';
 import { formatCount, formatShortDate } from '@/lib/format';
 import { useBroadcasts } from '../api/useBroadcasts';
-import { RANGE_OPTIONS, type InteractionFilters, type RangePreset } from './filters';
-import { KIND_LABEL } from './KindChip';
+import { RANGE_PRESETS, type InteractionFilters, type RangePreset } from './filters';
+import { useT } from '@/i18n';
 
 interface InteractionFiltersBarProps {
   filters: InteractionFilters;
@@ -34,16 +34,17 @@ export function InteractionFiltersBar({
   personName
 }: InteractionFiltersBarProps) {
   const broadcasts = useBroadcasts().data?.items ?? [];
+  const t = useT().admin.messages;
 
   const kindOptions = [
-    { value: '' as const, label: 'All kinds' },
+    { value: '' as const, label: t.allKinds },
     ...INTERACTION_KINDS.map((kind) => ({
       value: kind,
-      label: withCount(KIND_LABEL[kind], facets?.kinds[kind])
+      label: withCount(t.kinds[kind], facets?.kinds[kind])
     }))
   ];
   const commandOptions = [
-    { value: '', label: 'All commands' },
+    { value: '', label: t.allCommands },
     ...(facets?.commands ?? []).map(({ command, count }) => ({
       value: command,
       label: withCount(`/${command}`, count)
@@ -54,7 +55,7 @@ export function InteractionFiltersBar({
       : [])
   ];
   const broadcastOptions = [
-    { value: '', label: 'Any broadcast' },
+    { value: '', label: t.anyBroadcast },
     ...broadcasts.map((broadcast) => ({
       value: broadcast.id,
       label: `${formatShortDate(broadcast.createdAt)} — ${clip(broadcast.message, 40)}`
@@ -65,17 +66,17 @@ export function InteractionFiltersBar({
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
         <Switch
-          aria-label="Which rows"
+          aria-label={t.rowsAria}
           options={[
-            { value: 'messages', label: 'Messages' },
-            { value: 'all', label: 'Everything' }
+            { value: 'messages', label: t.viewMessages },
+            { value: 'all', label: t.viewAll }
           ]}
           value={filters.view}
           onChange={(view) => onChange({ view })}
         />
         <SearchInput
-          aria-label="Search messages"
-          placeholder="Name, @user, id or text"
+          aria-label={t.searchAria}
+          placeholder={t.searchPlaceholder}
           maxLength={80}
           value={searchInput}
           onChange={onSearchInput}
@@ -85,39 +86,39 @@ export function InteractionFiltersBar({
 
       <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end">
         <Select<InteractionKind | ''>
-          label="Kind"
+          label={t.kind}
           value={filters.kind}
           options={kindOptions}
           onChange={(kind) => onChange({ kind })}
           className="sm:w-40"
         />
         <Select
-          label="Command"
+          label={t.command}
           value={filters.command}
           options={commandOptions}
           onChange={(command) => onChange({ command })}
           className="sm:w-40"
         />
         <Select
-          label="Broadcast"
+          label={t.broadcast}
           value={filters.broadcast}
           options={broadcastOptions}
           onChange={(broadcast) => onChange({ broadcast })}
           className="col-span-2 sm:w-64"
         />
         <Select<RangePreset>
-          label="When"
+          label={t.when}
           value={filters.range}
-          options={RANGE_OPTIONS}
+          options={RANGE_PRESETS.map((value) => ({ value, label: t.range[value] }))}
           onChange={(range) => onChange({ range })}
           className="sm:w-40"
         />
         <Select<InteractionFilters['order']>
-          label="Order"
+          label={t.order}
           value={filters.order}
           options={[
-            { value: 'newest', label: 'Newest first' },
-            { value: 'oldest', label: 'Oldest first' }
+            { value: 'newest', label: t.newest },
+            { value: 'oldest', label: t.oldest }
           ]}
           onChange={(order) => onChange({ order })}
           className="sm:w-36"
@@ -129,7 +130,7 @@ export function InteractionFiltersBar({
             onChange={(event) => onChange({ includeAdmins: event.target.checked })}
             className="h-4 w-4 accent-[color:var(--color-gold)]"
           />
-          Show organisers
+          {t.showOrganisers}
         </label>
       </div>
 
@@ -138,10 +139,10 @@ export function InteractionFiltersBar({
           <button
             type="button"
             onClick={() => onChange({ person: '' })}
-            aria-label={`Stop showing only ${personName}`}
+            aria-label={t.stopOnly(personName)}
             className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--rule-strong)] px-3 py-1 text-sm text-paper hover:border-paper-dim"
           >
-            Only {personName}
+            {t.only(personName)}
             <X aria-hidden className="h-3.5 w-3.5" />
           </button>
         </div>

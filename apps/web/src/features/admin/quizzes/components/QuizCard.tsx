@@ -3,21 +3,23 @@ import { Link } from 'react-router';
 import type { QuizSummaryAdmin } from '@bookquest/shared';
 import { formatTimeAgo } from '@/lib/format';
 import { formatQuizDuration } from '../format';
+import { useT, type Messages } from '@/i18n';
+import { localizeGroupLabel } from '../../quest/quizConfig';
 
 type Chip = { label: string; tone: 'warn' | 'good' | 'plain' };
 
-function chipsFor(quiz: QuizSummaryAdmin): Chip[] {
+function chipsFor(quiz: QuizSummaryAdmin, t: Messages['adminQuiz']): Chip[] {
   const chips: Chip[] = [
-    quiz.isComplete ? { label: 'Ready', tone: 'good' } : { label: 'Incomplete', tone: 'warn' }
+    quiz.isComplete ? { label: t.library.ready, tone: 'good' } : { label: t.library.incomplete, tone: 'warn' }
   ];
   if (quiz.attachment) {
     chips.push({
-      label: `Attached to Edition ${quiz.attachment.questEdition} · ${quiz.attachment.groupLabel}`,
+      label: t.library.attachedTo(t.edition(quiz.attachment.questEdition), localizeGroupLabel(quiz.attachment.groupLabel)),
       tone: 'plain'
     });
   }
-  if (quiz.usedIn.length > 0) chips.push({ label: `Used in ${quiz.usedIn.map((e) => `Edition ${e}`).join(', ')}`, tone: 'plain' });
-  if (quiz.locked) chips.push({ label: 'Locked', tone: 'plain' });
+  if (quiz.usedIn.length > 0) chips.push({ label: t.library.usedIn(quiz.usedIn.map((e) => t.edition(e)).join(', ')), tone: 'plain' });
+  if (quiz.locked) chips.push({ label: t.library.locked, tone: 'plain' });
   return chips;
 }
 
@@ -37,6 +39,7 @@ interface QuizCardProps {
 export function QuizCard({ quiz, busy, onDuplicate, onDelete }: QuizCardProps) {
   const { easy, medium, hard } = quiz.difficultyMix;
   const canDelete = !quiz.attachment && !quiz.locked;
+  const t = useT().adminQuiz;
 
   return (
     <li className="flex flex-col gap-3 rounded-box border border-[color:var(--rule)] bg-[color:var(--color-ash)] p-4">
@@ -46,7 +49,7 @@ export function QuizCard({ quiz, busy, onDuplicate, onDelete }: QuizCardProps) {
         </Link>
         <button
           type="button"
-          aria-label={`Duplicate ${quiz.title}`}
+          aria-label={t.library.duplicateAria(quiz.title)}
           disabled={busy}
           onClick={onDuplicate}
           className="flex h-11 w-9 items-center justify-center text-taupe hover:text-paper disabled:opacity-40"
@@ -55,9 +58,9 @@ export function QuizCard({ quiz, busy, onDuplicate, onDelete }: QuizCardProps) {
         </button>
         <button
           type="button"
-          aria-label={`Delete ${quiz.title}`}
+          aria-label={t.library.deleteAria(quiz.title)}
           disabled={busy || !canDelete}
-          title={canDelete ? undefined : 'Attached or started quizzes can’t be deleted'}
+          title={canDelete ? undefined : t.library.cantDelete}
           onClick={onDelete}
           className="flex h-11 w-9 items-center justify-center text-taupe hover:text-error disabled:opacity-30 disabled:hover:text-taupe"
         >
@@ -65,14 +68,14 @@ export function QuizCard({ quiz, busy, onDuplicate, onDelete }: QuizCardProps) {
         </button>
       </div>
       <p className="m-0 text-sm text-paper-dim">
-        {quiz.questionCount} {quiz.questionCount === 1 ? 'question' : 'questions'} ·{' '}
+        {t.library.questions(quiz.questionCount)} ·{' '}
         {formatQuizDuration(quiz.totalSeconds)} ·{' '}
-        <span title="Easy · Medium · Hard">
+        <span title={t.library.difficultyMix}>
           {easy}·{medium}·{hard}
         </span>
       </p>
       <ul className="m-0 flex list-none flex-wrap gap-1.5 p-0">
-        {chipsFor(quiz).map(({ label, tone }) => (
+        {chipsFor(quiz, t).map(({ label, tone }) => (
           <li key={label} className={`rounded-full border px-2 py-0.5 text-xs ${TONE[tone]}`}>
             {label}
           </li>

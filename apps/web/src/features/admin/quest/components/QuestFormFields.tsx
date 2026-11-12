@@ -11,6 +11,7 @@ import { ResourceListEditor } from './ResourceListEditor';
 import { PrizeFieldsSection } from './PrizeFieldsSection';
 import { DateTimelineField } from './DateTimelineField';
 import { QuizConfigSection } from './QuizConfigSection';
+import { useT } from '@/i18n';
 
 interface QuestFormFieldsProps {
   changes: ChangeSummary;
@@ -33,6 +34,7 @@ export const QuestFormFields = memo(function QuestFormFields({
   } = useFormContext<QuestFormState>();
   const errored = sectionsWithErrors(errors);
   const [active, setActive] = useState<EditorSectionId>('book');
+  const t = useT().adminQuest.tabs;
 
   // A failed save jumps to the first broken group; typing elsewhere never yanks the view.
   useEffect(() => {
@@ -59,18 +61,18 @@ export const QuestFormFields = memo(function QuestFormFields({
   const tabs: SectionTab<EditorSectionId>[] = [
     tab(
       'book',
-      'Book',
+      t.book,
       BookOpen,
       <BookFieldsSection onCoverUploadingChange={onCoverUploadingChange} />
     ),
-    tab('resources', 'Resources', Link2, <ResourceListEditor />),
-    tab('prizes', 'Prizes', Trophy, <PrizeFieldsSection />),
-    tab('dates', 'Dates', CalendarDays, <DateTimelineField savedDates={savedDates} />),
+    tab('resources', t.resources, Link2, <ResourceListEditor />),
+    tab('prizes', t.prizes, Trophy, <PrizeFieldsSection />),
+    tab('dates', t.dates, CalendarDays, <DateTimelineField savedDates={savedDates} />),
     ...(quiz
       ? [
           tab(
             'quiz',
-            'Quiz',
+            t.quiz,
             CircleHelp,
             <QuizConfigSection quest={quiz.quest} lockMessage={quiz.lockMessage} onGoTo={setActive} />
           )

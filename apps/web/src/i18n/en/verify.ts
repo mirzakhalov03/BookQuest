@@ -1,0 +1,22 @@
+export const verify = {
+  promptTitle: 'Check a certificate',
+  promptBody: 'Enter the code printed beside the QR code.',
+  badCodeTitle: 'That isn’t a certificate code',
+  checkAgain: 'Check it and try again.',
+  loading: 'Checking the certificate…',
+  notFoundTitle: 'No certificate with this code',
+  notFoundBody: (code: string) => `We couldn’t find ${code}. Check it and try again.`,
+  codeShape: 'Codes look like BQ4-K7M2QX.',
+  codeLabel: 'Certificate code',
+  check: 'Check',
+  name: 'Name',
+  edition: 'Edition',
+  book: 'Book',
+  bookBy: (title: string, author: string) => `${title} by ${author}`,
+  place: 'Place',
+  participant: 'Participant',
+  issued: 'Issued',
+  code: 'Code',
+  genuine: 'Genuine BookQuest certificate',
+  imageAlt: (name: string, year: number) => `Certificate for ${name}, BookQuest ${year}`
+};

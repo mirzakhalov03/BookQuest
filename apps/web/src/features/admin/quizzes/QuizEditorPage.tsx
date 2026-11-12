@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, Lock } from 'lucide-react';
 import { saveQuizSchema, type QuizAdmin } from '@bookquest/shared';
 import { AdminScreen } from '@/layouts/AdminLayout';
-import { FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
 import { Button } from '@/components/ui/Button';
 import { ApiRequestError } from '@/lib/api/client';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
@@ -23,19 +22,19 @@ import { QuizDetailsSection } from './components/QuizDetailsSection';
 import { QuizSettingsSection } from './components/QuizSettingsSection';
 import { readDraft, toQuizFormState, type QuizDraftState, type QuizFormState } from './quizForm';
 import { applyQuizServerErrors } from './serverErrors';
+import { useT } from '@/i18n';
+import { errorMessage } from '@/lib/api/errorMessage';
 
 const QUIZ_FORM_ID = 'quiz-form';
-const LOCKED_BANNER =
-  'Locked — participants have started this quiz. You can still correct an answer key (below each question).';
-const STALE_MESSAGE = 'Someone else saved this quiz. Reload to see their version';
 
 /** `/admin/quizzes/:id` — edit one quiz. */
 export function QuizEditorPage() {
   const { id = '' } = useParams();
   const query = useQuiz(id);
+  const t = useT().adminQuiz.editor;
 
   return (
-    <AdminQuery query={query} loadingLabel="Opening the quiz…">
+    <AdminQuery query={query} loadingLabel={t.loading}>
       {(quiz) => (
         <QuizEditorForm
           key={quiz.id}
@@ -64,6 +63,8 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
   const [isStale, setIsStale] = useState(false);
   const [correctingId, setCorrectingId] = useState<string | null>(null);
   const showToast = useUiStore((state) => state.showToast);
+  const { common, admin, adminQuiz, adminQuest } = useT();
+  const t = adminQuiz.editor;
   const save = useSaveQuiz(quiz.id);
   const locked = quiz.locked;
   const isDirty = formState.isDirty;
@@ -96,17 +97,17 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
       // The server's answer is the new baseline, including its bumped revision.
       reset(toQuizFormState(saved));
       setIsStale(false);
-      showToast('Quiz saved.');
+      showToast(t.saved);
     } catch (error) {
       if (error instanceof ApiRequestError && error.reason === 'stale') setIsStale(true);
-      else if (error instanceof ApiRequestError && error.reason === 'quiz_locked') setFormError(error.message);
-      else setFormError(error instanceof ApiRequestError ? applyQuizServerErrors(error, setError) : FALLBACK_MESSAGE);
+      else if (error instanceof ApiRequestError && error.reason === 'quiz_locked') setFormError(errorMessage(error));
+      else setFormError(error instanceof ApiRequestError ? applyQuizServerErrors(error, setError) : errorMessage(error));
     }
   });
 
   async function reloadLatest() {
     const latest = await reload();
-    if (!latest) return showToast("Couldn't reload the quiz. Your edits are kept; try again.");
+    if (!latest) return showToast(t.reloadFailed);
     reset(toQuizFormState(latest));
     setIsStale(false);
     setFormError(null);
@@ -121,23 +122,23 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
     <FormProvider {...form}>
       <AdminScreen className="max-w-3xl">
         <AdminPageHeader
-          eyebrow="Quiz"
+          eyebrow={t.eyebrow}
           title={quiz.title}
           actions={
             <Button type="button" variant="quiet" onClick={openPreview} className="min-h-11 gap-2 px-3">
-              <Eye className="h-4 w-4" aria-hidden /> Preview
+              <Eye className="h-4 w-4" aria-hidden /> {t.preview}
             </Button>
           }
         />
 
         {locked && (
           <p role="status" className="m-0 flex items-start gap-2 rounded-box border border-amber/40 p-3 text-sm text-amber">
-            <Lock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> {LOCKED_BANNER}
+            <Lock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> {t.lockedBanner}
           </p>
         )}
         {quiz.usedIn.length > 0 && (
           <p className="m-0 text-sm text-taupe">
-            Used in {quiz.usedIn.map((edition) => `Edition ${edition}`).join(', ')}.
+            {t.usedIn(quiz.usedIn.map((edition) => adminQuiz.edition(edition)).join(', '))}
           </p>
         )}
 
@@ -158,9 +159,9 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
                 <>
                   {isStale && (
                     <div role="alert" className="flex flex-wrap items-center gap-3 rounded-box border border-amber/40 bg-[color:var(--color-ink)] p-3 text-sm text-amber">
-                      <span className="flex-1">{STALE_MESSAGE}</span>
+                      <span className="flex-1">{t.stale}</span>
                       <Button type="button" variant="quiet" onClick={() => void reloadLatest()} className="min-h-11 px-3 text-amber">
-                        Reload
+                        {t.reload}
                       </Button>
                     </div>
                   )}
@@ -182,10 +183,10 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
 
       <SaveBar
         visible={isDirty}
-        summary={errorCount > 0 ? `Fix ${errorCount} ${errorCount === 1 ? 'field' : 'fields'}` : 'Unsaved changes'}
+        summary={errorCount > 0 ? adminQuest.fixFields(errorCount) : admin.unsavedRegion}
         tone={errorCount > 0 ? 'bad' : 'neutral'}
-        submitLabel="Save"
-        busyLabel="Saving…"
+        submitLabel={common.save}
+        busyLabel={common.saving}
         isBusy={save.isPending}
         disabled={!canSave}
         formId={QUIZ_FORM_ID}

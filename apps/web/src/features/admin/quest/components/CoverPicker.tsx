@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import { Eye, ImagePlus, RefreshCw, Trash2, type LucideIcon } from 'lucide-react';
-import { COVER_CONTENT_TYPES, COVER_MAX_BYTES, COVER_MESSAGES } from '@bookquest/shared';
+import { COVER_CONTENT_TYPES, COVER_MAX_BYTES } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
 import { Spinner } from '@/components/ui/Spinner';
@@ -8,6 +8,8 @@ import { ApiRequestError } from '@/lib/api/client';
 import { downscaleImage } from '@/lib/downscaleImage';
 import { useUiStore } from '@/stores/ui.store';
 import { useUploadCover } from '../../api/useUploadCover';
+import { useT } from '@/i18n';
+import { errorMessage, fieldErrorMessage } from '@/lib/api/errorMessage';
 
 interface CoverPickerProps {
   /** The form's `book.coverUrl`; `''` means the drawn cover. */
@@ -36,6 +38,8 @@ export function CoverPicker({
   const upload = useUploadCover();
   const [preview, setPreview] = useState<string | null>(null);
   const showToast = useUiStore((state) => state.showToast);
+  const { common, errors, adminQuest } = useT();
+  const t = adminQuest.book;
   const [isViewing, setIsViewing] = useState(false);
 
   // The server's verdict on the saved cover arrives as a field error; surface it like the rest.
@@ -55,14 +59,14 @@ export function CoverPicker({
     event.target.value = ''; // so picking the same file again still fires change
     if (!picked) return;
     if (!isCoverType(picked)) {
-      showToast(COVER_MESSAGES.wrongType);
+      showToast(errors.reasons.cover_wrong_type);
       return;
     }
 
     // Size is checked after shrinking, so a big phone photo is fine; the API enforces the same cap.
     const file = await downscaleImage(picked);
     if (file.size > COVER_MAX_BYTES) {
-      showToast(COVER_MESSAGES.tooLarge);
+      showToast(errors.reasons.cover_too_large);
       return;
     }
 
@@ -72,8 +76,8 @@ export function CoverPicker({
       onError: (err) =>
         showToast(
           err instanceof ApiRequestError
-            ? (err.fields.file ?? err.message)
-            : 'Upload failed. Try again.'
+            ? (fieldErrorMessage(err, 'file') ?? errorMessage(err))
+            : t.uploadFailed
         ),
       onSettled: () => setPreview(null)
     });
@@ -89,7 +93,7 @@ export function CoverPicker({
     <div className="grid gap-[0.4rem]">
       <div className="flex items-start gap-5">
         <div className="grid shrink-0 gap-[0.4rem]">
-          <span className="type-label">Cover</span>
+          <span className="type-label">{t.cover}</span>
           <label
             htmlFor={inputId}
             className={`group relative grid aspect-[2/3] w-32 place-items-center overflow-hidden rounded-box border border-dashed border-[color:var(--rule-strong)] text-taupe transition-colors duration-150 focus-within:border-[color:var(--color-ember)] cursor-pointer hover:border-[color:var(--color-ember)] hover:text-paper-dim`}
@@ -97,13 +101,13 @@ export function CoverPicker({
             {shown ? (
               <img
                 src={shown}
-                alt="Book cover"
+                alt={t.coverAlt}
                 className={`h-full w-full object-cover transition-opacity ${upload.isPending ? 'opacity-50' : ''}`}
               />
             ) : (
               <span className="flex flex-col items-center gap-2 px-3 text-center text-sm">
                 <ImagePlus aria-hidden className="h-6 w-6" />
-                Choose a cover image
+                {t.chooseCover}
               </span>
             )}
             {upload.isPending && (
@@ -114,12 +118,12 @@ export function CoverPicker({
             {value && !upload.isPending && (
               <span className="absolute inset-x-0 bottom-0 flex justify-center gap-2 bg-gradient-to-t from-black/75 to-transparent px-2 pb-2 pt-6">
                 <OverlayButton
-                  label="Replace cover"
+                  label={t.replaceCover}
                   icon={RefreshCw}
                   onClick={() => inputRef.current?.click()}
                 />
-                <OverlayButton label="View cover" icon={Eye} onClick={() => setIsViewing(true)} />
-                <OverlayButton label="Remove cover" icon={Trash2} onClick={handleRemove} />
+                <OverlayButton label={t.viewCover} icon={Eye} onClick={() => setIsViewing(true)} />
+                <OverlayButton label={t.removeCover} icon={Trash2} onClick={handleRemove} />
               </span>
             )}
             <input
@@ -139,17 +143,17 @@ export function CoverPicker({
       <Sheet
         open={isViewing}
         onClose={() => setIsViewing(false)}
-        title="Cover"
+        title={t.cover}
         actions={
           <Button type="button" variant="quiet" onClick={() => setIsViewing(false)}>
-            Close
+            {common.close}
           </Button>
         }
       >
         {value && (
           <img
             src={value}
-            alt="Book cover"
+            alt={t.coverAlt}
             className="mx-auto max-h-[65vh] w-auto rounded-box object-contain"
           />
         )}

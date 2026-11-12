@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useT } from '@/i18n';
 
 const SHOW_AFTER_MS = 2000;
 
 /** After 2 s of failing requests (§6). The timer keeps running underneath, truthfully. */
 export function ConnectionBanner({ failingSince }: { failingSince: number | null }) {
   const [shown, setShown] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     if (failingSince === null) {
@@ -19,7 +21,7 @@ export function ConnectionBanner({ failingSince }: { failingSince: number | null
   if (!shown) return null;
   return (
     <p role="status" className="m-0 rounded-box border border-amber/40 bg-amber/10 px-4 py-3 text-sm text-amber">
-      Connection lost. Your saved answer is safe; we'll keep trying.
+      {t.quiz.connectionLost}
     </p>
   );
 }

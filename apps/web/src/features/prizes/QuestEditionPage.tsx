@@ -8,21 +8,26 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { isNotFound } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/errorMessage';
 import { formatCount, formatLongDate } from '@/lib/format';
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton';
 import { useQuestByEdition } from './api/useQuestByEdition';
 import { PrizePodium, hasAnyPrize } from './components/PrizePodium';
+import { useT } from '@/i18n';
 
 // Same forward arrow as every other "go here next" action, even though this goes up a level.
-const BACK_TO_ARCHIVE = (
-  <Link
-    to="/prizes"
-    className="group inline-flex items-center gap-3 text-taupe transition-colors hover:text-paper-dim"
-  >
-    Back to prizes
-    <ArrowIcon />
-  </Link>
-);
+function BackToArchive() {
+  const t = useT();
+  return (
+    <Link
+      to="/prizes"
+      className="group inline-flex items-center gap-3 text-taupe transition-colors hover:text-paper-dim"
+    >
+      {t.prizes.backToPrizes}
+      <ArrowIcon />
+    </Link>
+  );
+}
 
 /**
  * One past edition. Reached from a card on `/prizes` or a shared link. Either way
@@ -30,6 +35,7 @@ const BACK_TO_ARCHIVE = (
  */
 export function QuestEditionPage() {
   useTelegramBackButton('/prizes');
+  const t = useT();
 
   const { edition: editionParam } = useParams<{ edition: string }>();
   const edition = Number(editionParam);
@@ -43,15 +49,15 @@ export function QuestEditionPage() {
     return (
       <Screen>
         <EmptyState
-          title="That's not an edition number"
-          body="Pick an edition from the prizes page instead."
-          action={BACK_TO_ARCHIVE}
+          title={t.prizes.badEditionTitle}
+          body={t.prizes.badEditionBody}
+          action={<BackToArchive />}
         />
       </Screen>
     );
   }
 
-  if (isPending) return <LoadingState label="Turning back the pages…" />;
+  if (isPending) return <LoadingState label={t.prizes.editionLoading} />;
 
   if (error) {
     // A 404 here means the number in the URL doesn't exist — nothing about
@@ -61,7 +67,7 @@ export function QuestEditionPage() {
     if (isNotFound(error)) {
       return (
         <Screen>
-          <EmptyState title={error.message} body="Browse every past edition from the prizes page instead." action={BACK_TO_ARCHIVE} />
+          <EmptyState title={errorMessage(error)} body={t.prizes.browseInstead} action={<BackToArchive />} />
         </Screen>
       );
     }
@@ -86,31 +92,33 @@ export function QuestEditionPage() {
       <DatesSection quest={quest} />
       <PrizesSection prizes={quest.prizes} />
 
-      <p className="text-paper-dim">{formatCount(quest.participantCount)} people took part.</p>
+      <p className="text-paper-dim">{t.prizes.tookPart(formatCount(quest.participantCount))}</p>
     </Screen>
   );
 }
 
 function DatesSection({ quest }: { quest: Quest }) {
+  const t = useT().prizes;
   return (
     <section className="flex flex-col gap-2">
-      <p className="type-label">Dates</p>
+      <p className="type-label">{t.dates}</p>
       <dl className="flex flex-col gap-1">
-        <FactRow label="Opened" value={formatLongDate(quest.opensAt)} />
-        <FactRow label="Reading deadline" value={formatLongDate(quest.readingDeadline)} />
-        <FactRow label="Quiz" value={formatLongDate(quest.quizOpensAt)} />
-        <FactRow label="Results" value={formatLongDate(quest.resultsAt)} />
+        <FactRow label={t.opened} value={formatLongDate(quest.opensAt)} />
+        <FactRow label={t.readingDeadline} value={formatLongDate(quest.readingDeadline)} />
+        <FactRow label={t.quiz} value={formatLongDate(quest.quizOpensAt)} />
+        <FactRow label={t.results} value={formatLongDate(quest.resultsAt)} />
       </dl>
     </section>
   );
 }
 
 function PrizesSection({ prizes }: { prizes: Quest['prizes'] }) {
+  const t = useT();
   if (!hasAnyPrize(prizes)) return null;
 
   return (
     <section className="flex flex-col gap-2">
-      <p className="type-label">Prizes</p>
+      <p className="type-label">{t.prizes.label}</p>
       <PrizePodium prizes={prizes} />
     </section>
   );

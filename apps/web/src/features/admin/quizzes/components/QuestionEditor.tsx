@@ -16,16 +16,8 @@ import { TextArea } from '@/components/ui/TextArea';
 import { optionsFor, type QuizFormState } from '../quizForm';
 import { CharCount } from './CharCount';
 import { OptionsEditor } from './OptionsEditor';
+import { useT } from '@/i18n';
 
-const TYPE_OPTIONS = [
-  { value: 'true_false', label: 'True / False' },
-  { value: 'mcq', label: 'Multiple choice' }
-] as const;
-
-const DIFFICULTY_OPTIONS = QUESTION_DIFFICULTIES.map((value) => ({
-  value,
-  label: value[0]!.toUpperCase() + value.slice(1)
-}));
 
 interface QuestionEditorProps {
   index: number;
@@ -46,6 +38,13 @@ export function QuestionEditor({ index, issues, onRemove, locked, voided, onCorr
     formState: { errors }
   } = useFormContext<QuizFormState>();
   const base = `questions.${index}` as const;
+  const { adminQuiz } = useT();
+  const t = adminQuiz.editor;
+  const typeOptions = [
+    { value: 'true_false', label: t.typeTrueFalse },
+    { value: 'mcq', label: t.typeMcq }
+  ] as const;
+  const difficultyOptions = QUESTION_DIFFICULTIES.map((value) => ({ value, label: adminQuiz.difficulty[value] }));
   const question = useWatch({ control, name: base });
   const defaultTime = useWatch({ control, name: 'settings.defaultTimeLimitSec' });
   const fieldErrors = errors.questions?.[index];
@@ -71,13 +70,13 @@ export function QuestionEditor({ index, issues, onRemove, locked, voided, onCorr
     <div className="flex flex-col gap-4 border-t border-[color:var(--rule)] p-4">
       <fieldset disabled={locked} className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
         <Segmented
-          aria-label="Question type"
-          options={TYPE_OPTIONS}
+          aria-label={t.typeAria}
+          options={typeOptions}
           value={question.type}
           onChange={changeType}
         />
         <TextArea
-          label="Question"
+          label={t.question}
           rows={3}
           {...register(`${base}.prompt`)}
           head={<CharCount length={question.prompt.length} max={QUIZ_TEXT_LIMITS.prompt} />}
@@ -94,7 +93,7 @@ export function QuestionEditor({ index, issues, onRemove, locked, voided, onCorr
         />
         <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
           <Field
-            label="Time limit (s)"
+            label={t.timeLimit}
             type="number"
             inputMode="numeric"
             min={QUIZ_TIME_LIMIT_SEC.min}
@@ -104,20 +103,20 @@ export function QuestionEditor({ index, issues, onRemove, locked, voided, onCorr
               setValueAs: (v: string | number | null) => (v === '' || v == null ? null : Number(v))
             })}
             status={fieldErrors?.timeLimitSec ? 'bad' : undefined}
-            message={fieldErrors?.timeLimitSec ? `Use ${QUIZ_TIME_LIMIT_SEC.min}–${QUIZ_TIME_LIMIT_SEC.max}.` : undefined}
+            message={fieldErrors?.timeLimitSec ? t.timeRange(QUIZ_TIME_LIMIT_SEC.min, QUIZ_TIME_LIMIT_SEC.max) : undefined}
           />
           <div className="grid gap-[0.4rem]">
-            <span className="type-label">Difficulty</span>
+            <span className="type-label">{t.difficultyLabel}</span>
             <Segmented
-              aria-label="Difficulty"
-              options={DIFFICULTY_OPTIONS}
+              aria-label={t.difficultyLabel}
+              options={difficultyOptions}
               value={question.difficulty}
               onChange={(value: QuestionDifficulty) => setValue(`${base}.difficulty`, value, { shouldDirty: true })}
             />
           </div>
         </div>
         <TextArea
-          label="Explanation (optional, shown in review)"
+          label={t.explanation}
           rows={2}
           {...register(`${base}.explanation`, { setValueAs: (v: string | null) => (v ? v : null) })}
           head={<CharCount length={question.explanation?.length ?? 0} max={QUIZ_TEXT_LIMITS.explanation} />}
@@ -137,29 +136,29 @@ export function QuestionEditor({ index, issues, onRemove, locked, voided, onCorr
       {locked &&
         (voided ? (
           <p className="m-0 flex items-center gap-2 text-sm text-amber">
-            <Ban className="h-4 w-4 shrink-0" aria-hidden /> Voided: not counted in anyone’s score or total.
+            <Ban className="h-4 w-4 shrink-0" aria-hidden /> {t.voidedNote}
           </p>
         ) : (
           <Button type="button" variant="quiet" onClick={onCorrect} className="min-h-11 gap-2 self-start px-3">
-            <PencilLine className="h-4 w-4" aria-hidden /> Correct answer key
+            <PencilLine className="h-4 w-4" aria-hidden /> {t.correctKey}
           </Button>
         ))}
       <Sheet
         open={confirming}
         onClose={() => setConfirming(false)}
-        title="Remove this question?"
+        title={t.removeTitle}
         actions={
           <>
             <Button type="button" variant="quiet" onClick={() => setConfirming(false)}>
-              Keep it
+              {adminQuiz.library.keepIt}
             </Button>
             <Button type="button" onClick={onRemove}>
-              Remove
+              {t.remove}
             </Button>
           </>
         }
       >
-        <p className="m-0 text-taupe">It goes when you save the quiz; Discard brings it back.</p>
+        <p className="m-0 text-taupe">{t.removeBody}</p>
       </Sheet>
     </div>
   );

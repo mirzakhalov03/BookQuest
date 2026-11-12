@@ -1,28 +1,20 @@
 import type { Interaction } from '@bookquest/shared';
 import { CornerDownRight } from 'lucide-react';
+import { useT, type Messages } from '@/i18n';
 
-const MEDIA_LABEL: Record<NonNullable<Interaction['media']>['type'], string> = {
-  photo: 'Photo',
-  voice: 'Voice message',
-  video: 'Video',
-  video_note: 'Video note',
-  audio: 'Audio',
-  document: 'File',
-  sticker: 'Sticker',
-  animation: 'GIF'
-};
+type Words = Messages['admin']['messages'];
 
-function mediaLine(item: Interaction): string {
+function mediaLine(item: Interaction, t: Words): string {
   const media = item.media;
-  if (!media) return 'Media';
-  const parts = [`${media.emoji ? `${media.emoji} ` : ''}${MEDIA_LABEL[media.type]}`];
+  if (!media) return t.kinds.media;
+  const parts = [`${media.emoji ? `${media.emoji} ` : ''}${t.media[media.type]}`];
   if (media.fileName) parts.push(media.fileName);
-  if (media.durationSec) parts.push(`${media.durationSec}s`);
+  if (media.durationSec) parts.push(t.seconds(media.durationSec));
   const label = parts.join(' · ');
   return item.text ? `${label} — ${item.text}` : label;
 }
 
-function body(item: Interaction): string {
+function body(item: Interaction, t: Words): string {
   switch (item.kind) {
     case 'text':
     case 'web_app_data':
@@ -30,43 +22,44 @@ function body(item: Interaction): string {
     case 'command':
       return `/${item.command ?? ''}${item.commandArgs ? ` ${item.commandArgs}` : ''}`;
     case 'button':
-      return item.buttonLabel ?? item.callbackData ?? 'Button';
+      return item.buttonLabel ?? item.callbackData ?? t.kinds.button;
     case 'contact': {
       const contact = item.contact;
-      if (!contact) return 'Contact';
+      if (!contact) return t.kinds.contact;
       const whose = contact.isOwn
-        ? ' (own number)'
+        ? t.ownNumber
         : contact.firstName
           ? ` (${contact.firstName})`
           : '';
       return `${contact.phoneNumber}${whose}`;
     }
     case 'media':
-      return mediaLine(item);
+      return mediaLine(item, t);
     case 'location':
       return item.location
         ? `📍 ${item.location.lat.toFixed(4)}, ${item.location.lng.toFixed(4)}`
-        : 'Location';
+        : t.kinds.location;
     case 'membership':
-      return item.membership === 'blocked' ? 'Blocked the bot' : 'Unblocked the bot';
+      return item.membership === 'blocked' ? t.blockedBot : t.unblockedBot;
     default:
-      return 'Other update';
+      return t.otherUpdate;
   }
 }
 
 /** React escapes text: whatever people typed renders as text, links included, never as markup. */
 export function InteractionContent({ item }: { item: Interaction }) {
   const quiet = item.kind === 'membership' || item.kind === 'other';
+  const t = useT().admin.messages;
   return (
     <div className="flex min-w-0 flex-col gap-1">
       <p className={`m-0 whitespace-pre-wrap break-words ${quiet ? 'text-taupe' : 'text-paper'}`}>
-        {body(item)}
-        {item.isEdit && <span className="ml-2 text-xs text-taupe">(edited)</span>}
+        {body(item, t)}
+        {item.isEdit && <span className="ml-2 text-xs text-taupe">{t.edited}</span>}
       </p>
       {item.inReplyTo?.text ? (
-        <Context>Replying to “{item.inReplyTo.text}”</Context>
+        <Context>{t.replyingTo(item.inReplyTo.text)}</Context>
       ) : item.broadcast ? (
-        <Context>After broadcast “{item.broadcast.snippet}”</Context>
+        <Context>{t.afterBroadcast(item.broadcast.snippet)}</Context>
       ) : null}
     </div>
   );

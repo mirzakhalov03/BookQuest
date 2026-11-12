@@ -5,8 +5,10 @@ import { Field, type FieldStatus } from '@/components/ui/Field';
 import { Button } from '@/components/ui/Button';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { ApiRequestError } from '@/lib/api/client';
+import { errorMessage, fieldErrorMessage } from '@/lib/api/errorMessage';
 import { setSessionUser } from './useAuth';
 import { loginWithPhone, registerWithPhone } from './authApi';
+import { useT } from '@/i18n';
 
 export type AuthMode = 'login' | 'signup';
 
@@ -28,6 +30,7 @@ interface PhoneAuthFormProps {
  */
 export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
   const queryClient = useQueryClient();
+  const t = useT();
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -46,7 +49,7 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
     // Same rule the quest form and API use; caught here so a typo costs no round trip.
     const name = mode === 'signup' ? parseFullName(fullName.value) : null;
     if (name && !name.ok) {
-      setFullName((prev) => ({ ...prev, status: 'bad', message: name.message }));
+      setFullName((prev) => ({ ...prev, status: 'bad', message: t.validation.fullName[name.code] }));
       fullNameRef.current?.focus();
       return;
     }
@@ -66,24 +69,18 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
 
       setSessionUser(queryClient, session.user);
     } catch (error) {
-      if (error instanceof ApiRequestError) {
-        if (error.fields.phoneNumber) {
-          setPhoneNumber((prev) => ({ ...prev, status: 'bad', message: error.fields.phoneNumber }));
-          phoneNumberRef.current?.focus();
-        } else if (error.fields.password) {
-          setPassword((prev) => ({ ...prev, status: 'bad', message: error.fields.password }));
-          passwordRef.current?.focus();
-        } else if (error.fields.firstName) {
-          setFullName((prev) => ({ ...prev, status: 'bad', message: error.fields.firstName }));
-          fullNameRef.current?.focus();
-        } else {
-          // The 409 (phone number taken) and 401 (wrong credentials) carry no
-          // field — shown verbatim, same convention RegistrationForm uses
-          // for its own field-less rejections.
-          setFormError(error.message);
-        }
+      if (error instanceof ApiRequestError && error.fields.phoneNumber) {
+        setPhoneNumber((prev) => ({ ...prev, status: 'bad', message: fieldErrorMessage(error, 'phoneNumber') }));
+        phoneNumberRef.current?.focus();
+      } else if (error instanceof ApiRequestError && error.fields.password) {
+        setPassword((prev) => ({ ...prev, status: 'bad', message: fieldErrorMessage(error, 'password') }));
+        passwordRef.current?.focus();
+      } else if (error instanceof ApiRequestError && error.fields.firstName) {
+        setFullName((prev) => ({ ...prev, status: 'bad', message: fieldErrorMessage(error, 'firstName') }));
+        fullNameRef.current?.focus();
       } else {
-        setFormError('Something went wrong. Try again.');
+        // The 409 (phone number taken) and 401 (wrong credentials) carry no field.
+        setFormError(errorMessage(error));
       }
     } finally {
       setBusy(false);
@@ -95,10 +92,10 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
       {mode === 'signup' && (
         <Field
           ref={fullNameRef}
-          label="Full name"
+          label={t.auth.fullName}
           name="fullName"
           autoComplete="name"
-          placeholder="Sofia Karimova"
+          placeholder={t.auth.fullNamePlaceholder}
           value={fullName.value}
           status={fullName.status}
           message={fullName.message}
@@ -108,7 +105,7 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
 
       <Field
         ref={phoneNumberRef}
-        label="Phone number"
+        label={t.auth.phone}
         name="phoneNumber"
         type="tel"
         autoComplete="tel"
@@ -121,7 +118,7 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
 
       <Field
         ref={passwordRef}
-        label="Password"
+        label={t.auth.password}
         name="password"
         type="password"
         autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
@@ -134,7 +131,7 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
 
       <Button type="submit" className="group mt-[0.3rem]" disabled={busy}>
         <span>
-          {busy ? 'Working…' : mode === 'login' ? 'Log in' : 'Register'}
+          {busy ? t.auth.working : mode === 'login' ? t.common.logIn : t.auth.register}
         </span>
         <ArrowIcon />
       </Button>

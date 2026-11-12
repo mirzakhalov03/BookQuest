@@ -49,7 +49,7 @@ export async function getCertificateForUser(user: UserDocument): Promise<Certifi
 
   const participant = await requireParticipantForUser(user, quest);
   const result = await ResultModel.findOne({ quest: quest._id, participant: participant.id }).lean();
-  if (!result) throw ApiError.notFound('There is no completed quiz to certify yet.');
+  if (!result) throw ApiError.notFound('There is no completed quiz to certify yet.', { reason: 'no_certificate' });
 
   return buildCertificateData({ result, participant, quest, finishedCount: await countFinishers(quest._id) });
 }
@@ -57,7 +57,7 @@ export async function getCertificateForUser(user: UserDocument): Promise<Certifi
 /** Any edition: a 2025 certificate must still verify in 2027. Holding the code is the permission. */
 export async function getCertificateByCode(raw: string): Promise<CertificateData> {
   const code = normalizeCertificateCode(raw);
-  const notFound = () => ApiError.notFound('We couldn’t find a certificate with this code.');
+  const notFound = () => ApiError.notFound('We couldn’t find a certificate with this code.', { reason: 'certificate_not_found' });
   if (!code) throw notFound();
 
   const result = await ResultModel.findOne({ certificateCode: code }).lean();

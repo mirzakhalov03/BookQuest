@@ -7,6 +7,7 @@ import { ContactLink } from '../components/ContactLink';
 import { CopyButton } from '../components/CopyButton';
 import { DEFAULT_FILTERS } from './filters';
 import { InteractionsTable } from './InteractionsTable';
+import { useT } from '@/i18n';
 
 interface PersonSheetProps {
   telegramUserId: string | null;
@@ -19,6 +20,8 @@ const SHEET_PAGE = 30;
 
 /** One person: who they are, how to reach them, and everything they sent — organiser rows included. */
 export function PersonSheet({ telegramUserId, onClose, onFilter }: PersonSheetProps) {
+  const { common, admin } = useT();
+  const t = admin.messages;
   const timeline = useAdminInteractions(
     {
       ...DEFAULT_FILTERS,
@@ -32,7 +35,7 @@ export function PersonSheet({ telegramUserId, onClose, onFilter }: PersonSheetPr
   );
   const person = timeline.data?.pages[0]?.person;
   const items = timeline.data?.pages.flatMap((page) => page.items) ?? [];
-  const name = person ? [person.firstName, person.lastName].filter(Boolean).join(' ') : 'Person';
+  const name = person ? [person.firstName, person.lastName].filter(Boolean).join(' ') : t.person;
 
   return (
     <Sheet
@@ -43,7 +46,7 @@ export function PersonSheet({ telegramUserId, onClose, onFilter }: PersonSheetPr
         telegramUserId && (
           <>
             <Button variant="quiet" onClick={onClose}>
-              Close
+              {common.close}
             </Button>
             <Button
               variant="gold"
@@ -52,7 +55,7 @@ export function PersonSheet({ telegramUserId, onClose, onFilter }: PersonSheetPr
                 onClose();
               }}
             >
-              Show in list
+              {t.showInList}
             </Button>
           </>
         )
@@ -60,9 +63,9 @@ export function PersonSheet({ telegramUserId, onClose, onFilter }: PersonSheetPr
     >
       {!person || timeline.isPlaceholderData ? (
         timeline.error ? (
-          <p className="m-0 text-taupe">Couldn't load this person. Close and try again.</p>
+          <p className="m-0 text-taupe">{t.personFailed}</p>
         ) : (
-          <LoadingState label="Opening their history…" />
+          <LoadingState label={t.personLoading} />
         )
       ) : (
         <div className="flex max-h-[60vh] flex-col gap-4 overflow-y-auto">
@@ -70,24 +73,24 @@ export function PersonSheet({ telegramUserId, onClose, onFilter }: PersonSheetPr
             <span className="flex flex-wrap items-center gap-x-2 text-taupe">
               {person.username && <span>@{person.username} ·</span>}
               <span>{person.telegramUserId}</span>
-              <CopyButton value={person.telegramUserId} label="Copy Telegram id" />
+              <CopyButton value={person.telegramUserId} label={t.copyId} />
             </span>
             {person.username ? (
               <ContactLink contact={{ method: 'telegram', value: `@${person.username}` }} />
             ) : (
               <span className="text-taupe">
-                No @username: a reply from the bot is the only way to reach them.
+                {t.noUsername}
               </span>
             )}
             {person.phoneNumber && (
               <ContactLink contact={{ method: 'phone', value: person.phoneNumber }} />
             )}
             <span className="text-taupe">
-              {person.firstSeenAt && `First seen ${formatLongDate(person.firstSeenAt)}`}
-              {person.lastSeenAt && ` · Last seen ${formatTimeAgo(person.lastSeenAt)}`}
-              {` · ${formatCount(person.total)} interactions`}
+              {person.firstSeenAt && t.firstSeen(formatLongDate(person.firstSeenAt))}
+              {person.lastSeenAt && t.lastSeen(formatTimeAgo(person.lastSeenAt))}
+              {t.interactions(person.total, formatCount(person.total))}
             </span>
-            {person.blocked && <span className="text-ember">Blocked the bot</span>}
+            {person.blocked && <span className="text-ember">{t.blockedBot}</span>}
           </div>
           <InteractionsTable
             compact

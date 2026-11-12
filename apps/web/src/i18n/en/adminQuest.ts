@@ -1,0 +1,163 @@
+import type { BookResourceKind, QuestDateField, QuizDistribution } from '@bookquest/shared';
+import { pluralEn } from '../plural';
+
+export const adminQuest = {
+  loading: 'Opening the ledger…',
+  nothingToEdit: "There's nothing to edit between editions.",
+  aQuiz: 'a quiz',
+  updated: 'Quest updated.',
+  nextEdition: 'Next edition',
+  fixFields: (n: number) => `Fix ${n} ${pluralEn(n, 'field', 'fields')}`,
+  changes: (n: number) => `${n} ${pluralEn(n, 'change', 'changes')}`,
+  newEdition: {
+    loading: 'Finding the last edition…',
+    resultsNotOut: (edition: number) => `Results for edition ${edition} aren't out yet`,
+    stillRunning: (edition: number) => `Edition ${edition} is still running`,
+    startAfter: (date: string) => `Start the next edition after they're published on ${date}.`,
+    startOnceResults: 'Start the next edition once its results are out.',
+    backToQuest: 'Back to the quest',
+    live: (edition: number) => `Edition ${edition} is live.`,
+    eyebrow: 'New edition',
+    title: (edition: number) => `Edition ${edition}`,
+    carryOver: (previous: number) =>
+      `Prizes, quiz settings and the schedule carry over from edition ${previous}, a year later. The book starts blank.`,
+    first: 'The first edition. The schedule below is a starting point — adjust it to taste.',
+    ready: (edition: number) => `Edition ${edition}, ready when the book is in`,
+    create: 'Create edition',
+    creating: 'Creating…',
+    confirmTitle: (edition: number) => `Make edition ${edition} current?`,
+    notYet: 'Not yet',
+    createLive: 'Create and go live',
+    archiveNote: (previous: number) => `Edition ${previous} and its results move to the archive. `,
+    seenAtOnce: (edition: number) => `Participants see edition ${edition} on the Home screen straight away.`
+  },
+  tabs: { book: 'Book', resources: 'Resources', prizes: 'Prizes', dates: 'Dates', quiz: 'Quiz' },
+  hasErrors: 'Has errors',
+  book: {
+    title: 'Title',
+    author: 'Author',
+    pages: 'Pages',
+    description: 'Description',
+    descriptionPlaceholder: 'A shepherd boy leaves everything he knows…',
+    cover: 'Cover',
+    coverAlt: 'Book cover',
+    chooseCover: 'Choose a cover image',
+    replaceCover: 'Replace cover',
+    viewCover: 'View cover',
+    removeCover: 'Remove cover',
+    uploadFailed: 'Upload failed. Try again.'
+  },
+  dates: {
+    modeAria: 'When a date moves',
+    keepGaps: 'Keep the gaps',
+    moveOne: 'Move one date',
+    passed: (date: string) => `${date} · passed`,
+    editAnyway: 'Edit anyway',
+    order: {
+      readingDeadline: 'Reading has to end after the quest opens.',
+      quizOpensAt: 'The quiz cannot open before the reading deadline.',
+      quizClosesAt: 'The quiz has to close after it opens.',
+      resultsAt: 'Results cannot be published before the quiz closes.'
+    } satisfies Partial<Record<QuestDateField, string>>
+  },
+  prizes: {
+    blankHint: 'Leave a place blank to clear its prize.',
+    first: 'First place',
+    second: 'Second place',
+    third: 'Third place',
+    firstPlaceholder: 'AirPods Pro',
+    secondPlaceholder: '1,000,000 so‘m',
+    thirdPlaceholder: 'A year of books, on us'
+  },
+  preview: {
+    heading: 'What participants see',
+    untitled: 'Untitled',
+    unknownAuthor: 'Unknown author',
+    button: 'Preview'
+  },
+  quiz: {
+    noQuizBanner: 'The quiz is open but no quiz is attached — participants see ‘Questions are being prepared’.',
+    distributionAria: 'How quizzes are given out',
+    distribution: { single: 'One quiz', parity: 'Odd / even', random: 'Random groups' } satisfies Record<QuizDistribution, string>,
+    chooseSplit: 'Choose how participants are split, then pick the quizzes.',
+    groups: 'Groups',
+    fewer: 'Fewer groups',
+    more: 'More groups',
+    loadingQuizzes: 'Loading quizzes…',
+    libraryFailed: 'Couldn’t load the quiz library.',
+    chooseQuiz: 'Choose a quiz…',
+    quizOption: (title: string, questions: string, duration: string, complete: boolean) =>
+      `${title} · ${questions} · ${duration}${complete ? '' : ' · incomplete'}`,
+    splitRandom: 'Split evenly at random when saved',
+    detach: 'Detach quizzes',
+    locksWhen: 'Locks when the first participant starts.',
+    openLibrary: 'Open the quiz library',
+    none: 'None',
+    noQuizYet: 'No quiz yet',
+    everyone: 'Everyone',
+    odd: 'Odd numbers',
+    even: 'Even numbers',
+    oddShort: 'Odd',
+    evenShort: 'Even',
+    group: (n: number) => `Group ${n}`
+  },
+  readiness: {
+    aria: 'Quiz readiness',
+    passed: 'Passed',
+    needsFixing: 'Needs fixing',
+    edit: (title: string) => `Edit “${title}”`,
+    finish: (title: string) => `Finish “${title}”`,
+    ready: 'Every group has a ready quiz',
+    needsAttention: (groups: string) => `Needs attention: ${groups}.`,
+    shape: 'Variants match in shape',
+    shapeItem: (title: string, questions: string, duration: string) => `“${title}”: ${questions}, ${duration}`,
+    shapeRule: '. Same question count, difficulty mix and total time are required.',
+    buffer: (min: number) => `Results come ${min} min or more after the quiz closes`,
+    bufferDetail: 'Late attempts need time to finish before ranking.',
+    changeDates: 'Change the dates',
+    window: 'The quiz window fits the quiz',
+    windowDetail: (window: string, needed: string) => `The window is ${window} but the quiz takes ${needed}.`
+  },
+  resources: {
+    invalidUrl: 'Paste a full link, starting with https://',
+    empty: 'No reading resources yet. Paste a link to a PDF, an audiobook or a shop.',
+    untitled: 'Untitled',
+    label: 'Label',
+    url: 'URL',
+    kind: 'Kind',
+    kinds: { pdf: 'PDF', epub: 'EPUB', audio: 'Audio', link: 'Link' } satisfies Record<BookResourceKind, string>,
+    audiobook: 'Audiobook',
+    moveUp: 'Move up',
+    moveDown: 'Move down',
+    remove: 'Remove',
+    limit: (n: number) => `That's the limit of ${n}`,
+    addLink: (count: number, limit: number) => `Add a link · ${count}/${limit}`,
+    add: 'Add'
+  },
+  review: {
+    titleUpcoming: 'Review your changes',
+    titleLive: 'Change a live quest?',
+    save: 'Save changes',
+    seenAtOnce: (count: number, n: string) =>
+      `${n} ${pluralEn(count, 'participant sees', 'participants see')} this straight away.`,
+    prizes: { first: 'First prize', second: 'Second prize', third: 'Third prize' },
+    none: 'None',
+    quizSetup: 'Quiz setup'
+  },
+  schema: {
+    prizeTooLong: 'Keep it under 200 characters.',
+    groupsMismatch: 'That many groups doesn’t fit this split.',
+    pickEveryGroup: 'Pick a quiz for every group.',
+    pickDifferent: 'Pick a different quiz for each group.',
+    pickDate: 'Pick a date and time.',
+    titleRequired: 'Give the book a title.',
+    titleTooLong: 'Keep the title under 200 characters.',
+    authorRequired: 'Who wrote it?',
+    authorTooLong: 'Keep the author under 200 characters.',
+    pages: 'Whole pages, 1 to 20,000.',
+    descriptionTooLong: 'Keep it under 4,000 characters.',
+    linkName: 'Name this link.',
+    linkNameTooLong: 'Keep the name under 80 characters.',
+    badUrl: 'That doesn’t look like a full URL.'
+  }
+};

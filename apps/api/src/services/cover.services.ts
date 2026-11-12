@@ -32,7 +32,7 @@ export async function uploadCover(
 ): Promise<CoverUpload & { id: string }> {
   const contentType = detectImageType(file.buffer);
   if (!contentType) {
-    throw ApiError.badRequest(COVER_MESSAGES.wrongType, { file: COVER_MESSAGES.wrongType });
+    throw ApiError.badRequest(COVER_MESSAGES.wrongType, { file: COVER_MESSAGES.wrongType }, 'cover_wrong_type');
   }
 
   const upload = coversBucket().openUploadStream(file.originalname, {

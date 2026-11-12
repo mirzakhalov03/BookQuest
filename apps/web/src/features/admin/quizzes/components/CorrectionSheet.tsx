@@ -1,26 +1,20 @@
 import { useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { QUIZ_TEXT_LIMITS, groupLabels, type QuizAdmin, type QuizCorrectionPayload } from '@bookquest/shared';
-import { FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
 import { Button } from '@/components/ui/Button';
 import { Field } from '@/components/ui/Field';
 import { Segmented } from '@/components/ui/Segmented';
 import { Sheet } from '@/components/ui/Sheet';
 import { TextArea } from '@/components/ui/TextArea';
-import { ApiRequestError } from '@/lib/api/client';
 import { useUiStore } from '@/stores/ui.store';
 import { useQuizCorrection } from '../../api/useQuizCorrection';
 import { CharCount } from './CharCount';
+import { useT } from '@/i18n';
+import { errorMessage } from '@/lib/api/errorMessage';
+import { localizeGroupLabel } from '../../quest/quizConfig';
 
 type Mode = QuizCorrectionPayload['kind'];
 
-const MODE_OPTIONS = [
-  { value: 'key', label: 'Change answer' },
-  { value: 'void', label: 'Void question' }
-] as const;
-
-// A different word per action, so muscle memory from one can't confirm the other.
-const CONFIRM_WORD: Record<Mode, string> = { key: 'CHANGE', void: 'VOID' };
 const SINGLE_LABEL = groupLabels('single', 1)[0];
 
 interface CorrectionSheetProps {
@@ -39,13 +33,21 @@ export function CorrectionSheet({ quiz, questionId, onClose }: CorrectionSheetPr
   const [error, setError] = useState<string | null>(null);
   const correction = useQuizCorrection(quiz.id);
   const showToast = useUiStore((state) => state.showToast);
+  const { common, adminQuiz } = useT();
+  const t = adminQuiz.correction;
+  // A different word per action, so muscle memory from one can't confirm the other.
+  const confirmWord = t.confirmWord;
+  const modeOptions = [
+    { value: 'key', label: t.changeAnswer },
+    { value: 'void', label: t.voidQuestion }
+  ] as const;
 
   const index = quiz.questions.findIndex((q) => q.id === questionId);
   const question = quiz.questions[index];
   const counting = quiz.questions.length - quiz.voidedQuestionIds.length;
   const hasSiblings = quiz.attachment !== null && quiz.attachment.groupLabel !== SINGLE_LABEL;
   const changesKey = picked !== null && picked !== question?.correctOptionId;
-  const ready = (mode === 'void' || changesKey) && confirm === CONFIRM_WORD[mode];
+  const ready = (mode === 'void' || changesKey) && confirm === confirmWord[mode];
 
   function close() {
     setMode('key');
@@ -64,10 +66,10 @@ export function CorrectionSheet({ quiz, questionId, onClose }: CorrectionSheetPr
       const { rescored } = await correction.mutateAsync(
         mode === 'key' ? { ...base, kind: 'key', correctOptionId: picked! } : { ...base, kind: 'void' }
       );
-      showToast(rescored === 0 ? 'Already corrected; nothing to re-score.' : `Re-scored ${rescored} ${rescored === 1 ? 'attempt' : 'attempts'}.`);
+      showToast(rescored === 0 ? t.nothingToRescore : t.rescored(rescored));
       close();
     } catch (e) {
-      setError(e instanceof ApiRequestError ? e.message : FALLBACK_MESSAGE);
+      setError(errorMessage(e));
     }
   }
 
@@ -75,14 +77,14 @@ export function CorrectionSheet({ quiz, questionId, onClose }: CorrectionSheetPr
     <Sheet
       open={question !== undefined}
       onClose={close}
-      title={`Correct question ${index + 1}`}
+      title={t.title(index + 1)}
       actions={
         <>
           <Button type="button" variant="quiet" onClick={close}>
-            Cancel
+            {common.cancel}
           </Button>
           <Button type="button" disabled={!ready || correction.isPending} onClick={() => void submit()}>
-            {correction.isPending ? 'Re-scoring…' : mode === 'key' ? 'Change and re-score' : 'Void and re-score'}
+            {correction.isPending ? t.rescoring : mode === 'key' ? t.changeAndRescore : t.voidAndRescore}
           </Button>
         </>
       }
@@ -91,8 +93,8 @@ export function CorrectionSheet({ quiz, questionId, onClose }: CorrectionSheetPr
         <>
           <p className="m-0 text-paper-dim">{question.prompt}</p>
           <Segmented
-            aria-label="Correction"
-            options={MODE_OPTIONS}
+            aria-label={t.aria}
+            options={modeOptions}
             value={mode}
             onChange={(next: Mode) => {
               setMode(next);
@@ -103,7 +105,7 @@ export function CorrectionSheet({ quiz, questionId, onClose }: CorrectionSheetPr
 
           {mode === 'key' ? (
             <fieldset className="m-0 flex min-w-0 flex-col gap-1 border-0 p-0">
-              <legend className="type-label mb-1 p-0">New correct answer</legend>
+              <legend className="type-label mb-1 p-0">{t.newAnswer}</legend>
               {question.options.map((option) => {
                 const isCurrent = option.id === question.correctOptionId;
                 return (
@@ -122,7 +124,7 @@ export function CorrectionSheet({ quiz, questionId, onClose }: CorrectionSheetPr
                       className="h-5 w-5 shrink-0 accent-[color:var(--color-ember)]"
                     />
                     <span className="min-w-0 flex-1">{option.text}</span>
-                    {isCurrent && <span className="shrink-0 text-xs">Current</span>}
+                    {isCurrent && <span className="shrink-0 text-xs">{t.current}</span>}
                   </label>
                 );
               })}
@@ -130,16 +132,13 @@ export function CorrectionSheet({ quiz, questionId, onClose }: CorrectionSheetPr
           ) : (
             <>
               <p className="m-0 text-taupe">
-                Removed from the score and total of everyone on this quiz: they are scored out of {counting - 1}{' '}
-                instead of {counting}.
+                {t.voidBody(counting, counting - 1)}
               </p>
               {hasSiblings && (
                 <p role="note" className="m-0 flex items-start gap-2 rounded-box border border-amber/40 p-3 text-sm text-amber">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
                   <span>
-                    This quiz is one variant ({quiz.attachment!.groupLabel}) of a shared leaderboard, so totals will differ
-                    between variants. To keep them even, also void a {question.difficulty} question on the other variant, or
-                    accept the mismatch.
+                    {t.siblings(localizeGroupLabel(quiz.attachment!.groupLabel), adminQuiz.difficulty[question.difficulty])}
                   </span>
                 </p>
               )}
@@ -147,7 +146,7 @@ export function CorrectionSheet({ quiz, questionId, onClose }: CorrectionSheetPr
           )}
 
           <TextArea
-            label="Note (optional)"
+            label={t.note}
             value={note}
             rows={2}
             maxLength={QUIZ_TEXT_LIMITS.voidReason}
@@ -155,7 +154,7 @@ export function CorrectionSheet({ quiz, questionId, onClose }: CorrectionSheetPr
             onChange={(e) => setNote(e.target.value)}
           />
           <Field
-            label={`Type ${CONFIRM_WORD[mode]} to confirm`}
+            label={t.typeToConfirm(confirmWord[mode])}
             value={confirm}
             autoComplete="off"
             onChange={(e) => setConfirm(e.target.value)}

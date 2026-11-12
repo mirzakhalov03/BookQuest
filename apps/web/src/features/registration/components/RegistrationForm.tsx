@@ -7,12 +7,13 @@ import { Field, type FieldStatus } from '@/components/ui/Field';
 import { Switch } from '@/components/ui/Switch';
 import { Button } from '@/components/ui/Button';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
-import { FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
 import { ApiRequestError } from '@/lib/api/client';
+import { errorMessage, fieldErrorMessage } from '@/lib/api/errorMessage';
 import { haptic } from '@/lib/telegram';
 import { useContactMethodStore } from '@/stores/contactMethod.store';
 import { useRegister } from '../api/useRegister';
 import { useRevealHandoffStore } from '../revealHandoff.store';
+import { useT } from '@/i18n';
 
 interface FieldState {
   value: string;
@@ -22,15 +23,7 @@ interface FieldState {
 
 const EMPTY_FIELD: FieldState = { value: '' };
 
-const CONTACT_OPTIONS = [
-  { value: 'telegram', label: 'Telegram' },
-  { value: 'phone', label: 'Phone' }
-] as const;
-
-const CONTACT_PLACEHOLDER: Record<ContactMethod, string> = {
-  telegram: '@your_username',
-  phone: '+998 90 123 45 67'
-};
+const PHONE_PLACEHOLDER = '+998 90 123 45 67';
 
 /**
  * Name, contact and the switch between them (spec §4). Validation runs
@@ -43,6 +36,11 @@ const CONTACT_PLACEHOLDER: Record<ContactMethod, string> = {
  */
 export function RegistrationForm() {
   const navigate = useNavigate();
+  const t = useT();
+  const contactOptions = [
+    { value: 'telegram', label: t.registration.contactTelegram },
+    { value: 'phone', label: t.registration.contactPhone }
+  ] as const;
   const method = useContactMethodStore((state) => state.method);
   const setMethod = useContactMethodStore((state) => state.setMethod);
   const setRevealNumber = useRevealHandoffStore((state) => state.setNumber);
@@ -68,7 +66,7 @@ export function RegistrationForm() {
       setName({ value: result.value, status: 'good' });
       return true;
     }
-    setName((prev) => ({ ...prev, status: 'bad', message: result.message }));
+    setName((prev) => ({ ...prev, status: 'bad', message: t.validation.fullName[result.code] }));
     return false;
   }
 
@@ -79,7 +77,7 @@ export function RegistrationForm() {
       setContact({ value: result.value, status: 'good' });
       return true;
     }
-    setContact((prev) => ({ ...prev, status: 'bad', message: result.message }));
+    setContact((prev) => ({ ...prev, status: 'bad', message: t.validation.contact[result.code] }));
     return false;
   }
 
@@ -149,22 +147,22 @@ export function RegistrationForm() {
       haptic('error');
 
       if (!(error instanceof ApiRequestError)) {
-        setFormError(FALLBACK_MESSAGE);
+        setFormError(errorMessage(error));
         return;
       }
 
       // `error.fields` keys the same as the request body (spec §6) — no
       // translation layer, straight onto the matching input.
       if (error.fields.fullName) {
-        setName((prev) => ({ ...prev, status: 'bad', message: error.fields.fullName }));
+        setName((prev) => ({ ...prev, status: 'bad', message: fieldErrorMessage(error, 'fullName') }));
       }
       if (error.fields.contactValue) {
-        setContact((prev) => ({ ...prev, status: 'bad', message: error.fields.contactValue }));
+        setContact((prev) => ({ ...prev, status: 'bad', message: fieldErrorMessage(error, 'contactValue') }));
       }
       if (!error.fields.fullName && !error.fields.contactValue) {
         // The 409s — a taken contact, a closed quest — carry no field.
         // Shown verbatim (spec §6); the exact wording is the server's call.
-        setFormError(error.message);
+        setFormError(errorMessage(error));
       }
     }
   }
@@ -173,11 +171,11 @@ export function RegistrationForm() {
     <form className="form" onSubmit={handleSubmit} noValidate>
       <Field
         ref={nameInputRef}
-        label="Full name"
+        label={t.auth.fullName}
         name="fullname"
         autoComplete="name"
         spellCheck={false}
-        placeholder="Sofia Karimova"
+        placeholder={t.auth.fullNamePlaceholder}
         value={name.value}
         status={name.status}
         message={name.message}
@@ -190,12 +188,12 @@ export function RegistrationForm() {
 
       <Field
         ref={contactInputRef}
-        label="How we reach you"
+        label={t.registration.howWeReachYou}
         name="contact"
         head={
           <Switch
-            aria-label="Contact method"
-            options={CONTACT_OPTIONS}
+            aria-label={t.registration.contactMethod}
+            options={contactOptions}
             value={method}
             onChange={handleMethodChange}
           />
@@ -203,7 +201,7 @@ export function RegistrationForm() {
         inputMode={method === 'phone' ? 'tel' : 'text'}
         autoComplete="off"
         spellCheck={false}
-        placeholder={CONTACT_PLACEHOLDER[method]}
+        placeholder={method === 'phone' ? PHONE_PLACEHOLDER : t.registration.telegramPlaceholder}
         value={contact.value}
         status={contact.status}
         message={contact.message}
@@ -215,7 +213,7 @@ export function RegistrationForm() {
       />
 
       <Button type="submit" className="group mt-[0.3rem]" disabled={register.isPending}>
-        <span>{register.isPending ? 'Claiming your place…' : 'Claim your place'}</span>
+        <span>{register.isPending ? t.registration.claiming : t.registration.claim}</span>
         <ArrowIcon />
       </Button>
 
@@ -225,7 +223,7 @@ export function RegistrationForm() {
         </p>
       )}
 
-      <p className="form__note">Your number goes on the leaderboard, your quiz sheet and your certificate.</p>
+      <p className="form__note">{t.registration.numberNote}</p>
     </form>
   );
 }

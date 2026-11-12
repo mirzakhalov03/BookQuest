@@ -3,6 +3,7 @@ import type { Participant } from '@bookquest/shared';
 import { TelegramIcon } from '@/components/ui/TelegramIcon';
 import { openTelegramLink } from '@/lib/telegram';
 import { CopyButton } from './CopyButton';
+import { useT } from '@/i18n';
 
 type Contact = Participant['contact'];
 
@@ -14,6 +15,7 @@ function contactHref(contact: Contact): string {
 
 /** Reaching someone is why this screen exists: one tap opens the chat or dials, one more copies. */
 export function ContactLink({ contact }: { contact: Contact }) {
+  const t = useT().admin;
   const href = contactHref(contact);
 
   return (
@@ -29,13 +31,13 @@ export function ContactLink({ contact }: { contact: Contact }) {
         className="min-w-0 truncate text-paper-dim underline decoration-[color:var(--rule-strong)] underline-offset-4 hover:text-paper"
       >
         {contact.method === 'telegram' ? (
-          <TelegramIcon aria-label="Telegram" role="img" className="mr-1.5 inline-block h-4 w-4 -translate-y-px" />
+          <TelegramIcon aria-label={t.telegram} role="img" className="mr-1.5 inline-block h-4 w-4 -translate-y-px" />
         ) : (
-          <Phone aria-label="Phone" role="img" className="mr-1.5 inline-block h-4 w-4 -translate-y-px" />
+          <Phone aria-label={t.phone} role="img" className="mr-1.5 inline-block h-4 w-4 -translate-y-px" />
         )}
         {contact.value}
       </a>
-      <CopyButton value={contact.value} label={`Copy ${contact.value}`} />
+      <CopyButton value={contact.value} label={t.copyValue(contact.value)} />
     </span>
   );
 }

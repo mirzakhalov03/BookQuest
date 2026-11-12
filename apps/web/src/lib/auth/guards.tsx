@@ -3,6 +3,7 @@ import { Navigate, Outlet } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from './useAuth';
 import { AuthScreen } from './AuthScreen';
+import { useT } from '@/i18n';
 
 /**
  * Route guards — **UX, not security.**
@@ -49,6 +50,7 @@ export function RequireAdmin() {
 /** Inside Telegram, but the exchange was refused. Offer the one thing that helps. */
 function SignInAgain() {
   const { signIn } = useAuth();
+  const t = useT().auth;
   // Local, and it never leaves this panel: the outcome of the sign-in is the
   // auth query, so only the waiting is state (spec §5).
   const [busy, setBusy] = useState(false);
@@ -59,13 +61,11 @@ function SignInAgain() {
   };
 
   return (
-    <Panel label="Not signed in">
-      <h1 className="type-display text-4xl">We lost your session</h1>
-      <p className="max-w-[34ch] text-paper-dim">
-        Telegram could not confirm who you are. Try once more — it usually takes.
-      </p>
+    <Panel label={t.notSignedIn}>
+      <h1 className="type-display text-4xl">{t.lostSession}</h1>
+      <p className="max-w-[34ch] text-paper-dim">{t.lostSessionBody}</p>
       <Button className="mt-2 self-start" disabled={busy} onClick={retry}>
-        {busy ? 'Signing in…' : 'Sign in again'}
+        {busy ? t.signingIn : t.signInAgain}
       </Button>
     </Panel>
   );

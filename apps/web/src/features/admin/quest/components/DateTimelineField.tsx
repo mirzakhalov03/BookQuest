@@ -5,9 +5,10 @@ import { Field, statusFor } from '@/components/ui/Field';
 import { Button } from '@/components/ui/Button';
 import { Switch } from '@/components/ui/Switch';
 import { formatLongDate } from '@/lib/format';
-import { DATE_LABEL, parseLocal, shiftLaterDates, type DateInputs } from '../../dates';
+import { parseLocal, shiftLaterDates, type DateInputs } from '../../dates';
 import { QuestTimeline } from '../../components/QuestTimeline';
 import { DATE_PATHS, type QuestFormState } from '../questForm';
+import { useT } from '@/i18n';
 
 type ShiftMode = 'keep' | 'single';
 
@@ -23,6 +24,8 @@ export function DateTimelineField({ savedDates }: DateTimelineFieldProps) {
     trigger,
     formState: { errors }
   } = useFormContext<QuestFormState>();
+  const { admin, adminQuest } = useT();
+  const t = adminQuest.dates;
   const dates = useWatch({ control, name: 'dates' });
   const [mode, setMode] = useState<ShiftMode>('keep');
   const [unlocked, setUnlocked] = useState<ReadonlySet<QuestDateField>>(new Set());
@@ -56,10 +59,10 @@ export function DateTimelineField({ savedDates }: DateTimelineFieldProps) {
   return (
     <>
       <Switch
-        aria-label="When a date moves"
+        aria-label={t.modeAria}
         options={[
-          { value: 'keep', label: 'Keep the gaps' },
-          { value: 'single', label: 'Move one date' }
+          { value: 'keep', label: t.keepGaps },
+          { value: 'single', label: t.moveOne }
         ]}
         value={mode}
         onChange={setMode}
@@ -73,9 +76,9 @@ export function DateTimelineField({ savedDates }: DateTimelineFieldProps) {
             return (
               <>
                 <div className="flex items-baseline justify-between gap-3">
-                  <span className="text-paper-dim">{formatLongDate(date)} · passed</span>
+                  <span className="text-paper-dim">{t.passed(formatLongDate(date))}</span>
                   <Button type="button" variant="quiet" className="min-h-11 shrink-0 whitespace-nowrap px-2 text-sm" onClick={() => unlockFrom(key)}>
-                    Edit anyway
+                    {t.editAnyway}
                   </Button>
                 </div>
                 {/* Backstop for server errors; ordering errors can't land here because later dates unlock too. */}
@@ -95,7 +98,7 @@ export function DateTimelineField({ savedDates }: DateTimelineFieldProps) {
                 <Field
                   ref={field.ref}
                   type="datetime-local"
-                  label={DATE_LABEL[key]}
+                  label={admin.dates[key]}
                   hideLabel
                   // "18 Nov 2026 at 09:00" needs ~14rem; full width just stretches the box.
                   className="w-full max-w-[15rem]"

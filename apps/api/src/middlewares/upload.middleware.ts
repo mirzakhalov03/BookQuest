@@ -13,11 +13,11 @@ const coverUpload = multer({
 export const uploadCoverFile: RequestHandler = (req, res, next) => {
   coverUpload(req, res, (error: unknown) => {
     if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
-      next(new ApiError(413, 'validation_failed', COVER_MESSAGES.tooLarge, { file: COVER_MESSAGES.tooLarge }));
+      next(new ApiError(413, 'validation_failed', COVER_MESSAGES.tooLarge, { file: COVER_MESSAGES.tooLarge }, 'cover_too_large'));
       return;
     }
     if (error || !req.file) {
-      next(ApiError.badRequest(COVER_MESSAGES.missing, { file: COVER_MESSAGES.missing }));
+      next(ApiError.badRequest(COVER_MESSAGES.missing, { file: COVER_MESSAGES.missing }, 'cover_missing'));
       return;
     }
     next();

@@ -2,6 +2,7 @@ import { Bell } from 'lucide-react';
 import { NavLink } from 'react-router';
 import { readToken } from '@/lib/auth/tokenStore';
 import { useNotifications } from '@/features/notifications/api/useNotifications';
+import { useT } from '@/i18n';
 
 interface TopBarProps {
   /**
@@ -37,6 +38,7 @@ export function TopBar({ year }: TopBarProps) {
  * placement judgment call, not a spec requirement; see that plan's own note.
  */
 function NotificationsBell() {
+  const t = useT();
   const notifications = useNotifications();
   const unreadCount = notifications.data?.unreadCount ?? 0;
 
@@ -45,7 +47,7 @@ function NotificationsBell() {
   if (readToken() === null) return null;
 
   return (
-    <NavLink to="/notifications" aria-label="Notifications" className="relative">
+    <NavLink to="/notifications" aria-label={t.nav.notifications} className="relative">
       <Bell className="h-5 w-5" strokeWidth={1.8} aria-hidden="true" />
       {unreadCount > 0 && (
         <span className="absolute -right-1 -top-1 rounded-full bg-ember px-1 text-xs text-paper">

@@ -1,4 +1,5 @@
 import { formatParticipantNumber } from '@/lib/format';
+import { useT } from '@/i18n';
 
 interface ParticipantNumeralProps {
   value: number;
@@ -20,6 +21,7 @@ interface ParticipantNumeralProps {
  * owns it.
  */
 export function ParticipantNumeral({ value, className = '', hash = false }: ParticipantNumeralProps) {
+  const t = useT();
   const digits = formatParticipantNumber(value).split('');
 
   return (
@@ -28,7 +30,7 @@ export function ParticipantNumeral({ value, className = '', hash = false }: Part
     // `role=generic` element, so an `aria-label` on a plain `<span>` is
     // dropped by several AT combinations and the digits underneath, each
     // individually `aria-hidden`, announce nothing.
-    <span role="img" className={className} aria-label={`Participant ${value}`}>
+    <span role="img" className={className} aria-label={t.common.participantAria(value)}>
       {hash && <span aria-hidden="true">#</span>}
       {digits.map((digit, index) => (
         <span key={index} className="type-numeral" aria-hidden="true">

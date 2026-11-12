@@ -1,0 +1,38 @@
+export const profile = {
+  loading: 'Finding your number…',
+  readerFallback: 'Reader',
+  registrationClosed: 'Registration for this edition has closed. See you at the next one.',
+  nextEditionSoon: 'The next edition opens soon.',
+  adminDashboard: 'Admin dashboard',
+  certificates: 'Certificates & awards',
+  certificateSlot: 'Your certificate lands here',
+  certificateHint: 'Finish the quiz — it appears once results are published.',
+  pickAvatar: 'Pick your avatar',
+  initials: 'Initials',
+  avatars: {
+    rabbit: 'Rabbit',
+    bear: 'Bear',
+    chick: 'Chick',
+    queen: 'Queen',
+    'cool-duck': 'Cool duck',
+    'arctic-fox': 'Arctic fox',
+    duck: 'Duck',
+    'arctic-hare': 'Arctic hare',
+    'baby-penguin': 'Baby penguin'
+  },
+  changeAvatar: 'Change avatar',
+  participantNumber: 'Participant number',
+  numberHint: 'On the leaderboard and your certificate',
+  shareTitle: 'My BookQuest certificate',
+  linkCopied: 'Verification link copied.',
+  certificateAlt: (name: string, year: number, place: string | null) =>
+    `Certificate for ${name}, BookQuest ${year}${place ? `, ${place}` : ''}`,
+  download: 'Download',
+  share: 'Share',
+  connectTelegram: 'Connect Telegram',
+  connectTelegramBody: 'Link your Telegram account for a faster sign-in next time.',
+  connecting: 'Connecting…',
+  connectFailed: 'Telegram confirmed you, but connecting failed. Try again.',
+  language: 'Language',
+  avatarFailed: "Couldn't save your avatar. Try again."
+};

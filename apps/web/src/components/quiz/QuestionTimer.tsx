@@ -1,3 +1,5 @@
+import { useT, type Messages } from '@/i18n';
+
 interface QuestionTimerProps {
   remainingMs: number;
   totalMs: number;
@@ -9,13 +11,14 @@ const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 /** Only 10 s and 0 s are announced; a per-second live region would drown a screen reader. */
-function announcement(seconds: number): string {
-  if (seconds === 0) return "Time's up";
-  return seconds === 10 ? '10 seconds left' : '';
+function announcement(seconds: number, t: Messages['quiz']): string {
+  if (seconds === 0) return t.timesUp;
+  return seconds === 10 ? t.tenSecondsLeft : '';
 }
 
 export function QuestionTimer({ remainingMs, totalMs }: QuestionTimerProps) {
   const seconds = Math.ceil(remainingMs / 1000);
+  const t = useT();
   const fraction = totalMs > 0 ? Math.min(1, remainingMs / totalMs) : 0;
   const tone = remainingMs < 5000 ? 'text-ember' : remainingMs < 10_000 ? 'text-amber' : 'text-paper';
 
@@ -39,7 +42,7 @@ export function QuestionTimer({ remainingMs, totalMs }: QuestionTimerProps) {
         {seconds}
       </span>
       <span role="status" aria-live="polite" className="sr-only">
-        {announcement(seconds)}
+        {announcement(seconds, t.quiz)}
       </span>
     </div>
   );

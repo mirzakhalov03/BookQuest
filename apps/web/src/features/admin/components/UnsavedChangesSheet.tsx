@@ -1,25 +1,27 @@
 import type { Blocker } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
+import { useT } from '@/i18n';
 
 export function UnsavedChangesSheet({ blocker }: { blocker: Blocker }) {
+  const t = useT().admin;
   return (
     <Sheet
       open={blocker.state === 'blocked'}
       onClose={() => blocker.reset?.()}
-      title="Discard your changes?"
+      title={t.discardTitle}
       actions={
         <>
           <Button type="button" variant="quiet" onClick={() => blocker.reset?.()}>
-            Keep editing
+            {t.keepEditing}
           </Button>
           <Button type="button" onClick={() => blocker.proceed?.()}>
-            Discard
+            {t.discard}
           </Button>
         </>
       }
     >
-      <p className="m-0 text-taupe">These edits aren't saved yet. Leaving now throws them away.</p>
+      <p className="m-0 text-taupe">{t.discardBody}</p>
     </Sheet>
   );
 }

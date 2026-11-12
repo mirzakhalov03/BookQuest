@@ -5,6 +5,7 @@ import { formatLongDate, formatTimeAgo } from '@/lib/format';
 import { CopyButton } from '../components/CopyButton';
 import { InteractionContent } from './InteractionContent';
 import { KindChip } from './KindChip';
+import { useT } from '@/i18n';
 
 interface InteractionsTableProps {
   items: Interaction[];
@@ -30,6 +31,7 @@ export function InteractionsTable({
   onOpenPerson,
   compact = false
 }: InteractionsTableProps) {
+  const t = useT().admin.messages;
   return (
     <div className="flex flex-col gap-4">
       <ul className={`flex flex-col gap-2 ${compact ? '' : 'sm:hidden'}`}>
@@ -55,10 +57,10 @@ export function InteractionsTable({
           <table className="w-full table-fixed border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-[color:var(--rule-strong)] text-taupe">
-                <th className="type-label w-28 py-2 pr-3 font-normal">Time</th>
-                <th className="type-label w-56 py-2 pr-3 font-normal">Person</th>
-                <th className="type-label w-28 py-2 pr-3 font-normal">Kind</th>
-                <th className="type-label py-2 pr-3 font-normal">Content</th>
+                <th className="type-label w-28 py-2 pr-3 font-normal">{t.colTime}</th>
+                <th className="type-label w-56 py-2 pr-3 font-normal">{t.colPerson}</th>
+                <th className="type-label w-28 py-2 pr-3 font-normal">{t.colKind}</th>
+                <th className="type-label py-2 pr-3 font-normal">{t.colContent}</th>
               </tr>
             </thead>
             <tbody>
@@ -102,7 +104,8 @@ function Time({ iso, className = '' }: { iso: string; className?: string }) {
 }
 
 function PersonCell({ item, onOpen }: { item: Interaction; onOpen: (id: string) => void }) {
-  const name = [item.from.firstName, item.from.lastName].filter(Boolean).join(' ') || 'Unknown';
+  const t = useT().admin.messages;
+  const name = [item.from.firstName, item.from.lastName].filter(Boolean).join(' ') || t.unknown;
   const id = item.telegramUserId;
   return (
     <div className="flex min-w-0 flex-col">
@@ -118,9 +121,9 @@ function PersonCell({ item, onOpen }: { item: Interaction; onOpen: (id: string) 
         <span className="shrink-0" title={id}>
           {id.length > 6 ? `${id.slice(0, 5)}…` : id}
         </span>
-        <CopyButton value={id} label={`Copy Telegram id of ${name}`} />
+        <CopyButton value={id} label={t.copyIdOf(name)} />
         {item.fromAdmin && (
-          <span className="rounded-full border border-[color:var(--rule)] px-1.5">Organiser</span>
+          <span className="rounded-full border border-[color:var(--rule)] px-1.5">{t.organiser}</span>
         )}
       </span>
     </div>
@@ -134,6 +137,8 @@ function LoadMore({
   onLoadMore
 }: Pick<InteractionsTableProps, 'hasMore' | 'isLoadingMore' | 'onLoadMore'>) {
   const sentinel = useRef<HTMLDivElement>(null);
+  const { common, admin } = useT();
+  const t = admin.messages;
   // In a ref so an inline callback from the parent doesn't recreate the observer each render.
   const load = useRef(onLoadMore);
   load.current = onLoadMore;
@@ -157,7 +162,7 @@ function LoadMore({
     <div ref={sentinel} className="flex justify-center">
       {hasMore && (
         <Button variant="quiet" onClick={onLoadMore} disabled={isLoadingMore}>
-          {isLoadingMore ? 'Loading more…' : 'Load more'}
+          {isLoadingMore ? t.loadingMore : common.loadMore}
         </Button>
       )}
     </div>

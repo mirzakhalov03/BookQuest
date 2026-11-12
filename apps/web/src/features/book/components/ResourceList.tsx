@@ -3,6 +3,7 @@ import type { BookResource } from '@bookquest/shared';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { openExternalLink } from '@/lib/telegram';
 import { ResourceIcon } from './ResourceIcon';
+import { useT } from '@/i18n';
 
 interface ResourceListProps {
   resources: BookResource[];
@@ -20,12 +21,13 @@ interface ResourceListProps {
  * would be theatre, not a real barrier.
  */
 export function ResourceList({ resources }: ResourceListProps) {
+  const t = useT().book;
   if (resources.length === 0) {
     return (
       <EmptyState
-        title="Nowhere to read it yet"
+        title={t.noResourcesTitle}
         titleAs="h2"
-        body="The organisers haven't linked a copy for this edition. Check back closer to the deadline."
+        body={t.noResourcesBody}
       />
     );
   }

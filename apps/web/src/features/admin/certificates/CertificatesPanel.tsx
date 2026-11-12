@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CERTIFICATE_TIERS, type CertificateDelivery, type CertificateTier } from '@bookquest/shared';
+import { CERTIFICATE_TIERS, type CertificateDelivery } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
 import { Rule } from '@/components/ui/Rule';
@@ -8,13 +8,8 @@ import { formatCount } from '@/lib/format';
 import { useUiStore } from '@/stores/ui.store';
 import { useCertificateDelivery, useSendCertificates } from '../api/useCertificateDelivery';
 import { certificatePreviewUrl } from './previewUrl';
-
-const TIER_LABEL: Record<CertificateTier, string> = {
-  gold: '1st place',
-  silver: '2nd place',
-  bronze: '3rd place',
-  participant: 'Everyone else'
-};
+import { useT } from '@/i18n';
+import { errorMessage } from '@/lib/api/errorMessage';
 
 /**
  * On `/admin/results`: preview the four tiers, then send every finisher their
@@ -26,6 +21,8 @@ export function CertificatesPanel() {
   const send = useSendCertificates();
   const showToast = useUiStore((state) => state.showToast);
   const [confirming, setConfirming] = useState(false);
+  const { common, admin } = useT();
+  const t = admin.certificates;
   const status = delivery.data;
 
   const sending = status?.status === 'sending';
@@ -33,15 +30,15 @@ export function CertificatesPanel() {
 
   function confirmSend() {
     send.mutate(undefined, {
-      onSuccess: () => showToast('Certificates on their way.'),
-      onError: (error) => showToast(error instanceof ApiRequestError ? error.message : 'Could not start sending.'),
+      onSuccess: () => showToast(t.sentToast),
+      onError: (error) => showToast(error instanceof ApiRequestError ? errorMessage(error) : t.startFailed),
       onSettled: () => setConfirming(false)
     });
   }
 
   return (
     <section className="flex flex-col gap-3">
-      <p className="type-label m-0">Certificates</p>
+      <p className="type-label m-0">{t.title}</p>
       <Rule />
 
       <div className="grid grid-cols-2 gap-3">
@@ -52,10 +49,10 @@ export function CertificatesPanel() {
               width={1123}
               height={794}
               loading="lazy"
-              alt={`Sample ${TIER_LABEL[tier]} certificate`}
+              alt={t.sampleAlt(t.tiers[tier])}
               className="certificate-image"
             />
-            <figcaption className="text-sm text-taupe">{TIER_LABEL[tier]}</figcaption>
+            <figcaption className="text-sm text-taupe">{t.tiers[tier]}</figcaption>
           </figure>
         ))}
       </div>
@@ -66,7 +63,7 @@ export function CertificatesPanel() {
           className="h-2 w-full accent-gold"
           max={status.total}
           value={status.total - status.pending}
-          aria-label="Certificates sent"
+          aria-label={t.progressAria}
         />
       )}
 
@@ -76,27 +73,26 @@ export function CertificatesPanel() {
         disabled={!status || sending || allDone || send.isPending}
         onClick={() => setConfirming(true)}
       >
-        {allDone ? 'All certificates sent' : sending ? 'Sending…' : 'Send certificates'}
+        {allDone ? t.allSent : sending ? t.sending : t.send}
       </Button>
 
       <Sheet
         open={confirming}
         onClose={() => setConfirming(false)}
-        title={`Send to ${formatCount(status?.pending ?? 0)} finishers?`}
+        title={t.confirmTitle(formatCount(status?.pending ?? 0))}
         actions={
           <>
             <Button type="button" variant="quiet" onClick={() => setConfirming(false)}>
-              Cancel
+              {common.cancel}
             </Button>
             <Button type="button" variant="gold" onClick={confirmSend} disabled={send.isPending}>
-              {send.isPending ? 'Starting…' : 'Send now'}
+              {send.isPending ? t.starting : t.sendNow}
             </Button>
           </>
         }
       >
         <p className="m-0 text-sm text-taupe">
-          {formatCount(status?.pendingReachable ?? 0)} get it in Telegram, the rest in the app. Everyone can download
-          it from their profile. It can’t be unsent.
+          {t.confirmBody(formatCount(status?.pendingReachable ?? 0))}
         </p>
       </Sheet>
     </section>
@@ -105,18 +101,17 @@ export function CertificatesPanel() {
 
 function DeliveryLine({ status }: { status: CertificateDelivery }) {
   const processed = status.total - status.pending;
+  const t = useT().admin.certificates;
 
   let text: string;
   if (status.status === 'idle') {
-    text = `${formatCount(status.total)} finishers haven’t been sent their certificate yet.`;
+    text = t.idle(formatCount(status.total));
   } else if (status.status === 'sending') {
-    text = `Sending… ${formatCount(processed)} of ${formatCount(status.total)}`;
+    text = t.progress(formatCount(processed), formatCount(status.total));
   } else {
-    text =
-      `${formatCount(status.delivered)} delivered in Telegram · ${formatCount(status.inAppOnly)} in-app only · ` +
-      `${formatCount(status.blocked)} blocked the bot`;
-    if (status.failed > 0) text += ` · ${formatCount(status.failed)} failed, send again to retry`;
-    if (status.status === 'interrupted') text += '. The last send was interrupted: press Send to finish it.';
+    text = t.summary(formatCount(status.delivered), formatCount(status.inAppOnly), formatCount(status.blocked));
+    if (status.failed > 0) text += t.failed(formatCount(status.failed));
+    if (status.status === 'interrupted') text += t.interrupted;
   }
 
   return (

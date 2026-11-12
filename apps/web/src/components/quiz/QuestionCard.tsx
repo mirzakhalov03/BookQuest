@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { QuestionType } from '@bookquest/shared';
 import { OptionButton, type OptionState } from './OptionButton';
+import { useT } from '@/i18n';
 
 interface QuestionCardProps {
   question: { type: QuestionType; prompt: string; options: { id: string; text: string }[] };
@@ -28,6 +29,7 @@ export function QuestionCard({
 }: QuestionCardProps) {
   const { type, prompt, options } = question;
   const isTrueFalse = type === 'true_false';
+  const t = useT().quiz;
 
   // Refs keep the listener stable while the parent re-renders every frame.
   const latest = useRef({ options, onSelect });
@@ -67,7 +69,8 @@ export function QuestionCard({
           <OptionButton
             key={option.id}
             letter={isTrueFalse ? null : (LETTERS[index] ?? null)}
-            text={option.text}
+            // The server fixes true/false wording in English; say it in the reader's language instead.
+            text={isTrueFalse ? (option.id === 'true' ? t.trueLabel : t.falseLabel) : option.text}
             state={stateOf(option.id)}
             disabled={disabled}
             onClick={() => onSelect(option.id)}

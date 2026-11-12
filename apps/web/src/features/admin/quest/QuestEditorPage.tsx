@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { AdminQuest, UpdateQuestPayload } from '@bookquest/shared';
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { EmptyState } from '@/components/feedback/EmptyState';
-import { FALLBACK_MESSAGE } from '@/components/feedback/ErrorState';
 import { Button } from '@/components/ui/Button';
 import { ApiRequestError } from '@/lib/api/client';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
@@ -26,22 +25,25 @@ import { countErrors } from './changes';
 import { useQuestChanges } from './useQuestChanges';
 import { describeRiskyChanges, needsReview } from './review';
 import { canStartNextEdition } from '../phase';
+import { useT } from '@/i18n';
+import { errorMessage } from '@/lib/api/errorMessage';
 
 export const QUEST_FORM_ID = 'quest-form';
 
 /** `/admin/quest` — the current quest's book, resources, prizes, dates and quiz settings. */
 export function QuestEditorPage() {
+  const t = useT();
   const quest = useAdminCurrentQuest();
 
   return (
     <AdminQuery
       query={quest}
-      loadingLabel="Opening the ledger…"
+      loadingLabel={t.adminQuest.loading}
       notFound={(error) => (
         <EmptyState
-          title={error.message}
-          body="There's nothing to edit between editions."
-          action={<Button to="/admin/quest/new">Start next edition</Button>}
+          title={errorMessage(error)}
+          body={t.adminQuest.nothingToEdit}
+          action={<Button to="/admin/quest/new">{t.admin.dashboard.startNext}</Button>}
           className="flex-1"
         />
       )}
@@ -66,6 +68,7 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
   const quizzes = useQuizzes();
   const [now] = useState(() => new Date());
   const showToast = useUiStore((state) => state.showToast);
+  const t = useT();
   const update = useUpdateQuest(quest.id);
 
   const changes = useQuestChanges(quest, form);
@@ -75,7 +78,7 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
   const guard = useUnsavedChangesGuard(isDirty);
 
   const quizTab = useMemo(() => ({ quest, lockMessage: quizLockMessage }), [quest, quizLockMessage]);
-  const quizTitle = (id: string) => quizzes.data?.find((quiz) => quiz.id === id)?.title ?? 'a quiz';
+  const quizTitle = (id: string) => quizzes.data?.find((quiz) => quiz.id === id)?.title ?? t.adminQuest.aQuiz;
 
   async function save(patch: UpdateQuestPayload) {
     setFormError(null);
@@ -83,13 +86,13 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
       const updated = await update.mutateAsync(patch);
       // The server's answer is the new baseline; later edits diff against what was saved.
       reset(toFormState(updated));
-      showToast('Quest updated.');
+      showToast(t.adminQuest.updated);
     } catch (error) {
       setFormError(
-        error instanceof ApiRequestError ? applyServerErrors(error, setError) : FALLBACK_MESSAGE
+        error instanceof ApiRequestError ? applyServerErrors(error, setError) : errorMessage(error)
       );
       if (error instanceof ApiRequestError && error.reason === 'quiz_locked') {
-        setQuizLockMessage(error.message);
+        setQuizLockMessage(errorMessage(error));
         // Revert the fields the server froze (their error messages stay) so the other edits can save.
         const saved = toFormState(quest);
         if ('quizConfig' in error.fields) form.setValue('quizConfig', saved.quizConfig);
@@ -118,7 +121,7 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
           actions={
             canStartNextEdition(quest, now) && (
               <Button to="/admin/quest/new" variant="quiet" className="min-h-11 px-3">
-                Next edition
+                {t.adminQuest.nextEdition}
               </Button>
             )
           }
@@ -148,12 +151,12 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
         visible={isDirty}
         summary={
           errorCount > 0
-            ? `Fix ${errorCount} ${errorCount === 1 ? 'field' : 'fields'}`
-            : `${changes.count} ${changes.count === 1 ? 'change' : 'changes'}`
+            ? t.adminQuest.fixFields(errorCount)
+            : t.adminQuest.changes(changes.count)
         }
         tone={errorCount > 0 ? 'bad' : 'neutral'}
-        submitLabel="Save"
-        busyLabel="Saving…"
+        submitLabel={t.common.save}
+        busyLabel={t.common.saving}
         isBusy={update.isPending}
         disabled={!canSave}
         formId={QUEST_FORM_ID}

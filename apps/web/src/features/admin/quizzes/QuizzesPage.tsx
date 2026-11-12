@@ -13,10 +13,13 @@ import { AdminPageHeader } from '../components/AdminPageHeader';
 import { AdminQuery } from '../components/AdminQuery';
 import { NewQuizSheet } from './components/NewQuizSheet';
 import { QuizCard } from './components/QuizCard';
+import { useT } from '@/i18n';
+import { errorMessage } from '@/lib/api/errorMessage';
 
 /** `/admin/quizzes` — the quiz library. */
 export function QuizzesPage() {
   const quizzes = useQuizzes();
+  const t = useT().adminQuiz.library;
   const [creating, setCreating] = useState(false);
   const quest = useCurrentQuest().data;
   // Live while the quiz is open, and until results go out (void is still possible then).
@@ -27,28 +30,28 @@ export function QuizzesPage() {
   return (
     <AdminScreen className="max-w-5xl">
       <AdminPageHeader
-        eyebrow="Library"
-        title="Quizzes"
+        eyebrow={t.eyebrow}
+        title={t.title}
         actions={
           <>
             {showLive && (
               <Button to="/admin/quizzes/live" variant="quiet" className="min-h-11 px-4">
-                <Activity className="h-4 w-4" aria-hidden /> Live
+                <Activity className="h-4 w-4" aria-hidden /> {t.live}
               </Button>
             )}
             <Button type="button" onClick={() => setCreating(true)} className="min-h-11 px-4">
-              <Plus className="h-4 w-4" aria-hidden /> New quiz
+              <Plus className="h-4 w-4" aria-hidden /> {t.newQuiz}
             </Button>
           </>
         }
       />
-      <AdminQuery query={quizzes} loadingLabel="Counting the questions…">
+      <AdminQuery query={quizzes} loadingLabel={t.loading}>
         {(list) =>
           list.length === 0 ? (
             <EmptyState
               titleAs="h2"
-              title="No quizzes yet"
-              body="Write one, then attach it to a quest edition."
+              title={t.emptyTitle}
+              body={t.emptyBody}
               className="flex-1"
             />
           ) : (
@@ -66,10 +69,12 @@ function QuizGrid({ quizzes }: { quizzes: QuizSummaryAdmin[] }) {
   const duplicate = useDuplicateQuiz();
   const remove = useDeleteQuiz();
   const showToast = useUiStore((state) => state.showToast);
+  const { common, adminQuiz } = useT();
+  const t = adminQuiz.library;
 
   // A 409 carries the server's own explanation, so it is shown as written.
   const report = (error: unknown) =>
-    showToast(error instanceof ApiRequestError ? error.message : 'Something went wrong. Try again.');
+    showToast(error instanceof ApiRequestError ? errorMessage(error) : common.somethingWentWrong);
 
   async function confirmDelete() {
     const target = deleting;
@@ -77,7 +82,7 @@ function QuizGrid({ quizzes }: { quizzes: QuizSummaryAdmin[] }) {
     if (!target) return;
     try {
       await remove.mutateAsync(target.id);
-      showToast('Quiz deleted.');
+      showToast(t.deleted);
     } catch (error) {
       report(error);
     }
@@ -92,7 +97,7 @@ function QuizGrid({ quizzes }: { quizzes: QuizSummaryAdmin[] }) {
             quiz={quiz}
             busy={duplicate.isPending || remove.isPending}
             onDuplicate={() =>
-              duplicate.mutate(quiz.id, { onSuccess: () => showToast('Quiz duplicated.'), onError: report })
+              duplicate.mutate(quiz.id, { onSuccess: () => showToast(t.duplicated), onError: report })
             }
             onDelete={() => setDeleting(quiz)}
           />
@@ -101,19 +106,19 @@ function QuizGrid({ quizzes }: { quizzes: QuizSummaryAdmin[] }) {
       <Sheet
         open={deleting !== null}
         onClose={() => setDeleting(null)}
-        title="Delete this quiz?"
+        title={t.deleteTitle}
         actions={
           <>
             <Button type="button" variant="quiet" onClick={() => setDeleting(null)}>
-              Keep it
+              {t.keepIt}
             </Button>
             <Button type="button" onClick={() => void confirmDelete()}>
-              Delete
+              {t.delete}
             </Button>
           </>
         }
       >
-        <p className="m-0 text-taupe">“{deleting?.title}” and its questions will be gone for good.</p>
+        <p className="m-0 text-taupe">{t.deleteBody(deleting?.title ?? '')}</p>
       </Sheet>
     </>
   );

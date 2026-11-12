@@ -24,19 +24,21 @@ export async function registerParticipant(
   const quest = await requireCurrentQuestDocument();
 
   if (!isRegistrationOpen(quest)) {
-    throw ApiError.conflict('Registration for this year has closed.');
+    throw ApiError.conflict('Registration for this year has closed.', { reason: 'registration_closed' });
   }
 
   const already = await ParticipantModel.findOne({ quest: quest._id, user: user._id });
   if (already) {
-    throw ApiError.conflict(`You are already registered as participant ${already.number}.`);
+    throw ApiError.conflict(`You are already registered as participant ${already.number}.`, {
+      reason: 'already_registered'
+    });
   }
 
   /* Allocated before the insert and never returned to the pool. A gap in the
      sequence is harmless; handing the same number to two people is not. */
   const number = await nextSequence(`participant:${quest.id}`, PARTICIPANT_NUMBER_MIN);
   if (number > PARTICIPANT_NUMBER_MAX) {
-    throw ApiError.conflict('This year’s quest is full.');
+    throw ApiError.conflict('This year’s quest is full.', { reason: 'quest_full' });
   }
 
   let participant: ParticipantDocument;
@@ -56,7 +58,8 @@ export async function registerParticipant(
       throw ApiError.conflict(
         existing
           ? `You are already registered as participant ${existing.number}.`
-          : 'That registration already exists.'
+          : 'That registration already exists.',
+        { reason: 'already_registered' }
       );
     }
     throw error;
@@ -94,7 +97,7 @@ export async function requireParticipantForUser(
   currentQuest?: QuestDocument
 ): Promise<Participant> {
   const participant = await findParticipantForUser(user, currentQuest);
-  if (!participant) throw ApiError.notFound('You have not registered for this quest yet.');
+  if (!participant) throw ApiError.notFound('You have not registered for this quest yet.', { reason: 'not_registered' });
   return participant;
 }
 

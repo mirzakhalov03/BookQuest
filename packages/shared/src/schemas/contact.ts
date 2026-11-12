@@ -5,19 +5,30 @@
 
 const TELEGRAM_USERNAME = /^[a-z][a-z0-9_]{3,30}[a-z0-9]$/i;
 
+/** Stable ids for each failure, so clients can say it in their own language. */
+export type ContactIssue =
+  | 'telegram_missing'
+  | 'telegram_short'
+  | 'telegram_long'
+  | 'telegram_format'
+  | 'phone_missing'
+  | 'phone_short'
+  | 'phone_long';
+
 export type ContactResult =
   | { ok: true; value: string }
-  | { ok: false; message: string };
+  | { ok: false; code: ContactIssue; message: string };
 
 export function parseTelegramUsername(raw: string): ContactResult {
   const value = (raw ?? '').trim().replace(/^@+/, '');
 
-  if (!value) return { ok: false, message: 'Add the username people find you by on Telegram.' };
-  if (value.length < 5) return { ok: false, message: 'Telegram usernames are at least 5 characters.' };
-  if (value.length > 32) return { ok: false, message: 'That’s longer than a Telegram username can be.' };
+  if (!value) return { ok: false, code: 'telegram_missing', message: 'Add the username people find you by on Telegram.' };
+  if (value.length < 5) return { ok: false, code: 'telegram_short', message: 'Telegram usernames are at least 5 characters.' };
+  if (value.length > 32) return { ok: false, code: 'telegram_long', message: 'That’s longer than a Telegram username can be.' };
   if (!TELEGRAM_USERNAME.test(value)) {
     return {
       ok: false,
+      code: 'telegram_format',
       message: 'Usernames use letters, numbers and underscores, starting with a letter.'
     };
   }
@@ -27,9 +38,9 @@ export function parseTelegramUsername(raw: string): ContactResult {
 export function parsePhoneNumber(raw: string): ContactResult {
   const digits = (raw ?? '').replace(/\D/g, '');
 
-  if (!digits) return { ok: false, message: 'Add a number we can reach you on.' };
-  if (digits.length < 9) return { ok: false, message: 'That number looks a few digits short.' };
-  if (digits.length > 15) return { ok: false, message: 'That number has a few digits too many.' };
+  if (!digits) return { ok: false, code: 'phone_missing', message: 'Add a number we can reach you on.' };
+  if (digits.length < 9) return { ok: false, code: 'phone_short', message: 'That number looks a few digits short.' };
+  if (digits.length > 15) return { ok: false, code: 'phone_long', message: 'That number has a few digits too many.' };
 
   return { ok: true, value: formatPhone(digits) };
 }

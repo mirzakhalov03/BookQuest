@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
+import { useT } from '@/i18n';
 
 interface ExpandableTextProps {
   children: string;
@@ -14,6 +15,7 @@ interface ExpandableTextProps {
  * since CSS can't transition to `auto`.
  */
 export function ExpandableText({ children, lines = 4, className = '' }: ExpandableTextProps) {
+  const t = useT();
   const boxRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [size, setSize] = useState({ collapsed: 0, full: 0 });
@@ -46,7 +48,7 @@ export function ExpandableText({ children, lines = 4, className = '' }: Expandab
         {clamps && (
           // Always rendered so the measured full height already includes it.
           <button type="button" className="expandable__toggle expandable__less" aria-expanded={expanded} onClick={() => setExpanded(false)}>
-            less
+            {t.common.less}
           </button>
         )}
       </div>
@@ -58,7 +60,7 @@ export function ExpandableText({ children, lines = 4, className = '' }: Expandab
           aria-expanded={expanded}
           onClick={() => setExpanded(true)}
         >
-          more
+          {t.common.more}
         </button>
       )}
     </div>

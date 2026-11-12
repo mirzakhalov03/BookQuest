@@ -1,3 +1,5 @@
+import { useT } from '@/i18n';
+
 interface ProgressRailProps {
   total: number;
   /** Zero-based index of the question on screen. */
@@ -6,8 +8,9 @@ interface ProgressRailProps {
 
 /** Neutral by design: ticks show position only, never right or wrong. */
 export function ProgressRail({ total, current }: ProgressRailProps) {
+  const t = useT();
   return (
-    <div className="flex items-center gap-3" role="img" aria-label={`Question ${current + 1} of ${total}`}>
+    <div className="flex items-center gap-3" role="img" aria-label={t.quiz.questionOf(current + 1, total)}>
       <div aria-hidden className="flex flex-1 gap-1">
         {Array.from({ length: total }, (_, i) => (
           <span

@@ -18,6 +18,7 @@ import { ConnectionBanner } from './components/ConnectionBanner';
 import { QuestionView } from './components/QuestionView';
 import { QuizGuard } from './components/QuizGuard';
 import { useOtherTabNotice } from './components/useOtherTabNotice';
+import { useT } from '@/i18n';
 
 // Matches `.quiz-q-leave` in styles/quiz.css.
 const LEAVE_MS = 260;
@@ -39,6 +40,7 @@ type Hold = { question: AttemptQuestion; stage: 'leaving' | 'waiting' | 'submitt
 export function QuizPlayPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const t = useT().quiz;
   const { query, state, next, lock, select, flushSelection, pendingPick, refetch, failingSince } = useAttempt();
 
   // A session flag, seeded by "I'm ready"; the router state is cleared so a reload starts from the server's truth.
@@ -142,9 +144,9 @@ export function QuizPlayPage() {
       <ConnectionBanner failingSince={failingSince} />
       {otherTab.show && (
         <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-box border border-paper/15 bg-ash px-4 py-3">
-          <p className="m-0 text-sm text-paper-dim">The quiz is open in another tab — continue here?</p>
+          <p className="m-0 text-sm text-paper-dim">{t.otherTab}</p>
           <Button type="button" variant="quiet" className="min-h-10 px-3" onClick={otherTab.takeOver}>
-            Continue here
+            {t.continueHere}
           </Button>
         </div>
       )}
@@ -159,11 +161,11 @@ export function QuizPlayPage() {
         if (isNotFound(query.error)) return <Navigate to="/quiz" replace />;
         return <ErrorState error={query.error} onRetry={() => void refetch()} />;
       }
-      return <LoadingState label="Opening your quiz…" />;
+      return <LoadingState label={t.opening} />;
     }
 
-    if (hold?.stage === 'waiting') return <LoadingState label="Next question…" />;
-    if (hold?.stage === 'submitting') return <LoadingState label="Submitting your answers…" className="quiz-q-enter" />;
+    if (hold?.stage === 'waiting') return <LoadingState label={t.nextQuestion} />;
+    if (hold?.stage === 'submitting') return <LoadingState label={t.submitting} className="quiz-q-enter" />;
 
     if (question) {
       return (
@@ -187,7 +189,7 @@ export function QuizPlayPage() {
       case 'ready':
       case 'between':
       case 'question':
-        if (autoAdvance || advancing) return <LoadingState label="Next question…" />;
+        if (autoAdvance || advancing) return <LoadingState label={t.nextQuestion} />;
         return (
           <BetweenScreen
             index={state.position.index}
@@ -211,13 +213,14 @@ function Completed({ closedEarly }: { closedEarly: boolean }) {
 
 /** The attempt state carries no reason; the overview does. */
 function Voided() {
+  const t = useT().quiz;
   const { data } = useQuizOverview();
   const reason = data?.attempt?.voidReason;
   return (
     <EmptyState
-      title="Attempt withdrawn"
-      body={`Your attempt was withdrawn by the organisers.${reason ? ` Reason: ${reason}` : ''}`}
-      action={<Button to="/quiz" variant="quiet">Back to the quiz</Button>}
+      title={t.withdrawnTitle}
+      body={reason ? `${t.withdrawnBody} ${t.withdrawnReason(reason)}` : t.withdrawnBody}
+      action={<Button to="/quiz" variant="quiet">{t.backToQuiz}</Button>}
     />
   );
 }

@@ -1,5 +1,6 @@
 interface SegmentedProps<Value extends string> {
-  options: readonly { value: Value; label: string }[];
+  /** `lang` marks a label written in another language (native names in a language picker). */
+  options: readonly { value: Value; label: string; lang?: string }[];
   value: Value;
   onChange: (value: Value) => void;
   'aria-label': string;
@@ -28,6 +29,7 @@ export function Segmented<Value extends string>({
             type="button"
             role="radio"
             aria-checked={isOn}
+            lang={option.lang}
             onClick={() => onChange(option.value)}
             className={`min-h-11 flex-1 px-3 text-sm font-medium transition-colors disabled:opacity-50 ${
               isOn ? 'bg-ash-hi text-amber' : 'text-taupe hover:text-paper-dim'

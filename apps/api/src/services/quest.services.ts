@@ -35,13 +35,13 @@ export async function getAdminCurrentQuest(): Promise<AdminQuest> {
 
 export async function requireCurrentQuestDocument(): Promise<QuestDocument> {
   const quest = await findCurrentQuestDocument();
-  if (!quest) throw ApiError.notFound('No quest is running right now.');
+  if (!quest) throw ApiError.notFound('No quest is running right now.', { reason: 'quest_not_found' });
   return quest;
 }
 
 export async function getQuestByEdition(edition: number): Promise<Quest> {
   const quest = await QuestModel.findOne({ edition });
-  if (!quest) throw ApiError.notFound(`There was no edition ${edition}.`);
+  if (!quest) throw ApiError.notFound(`There was no edition ${edition}.`, { reason: 'edition_not_found' });
   return toQuestDto(quest);
 }
 
@@ -97,7 +97,7 @@ export async function createQuest(payload: CreateQuestPayload): Promise<Quest> {
     // Results, ranks and certificates are served only for the current quest; archiving it early loses them.
     const outgoing = await findCurrentQuestDocument();
     if (outgoing && new Date() < outgoing.resultsAt) {
-      throw ApiError.conflict(`Results for edition ${outgoing.edition} are not out yet.`);
+      throw ApiError.conflict(`Results for edition ${outgoing.edition} are not out yet.`, { reason: 'results_pending' });
     }
   }
 
@@ -119,7 +119,7 @@ export async function createQuest(payload: CreateQuestPayload): Promise<Quest> {
     return toQuestDto(quest);
   } catch (error) {
     if (isDuplicateKeyError(error)) {
-      throw ApiError.conflict(`Edition ${fields.edition} already exists.`);
+      throw ApiError.conflict(`Edition ${fields.edition} already exists.`, { reason: 'edition_exists' });
     }
     throw error;
   }

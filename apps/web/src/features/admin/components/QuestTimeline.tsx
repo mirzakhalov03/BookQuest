@@ -1,6 +1,7 @@
 import { Fragment, type ReactNode } from 'react';
 import { QUEST_DATE_FIELDS, type QuestDateField } from '@bookquest/shared';
-import { DATE_LABEL, GAP_LABEL, formatGap } from '../dates';
+import { formatGap } from '../dates';
+import { useT } from '@/i18n';
 
 interface QuestTimelineProps {
   dates: Record<QuestDateField, Date | null>;
@@ -19,6 +20,7 @@ const DOT: Record<NodeState, string> = {
 
 /** The five dates as one rail: what's passed, what's next, how long each stretch is. */
 export function QuestTimeline({ dates, now, renderValue }: QuestTimelineProps) {
+  const t = useT().admin;
   const firstFuture = QUEST_DATE_FIELDS.findIndex((field) => {
     const date = dates[field];
     return date === null || date > now;
@@ -39,15 +41,15 @@ export function QuestTimeline({ dates, now, renderValue }: QuestTimelineProps) {
             <li className="relative grid grid-cols-[1.1rem_1fr] gap-x-3 py-2">
               <span aria-hidden className={`relative z-[1] mt-1 h-2.5 w-2.5 justify-self-center rounded-full ${DOT[state]}`} />
               <div className="flex min-w-0 flex-col gap-1">
-                <span className="type-label">{DATE_LABEL[field]}</span>
+                <span className="type-label">{t.dates[field]}</span>
                 {renderValue(field)}
               </div>
             </li>
-            {gap && GAP_LABEL[field] && (
+            {gap && t.gaps[field as keyof typeof t.gaps] && (
               <li aria-hidden className="grid grid-cols-[1.1rem_1fr] gap-x-3 pb-1">
                 <span />
                 <span className="text-xs text-taupe-dim">
-                  {GAP_LABEL[field]} · {gap}
+                  {t.gaps[field as keyof typeof t.gaps]} · {gap}
                 </span>
               </li>
             )}
@@ -60,10 +62,11 @@ export function QuestTimeline({ dates, now, renderValue }: QuestTimelineProps) {
 }
 
 function NowMarker() {
+  const t = useT();
   return (
     <li className="grid grid-cols-[1.1rem_1fr] items-center gap-x-3 py-1">
       <span aria-hidden className="relative z-[1] h-px w-full bg-ember" />
-      <span className="type-label text-ember">Now</span>
+      <span className="type-label text-ember">{t.admin.now}</span>
     </li>
   );
 }

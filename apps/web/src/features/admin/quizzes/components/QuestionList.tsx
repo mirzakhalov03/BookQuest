@@ -21,8 +21,9 @@ import { findQuizIssues, quizShape, type QuizQuestion } from '@bookquest/shared'
 import { formatQuizDuration } from '../format';
 import { newQuestion, type QuizFormState } from '../quizForm';
 import { QuestionEditor } from './QuestionEditor';
+import { useT } from '@/i18n';
+import { localizeQuizIssues } from '../issues';
 
-const TYPE_LABEL = { true_false: 'T/F', mcq: 'MCQ' } as const;
 const DIFFICULTY_DOT = { easy: 'bg-gold-soft', medium: 'bg-amber', hard: 'bg-ember' } as const;
 const ROW_BUTTON =
   'flex h-11 w-9 shrink-0 items-center justify-center text-taupe hover:text-paper disabled:opacity-30 disabled:hover:text-taupe';
@@ -61,7 +62,8 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
   });
   const [questions, settings] = useWatch({ control, name: ['questions', 'settings'] });
   const [openId, setOpenId] = useState<string | null>(null);
-  const issues = findQuizIssues({ questions, settings });
+  const issues = localizeQuizIssues(findQuizIssues({ questions, settings }));
+  const t = useT().adminQuiz.editor;
   const shape = quizShape({ questions, settings });
 
   const sensors = useSensors(
@@ -97,7 +99,7 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
     <>
       <section className="flex flex-col gap-3">
         <h2 className="type-label m-0">
-          Questions
+          {t.questions}
           {shape.questionCount > 0 && (
             <span className="normal-case tracking-normal text-taupe-dim">
               {' '}
@@ -107,7 +109,7 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
         </h2>
         {settings.shuffleQuestions && (
           <p className="m-0 text-sm text-taupe">
-            Order is shuffled for each participant; this order is used in preview and review.
+            {t.shuffledNote}
           </p>
         )}
         {issues?.questions && fields.length === 0 && (
@@ -163,7 +165,7 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
             onClick={addQuestion}
             className="flex min-h-11 items-center justify-center gap-2 rounded-box border border-dashed border-[color:var(--rule-strong)] text-sm font-medium text-amber transition-colors hover:border-amber/60 hover:bg-ash-hi"
           >
-            <Plus className="h-4 w-4" aria-hidden /> Add question
+            <Plus className="h-4 w-4" aria-hidden /> {t.addQuestion}
           </button>
         )}
       </section>
@@ -212,6 +214,8 @@ function SortableRow({
     isDragging
   } = useSortable({ id, disabled: locked });
   const seconds = question.timeLimitSec ?? defaultTime;
+  const { adminQuiz } = useT();
+  const t = adminQuiz.editor;
 
   return (
     <li
@@ -225,7 +229,7 @@ function SortableRow({
         <button
           type="button"
           ref={setActivatorNodeRef}
-          aria-label={`Drag question ${index + 1}`}
+          aria-label={t.dragAria(index + 1)}
           disabled={locked}
           {...attributes}
           {...listeners}
@@ -243,23 +247,23 @@ function SortableRow({
         >
           <span className="w-6 shrink-0 text-sm tabular-nums text-taupe">{index + 1}</span>
           <span className="shrink-0 rounded-full border border-[color:var(--rule)] px-1.5 text-xs text-taupe">
-            {TYPE_LABEL[question.type]}
+            {t.typeShort[question.type]}
           </span>
           <span
             className={`min-w-0 flex-1 truncate ${question.prompt.trim() ? 'text-paper' : 'text-taupe'} ${
               voided ? 'line-through decoration-taupe' : ''
             }`}
           >
-            {question.prompt.trim() || 'Untitled question'}
+            {question.prompt.trim() || t.untitledQuestion}
           </span>
-          {voided && <span className="shrink-0 text-xs text-amber">Voided</span>}
+          {voided && <span className="shrink-0 text-xs text-amber">{t.voided}</span>}
           <span
-            aria-label={question.difficulty}
+            aria-label={adminQuiz.difficulty[question.difficulty]}
             className={`h-2 w-2 shrink-0 rounded-full ${DIFFICULTY_DOT[question.difficulty]}`}
           />
           <span className="shrink-0 text-xs tabular-nums text-taupe">{seconds}s</span>
           {hasError && (
-            <AlertTriangle aria-label="Needs attention" className="h-4 w-4 shrink-0 text-error" />
+            <AlertTriangle aria-label={t.needsAttention} className="h-4 w-4 shrink-0 text-error" />
           )}
           <ChevronDown
             className={`h-4 w-4 shrink-0 text-taupe transition-transform ${open ? 'rotate-180' : ''}`}
@@ -268,7 +272,7 @@ function SortableRow({
         </button>
         <button
           type="button"
-          aria-label={`Move question ${index + 1} up`}
+          aria-label={t.moveUpAria(index + 1)}
           disabled={locked || index === 0}
           onClick={() => onMove(index - 1)}
           className={ROW_BUTTON}
@@ -277,7 +281,7 @@ function SortableRow({
         </button>
         <button
           type="button"
-          aria-label={`Move question ${index + 1} down`}
+          aria-label={t.moveDownAria(index + 1)}
           disabled={locked || index === count - 1}
           onClick={() => onMove(index + 1)}
           className={ROW_BUTTON}

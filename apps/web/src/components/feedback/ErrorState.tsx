@@ -1,14 +1,6 @@
 import { Button } from '@/components/ui/Button';
-import { ApiRequestError } from '@/lib/api/client';
-
-// The API writes error.message for people, not for logs (spec, API contract
-// conventions), so it is safe to show verbatim. Anything that isn't an
-// ApiRequestError — a network failure, a timeout — never went through that
-// contract and has no product-written message, so it gets a plain one instead
-// of whatever the browser or fetch happened to say. Exported so any other
-// screen that catches a non-`ApiRequestError` failure (the registration form,
-// for one) says the same thing rather than inventing its own wording.
-export const FALLBACK_MESSAGE = "Couldn't reach BookQuest. Check your connection and try again.";
+import { errorMessage } from '@/lib/api/errorMessage';
+import { useT } from '@/i18n';
 
 interface ErrorStateProps {
   /** Whatever a query, mutation or router error handed back. */
@@ -23,18 +15,19 @@ interface ErrorStateProps {
  * prefixes or rephrases the message itself — the one judgment call it makes
  * is which message is fit to show at all.
  */
-export function ErrorState({ error, onRetry, retryLabel = 'Try again', className = '' }: ErrorStateProps) {
-  const message = error instanceof ApiRequestError ? error.message : FALLBACK_MESSAGE;
+export function ErrorState({ error, onRetry, retryLabel, className = '' }: ErrorStateProps) {
+  const t = useT();
+  const message = errorMessage(error);
 
   return (
     <div
       role="alert"
       className={`flex flex-1 flex-col items-center justify-center gap-4 px-6 py-10 text-center ${className}`}
     >
-      <p className="type-label text-amber">Something went wrong</p>
+      <p className="type-label text-amber">{t.common.somethingWentWrong}</p>
       <p className="max-w-sm text-paper-dim">{message}</p>
       <Button variant="quiet" onClick={onRetry}>
-        {retryLabel}
+        {retryLabel ?? t.common.tryAgain}
       </Button>
     </div>
   );

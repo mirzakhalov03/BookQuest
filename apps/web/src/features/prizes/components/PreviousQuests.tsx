@@ -4,18 +4,20 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { Button } from '@/components/ui/Button';
 import { useQuestArchive } from '@/lib/api/quest';
 import { QuestSummaryCard } from './QuestSummaryCard';
+import { useT } from '@/i18n';
 
 /** Every edition before the current one. `GET /quests` already leaves out the current one. */
 export function PreviousQuests() {
   const { data, isPending, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useQuestArchive();
+  const t = useT();
 
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="type-label m-0">Previous quests</h2>
+      <h2 className="type-label m-0">{t.prizes.previous}</h2>
 
       {isPending ? (
-        <LoadingState label="Opening the archive…" />
+        <LoadingState label={t.prizes.archiveLoading} />
       ) : error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
@@ -38,10 +40,11 @@ interface PreviousQuestListProps {
 }
 
 function PreviousQuestList({ editions, hasNextPage, isFetchingNextPage, onLoadMore }: PreviousQuestListProps) {
+  const t = useT();
   if (editions.length === 0) {
     return (
       <p className="py-4 text-taupe">
-        Nothing here yet. Each past edition's book and winner will show up here once it closes.
+        {t.prizes.archiveEmpty}
       </p>
     );
   }
@@ -59,7 +62,7 @@ function PreviousQuestList({ editions, hasNextPage, isFetchingNextPage, onLoadMo
       {/* A button, not infinite scroll: a short list is easier to use this way. */}
       {hasNextPage && (
         <Button variant="quiet" className="self-center" onClick={onLoadMore} disabled={isFetchingNextPage}>
-          {isFetchingNextPage ? 'Loading…' : 'Load more'}
+          {isFetchingNextPage ? t.common.loading : t.common.loadMore}
         </Button>
       )}
     </>

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
+import { useT } from '@/i18n';
 
 interface SaveBarProps {
   visible: boolean;
@@ -31,13 +32,14 @@ export function SaveBar({
   disabled,
   formId,
   onDiscard,
-  discardLabel = 'Discard',
+  discardLabel,
   children
 }: SaveBarProps) {
+  const t = useT().admin;
   return createPortal(
     <div
       role="region"
-      aria-label="Unsaved changes"
+      aria-label={t.unsavedRegion}
       aria-hidden={!visible}
       inert={!visible}
       className={`admin-savebar ${visible ? 'is-on' : ''}`}
@@ -47,7 +49,7 @@ export function SaveBar({
       </p>
       {children}
       <Button type="button" variant="quiet" onClick={onDiscard} className="min-h-11 px-3">
-        {discardLabel}
+        {discardLabel ?? t.discard}
       </Button>
       <Button type="submit" form={formId} disabled={disabled} className="min-h-11 px-5">
         {isBusy ? busyLabel : submitLabel}

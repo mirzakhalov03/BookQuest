@@ -3,7 +3,8 @@ import { Link } from 'react-router';
 import type { QuestSummary } from '@bookquest/shared';
 import { BookCover } from '@/components/BookCover';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
-import { formatCount, formatOrdinalEdition, formatParticipantNumber } from '@/lib/format';
+import { formatCount, formatParticipantNumber } from '@/lib/format';
+import { useT } from '@/i18n';
 
 /**
  * A thumbnail, not the stage's book — `--book-w` is overridden locally so the
@@ -28,6 +29,7 @@ const THUMB_STYLE = {
 } as CSSProperties;
 
 export function QuestSummaryCard({ quest }: { quest: QuestSummary }) {
+  const t = useT();
   return (
     <Link
       to={`/quests/${quest.edition}`}
@@ -38,17 +40,15 @@ export function QuestSummaryCard({ quest }: { quest: QuestSummary }) {
       </div>
 
       <div className="flex flex-1 flex-col gap-1">
-        <p className="type-label">
-          {formatOrdinalEdition(quest.edition)} · {quest.year}
-        </p>
+        <p className="type-label">{t.common.editionShort(quest.edition, quest.year)}</p>
         <p className="type-display text-xl text-paper">{quest.bookTitle}</p>
         <p className="text-sm text-taupe">{quest.bookAuthor}</p>
         <p className="text-sm text-taupe-dim">
-          {formatCount(quest.participantCount)} readers
+          {t.common.readers(quest.participantCount, formatCount(quest.participantCount))}
           {quest.winner && (
             <>
               {' '}
-              · won by {quest.winner.fullName} (#{formatParticipantNumber(quest.winner.number)})
+              · {t.prizes.wonBy(quest.winner.fullName, formatParticipantNumber(quest.winner.number))}
             </>
           )}
         </p>

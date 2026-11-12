@@ -6,26 +6,29 @@ import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
 import { hostnameOf } from '../resources';
 import type { QuestFormState } from '../questForm';
+import { useT } from '@/i18n';
 
 const PLACES = [
-  ['1st', 'first'],
-  ['2nd', 'second'],
-  ['3rd', 'third']
+  [1, 'first'],
+  [2, 'second'],
+  [3, 'third']
 ] as const;
 
 /** The participant-facing `BookHero`, fed unsaved values — the preview can't drift from the real screen. */
 export function QuestPreview({ values }: { values: QuestFormState }) {
   const { book, prizes } = values;
+  const { common, adminQuest } = useT();
+  const t = adminQuest.preview;
   const pages = Number(book.pages);
   const prizeRows = PLACES.map(([place, key]) => [place, prizes[key].trim()] as const).filter(([, prize]) => prize);
 
   return (
     <div className="flex flex-col gap-5 rounded-box border border-[color:var(--rule)] p-4">
-      <p className="type-label m-0">What participants see</p>
+      <p className="type-label m-0">{t.heading}</p>
       <BookHero
         titleAs="h2"
-        title={book.title.trim() || 'Untitled'}
-        author={book.author.trim() || 'Unknown author'}
+        title={book.title.trim() || t.untitled}
+        author={book.author.trim() || t.unknownAuthor}
         pages={Number.isFinite(pages) && pages > 0 ? pages : 0}
         coverUrl={book.coverUrl || null}
       />
@@ -43,7 +46,7 @@ export function QuestPreview({ values }: { values: QuestFormState }) {
         <ol className="m-0 flex list-none flex-col gap-1 p-0 text-sm">
           {prizeRows.map(([place, prize]) => (
             <li key={place} className="text-paper-dim">
-              <span className="type-label mr-2">{place}</span>
+              <span className="type-label mr-2">{common.placeShort(place)}</span>
               {prize}
             </li>
           ))}
@@ -70,20 +73,21 @@ export function QuestEditorLayout({ preview, children }: { preview: ReactNode; c
 
 export function PreviewButton({ preview }: { preview: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
 
   return (
     <>
       <Button type="button" variant="quiet" onClick={() => setOpen(true)} className="min-h-11 px-3 lg:hidden">
         <Eye aria-hidden className="h-4 w-4" />
-        Preview
+        {t.adminQuest.preview.button}
       </Button>
       <Sheet
         open={open}
         onClose={() => setOpen(false)}
-        title="Preview"
+        title={t.adminQuest.preview.button}
         actions={
           <Button type="button" variant="quiet" onClick={() => setOpen(false)}>
-            Close
+            {t.common.close}
           </Button>
         }
       >

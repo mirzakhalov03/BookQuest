@@ -12,22 +12,14 @@ import { formatCount, formatParticipantNumber } from '@/lib/format';
 import { useQuizAttempts, useQuizLive, type AttemptFilters } from '../api/useQuizLive';
 import { AdminPageHeader } from '../components/AdminPageHeader';
 import { AdminQuery } from '../components/AdminQuery';
-import { FLAG_LABEL, STATUS_LABEL } from './attemptLabels';
 import { AttemptSheet } from './components/AttemptSheet';
 import { AttemptsTable } from './components/AttemptsTable';
 import { LiveGroupTiles } from './components/LiveGroupTiles';
 import { VoidAttemptSheet } from './components/VoidAttemptSheet';
+import { useT } from '@/i18n';
 
 const SEARCH_DEBOUNCE_MS = 350;
 
-const STATUS_OPTIONS = [
-  { value: '' as const, label: 'Any status' },
-  ...ATTEMPT_STATUSES.map((value) => ({ value, label: STATUS_LABEL[value] }))
-];
-const FLAG_OPTIONS = [
-  { value: '' as const, label: 'Any flag' },
-  ...QUIZ_FLAGS.map((value) => ({ value, label: FLAG_LABEL[value] }))
-];
 
 const pick = <T extends string>(value: string | null, allowed: readonly T[]): T | '' =>
   value !== null && (allowed as readonly string[]).includes(value) ? (value as T) : '';
@@ -35,25 +27,26 @@ const pick = <T extends string>(value: string | null, allowed: readonly T[]): T 
 /** `/admin/quizzes/live` — per-variant progress and every attempt, polled while the tab is visible. */
 export function QuizLivePage() {
   const live = useQuizLive();
+  const t = useT().adminQuiz.live;
 
   return (
     <AdminScreen className="max-w-5xl">
       <AdminPageHeader
-        eyebrow="Quiz"
-        title="Live"
+        eyebrow={t.eyebrow}
+        title={t.title}
         actions={
           <Button to="/admin/quizzes" variant="quiet" className="min-h-11 px-4">
-            Library
+            {t.library}
           </Button>
         }
       />
-      <AdminQuery query={live} loadingLabel="Counting heads…">
+      <AdminQuery query={live} loadingLabel={t.loading}>
         {(stats) =>
           stats.groups.length === 0 ? (
             <EmptyState
               titleAs="h2"
-              title="No quiz is set up for this edition"
-              body="Attach quizzes in the quest editor first."
+              title={t.noneTitle}
+              body={t.noneBody}
               className="flex-1"
             />
           ) : (
@@ -72,6 +65,16 @@ export function QuizLivePage() {
 function Attempts() {
   const [params, setParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState(() => params.get('q') ?? '');
+  const { common, adminQuiz } = useT();
+  const t = adminQuiz.live;
+  const statusOptions = [
+    { value: '' as const, label: t.anyStatus },
+    ...ATTEMPT_STATUSES.map((value) => ({ value, label: adminQuiz.status[value] }))
+  ];
+  const flagOptions = [
+    { value: '' as const, label: t.anyFlag },
+    ...QUIZ_FLAGS.map((value) => ({ value, label: adminQuiz.flags[value] }))
+  ];
   const q = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
   const filters: AttemptFilters = {
     status: pick<AttemptStatus>(params.get('status'), ATTEMPT_STATUSES),
@@ -108,36 +111,36 @@ function Attempts() {
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="type-label m-0">Attempts</h2>
+      <h2 className="type-label m-0">{t.attempts}</h2>
       <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end">
         <SearchInput
-          aria-label="Search attempts"
-          placeholder="Name or number"
+          aria-label={t.searchAria}
+          placeholder={t.searchPlaceholder}
           maxLength={80}
           value={searchInput}
           onChange={setSearchInput}
           className="col-span-2 w-full sm:max-w-xs"
         />
         <Select<AttemptStatus | ''>
-          label="Status"
+          label={t.statusLabel}
           value={filters.status}
-          options={STATUS_OPTIONS}
+          options={statusOptions}
           onChange={(status) => setParam('status', status)}
         />
-        <Select<QuizFlag | ''> label="Flag" value={filters.flag} options={FLAG_OPTIONS} onChange={(flag) => setParam('flag', flag)} />
+        <Select<QuizFlag | ''> label={t.flagLabel} value={filters.flag} options={flagOptions} onChange={(flag) => setParam('flag', flag)} />
       </div>
 
-      <AdminQuery query={attempts} loadingLabel="Gathering attempts…">
+      <AdminQuery query={attempts} loadingLabel={t.attemptsLoading}>
         {() =>
           items.length === 0 ? (
             <EmptyState
               titleAs="h2"
-              title={filtered ? 'No attempts match' : 'No one has started yet'}
-              body={filtered ? 'Try clearing a filter.' : 'Attempts appear here as people begin.'}
+              title={filtered ? t.noMatch : t.noneStarted}
+              body={filtered ? t.clearFilter : t.appearHere}
             />
           ) : (
             <div className={`flex flex-col gap-4 transition-opacity ${attempts.isPlaceholderData ? 'opacity-60' : ''}`}>
-              <p className="m-0 text-sm text-taupe">{formatCount(total)} {total === 1 ? 'attempt' : 'attempts'}</p>
+              <p className="m-0 text-sm text-taupe">{t.count(total, formatCount(total))}</p>
               <AttemptsTable attempts={items} onOpen={setOpen} />
               {attempts.hasNextPage && (
                 <Button
@@ -146,7 +149,7 @@ function Attempts() {
                   disabled={attempts.isFetchingNextPage}
                   onClick={() => void attempts.fetchNextPage()}
                 >
-                  {attempts.isFetchingNextPage ? 'Loading…' : `Show more · ${formatCount(total - items.length)} left`}
+                  {attempts.isFetchingNextPage ? common.loading : t.showMore(formatCount(total - items.length))}
                 </Button>
               )}
             </div>

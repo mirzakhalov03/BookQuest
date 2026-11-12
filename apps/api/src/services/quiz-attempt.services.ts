@@ -80,7 +80,7 @@ async function requireParticipantContext(user: UserDocument): Promise<Participan
   const now = new Date();
   const quest = await requireQuest();
   const participant = await findParticipantForUser(user, quest);
-  if (!participant) throw ApiError.notFound(MSG.notRegistered);
+  if (!participant) throw ApiError.notFound(MSG.notRegistered, { reason: 'not_registered' });
   return { quest, participant, now };
 }
 
@@ -95,14 +95,14 @@ async function requireAttemptContext(user: UserDocument, now = new Date()): Prom
     findParticipantForUser(user, quest),
     QuizAttemptModel.findOne({ quest: quest._id, user: user._id }).lean<AttemptRow>()
   ]);
-  if (!participant) throw ApiError.notFound(MSG.notRegistered);
-  if (!attempt || String(attempt.participant) !== participant.id) throw ApiError.notFound(MSG.notStarted);
+  if (!participant) throw ApiError.notFound(MSG.notRegistered, { reason: 'not_registered' });
+  if (!attempt || String(attempt.participant) !== participant.id) throw ApiError.notFound(MSG.notStarted, { reason: 'not_started' });
   return { quest, participant, now, attempt };
 }
 
 async function reload(attempt: AttemptRow): Promise<AttemptRow> {
   const fresh = await QuizAttemptModel.findById(attempt._id).lean<AttemptRow>();
-  if (!fresh) throw ApiError.notFound(MSG.notStarted);
+  if (!fresh) throw ApiError.notFound(MSG.notStarted, { reason: 'not_started' });
   return fresh;
 }
 
@@ -489,8 +489,8 @@ export async function getOverview(user: UserDocument, now = new Date()): Promise
 /** The only participant path that serialises the answer key: gated on results and a completed attempt. */
 export async function getReview(user: UserDocument, now = new Date()): Promise<AttemptReview> {
   const { quest, attempt } = await requireAttemptContext(user);
-  if (now < quest.resultsAt) throw ApiError.notFound(MSG.reviewLocked);
-  if (attempt.status !== 'completed') throw ApiError.notFound(MSG.reviewUnavailable);
+  if (now < quest.resultsAt) throw ApiError.notFound(MSG.reviewLocked, { reason: 'results_not_published' });
+  if (attempt.status !== 'completed') throw ApiError.notFound(MSG.reviewUnavailable, { reason: 'review_unavailable' });
   return {
     items: attempt.items.map((item, index) => ({
       index,

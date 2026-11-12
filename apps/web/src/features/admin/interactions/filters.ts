@@ -11,13 +11,9 @@ const YMD = new Intl.DateTimeFormat('en-CA', {
   day: '2-digit'
 });
 
-export const RANGE_OPTIONS = [
-  { value: 'today', label: 'Today' },
-  { value: '7d', label: 'Last 7 days' },
-  { value: '30d', label: 'Last 30 days' },
-  { value: 'all', label: 'All time' }
-] as const;
-export type RangePreset = (typeof RANGE_OPTIONS)[number]['value'];
+/** Labels live in the dictionary (`admin.messages.range`). */
+export const RANGE_PRESETS = ['today', '7d', '30d', 'all'] as const;
+export type RangePreset = (typeof RANGE_PRESETS)[number];
 const BACK_DAYS: Record<Exclude<RangePreset, 'all'>, number> = { today: 0, '7d': 6, '30d': 29 };
 
 export interface InteractionFilters {
@@ -58,7 +54,7 @@ export function readFilters(params: URLSearchParams): InteractionFilters {
     broadcast: params.get('broadcast') ?? '',
     range: oneOf(
       params.get('range'),
-      RANGE_OPTIONS.map((option) => option.value),
+      RANGE_PRESETS,
       DEFAULT_FILTERS.range
     ),
     includeAdmins: params.get('organisers') === '1',

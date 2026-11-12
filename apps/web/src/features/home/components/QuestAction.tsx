@@ -6,6 +6,7 @@ import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { useAuth } from '@/lib/auth/useAuth';
 import { haptic } from '@/lib/telegram';
 import { formatCount, formatParticipantNumber } from '@/lib/format';
+import { useT, type Messages } from '@/i18n';
 
 interface QuestActionProps {
   quest: Quest;
@@ -18,6 +19,7 @@ interface QuestActionProps {
  */
 export function QuestAction({ quest }: QuestActionProps) {
   const { user } = useAuth();
+  const t = useT();
   const navigate = useNavigate();
   const participant = user?.participant ?? null;
 
@@ -32,9 +34,9 @@ export function QuestAction({ quest }: QuestActionProps) {
     return (
       <Act>
         <PrimaryButton variant="gold" onClick={() => go('/results')}>
-          View results
+          {t.home.viewResults}
         </PrimaryButton>
-        <p className="act__sub">Certificates are on their way to everyone who finished</p>
+        <p className="act__sub">{t.home.certificatesOnTheWay}</p>
       </Act>
     );
   }
@@ -44,8 +46,8 @@ export function QuestAction({ quest }: QuestActionProps) {
       return (
         <Act>
           {/* `/quiz` is a countdown placeholder until the quiz is built (plan Phase 6). */}
-          <PrimaryButton onClick={() => go('/quiz')}>Enter the quiz</PrimaryButton>
-          <p className="act__sub">{quizSubline(quest.quiz)}</p>
+          <PrimaryButton onClick={() => go('/quiz')}>{t.home.enterQuiz}</PrimaryButton>
+          <p className="act__sub">{quizSubline(quest.quiz, t)}</p>
         </Act>
       );
     }
@@ -55,8 +57,8 @@ export function QuestAction({ quest }: QuestActionProps) {
     // else for an already-registered reader to do but head for the book.
     return (
       <Act>
-        <PrimaryButton onClick={() => go('/book')}>Go to the book</PrimaryButton>
-        <p className="act__sub">You're participant {formatParticipantNumber(participant.number)}</p>
+        <PrimaryButton onClick={() => go('/book')}>{t.home.goToBook}</PrimaryButton>
+        <p className="act__sub">{t.home.youAreParticipant(formatParticipantNumber(participant.number))}</p>
       </Act>
     );
   }
@@ -67,9 +69,9 @@ export function QuestAction({ quest }: QuestActionProps) {
     return (
       <Act>
         <Button variant="quiet" disabled>
-          Registration has closed
+          {t.home.registrationClosed}
         </Button>
-        <p className="act__sub">Registration closed when the reading period ended</p>
+        <p className="act__sub">{t.home.registrationClosedSub}</p>
       </Act>
     );
   }
@@ -77,17 +79,17 @@ export function QuestAction({ quest }: QuestActionProps) {
   // Not registered, registration still open. `/me` handles signing in first when needed.
   return (
     <Act>
-      <PrimaryButton onClick={() => go('/me')}>Join BookQuest</PrimaryButton>
-      <p className="act__sub">Registration closes when the reading period ends</p>
+      <PrimaryButton onClick={() => go('/me')}>{t.home.join}</PrimaryButton>
+      <p className="act__sub">{t.home.joinSub}</p>
     </Act>
   );
 }
 
-function quizSubline(quiz: Quest['quiz']): string {
+function quizSubline(quiz: Quest['quiz'], t: Messages): string {
   // Null until an admin attaches a quiz.
-  if (!quiz) return 'Speed counts as much as accuracy.';
+  if (!quiz) return t.home.speedCounts;
   const minutes = Math.max(1, Math.round(quiz.totalSeconds / 60));
-  return `${formatCount(quiz.questionCount)} questions · about ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
+  return t.home.quizSummary(t.common.questions(quiz.questionCount, formatCount(quiz.questionCount)), minutes);
 }
 
 function Act({ children }: { children: ReactNode }) {

@@ -59,9 +59,19 @@ export function titleCaseWord(word: string): string {
     .replace(/^Mc(\p{L})/u, (_, ch: string) => 'Mc' + ch.toUpperCase());
 }
 
+/** Stable ids for each failure, so clients can say it in their own language. */
+export type FullNameIssue =
+  | 'missing'
+  | 'digits'
+  | 'characters'
+  | 'one_word'
+  | 'too_many_words'
+  | 'too_short'
+  | 'not_a_name';
+
 export type FullNameResult =
   | { ok: true; value: string }
-  | { ok: false; message: string };
+  | { ok: false; code: FullNameIssue; message: string };
 
 /**
  * Validates and normalises a full name in one pass, so callers never have to
@@ -71,24 +81,24 @@ export type FullNameResult =
 export function parseFullName(raw: string): FullNameResult {
   const value = (raw ?? '').replace(/\s+/g, ' ').trim();
 
-  if (!value) return fail('Your name goes on the certificate — add it here.');
-  if (/\d/.test(value)) return fail('Names don’t have numbers in them.');
-  if (/[^\p{L}\s'’-]/u.test(value)) return fail('Letters, hyphens and apostrophes only.');
+  if (!value) return fail('missing', 'Your name goes on the certificate — add it here.');
+  if (/\d/.test(value)) return fail('digits', 'Names don’t have numbers in them.');
+  if (/[^\p{L}\s'’-]/u.test(value)) return fail('characters', 'Letters, hyphens and apostrophes only.');
 
   const words = value.split(' ').filter(Boolean);
 
-  if (words.length < 2) return fail('Please enter your first and last name.');
-  if (words.length > 2) return fail('First and last name is enough — two words.');
+  if (words.length < 2) return fail('one_word', 'Please enter your first and last name.');
+  if (words.length > 2) return fail('too_many_words', 'First and last name is enough — two words.');
   if (words.some((w) => w.replace(/[^\p{L}]/gu, '').length < 2)) {
-    return fail('Both names need at least two letters.');
+    return fail('too_short', 'Both names need at least two letters.');
   }
   if (words.some(looksLikeMashing)) {
-    return fail('That doesn’t look like a name yet. Try your real one.');
+    return fail('not_a_name', 'That doesn’t look like a name yet. Try your real one.');
   }
 
   return { ok: true, value: words.map(titleCaseWord).join(' ') };
 }
 
-function fail(message: string): FullNameResult {
-  return { ok: false, message };
+function fail(code: FullNameIssue, message: string): FullNameResult {
+  return { ok: false, code, message };
 }

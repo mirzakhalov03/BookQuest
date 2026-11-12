@@ -1,5 +1,6 @@
 import { useId, type ReactNode } from 'react';
 import { AlertTriangle, type LucideIcon } from 'lucide-react';
+import { useT } from '@/i18n';
 
 export interface SectionTab<Id extends string> {
   id: Id;
@@ -23,6 +24,7 @@ interface SectionTabsProps<Id extends string> {
  */
 export function SectionTabs<Id extends string>({ tabs, active, onChange }: SectionTabsProps<Id>) {
   const baseId = useId();
+  const t = useT();
 
   return (
     <div className="flex flex-col gap-5">
@@ -48,12 +50,12 @@ export function SectionTabs<Id extends string>({ tabs, active, onChange }: Secti
               <span className="max-w-full truncate text-xs font-medium">{title}</span>
               {hasError ? (
                 <AlertTriangle
-                  aria-label="Has errors"
+                  aria-label={t.adminQuest.hasErrors}
                   className="absolute right-1.5 top-1.5 h-3.5 w-3.5 text-error"
                 />
               ) : isDirty ? (
                 <span
-                  aria-label="Unsaved changes"
+                  aria-label={t.admin.unsavedRegion}
                   className="absolute right-2 top-2 h-2 w-2 rounded-full bg-ember"
                 />
               ) : null}

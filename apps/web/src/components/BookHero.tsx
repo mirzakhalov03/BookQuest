@@ -1,5 +1,6 @@
 import { BookCover } from './BookCover';
-import { formatCount, formatOrdinalEdition } from '@/lib/format';
+import { formatCount } from '@/lib/format';
+import { useT } from '@/i18n';
 
 interface BookHeroProps {
   /** Omitted where the edition is already implied, e.g. `/book` is always the current one. */
@@ -19,6 +20,7 @@ interface BookHeroProps {
  * here rather than in either feature because both need it (spec §4 rule 1).
  */
 export function BookHero({ edition, year, title, author, pages, coverUrl, titleAs: Title = 'h1' }: BookHeroProps) {
+  const t = useT();
   return (
     <header className="flex items-start gap-5">
       <div className="cover-box">
@@ -29,13 +31,11 @@ export function BookHero({ edition, year, title, author, pages, coverUrl, titleA
           the title size itself to this column instead of breaking words. */}
       <div className="@container flex min-w-0 flex-1 flex-col gap-2 pt-1">
         {edition !== undefined && year !== undefined && (
-          <p className="type-label">
-            {formatOrdinalEdition(edition)} edition · {year}
-          </p>
+          <p className="type-label">{t.common.editionYear(edition, year)}</p>
         )}
         <Title className="type-display text-[clamp(1.25rem,13cqi,1.75rem)] text-paper">{title}</Title>
         <p className="text-taupe">{author}</p>
-        <p className="text-sm text-taupe-dim">{formatCount(pages)} pages</p>
+        <p className="text-sm text-taupe-dim">{t.common.pages(pages, formatCount(pages))}</p>
       </div>
     </header>
   );

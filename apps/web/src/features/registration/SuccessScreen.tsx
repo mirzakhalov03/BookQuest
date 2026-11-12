@@ -5,6 +5,7 @@ import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { haptic } from '@/lib/telegram';
 import { formatParticipantNumber } from '@/lib/format';
 import { useRevealHandoffStore } from './revealHandoff.store';
+import { useT } from '@/i18n';
 
 /**
  * `/register/success` — the emotional peak of the product, and a transient
@@ -20,6 +21,7 @@ import { useRevealHandoffStore } from './revealHandoff.store';
  */
 export function SuccessScreen() {
   const navigate = useNavigate();
+  const t = useT().registration;
   const number = usePeekAndClearRevealNumber();
 
   // The one celebratory buzz in the app (plan Phase 2). Guarded on `number`
@@ -39,14 +41,14 @@ export function SuccessScreen() {
 
         {/* `/me/welcome`'s one heading — `.success__hail`'s look comes
             from the class, not the tag. */}
-        <h1 className="success__hail">You&rsquo;re in.</h1>
+        <h1 className="success__hail">{t.youreIn}</h1>
 
-        <p className="success__caption">Your participant number</p>
+        <p className="success__caption">{t.yourNumber}</p>
         {/* `role="img"` names the whole number, same as `ParticipantNumeral`
             and `Book3D` — ARIA prohibits naming a bare `role=paragraph`
             element, so several AT combinations would announce nothing here
             otherwise: every digit below is individually `aria-hidden`. */}
-        <p className="success__id" role="img" aria-label={`Participant number ${number}`}>
+        <p className="success__id" role="img" aria-label={t.numberAria(number)}>
           {digits.map((digit, index) => (
             // `.type-numeral` (base.css) fixes each digit's cell width so a
             // four-digit number doesn't reflow as digits land one at a time.
@@ -63,16 +65,13 @@ export function SuccessScreen() {
           ))}
         </p>
 
-        <p className="success__keep">
-          Keep this number. It identifies you on the leaderboard, on your quiz sheet and on your
-          certificate.
-        </p>
+        <p className="success__keep">{t.keepNumber}</p>
 
         <Button
           className="group animate-[view-in_560ms_var(--ease-out-quest)_1.45s_both]"
           onClick={() => navigate('/me')}
         >
-          <span>See your profile</span>
+          <span>{t.seeProfile}</span>
           <ArrowIcon />
         </Button>
       </div>

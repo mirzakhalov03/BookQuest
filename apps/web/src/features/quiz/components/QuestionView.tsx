@@ -8,6 +8,7 @@ import { QuestionTimer } from '@/components/quiz/QuestionTimer';
 import { useCountdownTo } from '@/components/quiz/useCountdownTo';
 import { haptic } from '@/lib/telegram';
 import { serverNow } from '../lib/serverClock';
+import { useT } from '@/i18n';
 
 // Taps still count this long after the ring hits 0 (the server accepts them within its grace),
 // so a finger landing on the last frame is never thrown away.
@@ -44,6 +45,7 @@ export function QuestionView({
 }: QuestionViewProps) {
   const deadlineMs = Date.parse(question.deadlineAt);
   const remaining = useCountdownTo(deadlineMs, serverNow);
+  const t = useT();
   const timeUp = remaining === 0;
   const isLast = question.index === total - 1;
 
@@ -155,7 +157,7 @@ export function QuestionView({
       {/* Sticky so Continue stays under the thumb on long questions. */}
       <div className="sticky bottom-0 mt-auto bg-gradient-to-t from-ink via-ink/95 to-transparent pb-[calc(1rem+var(--safe-b))] pt-4">
         <Button type="button" className="w-full" disabled={!picked || disabled} onClick={() => picked && submit(picked)}>
-          {!picked ? 'Choose an answer' : isLast ? 'Finish' : 'Continue'}
+          {!picked ? t.quiz.chooseAnswer : isLast ? t.quiz.finish : t.common.continue}
           {picked && !isLast && <ArrowRight aria-hidden className="h-4 w-4" />}
         </Button>
       </div>

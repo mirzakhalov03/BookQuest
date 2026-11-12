@@ -43,7 +43,7 @@ export async function createUserWithPhone(
 ): Promise<UserDocument> {
   const existing = await UserModel.findOne({ phoneNumber });
   if (existing) {
-    throw ApiError.conflict('That phone number is already in use.');
+    throw ApiError.conflict('That phone number is already in use.', { reason: 'phone_in_use' });
   }
 
   const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
@@ -56,7 +56,7 @@ export async function createUserWithPhone(
        wins — the loser gets the same message the check above would have
        given, not a raw driver error. */
     if (isDuplicateKeyError(error)) {
-      throw ApiError.conflict('That phone number is already in use.');
+      throw ApiError.conflict('That phone number is already in use.', { reason: 'phone_in_use' });
     }
     throw error;
   }
@@ -103,7 +103,9 @@ export async function linkTelegramToUser(
 ): Promise<UserDocument> {
   const claimedBy = await UserModel.findOne({ telegramUserId: profile.telegramUserId });
   if (claimedBy && claimedBy.id !== user.id) {
-    throw ApiError.conflict('That Telegram account is already connected to a different user.');
+    throw ApiError.conflict('That Telegram account is already connected to a different user.', {
+      reason: 'telegram_in_use'
+    });
   }
 
   user.telegramUserId = profile.telegramUserId;
@@ -117,7 +119,9 @@ export async function linkTelegramToUser(
     // Same race as createUserWithPhone: the findOne above is a courtesy,
     // the unique index is the guarantee.
     if (isDuplicateKeyError(error)) {
-      throw ApiError.conflict('That Telegram account is already connected to a different user.');
+      throw ApiError.conflict('That Telegram account is already connected to a different user.', {
+      reason: 'telegram_in_use'
+    });
     }
     throw error;
   }

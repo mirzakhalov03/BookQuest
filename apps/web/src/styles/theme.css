@@ -34,8 +34,8 @@
   --color-error-line: #b2532a;
 
   /* One family, two widths */
-  --font-display: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-sans: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-display: 'Archivo', 'Roboto Flex', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-sans: 'Archivo', 'Roboto Flex', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
   --tracking-label: 0.16em;
 

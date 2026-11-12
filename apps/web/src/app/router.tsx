@@ -17,6 +17,7 @@ import { ProfilePage } from '@/features/profile/ProfilePage';
 import { VerifyPage } from '@/features/verify/VerifyPage';
 import { RequireAdmin, RequireAuth } from '@/lib/auth/guards';
 import { RouteErrorBoundary } from './RouteErrorBoundary';
+import { useT } from '@/i18n';
 
 type AdminScreens = typeof import('@/features/admin/screens');
 
@@ -25,13 +26,18 @@ const adminScreen = (name: keyof AdminScreens) => ({
   lazy: async () => ({ Component: (await import('@/features/admin/screens'))[name] as ComponentType })
 });
 
+function AdminFallback() {
+  const t = useT();
+  return <LoadingState label={t.nav.openingAdmin} />;
+}
+
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
     // On the root, so every screen below, including future ones, gets it for free.
     errorElement: <RouteErrorBoundary />,
     // Shown while a lazy route loads on a cold open of /admin.
-    hydrateFallbackElement: <LoadingState label="Opening the organiser desk…" />,
+    hydrateFallbackElement: <AdminFallback />,
     children: [
       // Public.
       { path: '/', element: <HomePage /> },

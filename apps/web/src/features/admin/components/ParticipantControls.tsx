@@ -1,4 +1,5 @@
 import { ArrowDown, ArrowUp } from 'lucide-react';
+import { useT } from '@/i18n';
 
 export type SortField = 'number' | 'name' | 'registered';
 export type SortOrder = 'asc' | 'desc';
@@ -8,11 +9,11 @@ export interface ParticipantSort {
   order: SortOrder;
 }
 
-const SORT_FIELDS: { field: SortField; label: string; firstOrder: SortOrder }[] = [
-  { field: 'number', label: 'Number', firstOrder: 'asc' },
-  { field: 'name', label: 'Name', firstOrder: 'asc' },
+const SORT_FIELDS: { field: SortField; firstOrder: SortOrder }[] = [
+  { field: 'number', firstOrder: 'asc' },
+  { field: 'name', firstOrder: 'asc' },
   // Newest first is what anyone asking for "registered" means.
-  { field: 'registered', label: 'Date', firstOrder: 'desc' }
+  { field: 'registered', firstOrder: 'desc' }
 ];
 
 interface ParticipantControlsProps {
@@ -23,11 +24,13 @@ interface ParticipantControlsProps {
 /** Sort as quiet text links — the search stays the only boxed control. */
 export function ParticipantControls({ sort, onSortChange }: ParticipantControlsProps) {
   const Arrow = sort.order === 'asc' ? ArrowUp : ArrowDown;
+  const t = useT().admin.participants;
+  const label = { number: t.sortNumber, name: t.sortName, registered: t.sortDate } satisfies Record<SortField, string>;
 
   return (
     <div className="flex items-center gap-4">
-      <span className="type-label shrink-0">Sort</span>
-      {SORT_FIELDS.map(({ field, label, firstOrder }) => {
+      <span className="type-label shrink-0">{t.sort}</span>
+      {SORT_FIELDS.map(({ field, firstOrder }) => {
         const active = sort.field === field;
         return (
           <LinkButton
@@ -41,7 +44,7 @@ export function ParticipantControls({ sort, onSortChange }: ParticipantControlsP
               })
             }
           >
-            {label}
+            {label[field]}
             {active && <Arrow aria-hidden className="ml-0.5 inline h-3.5 w-3.5 -translate-y-px" />}
           </LinkButton>
         );

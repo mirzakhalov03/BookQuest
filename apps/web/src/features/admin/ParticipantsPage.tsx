@@ -14,6 +14,7 @@ import { AdminQuery } from './components/AdminQuery';
 import { AdminPageHeader } from './components/AdminPageHeader';
 import { ParticipantControls, type ParticipantSort } from './components/ParticipantControls';
 import { ParticipantsTable } from './components/ParticipantsTable';
+import { useT } from '@/i18n';
 
 const LIMIT = 50;
 const SEARCH_DEBOUNCE_MS = 350;
@@ -21,6 +22,7 @@ const SEARCH_DEBOUNCE_MS = 350;
 /** `/admin/participants` — the roster with contact, which is why this endpoint is admin-only. */
 export function ParticipantsPage() {
   usePullToRefresh();
+  const t = useT().admin.participants;
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState(() => searchParams.get('q') ?? '');
   const query = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
@@ -40,10 +42,10 @@ export function ParticipantsPage() {
   return (
     <AdminScreen className="max-w-4xl">
       <div className="flex flex-col gap-3">
-        <AdminPageHeader title="Participants" titleClassName="text-4xl" />
+        <AdminPageHeader title={t.title} titleClassName="text-4xl" />
         <SearchInput
-          aria-label="Search participants"
-          placeholder="Name, number or contact"
+          aria-label={t.searchAria}
+          placeholder={t.searchPlaceholder}
           maxLength={80}
           value={searchInput}
           onChange={setSearchInput}
@@ -51,7 +53,7 @@ export function ParticipantsPage() {
         />
         <ParticipantControls sort={sort} onSortChange={setSort} />
       </div>
-      <AdminQuery query={participants} loadingLabel="Counting the roster…">
+      <AdminQuery query={participants} loadingLabel={t.loading}>
         {(data) => (
           // Old rows stay up while a new sort/search loads; dimming says the click landed.
           <div
@@ -80,26 +82,28 @@ interface RosterProps {
 }
 
 function Roster({ data, hasQuery, hasMore, isLoadingMore, onLoadMore }: RosterProps) {
+  const { common } = useT();
+  const t = useT().admin.participants;
   const items = data.pages.flatMap((page) => page.items);
   const total = data.pages[0]?.total ?? 0;
 
   if (items.length === 0) {
     return hasQuery ? (
       <EmptyState
-        title="No one matches that search"
+        title={t.noMatchTitle}
         titleAs="h2"
-        body="Try a different name, number or contact."
+        body={t.noMatchBody}
         className="flex-1"
       />
     ) : (
-      <EmptyState title="No one has registered yet" titleAs="h2" className="flex-1" />
+      <EmptyState title={t.noneTitle} titleAs="h2" className="flex-1" />
     );
   }
 
   return (
     <div className="flex flex-1 flex-col gap-4">
       <p className="m-0 text-sm text-taupe">
-        {formatCount(total)} {hasQuery ? 'found' : 'registered'}
+        {hasQuery ? t.found(formatCount(total)) : t.registered(formatCount(total))}
       </p>
       <ParticipantsTable participants={items} />
       {hasMore && (
@@ -109,7 +113,7 @@ function Roster({ data, hasQuery, hasMore, isLoadingMore, onLoadMore }: RosterPr
           disabled={isLoadingMore}
           className="self-center"
         >
-          {isLoadingMore ? 'Loading…' : `Show more · ${formatCount(total - items.length)} left`}
+          {isLoadingMore ? common.loading : t.showMore(formatCount(total - items.length))}
         </Button>
       )}
     </div>

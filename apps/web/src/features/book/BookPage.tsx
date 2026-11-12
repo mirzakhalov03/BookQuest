@@ -5,8 +5,10 @@ import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { isNotFound } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/errorMessage';
 import { ExpandableText } from '@/components/ui/ExpandableText';
 import { ResourceList } from './components/ResourceList';
+import { useT } from '@/i18n';
 
 /**
  * The book behind the current quest. Fed by `useCurrentQuest()` — the same
@@ -18,9 +20,10 @@ import { ResourceList } from './components/ResourceList';
  * why it names a parent, and this screen doesn't have one.
  */
 export function BookPage() {
+  const t = useT();
   const { data: quest, isPending, error, refetch } = useCurrentQuest();
 
-  if (isPending) return <LoadingState label="Opening the book…" />;
+  if (isPending) return <LoadingState label={t.book.loading} />;
 
   if (error) {
     // Same "between editions" condition Home handles, met by the same query —
@@ -28,7 +31,7 @@ export function BookPage() {
     if (isNotFound(error)) {
       return (
         <Screen>
-          <EmptyState title={error.message} body="Check back once the next edition opens." />
+          <EmptyState title={errorMessage(error)} body={t.common.checkBackNextEdition} />
         </Screen>
       );
     }
@@ -52,13 +55,13 @@ export function BookPage() {
           one yet leaves nothing here rather than a placeholder paragraph. */}
       {quest.book.description && (
         <section className="flex flex-col gap-2">
-          <p className="type-label">About the book</p>
+          <p className="type-label">{t.book.about}</p>
           <ExpandableText className="text-paper-dim">{quest.book.description}</ExpandableText>
         </section>
       )}
 
       <section className="flex flex-1 flex-col gap-2">
-        <p className="type-label">Where to read it</p>
+        <p className="type-label">{t.book.whereToRead}</p>
         <ResourceList resources={quest.book.resources} />
       </section>
     </Screen>

@@ -242,9 +242,9 @@ export async function deleteQuiz(id: string): Promise<void> {
     isQuizLocked(id)
   ]);
   if (attachment) {
-    throw ApiError.conflict('Detach this quiz from the quest before deleting it.', { reason: 'quiz_locked' });
+    throw ApiError.conflict('Detach this quiz from the quest before deleting it.', { reason: 'quiz_in_use' });
   }
-  if (usedIn.length > 0) throw ApiError.conflict('This quiz was used in an earlier edition, so it is kept.', { reason: 'quiz_locked' });
+  if (usedIn.length > 0) throw ApiError.conflict('This quiz was used in an earlier edition, so it is kept.', { reason: 'quiz_archived' });
   if (locked) throw ApiError.conflict(LOCKED_MESSAGE, { reason: 'quiz_locked' });
   await QuizModel.deleteOne({ _id: id });
 }

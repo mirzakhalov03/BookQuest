@@ -26,8 +26,8 @@ export class ApiError extends Error {
     this.reason = reason;
   }
 
-  static badRequest(message: string, fields?: Record<string, string>): ApiError {
-    return new ApiError(400, 'validation_failed', message, fields);
+  static badRequest(message: string, fields?: Record<string, string>, reason?: string): ApiError {
+    return new ApiError(400, 'validation_failed', message, fields, reason);
   }
 
   static notFound(message = 'Not found', options?: { reason?: string }): ApiError {
@@ -41,8 +41,8 @@ export class ApiError extends Error {
     return new ApiError(409, 'conflict', message, options?.fields, options?.reason);
   }
 
-  static unauthorized(message = 'Not allowed'): ApiError {
-    return new ApiError(401, 'unauthorized', message);
+  static unauthorized(message = 'Not allowed', reason?: string): ApiError {
+    return new ApiError(401, 'unauthorized', message, undefined, reason);
   }
 
   /** Authenticated, but not permitted. Distinct from 401 so the client knows
@@ -51,15 +51,15 @@ export class ApiError extends Error {
     return new ApiError(403, 'forbidden', message);
   }
 
-  static gone(message: string): ApiError {
-    return new ApiError(410, 'expired', message);
+  static gone(message: string, reason?: string): ApiError {
+    return new ApiError(410, 'expired', message, undefined, reason);
   }
 
-  static unprocessable(message: string): ApiError {
-    return new ApiError(422, 'unprocessable', message);
+  static unprocessable(message: string, reason?: string): ApiError {
+    return new ApiError(422, 'unprocessable', message, undefined, reason);
   }
 
-  static tooManyRequests(message = 'Too many attempts. Try again shortly.'): ApiError {
-    return new ApiError(429, 'rate_limited', message);
+  static tooManyRequests(message = 'Too many attempts. Try again shortly.', reason?: string): ApiError {
+    return new ApiError(429, 'rate_limited', message, undefined, reason);
   }
 }

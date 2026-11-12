@@ -5,6 +5,7 @@ import { haptic } from '@/lib/telegram';
 import { AVATAR_OPTIONS, avatarLabel } from '../avatars';
 import { useUpdateAvatar } from '../api/useUpdateAvatar';
 import { Avatar } from './Avatar';
+import { useT } from '@/i18n';
 
 interface AvatarPickerProps {
   open: boolean;
@@ -20,6 +21,7 @@ interface AvatarPickerProps {
 export function AvatarPicker({ open, onClose, name, current }: AvatarPickerProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const updateAvatar = useUpdateAvatar();
+  const t = useT();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -51,12 +53,12 @@ export function AvatarPicker({ open, onClose, name, current }: AvatarPickerProps
 
         <div className="flex items-center justify-between">
           <h2 id="avatar-sheet-title" className="type-display m-0 text-xl text-paper">
-            Pick your avatar
+            {t.profile.pickAvatar}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t.common.close}
             className="flex h-9 w-9 items-center justify-center rounded-full text-taupe hover:bg-ash-hi hover:text-paper-dim"
           >
             <X className="h-5 w-5" aria-hidden="true" />
@@ -64,7 +66,7 @@ export function AvatarPicker({ open, onClose, name, current }: AvatarPickerProps
         </div>
 
         <div className="grid grid-cols-3 gap-3">
-          <AvatarTile label="Initials" selected={current === null} onPick={() => pick(null)}>
+          <AvatarTile label={t.profile.initials} selected={current === null} onPick={() => pick(null)}>
             <Avatar name={name} className="w-[78%]" />
           </AvatarTile>
           {AVATAR_OPTIONS.map((id) => (

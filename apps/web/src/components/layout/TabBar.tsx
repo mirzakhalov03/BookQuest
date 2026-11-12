@@ -3,6 +3,7 @@ import { Sparkles, BookOpen, Trophy, BarChart3, User, PencilLine } from 'lucide-
 import { NavLink, useLocation } from 'react-router';
 import { isResultsOut } from '@bookquest/shared';
 import { useCurrentQuest } from '@/lib/api/quest';
+import { useT } from '@/i18n';
 
 interface Tab {
   to: string;
@@ -12,9 +13,6 @@ interface Tab {
   alsoMatches?: string;
 }
 
-const QUIZ_TAB: Tab = { to: '/quiz', label: 'Quiz', icon: PencilLine };
-const RESULTS_TAB: Tab = { to: '/results', label: 'Results', icon: BarChart3 };
-
 /**
  * The five destinations. Product knowledge stays limited to where the app goes
  * (spec §4 rule 3) — the one exception is the fourth slot, which follows the
@@ -22,16 +20,19 @@ const RESULTS_TAB: Tab = { to: '/results', label: 'Results', icon: BarChart3 };
  * states live there until then), then Results.
  */
 function useTabs(): Tab[] {
+  const t = useT().nav;
   const { data: quest, isError } = useCurrentQuest();
   // No current quest means no quiz to point at; the last results are the useful place.
   const quizOver = (quest && isResultsOut(quest)) || isError;
 
   return [
-    { to: '/', label: 'Stage', icon: Sparkles },
-    { to: '/book', label: 'Book', icon: BookOpen },
-    quizOver ? RESULTS_TAB : QUIZ_TAB,
-    { to: '/prizes', label: 'Prizes', icon: Trophy, alsoMatches: '/quests/' },
-    { to: '/me', label: 'You', icon: User }
+    { to: '/', label: t.stage, icon: Sparkles },
+    { to: '/book', label: t.book, icon: BookOpen },
+    quizOver
+      ? { to: '/results', label: t.results, icon: BarChart3 }
+      : { to: '/quiz', label: t.quiz, icon: PencilLine },
+    { to: '/prizes', label: t.prizes, icon: Trophy, alsoMatches: '/quests/' },
+    { to: '/me', label: t.profile, icon: User }
   ];
 }
 
@@ -46,9 +47,10 @@ function useTabs(): Tab[] {
 export function TabBar() {
   const { pathname } = useLocation();
   const tabs = useTabs();
+  const t = useT();
 
   return (
-    <nav className="tabbar" aria-label="Sections">
+    <nav className="tabbar" aria-label={t.nav.sections}>
       {tabs.map(({ to, label, icon: Icon, alsoMatches }) => (
         <NavLink
           key={to}

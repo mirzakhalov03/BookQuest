@@ -1,14 +1,13 @@
-import type { BookResourceKind } from '@bookquest/shared';
+import { BOOK_RESOURCE_KINDS, type BookResourceKind } from '@bookquest/shared';
 import type { SelectOption } from '@/components/ui/Select';
+import { getT } from '@/i18n';
 
 export const RESOURCE_LIMIT = 12;
 
-export const KIND_OPTIONS: readonly SelectOption<BookResourceKind>[] = [
-  { value: 'pdf', label: 'PDF' },
-  { value: 'epub', label: 'EPUB' },
-  { value: 'audio', label: 'Audio' },
-  { value: 'link', label: 'Link' }
-];
+export function kindOptions(): SelectOption<BookResourceKind>[] {
+  const kinds = getT().adminQuest.resources.kinds;
+  return BOOK_RESOURCE_KINDS.map((value) => ({ value, label: kinds[value] }));
+}
 
 const AUDIO_HOSTS = ['audible.', 'storytel.', 'soundcloud.com', 'podcasts.apple.com', 'open.spotify.com', 'music.youtube.com'];
 
@@ -44,7 +43,7 @@ export function defaultLabel(kind: BookResourceKind, url: string): string {
     case 'epub':
       return 'EPUB';
     case 'audio':
-      return 'Audiobook';
+      return getT().adminQuest.resources.audiobook;
     case 'link':
       return hostnameOf(url);
   }

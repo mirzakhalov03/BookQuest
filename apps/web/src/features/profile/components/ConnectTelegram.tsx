@@ -2,14 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { TelegramWidgetAuthPayload } from '@bookquest/shared';
 import { ApiRequestError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/errorMessage';
 import { authKeys } from '@/lib/auth/useAuth';
 import { linkTelegram } from '@/lib/auth/authApi';
+import { useT } from '@/i18n';
 
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME;
 
 type State = 'idle' | 'linking' | 'error' | 'script-failed';
 
-const GENERIC_LINK_ERROR = 'Telegram confirmed you, but connecting failed. Try again.';
 
 /**
  * The deferred half of phone/password sign-up: once the app's Telegram
@@ -20,7 +21,8 @@ export function ConnectTelegram() {
   const containerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const [state, setState] = useState<State>('idle');
-  const [errorMessage, setErrorMessage] = useState(GENERIC_LINK_ERROR);
+  const t = useT().profile;
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!BOT_USERNAME) {
@@ -39,7 +41,7 @@ export function ConnectTelegram() {
           // Mini App identity of a different user — the server says so
           // ("already connected to a different user"), and "try again"
           // would be wrong advice for that case.
-          setErrorMessage(error instanceof ApiRequestError ? error.message : GENERIC_LINK_ERROR);
+          setLinkError(error instanceof ApiRequestError ? errorMessage(error) : null);
           setState('error');
         });
     };
@@ -69,13 +71,11 @@ export function ConnectTelegram() {
           below is drawn by Telegram's own script — no color option in its
           API — so the accent goes on the one thing here that's actually
           ours. */}
-      <p className="type-label text-ember">Connect Telegram</p>
-      <p className="max-w-sm text-taupe-dim">
-        Link your Telegram account for a faster sign-in next time.
-      </p>
+      <p className="type-label text-ember">{t.connectTelegram}</p>
+      <p className="max-w-sm text-taupe-dim">{t.connectTelegramBody}</p>
       <div ref={containerRef} />
-      {state === 'linking' && <p className="text-sm text-paper-dim">Connecting…</p>}
-      {state === 'error' && <p className="text-sm text-ember">{errorMessage}</p>}
+      {state === 'linking' && <p className="text-sm text-paper-dim">{t.connecting}</p>}
+      {state === 'error' && <p className="text-sm text-ember">{linkError ?? t.connectFailed}</p>}
     </section>
   );
 }

@@ -10,8 +10,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { isNotFound } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { useVerifiedCertificate } from './api/useVerifiedCertificate';
-
-const ORDINAL = { 1: '1st', 2: '2nd', 3: '3rd' } as const;
+import { useT } from '@/i18n';
 
 /**
  * `/verify` and `/verify/:code` — what the QR code on a printed certificate
@@ -22,22 +21,23 @@ export function VerifyPage() {
   const params = useParams();
   const code = params.code ? normalizeCertificateCode(params.code) : null;
   const certificate = useVerifiedCertificate(code);
+  const t = useT().verify;
 
   if (!params.code) {
     return (
-      <Prompt title="Check a certificate" body="Enter the code printed beside the QR code." />
+      <Prompt title={t.promptTitle} body={t.promptBody} />
     );
   }
   if (code === null) {
-    return <Prompt title="That isn’t a certificate code" body="Check it and try again." />;
+    return <Prompt title={t.badCodeTitle} body={t.checkAgain} />;
   }
-  if (certificate.isPending) return <LoadingState label="Checking the certificate…" />;
+  if (certificate.isPending) return <LoadingState label={t.loading} />;
   if (certificate.error) {
     if (isNotFound(certificate.error)) {
       return (
         <Prompt
-          title="No certificate with this code"
-          body={`We couldn’t find ${code}. Check it and try again.`}
+          title={t.notFoundTitle}
+          body={t.notFoundBody(code)}
         />
       );
     }
@@ -63,12 +63,13 @@ function CodeForm() {
   const navigate = useNavigate();
   const [typed, setTyped] = useState('');
   const [message, setMessage] = useState<string | undefined>();
+  const t = useT().verify;
 
   function submit(event: FormEvent) {
     event.preventDefault();
     const normalised = normalizeCertificateCode(typed);
     if (!normalised) {
-      setMessage('Codes look like BQ4-K7M2QX.');
+      setMessage(t.codeShape);
       return;
     }
     setMessage(undefined);
@@ -78,7 +79,7 @@ function CodeForm() {
   return (
     <form onSubmit={submit} className="flex w-full max-w-sm flex-col gap-3" noValidate>
       <Field
-        label="Certificate code"
+        label={t.codeLabel}
         value={typed}
         onChange={(event) => setTyped(event.target.value)}
         message={message}
@@ -87,32 +88,33 @@ function CodeForm() {
         autoComplete="off"
         spellCheck={false}
       />
-      <Button type="submit">Check</Button>
+      <Button type="submit">{t.check}</Button>
     </form>
   );
 }
 
 function Verified({ data }: { data: CertificateData }) {
+  const { common, verify: t } = useT();
   const rows: Array<[string, string]> = [
-    ['Name', data.fullName],
-    ['Edition', `${data.questEdition} · ${data.questYear}`],
-    ['Book', `${data.bookTitle} by ${data.bookAuthor}`],
-    ...(data.placing ? ([['Place', ORDINAL[data.placing]]] as Array<[string, string]>) : []),
-    ['Participant', `№ ${data.participantNumber}`],
-    ['Issued', formatDate(data.issuedAt)],
-    ['Code', data.code]
+    [t.name, data.fullName],
+    [t.edition, common.editionShort(data.questEdition, data.questYear)],
+    [t.book, t.bookBy(data.bookTitle, data.bookAuthor)],
+    ...(data.placing ? ([[t.place, common.placeShort(data.placing)]] as Array<[string, string]>) : []),
+    [t.participant, `№ ${data.participantNumber}`],
+    [t.issued, formatDate(data.issuedAt)],
+    [t.code, data.code]
   ];
 
   return (
     <Screen className="gap-5">
       <h1 className="m-0 flex items-center gap-2 text-lg font-semibold text-gold">
-        <BadgeCheck className="h-6 w-6 shrink-0" aria-hidden="true" /> Genuine BookQuest certificate
+        <BadgeCheck className="h-6 w-6 shrink-0" aria-hidden="true" /> {t.genuine}
       </h1>
       <img
         src={data.imageUrl}
         width={1123}
         height={794}
-        alt={`Certificate for ${data.fullName}, BookQuest ${data.questYear}`}
+        alt={t.imageAlt(data.fullName, data.questYear)}
         className="certificate-image"
       />
       <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2">

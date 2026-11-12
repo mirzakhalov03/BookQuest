@@ -1,3 +1,5 @@
+import { useT } from '@/i18n';
+
 interface BookCoverProps {
   title: string;
   author: string;
@@ -21,6 +23,7 @@ interface BookCoverProps {
  * content, so it belongs over a photo exactly as much as over the drawing.
  */
 export function BookCover({ title, author, coverUrl, lazy = false }: BookCoverProps) {
+  const t = useT();
   if (coverUrl) {
     return (
       <div className="cover">
@@ -28,7 +31,7 @@ export function BookCover({ title, author, coverUrl, lazy = false }: BookCoverPr
           className="cover__image"
           draggable={false}
           src={coverUrl}
-          alt={`${title} cover`}
+          alt={t.common.bookCoverAlt(title)}
           decoding="async"
           {...(lazy ? { loading: 'lazy' as const } : { fetchPriority: 'high' as const })}
         />

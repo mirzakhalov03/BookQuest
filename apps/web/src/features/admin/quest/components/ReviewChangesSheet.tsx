@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
 import { formatCount } from '@/lib/format';
 import type { ChangeLine } from '../review';
+import { useT } from '@/i18n';
 
 interface ReviewChangesSheetProps {
   open: boolean;
@@ -14,18 +15,20 @@ interface ReviewChangesSheetProps {
 }
 
 export function ReviewChangesSheet({ open, lines, participantCount, isUpcoming, onConfirm, onCancel }: ReviewChangesSheetProps) {
+  const { admin, adminQuest } = useT();
+  const t = adminQuest.review;
   return (
     <Sheet
       open={open}
       onClose={onCancel}
-      title={isUpcoming ? 'Review your changes' : 'Change a live quest?'}
+      title={isUpcoming ? t.titleUpcoming : t.titleLive}
       actions={
         <>
           <Button type="button" variant="quiet" onClick={onCancel}>
-            Keep editing
+            {admin.keepEditing}
           </Button>
           <Button type="button" onClick={onConfirm}>
-            Save changes
+            {t.save}
           </Button>
         </>
       }
@@ -41,7 +44,7 @@ export function ReviewChangesSheet({ open, lines, participantCount, isUpcoming, 
       </ul>
       {!isUpcoming && (
         <p className="m-0 text-sm text-taupe">
-          {formatCount(participantCount)} {participantCount === 1 ? 'participant sees' : 'participants see'} this straight away.
+          {t.seenAtOnce(participantCount, formatCount(participantCount))}
         </p>
       )}
     </Sheet>

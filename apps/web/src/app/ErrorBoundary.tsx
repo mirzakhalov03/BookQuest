@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from 'react';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { getT } from '@/i18n';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -37,7 +38,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <ErrorState
             error={this.state.error}
             onRetry={() => window.location.assign('/')}
-            retryLabel="Back to start"
+            retryLabel={getT().common.backToStart}
           />
         </div>
       );

@@ -1,6 +1,7 @@
 import type { FieldPath, UseFormSetError } from 'react-hook-form';
 import type { ApiRequestError } from '@/lib/api/client';
 import type { QuizFormState } from './quizForm';
+import { errorMessage, fieldErrorMessage } from '@/lib/api/errorMessage';
 
 const FORM_ROOTS = new Set(['title', 'description', 'settings', 'questions']);
 
@@ -13,11 +14,12 @@ export function applyQuizServerErrors(
   setError: UseFormSetError<QuizFormState>
 ): string | null {
   const entries = Object.entries(error.fields);
-  if (entries.length === 0) return error.message;
+  if (entries.length === 0) return errorMessage(error);
 
   let formMessage: string | null = null;
   let focused = false;
-  for (const [key, message] of entries) {
+  for (const [key, raw] of entries) {
+    const message = fieldErrorMessage(error, key) ?? raw;
     if (!FORM_ROOTS.has(key.split('.')[0] ?? '')) {
       formMessage ??= message;
       continue;

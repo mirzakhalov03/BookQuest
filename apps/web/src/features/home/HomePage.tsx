@@ -11,7 +11,9 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { Screen } from '@/components/layout/Screen';
 import { TopBar } from '@/components/layout/TopBar';
 import { isNotFound } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/errorMessage';
 import { formatLongDate } from '@/lib/format';
+import { useT, type Messages } from '@/i18n';
 
 /**
  * The stage every other screen is measured against. `BookStage` and
@@ -21,6 +23,7 @@ import { formatLongDate } from '@/lib/format';
  * (spec §4 rule 4).
  */
 export function HomePage() {
+  const t = useT();
   const { data: quest, isPending, error, refetch } = useCurrentQuest();
   const refreshQuest = useRefreshCurrentQuest();
 
@@ -32,7 +35,7 @@ export function HomePage() {
   const targetIso = quest ? countdownTargetIso(quest) : null;
   const target = useMemo(() => (targetIso ? new Date(targetIso) : null), [targetIso]);
 
-  if (isPending) return <LoadingState label="Setting the stage…" />;
+  if (isPending) return <LoadingState label={t.home.loading} />;
 
   if (error) {
     // A quest-free gap between editions is a normal condition, not a failure
@@ -45,7 +48,7 @@ export function HomePage() {
         <>
           <TopBar />
           <Screen>
-            <EmptyState title={error.message} body="Check back once the next edition opens." />
+            <EmptyState title={errorMessage(error)} body={t.common.checkBackNextEdition} />
           </Screen>
         </>
       );
@@ -83,9 +86,9 @@ export function HomePage() {
         </div>
 
         <Countdown
-          label={countdownLabel(quest.phase)}
+          label={t.home.countdown[quest.phase]}
           target={target}
-          dateText={countdownDateText(quest)}
+          dateText={countdownDateText(quest, t)}
           onComplete={refreshQuest}
         />
 
@@ -115,18 +118,7 @@ function countdownTargetIso(quest: Quest): string | null {
  * closes in" 's shape (verb + "in") rather than reusing "Reading deadline",
  * which only reads right once the reading period has actually started.
  */
-function countdownLabel(phase: Quest['phase']): string {
-  switch (phase) {
-    case 'upcoming':
-      return 'Reading opens in';
-    case 'reading':
-      return 'Reading deadline';
-    case 'quiz':
-      return 'Quiz closes in';
-    case 'finished':
-      return 'Quiz closed';
-  }
-}
+
 
 /**
  * The line under the clock. `finished` is the one phase where it names a
@@ -134,7 +126,7 @@ function countdownLabel(phase: Quest['phase']): string {
  * `setState('finished')` does the same, pointing at `resultsAt` instead of
  * repeating the quiz's close time.
  */
-function countdownDateText(quest: Quest): string {
+function countdownDateText(quest: Quest, t: Messages): string {
   switch (quest.phase) {
     case 'upcoming':
       return formatLongDate(quest.opensAt);
@@ -143,6 +135,6 @@ function countdownDateText(quest: Quest): string {
     case 'quiz':
       return formatLongDate(quest.quizClosesAt);
     case 'finished':
-      return `Results published ${formatLongDate(quest.resultsAt)}`;
+      return t.home.resultsPublished(formatLongDate(quest.resultsAt));
   }
 }

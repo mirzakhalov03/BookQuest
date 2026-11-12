@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { formatLongDate } from '@/lib/format';
 import { useQuizOverview } from './api/useQuizOverview';
 import { OverviewCard } from './components/OverviewCard';
+import { useT } from '@/i18n';
 
 /**
  * `/quiz` — the overview (§4.1): the server's `/quiz/me` state for a signed-in
@@ -21,12 +22,13 @@ import { OverviewCard } from './components/OverviewCard';
  */
 export function QuizPage() {
   const { status } = useAuth();
+  const t = useT();
   const { data: quest, isPending, error, refetch } = useCurrentQuest();
 
   if (quest && isResultsOut(quest)) return <Navigate to="/results" replace />;
   if (status === 'authenticated') return <SignedIn quest={quest} />;
 
-  if (isPending) return <LoadingState label="Checking the calendar…" />;
+  if (isPending) return <LoadingState label={t.quiz.loading} />;
   if (error) {
     if (isNotFound(error)) return <NoQuiz />;
     return (
@@ -39,14 +41,16 @@ export function QuizPage() {
 }
 
 function NoQuiz() {
+  const t = useT();
   return (
     <Screen>
-      <EmptyState title="No quiz scheduled" body="Check back once the next edition opens." />
+      <EmptyState title={t.quiz.noQuizTitle} body={t.common.checkBackNextEdition} />
     </Screen>
   );
 }
 
 function SignedIn({ quest }: { quest: Quest | undefined }) {
+  const t = useT();
   const { data: overview, error, refetch } = useQuizOverview();
   const refreshQuest = useRefreshCurrentQuest();
   const refresh = useCallback(() => {
@@ -63,7 +67,7 @@ function SignedIn({ quest }: { quest: Quest | undefined }) {
         </Screen>
       );
     }
-    return <LoadingState label="Checking the calendar…" />;
+    return <LoadingState label={t.quiz.loading} />;
   }
 
   return (
@@ -74,6 +78,7 @@ function SignedIn({ quest }: { quest: Quest | undefined }) {
 }
 
 function SignedOut({ quest }: { quest: Quest }) {
+  const t = useT().quiz;
   const refreshQuest = useRefreshCurrentQuest();
   // Memoised on the ISO string — a fresh Date each render loops `useCountdown`.
   const target = useMemo(() => new Date(quest.quizOpensAt), [quest.quizOpensAt]);
@@ -81,12 +86,12 @@ function SignedOut({ quest }: { quest: Quest }) {
   return (
     <Screen className="flex-1 justify-center gap-6">
       <header className="flex flex-col gap-1 text-center">
-        <p className="type-label">Quiz</p>
-        <h1 className="type-display text-3xl text-paper">Quiz day is coming</h1>
+        <p className="type-label">{t.label}</p>
+        <h1 className="type-display text-3xl text-paper">{t.comingTitle}</h1>
       </header>
-      <Countdown label="Quiz opens in" target={target} dateText={formatLongDate(quest.quizOpensAt)} onComplete={refreshQuest} />
+      <Countdown label={t.opensIn} target={target} dateText={formatLongDate(quest.quizOpensAt)} onComplete={refreshQuest} />
       <Button to="/me" className="self-center">
-        Sign in to take part
+        {t.signInToPlay}
       </Button>
     </Screen>
   );

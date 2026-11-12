@@ -14,21 +14,24 @@ import { AdminQuery } from './components/AdminQuery';
 import { AdminPageHeader } from './components/AdminPageHeader';
 import { ForbiddenState, isForbidden } from './components/ForbiddenState';
 import { canStartNextEdition } from './phase';
+import { useT } from '@/i18n';
+import { errorMessage } from '@/lib/api/errorMessage';
 
 /** `/admin` — where the quest stands and the one or two things worth doing about it. */
 export function DashboardPage() {
   usePullToRefresh();
+  const t = useT().admin.dashboard;
   const quest = useCurrentQuest();
 
   return (
     <AdminQuery
       query={quest}
-      loadingLabel="Reading the register…"
+      loadingLabel={t.loading}
       notFound={(error) => (
         <EmptyState
-          title={error.message}
-          body="Nothing is running between editions. Set up the next one when you're ready."
-          action={<Button to="/admin/quest/new">Start next edition</Button>}
+          title={errorMessage(error)}
+          body={t.betweenEditions}
+          action={<Button to="/admin/quest/new">{t.startNext}</Button>}
           className="flex-1"
         />
       )}
@@ -48,6 +51,7 @@ const COVER_STYLE = {
 
 function Dashboard({ quest }: { quest: Quest }) {
   const stats = useAdminStats();
+  const t = useT().admin.dashboard;
   const [now] = useState(() => new Date());
   // Quest is public; only the stats call tells us the viewer isn't an admin.
   if (isForbidden(stats.error)) return <ForbiddenState error={stats.error} />;
@@ -66,10 +70,10 @@ function Dashboard({ quest }: { quest: Quest }) {
       />
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-        <StatCard label="Participants" value={count(stats.data?.participants)} />
-        <StatCard label="Joined today" value={count(stats.data?.registeredToday)} />
-        <StatCard label="Quiz submitted" value={count(stats.data?.quizSubmitted)} />
-        <StatCard label="Quiz in progress" value={count(stats.data?.quizInProgress)} />
+        <StatCard label={t.statParticipants} value={count(stats.data?.participants)} />
+        <StatCard label={t.statJoinedToday} value={count(stats.data?.registeredToday)} />
+        <StatCard label={t.statSubmitted} value={count(stats.data?.quizSubmitted)} />
+        <StatCard label={t.statInProgress} value={count(stats.data?.quizInProgress)} />
       </div>
 
       <NextSteps quest={quest} now={now} />
@@ -90,35 +94,36 @@ function StatCard({ label, value }: { label: string; value: string }) {
 }
 
 // No `to` yet means the page isn't built: shown as "Soon" rather than linking to "Nothing here".
-const QUICK_ACTIONS: { to?: string; label: string; icon: LucideIcon }[] = [
-  { to: '/admin/quizzes', label: 'Quizzes', icon: CircleHelp },
-  { label: 'Certificates', icon: Award },
-  { label: 'Posters', icon: Image }
+const QUICK_ACTIONS: { to?: string; key: 'actionQuizzes' | 'actionCertificates' | 'actionPosters'; icon: LucideIcon }[] = [
+  { to: '/admin/quizzes', key: 'actionQuizzes', icon: CircleHelp },
+  { key: 'actionCertificates', icon: Award },
+  { key: 'actionPosters', icon: Image }
 ];
 
 const TILE = 'flex min-w-0 flex-col items-center gap-2 rounded-box border px-2 py-4';
 
 /** Phase-aware next step first, then the go-to shortcuts. */
 function NextSteps({ quest, now }: { quest: Quest; now: Date }) {
+  const t = useT().admin.dashboard;
   let content;
   switch (quest.phase) {
     case 'quiz':
       content = (
-        <p className="m-0 text-sm text-taupe">The quiz is open. Results go out {formatLongDate(quest.resultsAt)}.</p>
+        <p className="m-0 text-sm text-taupe">{t.quizOpen(formatLongDate(quest.resultsAt))}</p>
       );
       break;
     case 'finished':
       // Results are served only for the current quest, so the next edition waits for them.
       content = canStartNextEdition(quest, now) ? (
         <>
-          <Button to="/admin/quest/new">Start next edition</Button>
+          <Button to="/admin/quest/new">{t.startNext}</Button>
           <Button to="/admin/results" variant="quiet">
-            View results
+            {t.viewResults}
           </Button>
         </>
       ) : (
         <p className="m-0 text-sm text-taupe">
-          Results go out {formatLongDate(quest.resultsAt)}. The next edition can start after that.
+          {t.resultsWait(formatLongDate(quest.resultsAt))}
         </p>
       );
       break;
@@ -126,32 +131,32 @@ function NextSteps({ quest, now }: { quest: Quest; now: Date }) {
 
   return (
     <section className="flex flex-col gap-3 rounded-box border border-[color:var(--rule)] p-4">
-      <h2 className="type-label m-0">Quick actions</h2>
+      <h2 className="type-label m-0">{t.quickActions}</h2>
       {content && <div className="flex flex-wrap items-center gap-3">{content}</div>}
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        {QUICK_ACTIONS.map(({ to, label, icon: Icon }) =>
+        {QUICK_ACTIONS.map(({ to, key, icon: Icon }) =>
           to ? (
             <Link
-              key={label}
+              key={key}
               to={to}
               className={`${TILE} border-amber/60 bg-ash-hi text-amber shadow-[0_2px_0_var(--color-void)] transition hover:bg-[color:var(--color-taupe-dim)]/30 active:translate-y-px active:shadow-none`}
             >
               <Icon className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
-              <span className="max-w-full truncate text-xs font-medium">{label}</span>
+              <span className="max-w-full truncate text-xs font-medium">{t[key]}</span>
             </Link>
           ) : (
             <div
-              key={label}
+              key={key}
               aria-disabled="true"
               className={`${TILE} border-dashed border-[color:var(--rule)] text-taupe`}
             >
               <Icon className="h-6 w-6 opacity-60" strokeWidth={1.75} aria-hidden="true" />
               <span className="max-w-full truncate text-xs font-medium">
-                {label}
-                <span className="sr-only">, coming soon</span>
+                {t[key]}
+                <span className="sr-only">{t.comingSoon}</span>
               </span>
               <span aria-hidden="true" className="type-label text-[0.5625rem]">
-                Soon
+                {t.soon}
               </span>
             </div>
           )

@@ -1,21 +1,6 @@
 import { QUEST_DATE_FIELDS, type Quest, type QuestDateField } from '@bookquest/shared';
 import { toDateTimeLocalInput } from '@/lib/format';
-
-export const DATE_LABEL: Record<QuestDateField, string> = {
-  opensAt: 'Opens',
-  readingDeadline: 'Reading deadline',
-  quizOpensAt: 'Quiz opens',
-  quizClosesAt: 'Quiz closes',
-  resultsAt: 'Results published'
-};
-
-/** The stretch that *follows* each date; the last one has none. */
-export const GAP_LABEL: Partial<Record<QuestDateField, string>> = {
-  opensAt: 'Reading',
-  readingDeadline: 'Break',
-  quizOpensAt: 'Quiz',
-  quizClosesAt: 'Until results'
-};
+import { getT } from '@/i18n';
 
 export type DateInputs = Record<QuestDateField, string>;
 
@@ -30,9 +15,10 @@ export function formatGap(from: Date | null, to: Date | null): string | null {
   if (!from || !to) return null;
   const hours = (to.getTime() - from.getTime()) / 3_600_000;
   if (hours < 0) return null;
-  if (hours === 0) return 'no gap';
-  if (hours < 48) return `${Math.round(hours)} h`;
-  return `${Math.round(hours / 24)} days`;
+  const t = getT().admin;
+  if (hours === 0) return t.gapNone;
+  if (hours < 48) return t.gapHours(Math.round(hours));
+  return t.gapDays(Math.round(hours / 24));
 }
 
 export function questDates(quest: Quest): Record<QuestDateField, Date> {
