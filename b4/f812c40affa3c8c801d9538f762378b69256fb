@@ -1,0 +1,45 @@
+apps/api/src/certificates/template.tsx
+  s_ed86d784e7207d::t_3cc1e737564075 10-12
+apps/api/src/services/certificate-delivery.services.ts
+  s_ed86d784e7207d::t_c35a8f146b4df7 16,221-222
+apps/web/src/app/router.tsx
+  s_ed86d784e7207d::t_e13ef0325c9351 107
+apps/web/src/features/admin/DashboardPage.tsx
+  s_ed86d784e7207d::t_5cc54d795acc59 109
+apps/web/src/features/admin/ResultsInspectionPage.tsx
+  s_ed86d784e7207d::t_55f4b7b2447697 9-11,17,24-30,54-58,65-74
+apps/web/src/features/admin/certificates/CertificateDelivery.tsx
+  s_ed86d784e7207d::t_eaa206a5a99426 2,7,13-17,19-21,23,32,46,49-54,67,96
+apps/web/src/features/admin/certificates/CertificatesPage.tsx
+  s_ed86d784e7207d::t_4ecd46bafd335c 1-55
+apps/web/src/features/admin/screens.ts
+  s_ed86d784e7207d::t_e966f1cbfafdc3 14
+apps/web/src/i18n/en/admin.ts
+  s_ed86d784e7207d::t_63b2cdb17e78f0 12,142-147
+apps/web/src/i18n/ru/admin.ts
+  s_ed86d784e7207d::t_624e6bbe6ba819 9,139-144
+apps/web/src/i18n/uz/admin.ts
+  s_ed86d784e7207d::t_49d134a6aa88a2 8,139-144
+apps/web/src/layouts/AdminLayout.tsx
+  s_ed86d784e7207d::t_850742e41f676b 4,43
+apps/web/src/lib/api/mock/routes.ts
+  s_ed86d784e7207d::t_6d8724f16b02cc 339-340
+packages/shared/src/schemas/result.ts
+  s_ed86d784e7207d::t_79705041182da8 97-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "b4f812c40affa3c8c801d9538f762378b69256fb",
+  "prompts": {},
+  "sessions": {
+    "s_ed86d784e7207d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ee52d4a-0fa8-4bff-a7b1-1cb51196e16d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
