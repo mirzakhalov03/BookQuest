@@ -1,4 +1,5 @@
 export const prizes = {
+  prizesGiven: 'Prizes given: ',
   photoAlt: 'All the prizes for this edition, together',
   label: 'Prizes',
   backToPrizes: 'Back to prizes',

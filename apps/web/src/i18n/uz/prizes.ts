@@ -1,6 +1,7 @@
 import type { prizes as En } from '../en/prizes';
 
 export const prizes: typeof En = {
+  prizesGiven: 'Berilgan sovrinlar: ',
   photoAlt: 'Ushbu mavsumning barcha sovrinlari',
   label: 'Sovrinlar',
   backToPrizes: 'Sovrinlarga qaytish',

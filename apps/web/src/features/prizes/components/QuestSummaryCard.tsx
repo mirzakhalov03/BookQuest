@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router';
-import type { QuestSummary } from '@bookquest/shared';
+import { Trophy } from 'lucide-react';
+import { PRIZE_PLACES, type QuestSummary } from '@bookquest/shared';
 import { BookCover } from '@/components/BookCover';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { formatCount, formatParticipantNumber } from '@/lib/format';
@@ -30,6 +31,11 @@ const THUMB_STYLE = {
 
 export function QuestSummaryCard({ quest }: { quest: QuestSummary }) {
   const t = useT();
+  // 1st–3rd only; the edition page has all five.
+  const topPrizes = PRIZE_PLACES.slice(0, 3)
+    .map(({ key }) => quest.prizes[key])
+    .filter(Boolean)
+    .join(' · ');
   return (
     <Link
       to={`/quests/${quest.edition}`}
@@ -39,7 +45,7 @@ export function QuestSummaryCard({ quest }: { quest: QuestSummary }) {
         <BookCover title={quest.bookTitle} author={quest.bookAuthor} coverUrl={quest.coverUrl} lazy />
       </div>
 
-      <div className="flex flex-1 flex-col gap-1">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         <p className="type-label">{t.common.editionShort(quest.edition, quest.year)}</p>
         <p className="type-display text-xl text-paper">{quest.bookTitle}</p>
         <p className="text-sm text-taupe">{quest.bookAuthor}</p>
@@ -52,6 +58,15 @@ export function QuestSummaryCard({ quest }: { quest: QuestSummary }) {
             </>
           )}
         </p>
+        {topPrizes && (
+          <p className="flex min-w-0 items-center gap-1.5 text-sm text-paper-dim">
+            <Trophy className="size-3.5 shrink-0 text-gold" aria-hidden="true" />
+            <span className="truncate">
+              <span className="sr-only">{t.prizes.prizesGiven}</span>
+              {topPrizes}
+            </span>
+          </p>
+        )}
       </div>
 
       <ArrowIcon />
