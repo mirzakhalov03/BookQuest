@@ -1,0 +1,21 @@
+apps/api/src/models/user.model.ts
+  s_ed86d784e7207d::t_78c52993988563 3,24-25
+apps/api/src/utils/randomAvatar.ts
+  s_ed86d784e7207d::t_ae57a3435e7c83 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "da5a5282e7e1d26f8c11ceeca1b9163ecc256315",
+  "prompts": {},
+  "sessions": {
+    "s_ed86d784e7207d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ee52d4a-0fa8-4bff-a7b1-1cb51196e16d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
