@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
 import { formatLongDate, formatTimeAgo } from '@/lib/format';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton';
 import { useNotifications } from './api/useNotifications';
 import { useMarkAllNotificationsRead, useMarkNotificationRead } from './api/useMarkNotificationRead';
 
@@ -22,6 +23,7 @@ const headingOf = (n: Notification) => (n.kind === 'broadcast' ? KIND.broadcast.
 
 export function NotificationsPage() {
   usePullToRefresh();
+  useTelegramBackButton('/');
   const notifications = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();

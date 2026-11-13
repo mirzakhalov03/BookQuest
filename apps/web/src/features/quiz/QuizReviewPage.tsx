@@ -8,17 +8,18 @@ import { QuestionCard } from '@/components/quiz/QuestionCard';
 import { isNotFound } from '@/lib/api/client';
 import { errorMessage } from '@/lib/api/errorMessage';
 import { formatStopwatch } from '@/lib/format';
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton';
 import { useQuizReview } from './api/useQuizReview';
 import { useT, type Messages } from '@/i18n';
 
 type ReviewItem = AttemptReview['items'][number];
-
 
 const chipLabel = (item: ReviewItem, t: Messages['quiz']): string =>
   item.voided ? t.voided : t.outcome[item.outcome ?? 'unserved'];
 
 /** `/quiz/review` — own answers beside the key, read-only; opens with the results. */
 export function QuizReviewPage() {
+  useTelegramBackButton('/quiz');
   const t = useT();
   const { data, error, refetch } = useQuizReview();
 
