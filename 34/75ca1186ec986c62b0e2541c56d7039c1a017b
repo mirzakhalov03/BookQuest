@@ -1,0 +1,37 @@
+apps/api/src/models/quest.model.ts
+  s_ed86d784e7207d::t_1f9bd978a00219 62-63
+apps/api/src/services/quest.services.ts
+  s_ed86d784e7207d::t_e14284f5b77c6f 3,62-63,84,122-123,179,230-232,255,281-297
+apps/web/src/features/admin/api/useCreateQuest.ts
+  s_ed86d784e7207d::t_9b58ca13983da9 2,9-11
+apps/web/src/lib/api/mock/fixtures.ts
+  s_ed86d784e7207d::t_7a1314cb1e67eb 1-2,36,41,83
+apps/web/src/lib/api/mock/people.ts
+  s_ed86d784e7207d::t_f57f64a602f761 2,199
+apps/web/src/lib/api/mock/routes.ts
+  s_ed86d784e7207d::t_9fb94c2b4cc13f 43-44,119,214,220,432,434,496,508,513,551,554,558,684,881
+apps/web/src/lib/api/mock/store.ts
+  s_ed86d784e7207d::t_36b52dbd000b80 2,23-25,31,65-70,74,109,113-116
+packages/shared/src/constants/quest.ts
+  s_ed86d784e7207d::t_86840ec502b8d4 19-20
+packages/shared/src/schemas/admin.ts
+  s_ed86d784e7207d::t_2c1c3585d0327b 4,40,61-62,70,72
+packages/shared/src/schemas/quest.ts
+  s_ed86d784e7207d::t_f157a6dc54c814 49-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "3475ca1186ec986c62b0e2541c56d7039c1a017b",
+  "prompts": {},
+  "sessions": {
+    "s_ed86d784e7207d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ee52d4a-0fa8-4bff-a7b1-1cb51196e16d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
