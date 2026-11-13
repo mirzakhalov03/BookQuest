@@ -2,6 +2,7 @@ import type { admin as En } from '../en/admin';
 import { pluralRu } from '../plural';
 
 export const admin: typeof En = {
+  refresh: 'Обновить',
   admin: 'Админ',
   sections: 'Разделы админки',
   backToStage: 'Вернуться на главную',

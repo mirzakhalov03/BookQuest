@@ -32,14 +32,11 @@ export function ResultsInspectionPage() {
       {({ rows, finished, solving, resultsAt, isPublished }) => (
         <AdminScreen className="max-w-4xl">
           <AdminPageHeader
+            stacked
             eyebrow="Results"
             title={isPublished ? `Published ${formatLongDate(resultsAt)}` : 'Live standings'}
             actions={
-              <RefreshButton
-                onRefresh={() => void standings.refetch()}
-                refreshing={standings.isFetching}
-                updatedAt={standings.dataUpdatedAt}
-              />
+              <RefreshButton onRefresh={() => void standings.refetch()} refreshing={standings.isFetching} />
             }
           />
           <p className="m-0 text-sm text-taupe">

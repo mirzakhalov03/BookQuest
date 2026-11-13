@@ -5,6 +5,7 @@ type MediaType = NonNullable<Interaction['media']>['type'];
 type RangePreset = 'today' | '7d' | '30d' | 'all';
 
 export const admin = {
+  refresh: 'Refresh',
   admin: 'Admin',
   sections: 'Admin sections',
   backToStage: 'Back to the stage',

@@ -1,6 +1,7 @@
 import type { admin as En } from '../en/admin';
 
 export const admin: typeof En = {
+  refresh: 'Yangilash',
   admin: 'Admin',
   sections: 'Admin bo‘limlari',
   backToStage: 'Bosh sahifaga qaytish',
