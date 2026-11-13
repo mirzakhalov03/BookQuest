@@ -1,0 +1,25 @@
+apps/web/src/features/admin/DashboardPage.tsx
+  s_ed86d784e7207d::t_e4936aaf203ac4 3,106,108,144-154
+apps/web/src/i18n/en/admin.ts
+  s_ed86d784e7207d::t_a997dbe87f567b 78,106-107,137-138,149-154,197-202,205-207,228-229
+apps/web/src/i18n/ru/admin.ts
+  s_ed86d784e7207d::t_67a2dba5b35e48 64-65,76,134-135,146-151,197-199
+apps/web/src/i18n/uz/admin.ts
+  s_ed86d784e7207d::t_711050cdc6959b 64-65,73-74,77,135-136,147-152,197-200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "b35f7fd57c6ad3f8f25e0118874dd0200934d32a",
+  "prompts": {},
+  "sessions": {
+    "s_ed86d784e7207d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ee52d4a-0fa8-4bff-a7b1-1cb51196e16d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
