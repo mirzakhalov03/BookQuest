@@ -16,6 +16,7 @@
     "seed:quiz": "tsx --env-file-if-exists=../../.env src/scripts/seed-quiz.ts",
     "seed:quiz:demo": "tsx --env-file-if-exists=../../.env src/scripts/seed-quiz-demo.ts",
     "drill:quiz": "tsx --env-file-if-exists=../../.env src/scripts/quiz-drill.ts",
+    "migrate:avatars": "tsx --env-file-if-exists=../../.env src/scripts/assign-random-avatars.ts",
     "reclassify:interactions": "tsx --env-file-if-exists=../../.env src/scripts/reclassify-interactions.ts",
     "clean": "rm -rf dist .turbo"
   },
