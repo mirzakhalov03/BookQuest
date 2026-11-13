@@ -1,0 +1,29 @@
+apps/web/src/features/profile/avatars.ts
+  s_03a8b7123d8d6f::t_1ed3bf4e25e88d 19
+apps/web/src/i18n/en/profile.ts
+  s_03a8b7123d8d6f::t_6103b3ca95b5f1 21-22,24-25,27-28
+apps/web/src/i18n/ru/profile.ts
+  s_03a8b7123d8d6f::t_9689d330b9cd42 21-22,24-25,27-28
+apps/web/src/i18n/uz/profile.ts
+  s_03a8b7123d8d6f::t_cd098c19eef6ad 21-22,24-25,27-28
+packages/shared/src/constants/avatar.ts
+  s_03a8b7123d8d6f::t_6025554e75e84e 8-9,11-12,14-15
+apps/web/src/features/profile/components/AvatarPicker.tsx
+  s_03a8b7123d8d6f::t_56fa965785e2df 68,84-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "3106478e55a6f42f233d3894a8414589534b4bc6",
+  "prompts": {},
+  "sessions": {
+    "s_03a8b7123d8d6f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "497c0adc-4c98-4063-94b2-9e0454396e48",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
