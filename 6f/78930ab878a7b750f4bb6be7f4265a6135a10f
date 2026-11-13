@@ -1,0 +1,31 @@
+apps/web/src/features/profile/ProfilePage.tsx
+  s_ed86d784e7207d::t_fb472608997691 49,88
+apps/web/src/features/profile/components/ReaderPass.tsx
+  s_ed86d784e7207d::t_f1754f52237fde 1,7,11-12,26,37-42,46-76,80-88,90-97,99,111-121
+apps/web/src/features/profile/useMascotGreeting.ts
+  s_ed86d784e7207d::t_5ab8e44231fca4 1-48
+apps/web/src/i18n/en/profile.ts
+  s_ed86d784e7207d::t_fb08b8e4ae0b9d 2
+apps/web/src/i18n/ru/profile.ts
+  s_ed86d784e7207d::t_98ecab28945506 4
+apps/web/src/i18n/uz/profile.ts
+  s_ed86d784e7207d::t_89d2843e7d8619 4
+apps/web/src/styles/profile.css
+  s_ed86d784e7207d::t_d97a53858f4c59 124-232
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "6f78930ab878a7b750f4bb6be7f4265a6135a10f",
+  "prompts": {},
+  "sessions": {
+    "s_ed86d784e7207d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ee52d4a-0fa8-4bff-a7b1-1cb51196e16d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
