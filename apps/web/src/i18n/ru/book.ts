@@ -1,6 +1,7 @@
 import type { book as En } from '../en/book';
 
 export const book: typeof En = {
+  mysteryLabel: 'Секретная книга — скоро откроем',
   loading: 'Открываем книгу…',
   about: 'О книге',
   whereToRead: 'Где читать',

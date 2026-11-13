@@ -501,6 +501,106 @@
   pointer-events: none;
 }
 
+/* ── The mystery cover (book hidden) ─────────────────────────────── */
+
+/* Darker board than the real cover, so the gold seal is the only light on it. */
+.cover--mystery {
+  justify-content: center;
+  align-items: center;
+  background:
+    radial-gradient(90% 60% at 50% 46%, rgba(226, 99, 42, 0.22), transparent 70%),
+    linear-gradient(158deg, #5e1f0e 0%, #3b1207 55%, #220a04 100%);
+}
+
+.mystery__ribbon {
+  position: absolute;
+  background: linear-gradient(90deg, #8a6425, #e3c77e 45%, #c8a24a 60%, #8a6425);
+  box-shadow: 0 0 0 1px rgba(20, 8, 3, 0.35);
+}
+.mystery__ribbon--v {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: calc(var(--book-w) * 0.075);
+  transform: translateX(-50%);
+}
+.mystery__ribbon--h {
+  left: 0;
+  right: 0;
+  top: 46%;
+  height: calc(var(--book-w) * 0.075);
+  transform: translateY(-50%);
+  background: linear-gradient(180deg, #8a6425, #e3c77e 45%, #c8a24a 60%, #8a6425);
+}
+
+/* Sits on the ribbons' crossing, where the real cover keeps its sun. */
+.mystery__seal {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  display: grid;
+  place-items: center;
+  width: calc(var(--book-w) * 0.46);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 38% 32%, #f6d89a, #c8a24a 62%, #8a6425);
+  box-shadow:
+    0 0 0 calc(var(--book-w) * 0.018) rgba(59, 18, 7, 0.9),
+    0 0 calc(var(--book-w) * 0.16) rgba(240, 160, 60, 0.45);
+  animation: mystery-float 6s var(--ease-soft) infinite;
+}
+
+.mystery__mark {
+  font-family: var(--font-display);
+  font-size: calc(var(--book-w) * 0.33);
+  font-weight: 800;
+  font-stretch: 125%;
+  line-height: 1;
+  color: #3b1207;
+  text-shadow: 0 1px 0 rgba(255, 236, 202, 0.45);
+  /* Optical centring: the glyph's dot sits low. */
+  transform: translateY(-4%);
+}
+
+/* A slow band of light crossing the board, like turning a wrapped gift. */
+.mystery__glint {
+  position: absolute;
+  inset: -10% auto -10% 0;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 236, 202, 0.16) 50%, transparent);
+  transform: translateX(-120%) skewX(-14deg);
+  animation: mystery-glint 7s var(--ease-soft) infinite;
+  pointer-events: none;
+}
+
+@keyframes mystery-float {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -54%) scale(1.03);
+  }
+}
+
+@keyframes mystery-glint {
+  0%,
+  55% {
+    transform: translateX(-120%) skewX(-14deg);
+  }
+  100% {
+    transform: translateX(320%) skewX(-14deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mystery__seal,
+  .mystery__glint {
+    animation: none;
+  }
+}
+
 /* ── Contact shadow + podium ──────────────────────────────────────── */
 
 /* Negative z-index puts this behind the book but still inside `.stage__center`,
