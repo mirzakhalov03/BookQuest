@@ -1,6 +1,11 @@
 import type { profile as En } from '../en/profile';
 
 export const profile: typeof En = {
+  certTeaser: 'Пройдите тест, чтобы получить сертификат',
+  certResultsOn: (date) => `Итоги ${date}`,
+  certMissed: 'Вы не завершили этот сезон. До встречи в следующем',
+  tiers: { gold: 'Золото', silver: 'Серебро', bronze: 'Бронза', participant: 'Участник' },
+  verifyCode: (code) => `Код проверки ${code}`,
   meetMascot: 'Знакомьтесь, ваш талисман! Нажмите, чтобы сменить',
   loading: 'Ищем ваш номер…',
   readerFallback: 'Читатель',
@@ -8,8 +13,6 @@ export const profile: typeof En = {
   nextEditionSoon: 'Следующий сезон скоро откроется.',
   adminDashboard: 'Панель администратора',
   certificates: 'Сертификаты и награды',
-  certificateSlot: 'Здесь появится ваш сертификат',
-  certificateHint: 'Пройдите тест — сертификат появится после публикации итогов.',
   pickAvatar: 'Выберите аватар',
   initials: 'Инициалы',
   avatars: {
@@ -28,7 +31,7 @@ export const profile: typeof En = {
   shareTitle: 'Мой сертификат BookQuest',
   linkCopied: 'Ссылка для проверки скопирована.',
   certificateAlt: (name, year, place) => `Сертификат: ${name}, BookQuest ${year}${place ? `, ${place}` : ''}`,
-  download: 'Скачать',
+  download: 'Сохранить изображение',
   share: 'Поделиться',
   connectTelegram: 'Привязать Telegram',
   connectTelegramBody: 'Привяжите Telegram, чтобы в следующий раз входить быстрее.',

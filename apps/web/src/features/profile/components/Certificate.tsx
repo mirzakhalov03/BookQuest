@@ -1,10 +1,10 @@
+import { useEffect, useRef, useState } from 'react';
 import { Download, Share2 } from 'lucide-react';
 import type { CertificateData } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
 import { downloadFile, isInsideTelegram, openExternalLink } from '@/lib/telegram';
 import { useUiStore } from '@/stores/ui.store';
 import { useT } from '@/i18n';
-
 
 /** `?download=1` asks the API for an attachment; set through URL so an existing query survives. */
 function withDownloadFlag(imageUrl: string): string {
@@ -23,6 +23,7 @@ export function Certificate({ data }: { data: CertificateData }) {
   const inTelegram = isInsideTelegram();
   const downloadUrl = withDownloadFlag(data.imageUrl);
   const fileName = `BookQuest-${data.questYear}-${data.code}.png`;
+  const [frameRef, settled] = useSettleOnView();
 
   function download() {
     // Older Telegram clients lack downloadFile; the system viewer can still save an opened image.
@@ -50,15 +51,18 @@ export function Certificate({ data }: { data: CertificateData }) {
   }
 
   return (
-    <div className="flex flex-col items-start gap-3">
-      <img
-        src={data.imageUrl}
-        width={1123}
-        height={794}
-        loading="lazy"
-        alt={t.profile.certificateAlt(data.fullName, data.questYear, data.placing ? t.common.place(data.placing) : null)}
-        className="certificate-image"
-      />
+    <div className="flex flex-col gap-4">
+      <figure ref={frameRef} className={`cert-frame ${settled ? 'is-in' : ''}`} data-tier={data.tier}>
+        <img
+          src={data.imageUrl}
+          width={1123}
+          height={794}
+          loading="lazy"
+          alt={t.profile.certificateAlt(data.fullName, data.questYear, data.placing ? t.common.place(data.placing) : null)}
+          className="certificate-image"
+        />
+        <figcaption className="cert-chip">{t.profile.tiers[data.tier]}</figcaption>
+      </figure>
       <div className="flex flex-wrap gap-2">
         {inTelegram ? (
           <Button variant="gold" onClick={download}>
@@ -81,6 +85,28 @@ export function Certificate({ data }: { data: CertificateData }) {
           </Button>
         )}
       </div>
+      <p className="m-0 text-xs text-taupe-dim">{t.profile.verifyCode(data.code)}</p>
     </div>
   );
+}
+
+/** True once the frame has scrolled into view, so the tilt-and-settle plays where it's seen. */
+function useSettleOnView() {
+  const ref = useRef<HTMLElement>(null);
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || typeof IntersectionObserver === 'undefined') return setSettled(true);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setSettled(true);
+        observer.disconnect();
+      },
+      { threshold: 0.35 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  return [ref, settled] as const;
 }

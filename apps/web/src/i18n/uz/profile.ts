@@ -1,6 +1,11 @@
 import type { profile as En } from '../en/profile';
 
 export const profile: typeof En = {
+  certTeaser: 'Sertifikat olish uchun testni yakunlang',
+  certResultsOn: (date) => `Natijalar: ${date}`,
+  certMissed: 'Bu mavsumni yakunlamadingiz. Keyingi safar ko‘rishguncha',
+  tiers: { gold: 'Oltin', silver: 'Kumush', bronze: 'Bronza', participant: 'Ishtirokchi' },
+  verifyCode: (code) => `Tekshirish kodi ${code}`,
   meetMascot: 'Bu sizning maskotingiz! Almashtirish uchun bosing',
   loading: 'Raqamingiz qidirilmoqda…',
   readerFallback: 'Kitobxon',
@@ -8,8 +13,6 @@ export const profile: typeof En = {
   nextEditionSoon: 'Keyingi mavsum tez orada boshlanadi.',
   adminDashboard: 'Admin paneli',
   certificates: 'Sertifikatlar va mukofotlar',
-  certificateSlot: 'Sertifikatingiz shu yerda paydo bo‘ladi',
-  certificateHint: 'Testni yakunlang — natijalar e’lon qilingach, u shu yerda chiqadi.',
   pickAvatar: 'Avatar tanlang',
   initials: 'Bosh harflar',
   avatars: {
@@ -28,7 +31,7 @@ export const profile: typeof En = {
   shareTitle: 'Mening BookQuest sertifikatim',
   linkCopied: 'Tasdiqlash havolasi nusxalandi.',
   certificateAlt: (name, year, place) => `${name} sertifikati, BookQuest ${year}${place ? `, ${place}` : ''}`,
-  download: 'Yuklab olish',
+  download: 'Rasmni saqlash',
   share: 'Ulashish',
   connectTelegram: 'Telegramni ulash',
   connectTelegramBody: 'Keyingi safar tezroq kirish uchun Telegram hisobingizni ulang.',

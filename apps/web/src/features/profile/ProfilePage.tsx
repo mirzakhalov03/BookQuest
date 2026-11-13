@@ -1,4 +1,4 @@
-import { Award, LayoutDashboard, LogOut } from 'lucide-react';
+import { LayoutDashboard, LogOut } from 'lucide-react';
 import { Screen } from '@/components/layout/Screen';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
@@ -10,6 +10,8 @@ import { JoinQuest } from '@/features/registration/JoinQuest';
 import { useCertificate } from './api/useCertificate';
 import { AccountList, AccountRow } from './components/AccountRow';
 import { Certificate } from './components/Certificate';
+import { CertificateTeaser } from './components/CertificateTeaser';
+import { isResultsOut } from '@bookquest/shared';
 import { ConnectTelegram } from './components/ConnectTelegram';
 import { ReaderPass } from './components/ReaderPass';
 import { useT } from '@/i18n';
@@ -137,21 +139,19 @@ function AccountSection() {
  */
 function CertificateSection() {
   const { data } = useCertificate();
+  const { data: quest } = useCurrentQuest();
   const t = useT().profile;
+  const resultsOut = quest ? isResultsOut(quest) : false;
 
   return (
     <section className="flex flex-col gap-3">
       <p className="type-label m-0">{t.certificates}</p>
       {data ? (
         <Certificate data={data} />
+      ) : resultsOut ? (
+        <p className="m-0 text-taupe">{t.certMissed}</p>
       ) : (
-        <div className="cert-slot">
-          <Award className="h-8 w-8 shrink-0 text-gold" strokeWidth={1.5} aria-hidden="true" />
-          <div className="flex flex-col gap-0.5">
-            <p className="m-0 text-paper-dim">{t.certificateSlot}</p>
-            <p className="m-0 text-sm text-taupe-dim">{t.certificateHint}</p>
-          </div>
-        </div>
+        <CertificateTeaser resultsAt={quest?.resultsAt ?? null} />
       )}
     </section>
   );

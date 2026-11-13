@@ -1,4 +1,11 @@
+import type { CertificateTier } from '@bookquest/shared';
+
 export const profile = {
+  certTeaser: 'Finish the quiz to earn your certificate',
+  certResultsOn: (date: string) => `Results on ${date}`,
+  certMissed: "You didn't finish this edition. See you next time",
+  tiers: { gold: 'Gold', silver: 'Silver', bronze: 'Bronze', participant: 'Participant' } satisfies Record<CertificateTier, string>,
+  verifyCode: (code: string) => `Verify code ${code}`,
   meetMascot: 'Meet your mascot! Tap to change it',
   loading: 'Finding your number…',
   readerFallback: 'Reader',
@@ -6,8 +13,6 @@ export const profile = {
   nextEditionSoon: 'The next edition opens soon.',
   adminDashboard: 'Admin dashboard',
   certificates: 'Certificates & awards',
-  certificateSlot: 'Your certificate lands here',
-  certificateHint: 'Finish the quiz — it appears once results are published.',
   pickAvatar: 'Pick your avatar',
   initials: 'Initials',
   avatars: {
@@ -27,7 +32,7 @@ export const profile = {
   linkCopied: 'Verification link copied.',
   certificateAlt: (name: string, year: number, place: string | null) =>
     `Certificate for ${name}, BookQuest ${year}${place ? `, ${place}` : ''}`,
-  download: 'Download',
+  download: 'Save image',
   share: 'Share',
   connectTelegram: 'Connect Telegram',
   connectTelegramBody: 'Link your Telegram account for a faster sign-in next time.',
