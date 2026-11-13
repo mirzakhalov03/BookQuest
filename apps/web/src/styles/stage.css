@@ -935,3 +935,93 @@
     font-size: clamp(2.2rem, 11vw, 3.4rem);
   }
 }
+
+/* ── Prizes CTA ───────────────────────────────────────────────────────
+   The way into Prizes from Home. Quieter than the primary button above it
+   (outline, not fill) but warm: a gold medallion and one pass of light on
+   arrival, timed after the action row has settled. */
+.prizes-cta {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  max-width: 22rem;
+  min-height: 3.5rem;
+  padding: 0.6rem 1rem 0.6rem 0.6rem;
+  overflow: hidden;
+  border: 1px solid var(--rule-gold);
+  border-radius: var(--radius-box);
+  background: linear-gradient(100deg, rgb(200 162 74 / 0.14), rgb(226 99 42 / 0.06) 60%, transparent);
+  color: var(--color-paper);
+  text-decoration: none;
+  transition: border-color 180ms linear, background-color 180ms linear;
+  animation: view-in 700ms var(--ease-out-quest) 1.25s both;
+}
+.prizes-cta:hover,
+.prizes-cta:active {
+  border-color: rgb(200 162 74 / 0.55);
+}
+.prizes-cta:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 3px;
+}
+
+.prizes-cta__medal {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  overflow: hidden;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #f6d89a, #c8a24a 62%, #8a6425);
+  color: #3b1207;
+}
+.prizes-cta__thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.prizes-cta__text {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.prizes-cta__headline {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-stretch: var(--wide);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-gold-soft);
+}
+.prizes-cta__more {
+  font-size: 0.75rem;
+  color: var(--color-taupe);
+}
+
+.prizes-cta__shine {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgb(255 236 202 / 0.18) 50%, transparent);
+  transform: translateX(-120%) skewX(-14deg);
+  animation: prizes-cta-shine 1.1s var(--ease-soft) 2.1s both;
+  pointer-events: none;
+}
+@keyframes prizes-cta-shine {
+  to {
+    transform: translateX(320%) skewX(-14deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prizes-cta__shine {
+    display: none;
+  }
+}

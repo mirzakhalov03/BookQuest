@@ -4,6 +4,7 @@ import { useCurrentQuest, useRefreshCurrentQuest } from '@/lib/api/quest';
 import { BookStage } from './components/BookStage';
 import { StageAside } from './components/StageAside';
 import { QuestAction } from './components/QuestAction';
+import { PrizesCta } from './components/PrizesCta';
 import { Countdown } from '@/components/ui/Countdown';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
@@ -95,6 +96,7 @@ export function HomePage() {
         />
 
         <QuestAction quest={quest} />
+        <PrizesCta prizes={quest.prizes} phase={quest.phase} />
       </main>
     </div>
   );

@@ -1,6 +1,8 @@
 import type { home as En } from '../en/home';
 
 export const home: typeof En = {
+  winPrize: (prize) => `${prize} yutib oling`,
+  morePrizes: (n) => `yana ${n} ta sovrin`,
   revealedSoon: 'Tez orada ochiladi',
   loading: 'Sahna hozirlanmoqda…',
   bookAria: (title, author) => `${author}, «${title}» — yoritilgan sahnada`,

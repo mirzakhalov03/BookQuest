@@ -1,4 +1,8 @@
+import { pluralEn } from '../plural';
+
 export const home = {
+  winPrize: (prize: string) => `Win ${prize}`,
+  morePrizes: (n: number) => `+${n} more ${pluralEn(n, 'prize', 'prizes')}`,
   revealedSoon: 'Revealed soon',
   loading: 'Setting the stage…',
   bookAria: (title: string, author: string) => `${title} by ${author}, standing on a lit podium`,
