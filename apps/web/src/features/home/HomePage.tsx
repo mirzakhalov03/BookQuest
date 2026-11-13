@@ -14,6 +14,7 @@ import { isNotFound } from '@/lib/api/client';
 import { errorMessage } from '@/lib/api/errorMessage';
 import { formatLongDate } from '@/lib/format';
 import { useT, type Messages } from '@/i18n';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
 /**
  * The stage every other screen is measured against. `BookStage` and
@@ -23,6 +24,7 @@ import { useT, type Messages } from '@/i18n';
  * (spec §4 rule 4).
  */
 export function HomePage() {
+  usePullToRefresh();
   const t = useT();
   const { data: quest, isPending, error, refetch } = useCurrentQuest();
   const refreshQuest = useRefreshCurrentQuest();

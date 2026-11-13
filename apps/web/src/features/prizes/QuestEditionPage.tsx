@@ -14,6 +14,7 @@ import { useTelegramBackButton } from '@/hooks/useTelegramBackButton';
 import { useQuestByEdition } from './api/useQuestByEdition';
 import { PrizePodium, hasAnyPrize } from './components/PrizePodium';
 import { useT } from '@/i18n';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
 // Same forward arrow as every other "go here next" action, even though this goes up a level.
 function BackToArchive() {
@@ -34,6 +35,7 @@ function BackToArchive() {
  * `/prizes` is its parent, so unlike the tab screens it gets the Telegram back button.
  */
 export function QuestEditionPage() {
+  usePullToRefresh();
   useTelegramBackButton('/prizes');
   const t = useT();
 

@@ -14,6 +14,7 @@ import { ConnectTelegram } from './components/ConnectTelegram';
 import { ReaderPass } from './components/ReaderPass';
 import { useT } from '@/i18n';
 import { LanguagePicker } from './components/LanguagePicker';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
 /**
  * `/me` — session-only, mounted under `<RequireAuth>` in the router, so a
@@ -24,6 +25,7 @@ import { LanguagePicker } from './components/LanguagePicker';
  * Telegram back button.
  */
 export function ProfilePage() {
+  usePullToRefresh();
   const { user } = useAuth();
   const t = useT();
   const participant = useParticipant();

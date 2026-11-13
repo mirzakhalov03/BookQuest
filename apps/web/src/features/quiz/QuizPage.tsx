@@ -14,6 +14,7 @@ import { formatLongDate } from '@/lib/format';
 import { useQuizOverview } from './api/useQuizOverview';
 import { OverviewCard } from './components/OverviewCard';
 import { useT } from '@/i18n';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
 /**
  * `/quiz` — the overview (§4.1): the server's `/quiz/me` state for a signed-in
@@ -21,6 +22,7 @@ import { useT } from '@/i18n';
  * follows the tab bar to `/results`.
  */
 export function QuizPage() {
+  usePullToRefresh();
   const { status } = useAuth();
   const t = useT();
   const { data: quest, isPending, error, refetch } = useCurrentQuest();

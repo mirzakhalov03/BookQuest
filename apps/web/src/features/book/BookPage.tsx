@@ -9,6 +9,7 @@ import { errorMessage } from '@/lib/api/errorMessage';
 import { ExpandableText } from '@/components/ui/ExpandableText';
 import { ResourceList } from './components/ResourceList';
 import { useT } from '@/i18n';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
 /**
  * The book behind the current quest. Fed by `useCurrentQuest()` — the same
@@ -20,6 +21,7 @@ import { useT } from '@/i18n';
  * why it names a parent, and this screen doesn't have one.
  */
 export function BookPage() {
+  usePullToRefresh();
   const t = useT();
   const { data: quest, isPending, error, refetch } = useCurrentQuest();
 
