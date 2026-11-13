@@ -1,0 +1,21 @@
+apps/api/package.json
+  s_ed86d784e7207d::t_33a2b66068f9ed 19
+apps/api/src/scripts/assign-random-avatars.ts
+  s_ed86d784e7207d::t_c7f8819c0fdce5 1-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "cd53ae9951a439624691a56ec1ca1dc9c66b42b4",
+  "prompts": {},
+  "sessions": {
+    "s_ed86d784e7207d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ee52d4a-0fa8-4bff-a7b1-1cb51196e16d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
