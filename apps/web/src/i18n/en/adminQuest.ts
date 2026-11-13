@@ -89,10 +89,15 @@ export const adminQuest = {
     button: 'Preview'
   },
   quiz: {
+    quiz: 'Quiz',
+    splitToggle: 'Give different groups different quizzes',
+    splitOff: 'Use one quiz for everyone',
+    ready: 'Ready',
+    toFix: (n: number) => `${n} ${pluralEn(n, 'thing', 'things')} to fix`,
+    manageQuizzes: 'Manage quizzes',
     noQuizBanner: 'The quiz is open but no quiz is attached — participants see ‘Questions are being prepared’.',
     distributionAria: 'How quizzes are given out',
     distribution: { single: 'One quiz', parity: 'Odd / even', random: 'Random groups' } satisfies Record<QuizDistribution, string>,
-    chooseSplit: 'Choose how participants are split, then pick the quizzes.',
     groups: 'Groups',
     fewer: 'Fewer groups',
     more: 'More groups',
@@ -102,9 +107,7 @@ export const adminQuest = {
     quizOption: (title: string, questions: string, duration: string, complete: boolean) =>
       `${title} · ${questions} · ${duration}${complete ? '' : ' · incomplete'}`,
     splitRandom: 'Split evenly at random when saved',
-    detach: 'Detach quizzes',
     locksWhen: 'Locks when the first participant starts.',
-    openLibrary: 'Open the quiz library',
     none: 'None',
     noQuizYet: 'No quiz yet',
     everyone: 'Everyone',

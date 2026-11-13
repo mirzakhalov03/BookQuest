@@ -88,10 +88,15 @@ export const adminQuest: typeof En = {
     button: 'Ko‘rish'
   },
   quiz: {
+    quiz: 'Test',
+    splitToggle: 'Guruhlarga turli testlar berish',
+    splitOff: 'Hammaga bitta test',
+    ready: 'Tayyor',
+    toFix: (n) => `${n} ta narsani tuzatish kerak`,
+    manageQuizzes: 'Testlarni boshqarish',
     noQuizBanner: 'Test ochiq, lekin unga test biriktirilmagan — ishtirokchilar «Savollar tayyorlanmoqda» yozuvini ko‘rmoqda.',
     distributionAria: 'Testlar qanday taqsimlanadi',
     distribution: { single: 'Bitta test', parity: 'Toq / juft', random: 'Tasodifiy guruhlar' },
-    chooseSplit: 'Ishtirokchilar qanday bo‘linishini tanlang, so‘ng testlarni belgilang.',
     groups: 'Guruhlar',
     fewer: 'Guruhlarni kamaytirish',
     more: 'Guruhlarni ko‘paytirish',
@@ -101,9 +106,7 @@ export const adminQuest: typeof En = {
     quizOption: (title, questions, duration, complete) =>
       `${title} · ${questions} · ${duration}${complete ? '' : ' · tugallanmagan'}`,
     splitRandom: 'Saqlanganda tasodifiy teng bo‘linadi',
-    detach: 'Testlarni ajratish',
     locksWhen: 'Birinchi ishtirokchi boshlaganda qulflanadi.',
-    openLibrary: 'Testlar to‘plamini ochish',
     none: 'Yo‘q',
     noQuizYet: 'Hali test yo‘q',
     everyone: 'Hamma',

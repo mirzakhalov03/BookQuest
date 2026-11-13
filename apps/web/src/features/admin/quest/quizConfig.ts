@@ -7,8 +7,9 @@ export interface QuizConfigForm {
   quizIds: string[];
 }
 
-/** Labels live in the dictionary (`adminQuest.quiz.distribution`). */
-export const DISTRIBUTIONS = ['single', 'parity', 'random'] as const satisfies readonly QuizDistribution[];
+/** The splits behind "give different groups different quizzes"; labels live in `adminQuest.quiz.distribution`. */
+export const SPLIT_DISTRIBUTIONS = ['parity', 'random'] as const satisfies readonly QuizDistribution[];
+export type SplitDistribution = (typeof SPLIT_DISTRIBUTIONS)[number];
 
 /** Client-side twin of shared `groupLabels`, in the reader's language. */
 export function localGroupLabels(distribution: QuizDistribution, count: number): string[] {

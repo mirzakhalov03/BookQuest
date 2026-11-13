@@ -89,10 +89,15 @@ export const adminQuest: typeof En = {
     button: 'Предпросмотр'
   },
   quiz: {
+    quiz: 'Тест',
+    splitToggle: 'Дать разным группам разные тесты',
+    splitOff: 'Один тест для всех',
+    ready: 'Готово',
+    toFix: (n) => `${n} ${pluralRu(n, 'проблема', 'проблемы', 'проблем')} исправить`,
+    manageQuizzes: 'Управление тестами',
     noQuizBanner: 'Тест открыт, но к нему не привязан ни один тест — участники видят «Вопросы готовятся».',
     distributionAria: 'Как раздаются тесты',
     distribution: { single: 'Один тест', parity: 'Чёт / нечет', random: 'Случайные группы' },
-    chooseSplit: 'Выберите, как делить участников, затем укажите тесты.',
     groups: 'Группы',
     fewer: 'Меньше групп',
     more: 'Больше групп',
@@ -102,9 +107,7 @@ export const adminQuest: typeof En = {
     quizOption: (title, questions, duration, complete) =>
       `${title} · ${questions} · ${duration}${complete ? '' : ' · не готов'}`,
     splitRandom: 'При сохранении поровну и случайно',
-    detach: 'Отвязать тесты',
     locksWhen: 'Блокируется, когда первый участник начнёт тест.',
-    openLibrary: 'Открыть библиотеку тестов',
     none: 'Нет',
     noQuizYet: 'Теста пока нет',
     everyone: 'Все',
