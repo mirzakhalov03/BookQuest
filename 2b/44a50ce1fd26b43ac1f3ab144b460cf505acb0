@@ -1,0 +1,37 @@
+apps/web/src/features/profile/avatars.ts
+  s_03a8b7123d8d6f::t_71bb7f91321957 19
+apps/web/src/features/profile/components/AvatarPicker.tsx
+  s_88f71edddf204a::t_e32e9a45c94b2b 68-83,125,129-136
+apps/web/src/i18n/en/profile.ts
+  s_03a8b7123d8d6f::t_6a591d48f55031 19-30
+apps/web/src/i18n/ru/profile.ts
+  s_03a8b7123d8d6f::t_0684010ffd7ab2 19-30
+apps/web/src/i18n/uz/profile.ts
+  s_03a8b7123d8d6f::t_7b309c13388991 19-30
+packages/shared/src/constants/avatar.ts
+  s_03a8b7123d8d6f::t_a2a5058a2bb9f2 6-13,15,17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "2b44a50ce1fd26b43ac1f3ab144b460cf505acb0",
+  "prompts": {},
+  "sessions": {
+    "s_03a8b7123d8d6f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "497c0adc-4c98-4063-94b2-9e0454396e48",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_88f71edddf204a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cbf4122c-c4cc-4ed6-867e-521613d2d9eb",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
