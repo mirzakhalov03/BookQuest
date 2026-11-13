@@ -65,7 +65,7 @@ export function AvatarPicker({ open, onClose, name, current }: AvatarPickerProps
           </button>
         </div>
 
-        {/* Its own row so the 12 mascots keep a clean 3×4 grid */}
+        {/* Its own row, apart from the mascot tiles */}
         <button
           type="button"
           onClick={() => pick(null)}
@@ -81,7 +81,8 @@ export function AvatarPicker({ open, onClose, name, current }: AvatarPickerProps
           {current === null && <SelectedMark />}
         </button>
 
-        <div className="grid grid-cols-3 gap-3">
+        {/* Wrapping three-up rather than a grid, so a short last row sits centred */}
+        <div className="flex flex-wrap justify-center gap-3 [&>*]:w-[calc((100%-1.5rem)/3)]">
           {AVATAR_OPTIONS.map((id) => (
             <AvatarTile
               key={id}

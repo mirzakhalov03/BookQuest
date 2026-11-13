@@ -3,15 +3,16 @@
  * `apps/web/src/assets/avatars/` — swapping the set means swapping both.
  */
 export const AVATARS = [
-  'bookworm',
   'owl',
-  'fox',
-  'axolotl',
-  'penguin',
   'cat',
-  'frog',
+  'ginger-kitty',
+  'midnight-kitty',
   'raccoon',
+  'sky-macaw',
+  'baby-macaw',
   'bear',
+  'honey-bear',
+  'panda',
   'bunny',
   'duck',
   'dragon'
