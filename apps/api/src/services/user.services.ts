@@ -134,7 +134,8 @@ export async function updateProfile(
   user: UserDocument,
   update: UpdateProfilePayload
 ): Promise<UserDocument> {
-  user.avatar = update.avatar;
+  // `set`: the inferred type drops null once the default is a function, but null (Initials) is valid.
+  user.set('avatar', update.avatar);
   await user.save();
   return user;
 }
