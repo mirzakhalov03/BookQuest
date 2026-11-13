@@ -3,14 +3,18 @@
  * `apps/web/src/assets/avatars/` — swapping the set means swapping both.
  */
 export const AVATARS = [
-  'rabbit',
+  'bookworm',
+  'owl',
+  'fox',
+  'axolotl',
+  'penguin',
+  'cat',
+  'frog',
+  'raccoon',
   'bear',
-  'queen',
-  'cool-duck',
-  'arctic-fox',
+  'bunny',
   'duck',
-  'arctic-hare',
-  'baby-penguin'
+  'dragon'
 ] as const;
 
 export type AvatarId = (typeof AVATARS)[number];

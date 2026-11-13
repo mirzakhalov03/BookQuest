@@ -65,10 +65,23 @@ export function AvatarPicker({ open, onClose, name, current }: AvatarPickerProps
           </button>
         </div>
 
+        {/* Its own row so the 12 mascots keep a clean 3×4 grid */}
+        <button
+          type="button"
+          onClick={() => pick(null)}
+          aria-pressed={current === null}
+          className={`flex items-center gap-3 rounded-box bg-ash-hi px-3 py-2 text-left transition-transform duration-150 active:scale-[0.98] ${
+            current === null
+              ? 'ring-2 ring-gold'
+              : 'ring-1 ring-[color:var(--rule)] hover:ring-[color:var(--rule-strong)]'
+          }`}
+        >
+          <Avatar name={name} className="w-10" />
+          <span className="flex-1 text-paper-dim">{t.profile.initials}</span>
+          {current === null && <SelectedMark />}
+        </button>
+
         <div className="grid grid-cols-3 gap-3">
-          <AvatarTile label={t.profile.initials} selected={current === null} onPick={() => pick(null)}>
-            <Avatar name={name} className="w-[78%]" />
-          </AvatarTile>
           {AVATAR_OPTIONS.map((id) => (
             <AvatarTile
               key={id}
@@ -109,11 +122,15 @@ function AvatarTile({
       }`}
     >
       {children}
-      {selected && (
-        <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gold text-ink">
-          <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
-        </span>
-      )}
+      {selected && <SelectedMark className="absolute right-1.5 top-1.5" />}
     </button>
+  );
+}
+
+function SelectedMark({ className = '' }: { className?: string }) {
+  return (
+    <span className={`flex h-5 w-5 items-center justify-center rounded-full bg-gold text-ink ${className}`}>
+      <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+    </span>
   );
 }

@@ -16,7 +16,7 @@ export function avatarUrl(id: AvatarId): string | undefined {
 /** Only the avatars that actually have an image, in the shared list's order. */
 export const AVATAR_OPTIONS = AVATARS.filter((id) => avatarUrl(id) !== undefined);
 
-/** "arctic-fox" → "Arctic fox", for screen readers. */
+/** "fox" → "Cool fox", for screen readers. */
 export function avatarLabel(id: AvatarId): string {
   return getT().profile.avatars[id];
 }
