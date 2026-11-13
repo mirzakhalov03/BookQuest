@@ -1,6 +1,8 @@
 import type { book as En } from '../en/book';
 
 export const book: typeof En = {
+  readOrListen: 'Читать или слушать',
+  whereToFind: 'Где найти',
   mysteryLabel: 'Секретная книга — скоро откроем',
   lockedTitle: 'Книга пока держится в секрете',
   lockedBody: 'Скоро откроем — пришлём уведомление.',

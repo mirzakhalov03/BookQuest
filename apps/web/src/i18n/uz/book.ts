@@ -1,6 +1,8 @@
 import type { book as En } from '../en/book';
 
 export const book: typeof En = {
+  readOrListen: 'O‘qish yoki tinglash',
+  whereToFind: 'Qayerdan topish mumkin',
   mysteryLabel: 'Sirli kitob — tez orada ochiladi',
   lockedTitle: 'Kitob hozircha sir',
   lockedBody: 'Tez orada ochamiz. Sizga xabar yuboramiz.',

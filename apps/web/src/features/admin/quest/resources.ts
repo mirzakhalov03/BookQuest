@@ -9,6 +9,9 @@ export function kindOptions(): SelectOption<BookResourceKind>[] {
   return BOOK_RESOURCE_KINDS.map((value) => ({ value, label: kinds[value] }));
 }
 
+// Shops and maps, so a pasted Asaxiy or Google Maps link lands under "Where to find it".
+const STORE_HOSTS = ['asaxiy.uz', 'book.uz', 'kitobxon.com', 'uzum.uz', 'amazon.', 'maps.google.', 'maps.app.goo.gl', 'yandex.uz'];
+
 const AUDIO_HOSTS = ['audible.', 'storytel.', 'soundcloud.com', 'podcasts.apple.com', 'open.spotify.com', 'music.youtube.com'];
 
 /** A best guess the admin can still change — it only saves them picking from a list. */
@@ -25,6 +28,7 @@ export function inferKind(url: string): BookResourceKind {
   if (/\.(mp3|m4a|m4b|aac|ogg)$/.test(path) || AUDIO_HOSTS.some((host) => parsed.hostname.includes(host))) {
     return 'audio';
   }
+  if (STORE_HOSTS.some((host) => parsed.hostname.includes(host)) || path.startsWith('/maps')) return 'store';
   return 'link';
 }
 
@@ -45,6 +49,7 @@ export function defaultLabel(kind: BookResourceKind, url: string): string {
     case 'audio':
       return getT().adminQuest.resources.audiobook;
     case 'link':
+    case 'store':
       return hostnameOf(url);
   }
 }

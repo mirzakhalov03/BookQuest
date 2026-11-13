@@ -71,10 +71,7 @@ export function BookPage() {
         </section>
       )}
 
-      <section className="flex flex-1 flex-col gap-2">
-        <p className="type-label">{t.book.whereToRead}</p>
-        <ResourceList resources={quest.book.resources} />
-      </section>
+      <ResourceList resources={quest.book.resources} />
     </Screen>
   );
 }

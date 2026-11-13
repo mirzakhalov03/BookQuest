@@ -127,7 +127,7 @@ export const adminQuest: typeof En = {
     label: 'Название',
     url: 'URL',
     kind: 'Тип',
-    kinds: { pdf: 'PDF', epub: 'EPUB', audio: 'Аудио', link: 'Ссылка' },
+    kinds: { pdf: 'PDF', epub: 'EPUB', audio: 'Аудио', link: 'Ссылка', store: 'Магазин или библиотека' },
     audiobook: 'Аудиокнига',
     moveUp: 'Выше',
     moveDown: 'Ниже',

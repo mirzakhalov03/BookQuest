@@ -1,21 +1,13 @@
 import { useState } from 'react';
 import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
-import type { BookResourceKind } from '@bookquest/shared';
-import type { LucideIcon } from 'lucide-react';
-import { AlertTriangle, ArrowDown, ArrowUp, BookOpen, FileText, Headphones, Link2 } from 'lucide-react';
+import { AlertTriangle, ArrowDown, ArrowUp } from 'lucide-react';
+import { RESOURCE_ICONS } from '@/components/ResourceIcon';
 import { Field, statusFor } from '@/components/ui/Field';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { isValidResourceUrl, type QuestFormState } from '../questForm';
 import { kindOptions, RESOURCE_LIMIT, defaultLabel, hostnameOf, inferKind } from '../resources';
 import { useT } from '@/i18n';
-
-const KIND_ICON: Record<BookResourceKind, LucideIcon> = {
-  pdf: FileText,
-  epub: BookOpen,
-  audio: Headphones,
-  link: Link2
-};
 
 /**
  * Paste a link and the row fills itself in; rows stay collapsed to one line
@@ -59,7 +51,7 @@ export function ResourceListEditor() {
             const current = resources[index] ?? field;
             const rowErrors = errors.book?.resources?.[index];
             const isOpen = openId === field.id || Boolean(rowErrors);
-            const Icon = KIND_ICON[current.kind];
+            const Icon = RESOURCE_ICONS[current.kind];
 
             return (
               <li key={field.id} className="py-1">

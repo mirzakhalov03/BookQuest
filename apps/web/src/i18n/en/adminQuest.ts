@@ -127,7 +127,7 @@ export const adminQuest = {
     label: 'Label',
     url: 'URL',
     kind: 'Kind',
-    kinds: { pdf: 'PDF', epub: 'EPUB', audio: 'Audio', link: 'Link' } satisfies Record<BookResourceKind, string>,
+    kinds: { pdf: 'PDF', epub: 'EPUB', audio: 'Audio', link: 'Link', store: 'Shop or library' } satisfies Record<BookResourceKind, string>,
     audiobook: 'Audiobook',
     moveUp: 'Move up',
     moveDown: 'Move down',

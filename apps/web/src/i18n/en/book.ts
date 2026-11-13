@@ -1,4 +1,6 @@
 export const book = {
+  readOrListen: 'Read or listen',
+  whereToFind: 'Where to find it',
   mysteryLabel: 'A secret book, revealed soon',
   lockedTitle: 'The book is a secret, for now',
   lockedBody: "We'll reveal it soon. You'll get a notification.",

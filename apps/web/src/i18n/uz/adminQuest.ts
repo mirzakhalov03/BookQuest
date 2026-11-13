@@ -126,7 +126,7 @@ export const adminQuest: typeof En = {
     label: 'Nomi',
     url: 'URL',
     kind: 'Turi',
-    kinds: { pdf: 'PDF', epub: 'EPUB', audio: 'Audio', link: 'Havola' },
+    kinds: { pdf: 'PDF', epub: 'EPUB', audio: 'Audio', link: 'Havola', store: 'Do‘kon yoki kutubxona' },
     audiobook: 'Audiokitob',
     moveUp: 'Yuqoriga',
     moveDown: 'Pastga',
