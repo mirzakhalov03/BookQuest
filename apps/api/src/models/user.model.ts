@@ -22,7 +22,8 @@ const userSchema = new Schema(
     languageCode: { type: String, default: null },
     // An `AVATARS` id. No enum: a retired id should read as "no avatar", not fail the next save.
     // Random on insert only (create, and upserts with `setDefaultsOnInsert`); an explicit null = Initials, kept.
-    avatar: { type: String, default: randomAvatar },
+    // Typed nullable so the inferred field admits the explicit null.
+    avatar: { type: String, default: (): string | null => randomAvatar() },
 
     /* Only means "this phone account proved the shared admin password".
        Access itself is decided per request by `isAdmin` (user.services). */
