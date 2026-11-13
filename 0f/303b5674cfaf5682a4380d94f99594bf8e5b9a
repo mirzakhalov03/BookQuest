@@ -1,0 +1,25 @@
+apps/web/src/features/prizes/components/QuestSummaryCard.tsx
+  s_ed86d784e7207d::t_a07473b8321e98 3-4,34-38,48,61-69
+apps/web/src/i18n/en/prizes.ts
+  s_ed86d784e7207d::t_76184d4f2bd5ae 2
+apps/web/src/i18n/ru/prizes.ts
+  s_ed86d784e7207d::t_44c18648df3fca 4
+apps/web/src/i18n/uz/prizes.ts
+  s_ed86d784e7207d::t_0022266e98fb21 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "0f303b5674cfaf5682a4380d94f99594bf8e5b9a",
+  "prompts": {},
+  "sessions": {
+    "s_ed86d784e7207d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ee52d4a-0fa8-4bff-a7b1-1cb51196e16d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
