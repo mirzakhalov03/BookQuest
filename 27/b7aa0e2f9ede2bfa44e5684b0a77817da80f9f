@@ -1,0 +1,25 @@
+apps/web/src/features/admin/api/useUpdateQuest.ts
+  s_ed86d784e7207d::t_ea30cc46ca8bf3 4,23-24
+apps/web/src/features/admin/quest/components/QuizConfigSection.tsx
+  s_ed86d784e7207d::t_315978d344b9e1 50-52,76,128
+apps/web/src/hooks/useOverscroll.ts
+  s_ed86d784e7207d::t_3648889410bceb 5,40-41,49-50,114-129,156-164,182-183
+apps/web/src/lib/api/quest.ts
+  s_ed86d784e7207d::t_39215db10aff1d 2-7,28-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "27b7aa0e2f9ede2bfa44e5684b0a77817da80f9f",
+  "prompts": {},
+  "sessions": {
+    "s_ed86d784e7207d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ee52d4a-0fa8-4bff-a7b1-1cb51196e16d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
