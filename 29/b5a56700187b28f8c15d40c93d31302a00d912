@@ -1,0 +1,31 @@
+apps/web/src/features/profile/ProfilePage.tsx
+  s_ed86d784e7207d::t_64dfbbd84ea631 1,13-14,142,144,151-152,154
+apps/web/src/features/profile/components/Certificate.tsx
+  s_ed86d784e7207d::t_3276e159059e9b 1,26,54-65,88,92-112
+apps/web/src/features/profile/components/CertificateTeaser.tsx
+  s_ed86d784e7207d::t_8ad75d1092b64a 1-28
+apps/web/src/i18n/en/profile.ts
+  s_ed86d784e7207d::t_aa10b1e6e85816 1-2,4-8,35
+apps/web/src/i18n/ru/profile.ts
+  s_ed86d784e7207d::t_2e7a7ee59a8b48 4-8,34
+apps/web/src/i18n/uz/profile.ts
+  s_ed86d784e7207d::t_7caaa076ee2113 4-8,34
+apps/web/src/styles/profile.css
+  s_ed86d784e7207d::t_ca6bc4ebbe3343 66-68,70-131,133,135-195,203-205
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "29b5a56700187b28f8c15d40c93d31302a00d912",
+  "prompts": {},
+  "sessions": {
+    "s_ed86d784e7207d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ee52d4a-0fa8-4bff-a7b1-1cb51196e16d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
