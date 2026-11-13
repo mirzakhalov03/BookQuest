@@ -46,6 +46,7 @@ export function ProfilePage() {
   return (
     <Screen className="gap-8">
       <ReaderPass
+        userId={user?.id}
         name={participant.data.fullName}
         avatar={user?.avatar ?? null}
         number={participant.data.number}
@@ -84,6 +85,7 @@ function NotJoined() {
   return (
     <Screen className="gap-8">
       <ReaderPass
+        userId={user?.id}
         name={user?.firstName ?? t.profile.readerFallback}
         avatar={user?.avatar ?? null}
         telegramUsername={user?.telegramUserId ? user.username : null}

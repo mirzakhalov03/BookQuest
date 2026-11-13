@@ -1,6 +1,7 @@
 import type { profile as En } from '../en/profile';
 
 export const profile: typeof En = {
+  meetMascot: 'Знакомьтесь, ваш талисман! Нажмите, чтобы сменить',
   loading: 'Ищем ваш номер…',
   readerFallback: 'Читатель',
   registrationClosed: 'Регистрация в этом сезоне закрыта. До встречи в следующем!',

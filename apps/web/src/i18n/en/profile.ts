@@ -1,4 +1,5 @@
 export const profile = {
+  meetMascot: 'Meet your mascot! Tap to change it',
   loading: 'Finding your number…',
   readerFallback: 'Reader',
   registrationClosed: 'Registration for this edition has closed. See you at the next one.',
