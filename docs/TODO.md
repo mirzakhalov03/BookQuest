@@ -2,24 +2,43 @@
 
 Future work, roughly in the order we expect to pick it up. Move an item into a spec/plan under `docs/superpowers/` when it starts.
 
-## Pull-to-refresh
+**Launch prep (22 Nov 2026), specced on 2026-11-12** in `docs/superpowers/specs/2026-11-12-*`: app shell polish, book reveal & sources, prizes refresh, mascots & certificates, admin cleanup. Every item below is covered by one of them.
 
-Pull down from the top of a screen; a circular book indicator fills as you drag, and reaching the threshold reloads the page.
+## Bugs
 
-Findings from looking at the code (2026-09-29):
+- **Pull-to-refresh isn't working.** Shipped in `46a8b69` but the gesture doesn't trigger a refresh — needs debugging.
 
-- **No book loader exists yet.** The only loading UI is `components/ui/Spinner.tsx` (plain ring) and `LoadingState`. `.book` in `styles/stage.css` is the 3D hero book, not a loader. The fill-circle book indicator has to be built new (SVG ring + book icon driven by `progress`), styled to match Spinner/tokens.
-- **Telegram fights the gesture.** A downward swipe collapses/closes the Mini App. Add a feature-detected `disableVerticalSwipes()` to `lib/telegram.ts` (same try/catch guard as `enableClosingConfirmation`).
-- **Native browser pull-to-refresh** would double-fire; add `overscroll-behavior-y: contain`.
-- **Exclude admin routes.** A reload wipes half-edited quest forms (see `useUnsavedChangesGuard`).
-- **Trigger** fires when the ring completes (haptic tick at full), per the request; releasing early snaps back with no reload.
-- **Reload vs refetch:** `window.location.reload()` also picks up a new service-worker build; `queryClient.invalidateQueries()` is smoother (no flash, keeps scroll/state). Default to reload unless we decide otherwise.
-- Planned files: `hooks/usePullToRefresh.ts`, `components/ui/PullToRefresh.tsx`, mounted once in `layouts/AppLayout.tsx`.
-- Open: no design approval yet — confirm the admin exclusion and reload-vs-refetch before building.
+## Participant app
 
-## Quiz-making feature
+### Navigation
+- **Reorder the navbar:** Home → Prizes (Sovrinlar) → Books → Results.
+- **Notifications back button:** when the notifications section is open, turn Telegram's native "Close" button into a back button that returns to Home.
 
-Let admins author the quiz for a quest's book. Not scoped yet — needs brainstorming (question types, editor UX, how it ties to editions and results).
+### Home
+- **Prizes CTA:** add an eye-catching button on Home that pulls users into the Prizes section.
+
+### Prizes
+- **Possible redesign (undecided):** drop the podium entirely and show a single photo of all the prizes already standing on a real podium.
+- **Prizes for 4th and 5th place**, not just the top 3.
+- **Previous quests section:** a smaller section showing what prizes were given in past quests.
+
+### Books
+- **Where to find the book:** add reference links (stores, libraries, etc.).
+
+### Profile
+- **Avatar picker:** remove the 3rd mascot.
+- **Randomly assigned mascots:** give each user a random mascot by default, and animate it when they open Profile so they notice it.
+
+### Certificates
+- **Redesign the certificates section.**
+
+## Admin
+
+- **Hide/reveal the book toggle:** when hidden, the book cover shows a `?` and the `/book` section is locked. Used when a quest is announced, to keep the intrigue.
+- **Results page:** title spans full width; the Sync button gets smaller and drops the "last synced" time — pull-to-refresh replaces it.
+- **Real certificate designs:** put the actual certificate designs in the dashboard's Certificates section, and remove the sample ones from the Results page.
+- **Remove the Posts section** from the dashboard.
+- **Simplify the quiz section** of the quest editor.
 
 ## Full refactor & optimization pass
 
