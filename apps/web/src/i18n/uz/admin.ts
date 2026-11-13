@@ -57,6 +57,7 @@ export const admin: typeof En = {
   gapHours: (n) => `${n} soat`,
   gapDays: (n) => `${n} kun`,
   dashboard: {
+    bookHidden: 'Kitob yashirin',
     loading: 'Ro‘yxat o‘qilmoqda…',
     betweenEditions: 'Mavsumlar orasida hech narsa o‘tkazilmayapti. Tayyor bo‘lganingizda keyingisini sozlang.',
     startNext: 'Keyingi mavsumni boshlash',

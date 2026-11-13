@@ -34,6 +34,8 @@ export const adminQuest: typeof En = {
   tabs: { book: 'Книга', resources: 'Материалы', prizes: 'Призы', dates: 'Даты', quiz: 'Тест' },
   hasErrors: 'Есть ошибки',
   book: {
+    revealLabel: 'Показывать книгу читателям',
+    revealHint: 'Выключено: читатели видят обложку с ?, а страница книги закрыта. Чтобы книга оставалась сюрпризом до анонса.',
     title: 'Название',
     author: 'Автор',
     pages: 'Страниц',
@@ -135,6 +137,13 @@ export const adminQuest: typeof En = {
     add: 'Добавить'
   },
   review: {
+    bookVisibility: 'Книга',
+    bookHidden: 'Скрыта от читателей',
+    bookShown: 'Видна читателям',
+    revealedBook: 'Книга открыта',
+    hidBook: 'Книга скрыта',
+    revealNudge: 'Читатели увидят книгу при следующем обновлении. Объявить об этом?',
+    saveAndAnnounce: 'Сохранить и объявить',
     titleUpcoming: 'Проверьте изменения',
     titleLive: 'Изменить идущий конкурс?',
     save: 'Сохранить изменения',

@@ -1,6 +1,7 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import { Field, statusFor } from '@/components/ui/Field';
 import { TextArea } from '@/components/ui/TextArea';
+import { Toggle } from '@/components/ui/Toggle';
 import type { QuestFormState } from '../questForm';
 import { CoverPicker } from './CoverPicker';
 import { useT } from '@/i18n';
@@ -22,6 +23,13 @@ export function BookFieldsSection({ onCoverUploadingChange }: BookFieldsSectionP
 
   return (
     <>
+      <Controller
+        control={control}
+        name="bookRevealed"
+        render={({ field }) => (
+          <Toggle checked={field.value} onChange={field.onChange} label={t.revealLabel} hint={t.revealHint} />
+        )}
+      />
       <Field label={t.title} {...register('book.title')} {...statusFor(e?.title?.message)} />
       <Field label={t.author} {...register('book.author')} {...statusFor(e?.author?.message)} />
       <Controller

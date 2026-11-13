@@ -58,6 +58,7 @@ export const questFormSchema = z
         )
         .max(12)
     }),
+    bookRevealed: z.boolean(),
     prizes: z.object({ first: prize, second: prize, third: prize }),
     dates: z.object({
       opensAt: date,

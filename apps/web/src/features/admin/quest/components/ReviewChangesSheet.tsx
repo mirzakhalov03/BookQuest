@@ -10,11 +10,21 @@ interface ReviewChangesSheetProps {
   participantCount: number;
   /** Before launch nobody has seen the quest, so the "live" framing would be wrong. */
   isUpcoming: boolean;
-  onConfirm: () => void;
+  /** This save reveals the book: offer to announce it right after. */
+  revealing: boolean;
+  onConfirm: (announce: boolean) => void;
   onCancel: () => void;
 }
 
-export function ReviewChangesSheet({ open, lines, participantCount, isUpcoming, onConfirm, onCancel }: ReviewChangesSheetProps) {
+export function ReviewChangesSheet({
+  open,
+  lines,
+  participantCount,
+  isUpcoming,
+  revealing,
+  onConfirm,
+  onCancel
+}: ReviewChangesSheetProps) {
   const { admin, adminQuest } = useT();
   const t = adminQuest.review;
   return (
@@ -27,7 +37,12 @@ export function ReviewChangesSheet({ open, lines, participantCount, isUpcoming, 
           <Button type="button" variant="quiet" onClick={onCancel}>
             {admin.keepEditing}
           </Button>
-          <Button type="button" onClick={onConfirm}>
+          {revealing && (
+            <Button type="button" variant="quiet" onClick={() => onConfirm(true)}>
+              {t.saveAndAnnounce}
+            </Button>
+          )}
+          <Button type="button" onClick={() => onConfirm(false)}>
             {t.save}
           </Button>
         </>
@@ -42,6 +57,7 @@ export function ReviewChangesSheet({ open, lines, participantCount, isUpcoming, 
           </li>
         ))}
       </ul>
+      {revealing && <p className="m-0 text-sm text-paper-dim">{t.revealNudge}</p>}
       {!isUpcoming && (
         <p className="m-0 text-sm text-taupe">
           {t.seenAtOnce(participantCount, formatCount(participantCount))}

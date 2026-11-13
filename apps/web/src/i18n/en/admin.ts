@@ -60,6 +60,7 @@ export const admin = {
   gapHours: (n: number) => `${n} h`,
   gapDays: (n: number) => `${n} ${pluralEn(n, 'day', 'days')}`,
   dashboard: {
+    bookHidden: 'Book hidden',
     loading: 'Reading the register…',
     betweenEditions: "Nothing is running between editions. Set up the next one when you're ready.",
     startNext: 'Start next edition',

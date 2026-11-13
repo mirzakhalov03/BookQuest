@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { useWatch } from 'react-hook-form';
 import { Eye } from 'lucide-react';
 import { BookHero } from '@/components/BookHero';
+import { BookLocked } from '@/components/BookLocked';
 import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
 import { hostnameOf } from '../resources';
@@ -16,15 +17,35 @@ const PLACES = [
 
 /** The participant-facing `BookHero`, fed unsaved values — the preview can't drift from the real screen. */
 export function QuestPreview({ values }: { values: QuestFormState }) {
-  const { book, prizes } = values;
+  const { prizes } = values;
   const { common, adminQuest } = useT();
   const t = adminQuest.preview;
-  const pages = Number(book.pages);
   const prizeRows = PLACES.map(([place, key]) => [place, prizes[key].trim()] as const).filter(([, prize]) => prize);
 
   return (
     <div className="flex flex-col gap-5 rounded-box border border-[color:var(--rule)] p-4">
       <p className="type-label m-0">{t.heading}</p>
+      {/* Hidden: exactly the locked screen readers get. */}
+      {values.bookRevealed ? <BookPreview book={values.book} /> : <BookLocked titleAs="h2" />}
+      {prizeRows.length > 0 && (
+        <ol className="m-0 flex list-none flex-col gap-1 p-0 text-sm">
+          {prizeRows.map(([place, prize]) => (
+            <li key={place} className="text-paper-dim">
+              <span className="type-label mr-2">{common.placeShort(place)}</span>
+              {prize}
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+function BookPreview({ book }: { book: QuestFormState['book'] }) {
+  const t = useT().adminQuest.preview;
+  const pages = Number(book.pages);
+  return (
+    <>
       <BookHero
         titleAs="h2"
         title={book.title.trim() || t.untitled}
@@ -42,17 +63,7 @@ export function QuestPreview({ values }: { values: QuestFormState }) {
           ))}
         </ul>
       )}
-      {prizeRows.length > 0 && (
-        <ol className="m-0 flex list-none flex-col gap-1 p-0 text-sm">
-          {prizeRows.map(([place, prize]) => (
-            <li key={place} className="text-paper-dim">
-              <span className="type-label mr-2">{common.placeShort(place)}</span>
-              {prize}
-            </li>
-          ))}
-        </ol>
-      )}
-    </div>
+    </>
   );
 }
 

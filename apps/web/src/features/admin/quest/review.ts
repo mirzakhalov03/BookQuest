@@ -10,11 +10,10 @@ export interface ChangeLine {
   after: string;
 }
 
-
 /** Only edits participants have already planned around get a second look; typos just save. */
 export function needsReview(quest: AdminQuest, patch: UpdateQuestPayload): boolean {
-  // Quiz setup is always reviewed, even before launch (§5.3).
-  if (patch.quizConfig !== undefined) return true;
+  // Quiz setup is always reviewed, even before launch (§5.3). So is the reveal: it's the launch moment.
+  if (patch.quizConfig !== undefined || patch.bookRevealed !== undefined) return true;
   if (quest.phase === 'upcoming') return false;
   return patch.prizes !== undefined || QUEST_DATE_FIELDS.some((field) => patch[field] !== undefined);
 }
@@ -28,6 +27,13 @@ export function describeRiskyChanges(
   const { admin, adminQuest } = getT();
   const t = adminQuest.review;
 
+  if (patch.bookRevealed !== undefined) {
+    lines.push({
+      label: t.bookVisibility,
+      before: patch.bookRevealed ? t.bookHidden : t.bookShown,
+      after: patch.bookRevealed ? t.revealedBook : t.hidBook
+    });
+  }
   for (const field of QUEST_DATE_FIELDS) {
     const next = patch[field];
     if (next) lines.push({ label: admin.dates[field], before: formatLongDate(quest[field]), after: formatLongDate(next) });

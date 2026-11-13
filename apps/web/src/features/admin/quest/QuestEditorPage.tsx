@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { AdminQuest, UpdateQuestPayload } from '@bookquest/shared';
 import { AdminScreen } from '@/layouts/AdminLayout';
@@ -70,6 +71,7 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
   const showToast = useUiStore((state) => state.showToast);
   const t = useT();
   const update = useUpdateQuest(quest.id);
+  const navigate = useNavigate();
 
   const changes = useQuestChanges(quest, form);
   const savedDates = useMemo(() => toFormState(quest).dates, [quest]);
@@ -80,13 +82,18 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
   const quizTab = useMemo(() => ({ quest, lockMessage: quizLockMessage }), [quest, quizLockMessage]);
   const quizTitle = (id: string) => quizzes.data?.find((quiz) => quiz.id === id)?.title ?? t.adminQuest.aQuiz;
 
-  async function save(patch: UpdateQuestPayload) {
+  async function save(patch: UpdateQuestPayload, announce = false) {
     setFormError(null);
     try {
       const updated = await update.mutateAsync(patch);
       // The server's answer is the new baseline; later edits diff against what was saved.
       reset(toFormState(updated));
       showToast(t.adminQuest.updated);
+      // Nothing is sent automatically; the admin writes the announcement themselves.
+      if (announce) {
+        guard.bypass();
+        void navigate('/admin/broadcast');
+      }
     } catch (error) {
       setFormError(
         error instanceof ApiRequestError ? applyServerErrors(error, setError) : errorMessage(error)
@@ -170,11 +177,12 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
         lines={pendingPatch ? describeRiskyChanges(quest, pendingPatch, quizTitle) : []}
         participantCount={quest.participantCount}
         isUpcoming={quest.phase === 'upcoming'}
+        revealing={pendingPatch?.bookRevealed === true}
         onCancel={() => setPendingPatch(null)}
-        onConfirm={() => {
+        onConfirm={(announce) => {
           const patch = pendingPatch;
           setPendingPatch(null);
-          if (patch) void save(patch);
+          if (patch) void save(patch, announce);
         }}
       />
       <UnsavedChangesSheet blocker={guard.blocker} />

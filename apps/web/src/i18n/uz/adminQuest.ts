@@ -33,6 +33,8 @@ export const adminQuest: typeof En = {
   tabs: { book: 'Kitob', resources: 'Manbalar', prizes: 'Sovrinlar', dates: 'Sanalar', quiz: 'Test' },
   hasErrors: 'Xatolar bor',
   book: {
+    revealLabel: 'Kitobni o‘quvchilarga ko‘rsatish',
+    revealHint: 'O‘chiq: o‘quvchilar ? muqovani ko‘radi va Kitob sahifasi yopiq turadi. E’lon qilguningizcha kitobni sir saqlash uchun.',
     title: 'Nomi',
     author: 'Muallif',
     pages: 'Sahifalar',
@@ -134,6 +136,13 @@ export const adminQuest: typeof En = {
     add: 'Qo‘shish'
   },
   review: {
+    bookVisibility: 'Kitob',
+    bookHidden: 'O‘quvchilardan yashirin',
+    bookShown: 'O‘quvchilarga ko‘rinadi',
+    revealedBook: 'Kitob ochildi',
+    hidBook: 'Kitob yashirildi',
+    revealNudge: 'O‘quvchilar kitobni keyingi yangilashda ko‘radi. E’lon qilasizmi?',
+    saveAndAnnounce: 'Saqlash va e’lon qilish',
     titleUpcoming: 'O‘zgarishlarni ko‘rib chiqing',
     titleLive: 'Faol tanlov o‘zgartirilsinmi?',
     save: 'O‘zgarishlarni saqlash',

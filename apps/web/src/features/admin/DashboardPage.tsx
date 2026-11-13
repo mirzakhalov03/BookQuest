@@ -1,8 +1,8 @@
 import { useState, type CSSProperties } from 'react';
 import { Link } from 'react-router';
-import { Award, CircleHelp, Image, type LucideIcon } from 'lucide-react';
-import type { Quest } from '@bookquest/shared';
-import { useCurrentQuest } from '@/lib/api/quest';
+import { Award, CircleHelp, Image, Lock, type LucideIcon } from 'lucide-react';
+import type { AdminQuest } from '@bookquest/shared';
+import { useAdminCurrentQuest } from './api/useAdminCurrentQuest';
 import { AdminScreen } from '@/layouts/AdminLayout';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { BookCover } from '@/components/BookCover';
@@ -21,7 +21,7 @@ import { errorMessage } from '@/lib/api/errorMessage';
 export function DashboardPage() {
   usePullToRefresh();
   const t = useT().admin.dashboard;
-  const quest = useCurrentQuest();
+  const quest = useAdminCurrentQuest();
 
   return (
     <AdminQuery
@@ -49,11 +49,11 @@ const COVER_STYLE = {
   boxShadow: '0 8px 20px -8px rgba(0, 0, 0, 0.9)'
 } as CSSProperties;
 
-function Dashboard({ quest }: { quest: Quest }) {
+function Dashboard({ quest }: { quest: AdminQuest }) {
   const stats = useAdminStats();
   const t = useT().admin.dashboard;
   const [now] = useState(() => new Date());
-  // Quest is public; only the stats call tells us the viewer isn't an admin.
+  // AdminQuery already handles a 403 on the quest; this covers stats failing on its own.
   if (isForbidden(stats.error)) return <ForbiddenState error={stats.error} />;
 
   const count = (value: number | undefined) => (value === undefined ? '—' : formatCount(value));
@@ -68,6 +68,16 @@ function Dashboard({ quest }: { quest: Quest }) {
           </div>
         }
       />
+
+      {!quest.bookRevealed && (
+        <Link
+          to="/admin/quest"
+          className="inline-flex min-h-8 items-center gap-1.5 self-start rounded-chip border border-amber/40 bg-amber/10 px-2.5 text-sm text-amber"
+        >
+          <Lock className="size-3.5" aria-hidden="true" />
+          {t.bookHidden}
+        </Link>
+      )}
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
         <StatCard label={t.statParticipants} value={count(stats.data?.participants)} />
@@ -103,7 +113,7 @@ const QUICK_ACTIONS: { to?: string; key: 'actionQuizzes' | 'actionCertificates' 
 const TILE = 'flex min-w-0 flex-col items-center gap-2 rounded-box border px-2 py-4';
 
 /** Phase-aware next step first, then the go-to shortcuts. */
-function NextSteps({ quest, now }: { quest: Quest; now: Date }) {
+function NextSteps({ quest, now }: { quest: AdminQuest; now: Date }) {
   const t = useT().admin.dashboard;
   let content;
   switch (quest.phase) {

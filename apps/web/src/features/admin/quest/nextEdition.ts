@@ -1,6 +1,6 @@
 import type { CreateQuestPayload, Quest } from '@bookquest/shared';
 import { defaultDates, plusOneYear } from '../dates';
-import { formDates, toFormState, toResources, trimmedOrNull, type QuestFormState } from './questForm';
+import { formDates, toResources, trimmedOrNull, type QuestFormState } from './questForm';
 
 export interface EditionDraft {
   edition: number;
@@ -28,6 +28,7 @@ export function nextEditionDraft(source: Quest | null, now: Date): EditionDraft 
       edition: 1,
       values: {
         book: EMPTY_BOOK,
+        bookRevealed: false,
         prizes: { first: '', second: '', third: '' },
         dates: defaultDates(now),
         quizConfig: null
@@ -35,7 +36,6 @@ export function nextEditionDraft(source: Quest | null, now: Date): EditionDraft 
     };
   }
 
-  const carried = toFormState(source);
   const shifted = {
     opensAt: plusOneYear(source.opensAt),
     readingDeadline: plusOneYear(source.readingDeadline),
@@ -47,8 +47,14 @@ export function nextEditionDraft(source: Quest | null, now: Date): EditionDraft 
   return {
     edition: source.edition + 1,
     values: {
-      ...carried,
       book: EMPTY_BOOK,
+      // Launches are announcements: the new book starts hidden.
+      bookRevealed: false,
+      prizes: {
+        first: source.prizes.first ?? '',
+        second: source.prizes.second ?? '',
+        third: source.prizes.third ?? ''
+      },
       quizConfig: null,
       dates: new Date(shifted.opensAt) > now ? shifted : defaultDates(now)
     }
@@ -75,6 +81,7 @@ export function buildCreatePayload(edition: number, values: QuestFormState): Cre
       second: trimmedOrNull(values.prizes.second),
       third: trimmedOrNull(values.prizes.third)
     },
+    bookRevealed: values.bookRevealed,
     ...dates,
     makeCurrent: true
   };

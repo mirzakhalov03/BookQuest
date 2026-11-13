@@ -27,7 +27,7 @@ export function summarizeChanges(patch: UpdateQuestPayload | null): ChangeSummar
   };
 
   const { resources, ...book } = patch.book ?? {};
-  tally('book', Object.keys(book).length);
+  tally('book', Object.keys(book).length + (patch.bookRevealed !== undefined ? 1 : 0));
   tally('resources', resources ? 1 : 0);
   tally('prizes', Object.keys(patch.prizes ?? {}).length);
   tally('dates', QUEST_DATE_FIELDS.filter((field) => patch[field] !== undefined).length);
@@ -40,7 +40,7 @@ export function sectionsWithErrors(errors: FieldErrors<QuestFormState>): Readonl
   const sections = new Set<EditorSectionId>();
   const { resources, ...book } = errors.book ?? {};
 
-  if (Object.keys(book).length > 0) sections.add('book');
+  if (Object.keys(book).length > 0 || errors.bookRevealed) sections.add('book');
   if (resources) sections.add('resources');
   if (errors.prizes) sections.add('prizes');
   if (errors.dates) sections.add('dates');

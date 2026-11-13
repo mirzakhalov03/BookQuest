@@ -1,5 +1,5 @@
 import { QUEST_DATE_FIELDS } from '@bookquest/shared';
-import type { AdminQuest, Book, BookResource, Prizes, Quest, QuestDates, UpdateQuestPayload } from '@bookquest/shared';
+import type { AdminQuest, Book, BookResource, Prizes, QuestDates, UpdateQuestPayload } from '@bookquest/shared';
 import { toDateTimeLocalInput } from '@/lib/format';
 import { quizConfigChanged, type QuizConfigForm } from './quizConfig';
 
@@ -18,6 +18,8 @@ export interface QuestFormState {
     description: string;
     resources: ResourceDraft[];
   };
+  /** Off keeps the book a secret from readers. */
+  bookRevealed: boolean;
   prizes: { first: string; second: string; third: string };
   dates: {
     opensAt: string;
@@ -36,8 +38,8 @@ export const DATE_PATHS = QUEST_DATE_FIELDS.map((key) => `dates.${key}` as const
  * number — so every field in the form is the same kind of controlled input,
  * and blank has one obvious meaning (see `trimmedOrNull` below) instead of
  * `NaN` or `0` standing in for "cleared". */
-export function toFormState(quest: Quest | AdminQuest): QuestFormState {
-  const config = 'quizConfig' in quest ? quest.quizConfig : null;
+export function toFormState(quest: AdminQuest): QuestFormState {
+  const config = quest.quizConfig;
   return {
     book: {
       title: quest.book.title,
@@ -47,6 +49,7 @@ export function toFormState(quest: Quest | AdminQuest): QuestFormState {
       description: quest.book.description ?? '',
       resources: quest.book.resources.map((resource) => ({ ...resource }))
     },
+    bookRevealed: quest.bookRevealed,
     prizes: {
       first: quest.prizes.first ?? '',
       second: quest.prizes.second ?? '',
@@ -137,6 +140,7 @@ export function buildQuestPatch(initial: AdminQuest, form: QuestFormState): Upda
     book.resources = resources;
   }
   if (Object.keys(book).length > 0) patch.book = book;
+  if (form.bookRevealed !== initial.bookRevealed) patch.bookRevealed = form.bookRevealed;
 
   const prizes: Partial<Prizes> = {};
   const first = trimmedOrNull(form.prizes.first);

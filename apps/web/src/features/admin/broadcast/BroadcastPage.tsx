@@ -5,7 +5,7 @@ import { AdminScreen } from '@/layouts/AdminLayout';
 import { TextArea } from '@/components/ui/TextArea';
 import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
-import { useCurrentQuest } from '@/lib/api/quest';
+import { useAdminCurrentQuest } from '../api/useAdminCurrentQuest';
 import { formatCount } from '@/lib/format';
 import { useUiStore } from '@/stores/ui.store';
 import { useBroadcasts } from '../api/useBroadcasts';
@@ -27,7 +27,7 @@ export function BroadcastPage() {
   const [message, setMessage] = useState(() => (location.state as BroadcastLocationState | null)?.draft ?? '');
   const [confirming, setConfirming] = useState(false);
   const broadcasts = useBroadcasts();
-  const quest = useCurrentQuest();
+  const quest = useAdminCurrentQuest();
   const send = useSendBroadcast();
   const showToast = useUiStore((state) => state.showToast);
   const t = useT();

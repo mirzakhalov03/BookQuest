@@ -34,6 +34,8 @@ export const adminQuest = {
   tabs: { book: 'Book', resources: 'Resources', prizes: 'Prizes', dates: 'Dates', quiz: 'Quiz' },
   hasErrors: 'Has errors',
   book: {
+    revealLabel: 'Show the book to readers',
+    revealHint: 'Off: readers see a ? cover and the Book page stays locked. Use it to keep the book a surprise until you announce it.',
     title: 'Title',
     author: 'Author',
     pages: 'Pages',
@@ -135,6 +137,13 @@ export const adminQuest = {
     add: 'Add'
   },
   review: {
+    bookVisibility: 'The book',
+    bookHidden: 'Hidden from readers',
+    bookShown: 'Shown to readers',
+    revealedBook: 'Revealed the book',
+    hidBook: 'Hid the book',
+    revealNudge: 'Readers will see the book on their next refresh. Want to announce it?',
+    saveAndAnnounce: 'Save and announce',
     titleUpcoming: 'Review your changes',
     titleLive: 'Change a live quest?',
     save: 'Save changes',

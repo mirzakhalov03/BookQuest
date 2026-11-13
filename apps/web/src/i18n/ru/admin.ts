@@ -57,6 +57,7 @@ export const admin: typeof En = {
   gapHours: (n) => `${n} ч`,
   gapDays: (n) => `${n} ${pluralRu(n, 'день', 'дня', 'дней')}`,
   dashboard: {
+    bookHidden: 'Книга скрыта',
     loading: 'Читаем журнал…',
     betweenEditions: 'Между сезонами ничего не проводится. Настройте следующий, когда будете готовы.',
     startNext: 'Начать следующий сезон',

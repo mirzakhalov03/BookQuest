@@ -6,7 +6,7 @@ import { useT } from '@/i18n';
 const COVER_STYLE = { '--book-w': '10rem', height: `${10 * 1.47}rem` } as CSSProperties;
 
 /** The book page while the admin keeps it a secret (`/book`, or the current edition's `/quests/:n`): no title, no links. */
-export function BookLocked() {
+export function BookLocked({ titleAs: Title = 'h1' }: { titleAs?: 'h1' | 'h2' }) {
   const t = useT().book;
   return (
     <section className="flex flex-1 flex-col items-center justify-center gap-6 py-8 text-center">
@@ -14,7 +14,7 @@ export function BookLocked() {
         <MysteryCover />
       </div>
       <div className="flex max-w-[22rem] flex-col gap-2">
-        <h1 className="type-display text-2xl text-paper">{t.lockedTitle}</h1>
+        <Title className="type-display text-2xl text-paper">{t.lockedTitle}</Title>
         <p className="text-taupe">{t.lockedBody}</p>
       </div>
     </section>

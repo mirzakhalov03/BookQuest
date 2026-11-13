@@ -1,4 +1,4 @@
-import type { Quest } from '@bookquest/shared';
+import type { AdminQuest } from '@bookquest/shared';
 import { formatLongDate } from '@/lib/format';
 import { getT } from '@/i18n';
 
@@ -10,7 +10,7 @@ export interface Suggestion {
 const DAY_MS = 86_400_000;
 
 /** Starting points from the quest's own dates, so the facts in a broadcast are never retyped by hand. */
-export function broadcastSuggestions(quest: Quest, now: Date): Suggestion[] {
+export function broadcastSuggestions(quest: AdminQuest, now: Date): Suggestion[] {
   const { title, author } = quest.book;
   const t = getT().admin.broadcast.suggestions;
 
