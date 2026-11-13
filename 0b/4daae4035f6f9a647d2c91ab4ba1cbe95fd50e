@@ -1,0 +1,29 @@
+apps/web/src/features/book/BookPage.tsx
+  s_ed86d784e7207d::t_7bae808e9b85fc 12,24
+apps/web/src/features/home/HomePage.tsx
+  s_ed86d784e7207d::t_73967ffade69bd 17,27
+apps/web/src/features/prizes/PrizesPage.tsx
+  s_ed86d784e7207d::t_d85ac0ebf6c6cd 4,11
+apps/web/src/features/prizes/QuestEditionPage.tsx
+  s_ed86d784e7207d::t_8c160b5263b904 17,38
+apps/web/src/features/profile/ProfilePage.tsx
+  s_ed86d784e7207d::t_0b9803e1bb3366 17,28
+apps/web/src/features/quiz/QuizPage.tsx
+  s_ed86d784e7207d::t_96a716b2073f83 17,25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "0b4daae4035f6f9a647d2c91ab4ba1cbe95fd50e",
+  "prompts": {},
+  "sessions": {
+    "s_ed86d784e7207d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ee52d4a-0fa8-4bff-a7b1-1cb51196e16d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
