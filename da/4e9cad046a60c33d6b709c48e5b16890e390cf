@@ -1,0 +1,27 @@
+apps/web/src/components/MysteryCover.tsx
+  s_ed86d784e7207d::t_ebc08ee52ab8b3 1-25
+apps/web/src/i18n/en/book.ts
+  s_ed86d784e7207d::t_261e9d8edb3e01 2
+apps/web/src/i18n/ru/book.ts
+  s_ed86d784e7207d::t_1b15542e13147c 4
+apps/web/src/i18n/uz/book.ts
+  s_ed86d784e7207d::t_a7de750f6ffda1 4
+apps/web/src/styles/stage.css
+  s_ed86d784e7207d::t_012b7f737a7c41 504-603
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "da4e9cad046a60c33d6b709c48e5b16890e390cf",
+  "prompts": {},
+  "sessions": {
+    "s_ed86d784e7207d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ee52d4a-0fa8-4bff-a7b1-1cb51196e16d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
