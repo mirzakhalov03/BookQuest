@@ -1,0 +1,39 @@
+docs/TODO.md
+  s_b23dfd837dbc30::t_2eb3c879d9295c 5,7,9,11,13-15,17-41
+docs/superpowers/specs/2026-11-12-admin-cleanup-design.md
+  s_b23dfd837dbc30::t_46b4a9fa449647 1-78
+docs/superpowers/specs/2026-11-12-app-shell-polish-design.md
+  s_b23dfd837dbc30::t_12d5332cb6be33 1-85
+docs/superpowers/specs/2026-11-12-prizes-refresh-design.md
+  s_b23dfd837dbc30::t_39877d1cf56147 1-94
+docs/superpowers/plans/2026-11-13-admin-cleanup.md
+  s_b23dfd837dbc30::t_9715ad4160ab33 1-92
+docs/superpowers/plans/2026-11-13-app-shell-polish.md
+  s_b23dfd837dbc30::t_801bce27df9c54 1-86
+docs/superpowers/plans/2026-11-13-book-reveal-and-sources.md
+  s_b23dfd837dbc30::t_07b56dbabfb3df 1-160
+docs/superpowers/plans/2026-11-13-mascots-and-certificates.md
+  s_b23dfd837dbc30::t_36cf072fe12f2c 1-146
+docs/superpowers/plans/2026-11-13-prizes-refresh.md
+  s_b23dfd837dbc30::t_f910b31b850e54 1-153
+docs/superpowers/specs/2026-11-12-book-reveal-and-sources-design.md
+  s_b23dfd837dbc30::t_8ab3c627d19f9b 1-126
+docs/superpowers/specs/2026-11-12-mascots-and-certificates-design.md
+  s_b23dfd837dbc30::t_8eee464e753e23 1-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "afc3905830e72da075b90584ebc8652f68b97a75",
+  "prompts": {},
+  "sessions": {
+    "s_b23dfd837dbc30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e0435901-b953-480b-9dc8-956799761dc0",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
