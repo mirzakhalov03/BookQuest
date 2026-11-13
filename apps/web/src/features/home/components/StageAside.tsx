@@ -3,7 +3,9 @@ import { useT } from '@/i18n';
 
 type StageAsideProps =
   | { variant: 'left'; title: string; author: string }
-  | { variant: 'right'; pages: number; quizOpensAt: string; participantCount: number };
+  /** Hidden book: the title slot says it's coming instead. */
+  | { variant: 'left'; title: null }
+  | { variant: 'right'; pages: number | null; quizOpensAt: string; participantCount: number };
 
 /**
  * The two panels either side of the book, visible only at ≥900px
@@ -19,8 +21,14 @@ export function StageAside(props: StageAsideProps) {
         {/* `/`'s one heading — no other element on Home outranks the book
             itself. `.booktitle`'s look comes from the class, not the tag, so
             promoting it from h2 to h1 changes nothing visually. */}
-        <h1 className="booktitle">{props.title}</h1>
-        <p className="byline">{props.author}</p>
+        {props.title === null ? (
+          <h1 className="booktitle">{t.revealedSoon}</h1>
+        ) : (
+          <>
+            <h1 className="booktitle">{props.title}</h1>
+            <p className="byline">{props.author}</p>
+          </>
+        )}
       </div>
     );
   }
@@ -28,10 +36,12 @@ export function StageAside(props: StageAsideProps) {
   return (
     <div className="stage__aside stage__aside--right">
       <dl className="facts">
-        <div className="facts__row">
-          <dt>{t.factPages}</dt>
-          <dd>{formatCount(props.pages)}</dd>
-        </div>
+        {props.pages !== null && (
+          <div className="facts__row">
+            <dt>{t.factPages}</dt>
+            <dd>{formatCount(props.pages)}</dd>
+          </div>
+        )}
         <div className="facts__row">
           <dt>{t.factQuizOpens}</dt>
           <dd>{formatLongDate(props.quizOpensAt)}</dd>

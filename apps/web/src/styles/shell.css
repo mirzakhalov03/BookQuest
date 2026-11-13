@@ -362,6 +362,27 @@
   stroke-linejoin: round;
 }
 
+/* `.tab .x` outranks `.tab span`, which would otherwise ellipsise the wrapper. */
+.tab .tab__iconwrap {
+  position: relative;
+  display: inline-flex;
+  max-width: none;
+  padding: 0;
+  overflow: visible;
+}
+.tab__lock {
+  position: absolute;
+  right: -5px;
+  bottom: -3px;
+  width: 12px;
+  height: 12px;
+  padding: 1.5px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  color: var(--color-amber);
+  stroke-width: 2.4;
+}
+
 .tab:hover {
   color: var(--color-paper-dim);
 }

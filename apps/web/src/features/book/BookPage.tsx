@@ -8,6 +8,7 @@ import { isNotFound } from '@/lib/api/client';
 import { errorMessage } from '@/lib/api/errorMessage';
 import { ExpandableText } from '@/components/ui/ExpandableText';
 import { ResourceList } from './components/ResourceList';
+import { BookLocked } from '@/components/BookLocked';
 import { useT } from '@/i18n';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
@@ -40,6 +41,14 @@ export function BookPage() {
     return (
       <Screen>
         <ErrorState error={error} onRetry={() => refetch()} />
+      </Screen>
+    );
+  }
+
+  if (!quest.book) {
+    return (
+      <Screen>
+        <BookLocked />
       </Screen>
     );
   }

@@ -1,10 +1,11 @@
+import type { Book } from '@bookquest/shared';
 import { BookCover } from '@/components/BookCover';
+import { MysteryCover } from '@/components/MysteryCover';
 import { useT } from '@/i18n';
 
 interface Book3DProps {
-  title: string;
-  author: string;
-  coverUrl: string | null;
+  /** `null` while the admin keeps the book a secret. */
+  book: Book | null;
 }
 
 /**
@@ -13,15 +14,19 @@ interface Book3DProps {
  * and TRAP 2 in `stage.css` — the tilt has to stay positive (spine visible)
  * and the spine has to stay brighter than the cover (it faces the light).
  */
-export function Book3D({ title, author, coverUrl }: Book3DProps) {
+export function Book3D({ book }: Book3DProps) {
   const t = useT();
   return (
-    <div className="book" role="img" aria-label={t.home.bookAria(title, author)}>
+    <div
+      className="book"
+      role="img"
+      aria-label={book ? t.home.bookAria(book.title, book.author) : t.book.mysteryLabel}
+    >
       <div className="book__face book__cover">
-        <BookCover title={title} author={author} coverUrl={coverUrl} />
+        {book ? <BookCover title={book.title} author={book.author} coverUrl={book.coverUrl} /> : <MysteryCover />}
       </div>
       <div className="book__face book__spine">
-        <span className="book__spinetext">{title}</span>
+        <span className="book__spinetext">{book ? book.title : '?'}</span>
       </div>
       <div className="book__face book__edge" />
       <div className="book__face book__top" />

@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Sparkles, BookOpen, Trophy, BarChart3, User, PencilLine } from 'lucide-react';
+import { Sparkles, BookOpen, Trophy, BarChart3, User, PencilLine, Lock } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router';
 import { isResultsOut } from '@bookquest/shared';
 import { useCurrentQuest } from '@/lib/api/quest';
@@ -11,6 +11,8 @@ interface Tab {
   icon: LucideIcon;
   /** Other paths that belong to this tab. */
   alsoMatches?: string;
+  /** A small lock over the icon; the tab still navigates. */
+  locked?: boolean;
 }
 
 /**
@@ -28,7 +30,7 @@ function useTabs(): Tab[] {
   return [
     { to: '/', label: t.stage, icon: Sparkles },
     { to: '/prizes', label: t.prizes, icon: Trophy, alsoMatches: '/quests/' },
-    { to: '/book', label: t.book, icon: BookOpen },
+    { to: '/book', label: t.book, icon: BookOpen, locked: quest?.bookRevealed === false },
     quizOver
       ? { to: '/results', label: t.results, icon: BarChart3 }
       : { to: '/quiz', label: t.quiz, icon: PencilLine },
@@ -51,7 +53,7 @@ export function TabBar() {
 
   return (
     <nav className="tabbar" aria-label={t.nav.sections}>
-      {tabs.map(({ to, label, icon: Icon, alsoMatches }) => (
+      {tabs.map(({ to, label, icon: Icon, alsoMatches, locked }) => (
         <NavLink
           key={to}
           to={to}
@@ -62,7 +64,14 @@ export function TabBar() {
             isActive || (alsoMatches && pathname.startsWith(alsoMatches)) ? 'tab is-on' : 'tab'
           }
         >
-          <Icon className="tab__icon" aria-hidden="true" />
+          {locked ? (
+            <span className="tab__iconwrap">
+              <Icon className="tab__icon" aria-hidden="true" />
+              <Lock className="tab__lock" aria-hidden="true" />
+            </span>
+          ) : (
+            <Icon className="tab__icon" aria-hidden="true" />
+          )}
           <span>{label}</span>
         </NavLink>
       ))}

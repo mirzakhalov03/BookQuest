@@ -1,4 +1,5 @@
 export const home = {
+  revealedSoon: 'Revealed soon',
   loading: 'Setting the stage…',
   bookAria: (title: string, author: string) => `${title} by ${author}, standing on a lit podium`,
   countdown: {

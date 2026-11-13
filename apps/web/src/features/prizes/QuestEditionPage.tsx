@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import type { Quest } from '@bookquest/shared';
 import { BookHero } from '@/components/BookHero';
+import { BookLocked } from '@/components/BookLocked';
 import { Screen } from '@/components/layout/Screen';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
@@ -82,14 +83,19 @@ export function QuestEditionPage() {
 
   return (
     <Screen className="gap-8">
-      <BookHero
-        edition={quest.edition}
-        year={quest.year}
-        title={quest.book.title}
-        author={quest.book.author}
-        pages={quest.book.pages}
-        coverUrl={quest.book.coverUrl}
-      />
+      {/* Only the current edition can be hidden, reached here by typing its number. */}
+      {quest.book ? (
+        <BookHero
+          edition={quest.edition}
+          year={quest.year}
+          title={quest.book.title}
+          author={quest.book.author}
+          pages={quest.book.pages}
+          coverUrl={quest.book.coverUrl}
+        />
+      ) : (
+        <BookLocked />
+      )}
 
       <DatesSection quest={quest} />
       <PrizesSection prizes={quest.prizes} />

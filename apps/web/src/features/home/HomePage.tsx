@@ -71,17 +71,17 @@ export function HomePage() {
 
       <main className="home">
         <div className="stage">
-          <StageAside variant="left" title={quest.book.title} author={quest.book.author} />
+          {quest.book ? (
+            <StageAside variant="left" title={quest.book.title} author={quest.book.author} />
+          ) : (
+            <StageAside variant="left" title={null} />
+          )}
 
-          <BookStage
-            title={quest.book.title}
-            author={quest.book.author}
-            coverUrl={quest.book.coverUrl}
-          />
+          <BookStage book={quest.book} />
 
           <StageAside
             variant="right"
-            pages={quest.book.pages}
+            pages={quest.book?.pages ?? null}
             quizOpensAt={quest.quizOpensAt}
             participantCount={quest.participantCount}
           />

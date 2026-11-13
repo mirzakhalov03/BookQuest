@@ -2,6 +2,7 @@ import type { home as En } from '../en/home';
 import { pluralRu } from '../plural';
 
 export const home: typeof En = {
+  revealedSoon: 'Скоро откроем',
   loading: 'Готовим сцену…',
   bookAria: (title, author) => `«${title}», ${author}, на освещённом пьедестале`,
   countdown: {
