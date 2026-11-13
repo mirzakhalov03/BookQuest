@@ -124,7 +124,7 @@ function NewEditionForm({ source }: { source: LatestQuest }) {
 
         <QuestEditorLayout preview={preview}>
           <form id={FORM_ID} onSubmit={submit} noValidate className="flex flex-col gap-6">
-            <QuestFormFields changes={NO_CHANGES} savedDates={null} onCoverUploadingChange={setIsCoverUploading} />
+            <QuestFormFields changes={NO_CHANGES} savedDates={null} onUploadingChange={setIsCoverUploading} />
             {formError && (
               <p role="alert" className="m-0 text-sm text-error">
                 {formError}

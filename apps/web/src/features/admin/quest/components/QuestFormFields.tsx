@@ -17,7 +17,8 @@ interface QuestFormFieldsProps {
   changes: ChangeSummary;
   /** The saved schedule — past dates in it lock. `null` when creating. */
   savedDates: DateInputs | null;
-  onCoverUploadingChange: (uploading: boolean) => void;
+  /** True while the cover or the prize photo is uploading, so Save can wait. */
+  onUploadingChange: (uploading: boolean) => void;
   /** The saved quest, once one exists: only then is there a quiz to set up. Absent when creating. */
   quiz?: { quest: AdminQuest; lockMessage: string | null };
 }
@@ -26,9 +27,12 @@ interface QuestFormFieldsProps {
 export const QuestFormFields = memo(function QuestFormFields({
   changes,
   savedDates,
-  onCoverUploadingChange,
+  onUploadingChange,
   quiz
 }: QuestFormFieldsProps) {
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  useEffect(() => onUploadingChange(coverUploading || photoUploading), [coverUploading, photoUploading, onUploadingChange]);
   const {
     formState: { errors, submitCount }
   } = useFormContext<QuestFormState>();
@@ -63,10 +67,10 @@ export const QuestFormFields = memo(function QuestFormFields({
       'book',
       t.book,
       BookOpen,
-      <BookFieldsSection onCoverUploadingChange={onCoverUploadingChange} />
+      <BookFieldsSection onCoverUploadingChange={setCoverUploading} />
     ),
     tab('resources', t.resources, Link2, <ResourceListEditor />),
-    tab('prizes', t.prizes, Trophy, <PrizeFieldsSection />),
+    tab('prizes', t.prizes, Trophy, <PrizeFieldsSection onPhotoUploadingChange={setPhotoUploading} />),
     tab('dates', t.dates, CalendarDays, <DateTimelineField savedDates={savedDates} />),
     ...(quiz
       ? [

@@ -11,11 +11,29 @@ import { useUploadCover } from '../../api/useUploadCover';
 import { useT } from '@/i18n';
 import { errorMessage, fieldErrorMessage } from '@/lib/api/errorMessage';
 
-interface CoverPickerProps {
-  /** The form's `book.coverUrl`; `''` means the drawn cover. */
+export interface ImagePickerLabels {
+  title: string;
+  alt: string;
+  choose: string;
+  replace: string;
+  view: string;
+  remove: string;
+}
+
+const SHAPES = {
+  // A book cover, beside a short field.
+  cover: { wrap: 'shrink-0', box: 'aspect-[2/3] w-32', maxSide: 1000 },
+  // A full-width photo, e.g. all the prizes together.
+  wide: { wrap: 'flex-1', box: 'aspect-[4/3] w-full max-w-md', maxSide: 1600 }
+} as const;
+
+interface ImagePickerProps {
+  /** The form's URL field; `''` means no image. */
   value: string;
   onChange: (url: string) => void;
-  /** Server `error.fields['book.coverUrl']` from the quest save. */
+  labels: ImagePickerLabels;
+  shape?: keyof typeof SHAPES;
+  /** Server field error for this URL from the quest save. */
   error?: string;
   /** Must be stable (a state setter) — it runs in an effect. */
   onUploadingChange: (uploading: boolean) => void;
@@ -25,21 +43,23 @@ interface CoverPickerProps {
 
 const isCoverType = (file: File): boolean => (COVER_CONTENT_TYPES as readonly string[]).includes(file.type);
 
-/** Uploads on pick; the quest save then sends the returned URL like any other field. */
-export function CoverPicker({
+/** Uploads on pick (through the cover pipeline); the quest save then sends the returned URL like any other field. */
+export function ImagePicker({
   value,
   onChange,
+  labels,
+  shape = 'cover',
   error,
   onUploadingChange,
   aside
-}: CoverPickerProps) {
+}: ImagePickerProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const upload = useUploadCover();
   const [preview, setPreview] = useState<string | null>(null);
   const showToast = useUiStore((state) => state.showToast);
   const { common, errors, adminQuest } = useT();
-  const t = adminQuest.book;
+  const { wrap, box, maxSide } = SHAPES[shape];
   const [isViewing, setIsViewing] = useState(false);
 
   // The server's verdict on the saved cover arrives as a field error; surface it like the rest.
@@ -64,7 +84,7 @@ export function CoverPicker({
     }
 
     // Size is checked after shrinking, so a big phone photo is fine; the API enforces the same cap.
-    const file = await downscaleImage(picked);
+    const file = await downscaleImage(picked, maxSide);
     if (file.size > COVER_MAX_BYTES) {
       showToast(errors.reasons.cover_too_large);
       return;
@@ -77,7 +97,7 @@ export function CoverPicker({
         showToast(
           err instanceof ApiRequestError
             ? (fieldErrorMessage(err, 'file') ?? errorMessage(err))
-            : t.uploadFailed
+            : adminQuest.book.uploadFailed
         ),
       onSettled: () => setPreview(null)
     });
@@ -92,22 +112,22 @@ export function CoverPicker({
   return (
     <div className="grid gap-[0.4rem]">
       <div className="flex items-start gap-5">
-        <div className="grid shrink-0 gap-[0.4rem]">
-          <span className="type-label">{t.cover}</span>
+        <div className={`grid ${wrap} gap-[0.4rem]`}>
+          <span className="type-label">{labels.title}</span>
           <label
             htmlFor={inputId}
-            className={`group relative grid aspect-[2/3] w-32 place-items-center overflow-hidden rounded-box border border-dashed border-[color:var(--rule-strong)] text-taupe transition-colors duration-150 focus-within:border-[color:var(--color-ember)] cursor-pointer hover:border-[color:var(--color-ember)] hover:text-paper-dim`}
+            className={`group relative grid ${box} place-items-center overflow-hidden rounded-box border border-dashed border-[color:var(--rule-strong)] text-taupe transition-colors duration-150 focus-within:border-[color:var(--color-ember)] cursor-pointer hover:border-[color:var(--color-ember)] hover:text-paper-dim`}
           >
             {shown ? (
               <img
                 src={shown}
-                alt={t.coverAlt}
+                alt={labels.alt}
                 className={`h-full w-full object-cover transition-opacity ${upload.isPending ? 'opacity-50' : ''}`}
               />
             ) : (
               <span className="flex flex-col items-center gap-2 px-3 text-center text-sm">
                 <ImagePlus aria-hidden className="h-6 w-6" />
-                {t.chooseCover}
+                {labels.choose}
               </span>
             )}
             {upload.isPending && (
@@ -118,12 +138,12 @@ export function CoverPicker({
             {value && !upload.isPending && (
               <span className="absolute inset-x-0 bottom-0 flex justify-center gap-2 bg-gradient-to-t from-black/75 to-transparent px-2 pb-2 pt-6">
                 <OverlayButton
-                  label={t.replaceCover}
+                  label={labels.replace}
                   icon={RefreshCw}
                   onClick={() => inputRef.current?.click()}
                 />
-                <OverlayButton label={t.viewCover} icon={Eye} onClick={() => setIsViewing(true)} />
-                <OverlayButton label={t.removeCover} icon={Trash2} onClick={handleRemove} />
+                <OverlayButton label={labels.view} icon={Eye} onClick={() => setIsViewing(true)} />
+                <OverlayButton label={labels.remove} icon={Trash2} onClick={handleRemove} />
               </span>
             )}
             <input
@@ -143,7 +163,7 @@ export function CoverPicker({
       <Sheet
         open={isViewing}
         onClose={() => setIsViewing(false)}
-        title={t.cover}
+        title={labels.title}
         actions={
           <Button type="button" variant="quiet" onClick={() => setIsViewing(false)}>
             {common.close}
@@ -153,7 +173,7 @@ export function CoverPicker({
         {value && (
           <img
             src={value}
-            alt={t.coverAlt}
+            alt={labels.alt}
             className="mx-auto max-h-[65vh] w-auto rounded-box object-contain"
           />
         )}

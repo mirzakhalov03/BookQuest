@@ -63,6 +63,17 @@ export const adminQuest = {
     } satisfies Partial<Record<QuestDateField, string>>
   },
   prizes: {
+    fourth: 'Fourth place',
+    fifth: 'Fifth place',
+    fourthPlaceholder: 'A signed copy',
+    fifthPlaceholder: 'A BookQuest tote',
+    photo: 'Photo of the prizes',
+    photoHint: 'Optional. One photo of all the prizes together. Without it, readers see the podium.',
+    photoAlt: 'Photo of the prizes',
+    addPhoto: 'Add a photo of the prizes',
+    replacePhoto: 'Replace photo',
+    viewPhoto: 'View photo',
+    removePhoto: 'Remove photo',
     blankHint: 'Leave a place blank to clear its prize.',
     first: 'First place',
     second: 'Second place',
@@ -149,7 +160,10 @@ export const adminQuest = {
     save: 'Save changes',
     seenAtOnce: (count: number, n: string) =>
       `${n} ${pluralEn(count, 'participant sees', 'participants see')} this straight away.`,
-    prizes: { first: 'First prize', second: 'Second prize', third: 'Third prize' },
+    prizes: { first: 'First prize', second: 'Second prize', third: 'Third prize', fourth: 'Fourth prize', fifth: 'Fifth prize' },
+    prizePhoto: 'Prize photo',
+    photoSet: 'Photo added',
+    photoReplaced: 'New photo',
     none: 'None',
     quizSetup: 'Quiz setup'
   },

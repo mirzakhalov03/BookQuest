@@ -140,7 +140,7 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
           <QuestFormFields
             changes={changes}
             savedDates={savedDates}
-            onCoverUploadingChange={setIsCoverUploading}
+            onUploadingChange={setIsCoverUploading}
             quiz={quizTab}
           />
           {formError && (

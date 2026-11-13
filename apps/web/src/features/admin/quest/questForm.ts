@@ -1,4 +1,4 @@
-import { QUEST_DATE_FIELDS } from '@bookquest/shared';
+import { PRIZE_PLACES, QUEST_DATE_FIELDS, type PrizePlaceKey } from '@bookquest/shared';
 import type { AdminQuest, Book, BookResource, Prizes, QuestDates, UpdateQuestPayload } from '@bookquest/shared';
 import { toDateTimeLocalInput } from '@/lib/format';
 import { quizConfigChanged, type QuizConfigForm } from './quizConfig';
@@ -20,7 +20,7 @@ export interface QuestFormState {
   };
   /** Off keeps the book a secret from readers. */
   bookRevealed: boolean;
-  prizes: { first: string; second: string; third: string };
+  prizes: Record<PrizePlaceKey, string> & { photoUrl: string };
   dates: {
     opensAt: string;
     readingDeadline: string;
@@ -50,11 +50,7 @@ export function toFormState(quest: AdminQuest): QuestFormState {
       resources: quest.book.resources.map((resource) => ({ ...resource }))
     },
     bookRevealed: quest.bookRevealed,
-    prizes: {
-      first: quest.prizes.first ?? '',
-      second: quest.prizes.second ?? '',
-      third: quest.prizes.third ?? ''
-    },
+    prizes: toPrizeForm(quest.prizes),
     dates: {
       opensAt: toDateTimeLocalInput(quest.opensAt),
       readingDeadline: toDateTimeLocalInput(quest.readingDeadline),
@@ -81,6 +77,18 @@ export function formDates(form: QuestFormState): QuestDates {
     quizClosesAt: new Date(form.dates.quizClosesAt),
     resultsAt: new Date(form.dates.resultsAt)
   };
+}
+
+const PRIZE_FIELD_KEYS = [...PRIZE_PLACES.map((place) => place.key), 'photoUrl'] as const;
+
+/** Every place plus the photo, as editable strings. */
+export function toPrizeForm(prizes: Prizes): QuestFormState['prizes'] {
+  return Object.fromEntries(PRIZE_FIELD_KEYS.map((key) => [key, prizes[key] ?? ''])) as QuestFormState['prizes'];
+}
+
+/** The form's prizes in the API's shape: blank becomes `null`. Shared by the edit diff and the create payload. */
+export function toPrizes(form: QuestFormState['prizes']): Prizes {
+  return Object.fromEntries(PRIZE_FIELD_KEYS.map((key) => [key, trimmedOrNull(form[key])])) as Prizes;
 }
 
 /** Blank means "clear it" — the schema's prize and cover/description fields
@@ -143,12 +151,10 @@ export function buildQuestPatch(initial: AdminQuest, form: QuestFormState): Upda
   if (form.bookRevealed !== initial.bookRevealed) patch.bookRevealed = form.bookRevealed;
 
   const prizes: Partial<Prizes> = {};
-  const first = trimmedOrNull(form.prizes.first);
-  if (first !== initial.prizes.first) prizes.first = first;
-  const second = trimmedOrNull(form.prizes.second);
-  if (second !== initial.prizes.second) prizes.second = second;
-  const third = trimmedOrNull(form.prizes.third);
-  if (third !== initial.prizes.third) prizes.third = third;
+  const formPrizes = toPrizes(form.prizes);
+  for (const key of PRIZE_FIELD_KEYS) {
+    if (formPrizes[key] !== initial.prizes[key]) prizes[key] = formPrizes[key];
+  }
   if (Object.keys(prizes).length > 0) patch.prizes = prizes;
 
   const dates = formDates(form);

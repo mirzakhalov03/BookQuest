@@ -3,7 +3,7 @@ import { Field, statusFor } from '@/components/ui/Field';
 import { TextArea } from '@/components/ui/TextArea';
 import { Toggle } from '@/components/ui/Toggle';
 import type { QuestFormState } from '../questForm';
-import { CoverPicker } from './CoverPicker';
+import { ImagePicker } from './ImagePicker';
 import { useT } from '@/i18n';
 
 interface BookFieldsSectionProps {
@@ -37,8 +37,16 @@ export function BookFieldsSection({ onCoverUploadingChange }: BookFieldsSectionP
         name="book.coverUrl"
         // Controller writes only this field, so a late upload can't overwrite other edits.
         render={({ field, fieldState }) => (
-          <CoverPicker
+          <ImagePicker
             value={field.value}
+            labels={{
+              title: t.cover,
+              alt: t.coverAlt,
+              choose: t.chooseCover,
+              replace: t.replaceCover,
+              view: t.viewCover,
+              remove: t.removeCover
+            }}
             onChange={field.onChange}
             error={fieldState.error?.message}
             onUploadingChange={onCoverUploadingChange}

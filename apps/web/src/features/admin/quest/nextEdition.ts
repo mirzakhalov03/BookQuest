@@ -1,11 +1,13 @@
-import type { CreateQuestPayload, Quest } from '@bookquest/shared';
+import type { CreateQuestPayload, Prizes, Quest } from '@bookquest/shared';
 import { defaultDates, plusOneYear } from '../dates';
-import { formDates, toResources, trimmedOrNull, type QuestFormState } from './questForm';
+import { formDates, toPrizeForm, toPrizes, toResources, trimmedOrNull, type QuestFormState } from './questForm';
 
 export interface EditionDraft {
   edition: number;
   values: QuestFormState;
 }
+
+const NO_PRIZES: Prizes = { first: null, second: null, third: null, fourth: null, fifth: null, photoUrl: null };
 
 const EMPTY_BOOK: QuestFormState['book'] = {
   title: '',
@@ -29,7 +31,7 @@ export function nextEditionDraft(source: Quest | null, now: Date): EditionDraft 
       values: {
         book: EMPTY_BOOK,
         bookRevealed: false,
-        prizes: { first: '', second: '', third: '' },
+        prizes: toPrizeForm(NO_PRIZES),
         dates: defaultDates(now),
         quizConfig: null
       }
@@ -50,11 +52,9 @@ export function nextEditionDraft(source: Quest | null, now: Date): EditionDraft 
       book: EMPTY_BOOK,
       // Launches are announcements: the new book starts hidden.
       bookRevealed: false,
-      prizes: {
-        first: source.prizes.first ?? '',
-        second: source.prizes.second ?? '',
-        third: source.prizes.third ?? ''
-      },
+      // The photo stays behind: it shows last year's prizes, and two quests sharing one upload
+      // would let either one's replace delete the other's file.
+      prizes: toPrizeForm({ ...source.prizes, photoUrl: null }),
       quizConfig: null,
       dates: new Date(shifted.opensAt) > now ? shifted : defaultDates(now)
     }
@@ -76,11 +76,7 @@ export function buildCreatePayload(edition: number, values: QuestFormState): Cre
       description: trimmedOrNull(values.book.description),
       resources: toResources(values.book.resources)
     },
-    prizes: {
-      first: trimmedOrNull(values.prizes.first),
-      second: trimmedOrNull(values.prizes.second),
-      third: trimmedOrNull(values.prizes.third)
-    },
+    prizes: toPrizes(values.prizes),
     bookRevealed: values.bookRevealed,
     ...dates,
     makeCurrent: true

@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { BOOK_RESOURCE_KINDS, QUIZ_DISTRIBUTIONS, QUIZ_GROUP_COUNTS, findQuestDateIssues } from '@bookquest/shared';
+import {
+  BOOK_RESOURCE_KINDS,
+  PRIZE_PLACES,
+  QUIZ_DISTRIBUTIONS,
+  QUIZ_GROUP_COUNTS,
+  findQuestDateIssues,
+  type PrizePlaceKey
+} from '@bookquest/shared';
 import { parseLocal } from '../dates';
 import { formDates, isValidResourceUrl, type QuestFormState } from './questForm';
 import { getT, type Messages } from '@/i18n';
@@ -59,7 +66,10 @@ export const questFormSchema = z
         .max(12)
     }),
     bookRevealed: z.boolean(),
-    prizes: z.object({ first: prize, second: prize, third: prize }),
+    prizes: z.object({
+      ...(Object.fromEntries(PRIZE_PLACES.map(({ key }) => [key, prize])) as Record<PrizePlaceKey, typeof prize>),
+      photoUrl: z.string()
+    }),
     dates: z.object({
       opensAt: date,
       readingDeadline: date,

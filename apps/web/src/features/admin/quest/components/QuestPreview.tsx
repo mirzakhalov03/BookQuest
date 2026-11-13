@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { PRIZE_PLACES } from '@bookquest/shared';
 import { useWatch } from 'react-hook-form';
 import { Eye } from 'lucide-react';
 import { BookHero } from '@/components/BookHero';
@@ -9,18 +10,12 @@ import { hostnameOf } from '../resources';
 import type { QuestFormState } from '../questForm';
 import { useT } from '@/i18n';
 
-const PLACES = [
-  [1, 'first'],
-  [2, 'second'],
-  [3, 'third']
-] as const;
-
 /** The participant-facing `BookHero`, fed unsaved values — the preview can't drift from the real screen. */
 export function QuestPreview({ values }: { values: QuestFormState }) {
   const { prizes } = values;
   const { common, adminQuest } = useT();
   const t = adminQuest.preview;
-  const prizeRows = PLACES.map(([place, key]) => [place, prizes[key].trim()] as const).filter(([, prize]) => prize);
+  const prizeRows = PRIZE_PLACES.map(({ rank, key }) => [rank, prizes[key].trim()] as const).filter(([, prize]) => prize);
 
   return (
     <div className="flex flex-col gap-5 rounded-box border border-[color:var(--rule)] p-4">

@@ -1,4 +1,4 @@
-const MAX_SIDE = 1000;
+const DEFAULT_MAX_SIDE = 1000;
 const WEBP_QUALITY = 0.82;
 const JPEG_QUALITY = 0.85;
 
@@ -11,7 +11,7 @@ function encode(canvas: HTMLCanvasElement, type: string, quality: number): Promi
  * show ~200px wide, so a phone photo would otherwise cost megabytes on Home.
  * Falls back to the original when the browser can't decode it; the server still validates.
  */
-export async function downscaleImage(file: File): Promise<File> {
+export async function downscaleImage(file: File, maxSide = DEFAULT_MAX_SIDE): Promise<File> {
   let bitmap: ImageBitmap;
   try {
     bitmap = await createImageBitmap(file);
@@ -19,7 +19,7 @@ export async function downscaleImage(file: File): Promise<File> {
     return file;
   }
 
-  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(bitmap.width * scale);
   canvas.height = Math.round(bitmap.height * scale);
