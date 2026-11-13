@@ -13,7 +13,8 @@ import { errorMessage } from '@/lib/api/errorMessage';
 import { formatCount, formatLongDate } from '@/lib/format';
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton';
 import { useQuestByEdition } from './api/useQuestByEdition';
-import { PrizePodium, hasAnyPrize } from './components/PrizePodium';
+import { hasAnyPrize } from '@bookquest/shared';
+import { PrizeShowcase } from './components/PrizeShowcase';
 import { useT } from '@/i18n';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
@@ -98,7 +99,7 @@ export function QuestEditionPage() {
       )}
 
       <DatesSection quest={quest} />
-      <PrizesSection prizes={quest.prizes} />
+      <PrizesSection quest={quest} />
 
       <p className="text-paper-dim">{t.prizes.tookPart(formatCount(quest.participantCount))}</p>
     </Screen>
@@ -120,14 +121,14 @@ function DatesSection({ quest }: { quest: Quest }) {
   );
 }
 
-function PrizesSection({ prizes }: { prizes: Quest['prizes'] }) {
+function PrizesSection({ quest }: { quest: Quest }) {
   const t = useT();
-  if (!hasAnyPrize(prizes)) return null;
+  if (!hasAnyPrize(quest.prizes)) return null;
 
   return (
     <section className="flex flex-col gap-2">
       <p className="type-label">{t.prizes.label}</p>
-      <PrizePodium prizes={prizes} />
+      <PrizeShowcase prizes={quest.prizes} label={t.common.editionYear(quest.edition, quest.year)} />
     </section>
   );
 }

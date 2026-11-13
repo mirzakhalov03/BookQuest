@@ -3,7 +3,8 @@ import { isNotFound } from '@/lib/api/client';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
-import { PrizePodium, hasAnyPrize } from './PrizePodium';
+import { hasAnyPrize } from '@bookquest/shared';
+import { PrizeShowcase } from './PrizeShowcase';
 import { useT } from '@/i18n';
 
 /** What this edition's winners take home. Reads the same cached current quest as Home and `/book`. */
@@ -27,16 +28,17 @@ export function CurrentPrizes() {
   }
 
   const hasPrizes = hasAnyPrize(quest.prizes);
+  const edition = t.common.editionYear(quest.edition, quest.year);
 
   return (
     <section className="flex flex-col gap-4">
       <header className="flex flex-col gap-1">
-        <p className="type-label">{t.common.editionYear(quest.edition, quest.year)}</p>
+        <p className="type-label">{edition}</p>
         <h1 className="type-display text-3xl text-paper">{t.prizes.upForWinners}</h1>
       </header>
 
       {hasPrizes ? (
-        <PrizePodium prizes={quest.prizes} />
+        <PrizeShowcase prizes={quest.prizes} label={edition} />
       ) : (
         <p className="text-taupe">{t.prizes.notAnnounced}</p>
       )}

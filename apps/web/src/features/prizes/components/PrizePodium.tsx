@@ -1,16 +1,8 @@
-import type { Prizes } from '@bookquest/shared';
+import { PRIZE_PLACES, type Prizes } from '@bookquest/shared';
 import { useT } from '@/i18n';
 
-const PLACES = [
-  { key: 'first', rank: 1 },
-  { key: 'second', rank: 2 },
-  { key: 'third', rank: 3 }
-] as const;
-
-/** Every prize is nullable, so callers check this before giving prizes a section at all. */
-export function hasAnyPrize(prizes: Prizes) {
-  return PLACES.some(({ key }) => prizes[key]);
-}
+// The stand has three steps; 4th–5th continue below it in `PrizeList`.
+const PLACES = PRIZE_PLACES.slice(0, 3);
 
 /**
  * A 2nd–1st–3rd stand. The DOM stays in rank order for screen readers; CSS `order` builds the stand.

@@ -1,4 +1,5 @@
 export const prizes = {
+  photoAlt: 'All the prizes for this edition, together',
   label: 'Prizes',
   backToPrizes: 'Back to prizes',
   badEditionTitle: "That's not an edition number",

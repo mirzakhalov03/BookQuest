@@ -89,3 +89,86 @@
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
 }
+
+/* ── Ranked prize list ──────────────────────────────────────────────────
+   One row per place. Beside a photo it carries all five; under the podium it
+   continues with 4th–5th in the same voice, so the two never read as separate
+   systems. Medal tints are the podium's gold, plus a silver and a bronze. */
+
+.prize-list {
+  --medal: var(--color-taupe);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prize-list__row {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.prize-list__row:last-child {
+  border-bottom: none;
+}
+.prize-list__row[data-rank='1'] { --medal: var(--color-gold-soft); }
+.prize-list__row[data-rank='2'] { --medal: #cdc6bb; }
+.prize-list__row[data-rank='3'] { --medal: #c98a55; }
+
+.prize-list__rank {
+  font-size: 2.25rem;
+  line-height: 1;
+  text-align: center;
+  color: var(--medal);
+}
+.prize-list__row[data-rank='1'] .prize-list__rank {
+  font-size: 2.75rem;
+}
+
+.prize-list__body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.prize-list__prize {
+  overflow-wrap: anywhere;
+  color: var(--color-paper);
+}
+.prize-list__row[data-rank='1'] .prize-list__prize {
+  color: var(--color-gold-soft);
+}
+.prize-list__prize.is-empty {
+  font-style: italic;
+  color: var(--color-taupe-dim);
+}
+
+/* ── Prize photo ─────────────────────────────────────────────────────── */
+
+.prize-photo {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius-box);
+  border: 1px solid var(--rule-gold);
+  background: var(--color-ash);
+}
+
+.prize-photo__img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.prize-photo__label {
+  position: absolute;
+  inset: auto 0 0;
+  margin: 0;
+  padding: 2.5rem 1rem 0.85rem;
+  background: linear-gradient(180deg, transparent, rgb(10 7 5 / 0.85));
+  color: var(--color-paper);
+}
