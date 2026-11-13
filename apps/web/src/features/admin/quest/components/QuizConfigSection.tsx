@@ -47,7 +47,9 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
   const dates = useWatch({ control, name: 'dates' });
   const quizzes = useQuizzes();
   const sizes = useQuizGroupSizes(config?.distribution ?? null, config?.quizIds.length ?? 0);
-  const [splitOpen, setSplitOpen] = useState(() => isSplit(config));
+  // The admin's wish to see the split; a split setup always shows it, so a Discard or lock revert can't hide one.
+  const [wantsSplit, setWantsSplit] = useState(false);
+  const splitOpen = wantsSplit || isSplit(config);
   const locked = lockMessage !== null;
   const { common, adminQuest } = useT();
   const t = adminQuest.quiz;
@@ -71,7 +73,7 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
   // Closing the split never leaves a setup on screen that the admin can't see: it drops to one quiz, keeping the first pick.
   function toggleSplit() {
     if (splitOpen && config && isSplit(config)) setSingle(config.quizIds[0] ?? '');
-    setSplitOpen(!splitOpen);
+    setWantsSplit(!splitOpen);
   }
 
   const labels = config ? localGroupLabels(config.distribution, config.quizIds.length) : [];
@@ -123,7 +125,7 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
           </p>
         )}
 
-        {!splitOpen && quizzes.data && (
+        {!isSplit(config) && quizzes.data && (
           // The empty option detaches the quiz.
           <Select
             label={t.quiz}

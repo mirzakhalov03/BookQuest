@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { queryClient } from '@/lib/queryClient';
 import { haptic } from '@/lib/telegram';
 import { usePullRefreshStore } from '@/stores/pullRefresh.store';
+import { fetchCurrentQuestFresh, questKeys } from '@/lib/api/quest';
 
 /** Furthest the content travels; resistance flattens toward it. */
 const MAX_PULL = 150;
@@ -36,7 +37,8 @@ const resist = (px: number) => MAX_PULL * (1 - Math.exp(-px / MAX_PULL));
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const atTop = () => window.scrollY <= 0;
-const atBottom = () => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1;
+const atBottom = () =>
+  window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1;
 
 /** Dialogs, sliders, drag lists and inner scrollers own their own gestures. */
 function canStretch(target: EventTarget | null): boolean {
@@ -44,7 +46,8 @@ function canStretch(target: EventTarget | null): boolean {
   if (target.closest('dialog, input[type="range"], [data-no-overscroll]')) return false;
   for (let el: Element | null = target; el && el !== document.body; el = el.parentElement) {
     const { overflowY } = getComputedStyle(el);
-    if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight) return false;
+    if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight)
+      return false;
   }
   return true;
 }
@@ -108,7 +111,22 @@ export function useOverscroll(): void {
       refreshing = true;
       setPull('refreshing', REST_AT);
       // refetchQueries doesn't throw; a failed fetch shows in the screen's own error state.
-      await Promise.all([queryClient.refetchQueries({ type: 'active' }), wait(MIN_REFRESH_MS)]);
+      const current = questKeys.current();
+      const isCurrentQuest = (key: readonly unknown[]) =>
+        JSON.stringify(key) === JSON.stringify(current);
+      const showsQuest = queryClient
+        .getQueryCache()
+        .findAll({ type: 'active' })
+        .some((query) => isCurrentQuest(query.queryKey));
+      await Promise.all([
+        queryClient.refetchQueries({
+          type: 'active',
+          predicate: (query) => !isCurrentQuest(query.queryKey)
+        }),
+        // The current quest skips the HTTP cache: a pull right after a reveal must show the book.
+        showsQuest ? fetchCurrentQuestFresh(queryClient) : null,
+        wait(MIN_REFRESH_MS)
+      ]);
       setPull('done', REST_AT);
       pullTimer = setTimeout(() => {
         clearPull();
@@ -135,7 +153,15 @@ export function useOverscroll(): void {
       if (!touch) return release();
       if (!canStretch(event.target)) return;
       const { clientX, clientY } = touch;
-      gesture = { startX: clientX, startY: clientY, lastY: clientY, axis: null, edge: null, originY: 0, pull: 0 };
+      gesture = {
+        startX: clientX,
+        startY: clientY,
+        lastY: clientY,
+        axis: null,
+        edge: null,
+        originY: 0,
+        pull: 0
+      };
     }
 
     function onMove(event: TouchEvent) {
@@ -153,7 +179,8 @@ export function useOverscroll(): void {
 
       // Engage the moment the page runs out of scroll, even mid-gesture.
       if (!gesture.edge) {
-        const edge: Edge | null = y > gesture.lastY && atTop() ? 'top' : y < gesture.lastY && atBottom() ? 'bottom' : null;
+        const edge: Edge | null =
+          y > gesture.lastY && atTop() ? 'top' : y < gesture.lastY && atBottom() ? 'bottom' : null;
         gesture.lastY = y;
         if (!edge) return;
         gesture.edge = edge;

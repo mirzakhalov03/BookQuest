@@ -1,5 +1,10 @@
 import { useCallback } from 'react';
-import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+  type QueryClient
+} from '@tanstack/react-query';
 import type { CursorPage, Quest, QuestSummary } from '@bookquest/shared';
 import { api } from './client';
 
@@ -20,13 +25,24 @@ export function useCurrentQuest() {
 /** When a phase ends: refetch past the HTTP cache, which would still hold the old phase. */
 export function useRefreshCurrentQuest(): () => void {
   const queryClient = useQueryClient();
-  return useCallback(() => {
-    void queryClient.fetchQuery({
-      queryKey: questKeys.current(),
-      queryFn: () => api.get<Quest>('/quests/current', { cache: 'no-cache' }),
-      staleTime: 0
-    });
-  }, [queryClient]);
+  return useCallback(() => void fetchCurrentQuestFresh(queryClient), [queryClient]);
+}
+
+/**
+ * Past the 30s HTTP cache, for moments a person expects news: a phase ending,
+ * a pull-to-refresh, an admin save (a book reveal must not come back as "?").
+ */
+export function fetchCurrentQuestFresh(queryClient: QueryClient): Promise<unknown> {
+  return (
+    queryClient
+      .fetchQuery({
+        queryKey: questKeys.current(),
+        queryFn: () => api.get<Quest>('/quests/current', { cache: 'no-cache' }),
+        staleTime: 0
+      })
+      // Same as refetchQueries: a failure shows in the screen's own error state.
+      .catch(() => undefined)
+  );
 }
 
 // Own root, not under `questKeys.all`: invalidating the current quest and the archive are different events.

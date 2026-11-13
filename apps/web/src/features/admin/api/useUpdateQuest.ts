@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AdminQuest, UpdateQuestPayload } from '@bookquest/shared';
 import { api } from '@/lib/api/client';
-import { questKeys } from '@/lib/api/quest';
+import { fetchCurrentQuestFresh } from '@/lib/api/quest';
 import { adminKeys } from './adminKeys';
 
 /**
@@ -20,7 +20,8 @@ export function useUpdateQuest(questId: string) {
     mutationFn: (patch: UpdateQuestPayload) => api.patch<AdminQuest>(`/admin/quests/${questId}`, patch),
     onSuccess: (quest) => {
       queryClient.setQueryData(adminKeys.currentQuest(), quest);
-      void queryClient.invalidateQueries({ queryKey: questKeys.current() });
+      // Fresh, past the HTTP cache: the admin's own Home should show a reveal at once.
+      void fetchCurrentQuestFresh(queryClient);
       // The dashboard's `phase` and the editor's own next load both read
       // through here.
       void queryClient.invalidateQueries({ queryKey: adminKeys.stats() });
