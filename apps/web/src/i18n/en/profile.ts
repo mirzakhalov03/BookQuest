@@ -12,7 +12,6 @@ export const profile = {
   avatars: {
     rabbit: 'Rabbit',
     bear: 'Bear',
-    chick: 'Chick',
     queen: 'Queen',
     'cool-duck': 'Cool duck',
     'arctic-fox': 'Arctic fox',

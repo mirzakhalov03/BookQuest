@@ -5,7 +5,6 @@
 export const AVATARS = [
   'rabbit',
   'bear',
-  'chick',
   'queen',
   'cool-duck',
   'arctic-fox',

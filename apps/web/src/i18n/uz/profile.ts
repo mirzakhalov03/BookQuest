@@ -14,7 +14,6 @@ export const profile: typeof En = {
   avatars: {
     rabbit: 'Quyoncha',
     bear: 'Ayiq',
-    chick: 'Jo‘ja',
     queen: 'Malika',
     'cool-duck': 'Zo‘r o‘rdak',
     'arctic-fox': 'Qutb tulkisi',

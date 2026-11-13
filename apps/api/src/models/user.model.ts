@@ -1,5 +1,6 @@
 import { Schema, model, type InferSchemaType, type HydratedDocument } from 'mongoose';
 import { ROLES } from '@bookquest/shared';
+import { randomAvatar } from '../utils/randomAvatar.js';
 
 /** A person. Profile fields refresh on every Telegram sign-in: names, handles and photos change. */
 const userSchema = new Schema(
@@ -20,7 +21,8 @@ const userSchema = new Schema(
     photoUrl: { type: String, default: null },
     languageCode: { type: String, default: null },
     // An `AVATARS` id. No enum: a retired id should read as "no avatar", not fail the next save.
-    avatar: { type: String, default: null },
+    // Random on insert only (create, and upserts with `setDefaultsOnInsert`); an explicit null = Initials, kept.
+    avatar: { type: String, default: randomAvatar },
 
     /* Only means "this phone account proved the shared admin password".
        Access itself is decided per request by `isAdmin` (user.services). */
