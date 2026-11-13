@@ -64,7 +64,10 @@ export const CURRENT_QUEST: StoredQuest = {
   prizes: {
     first: 'AirPods Pro 2',
     second: 'A 10-book shelf of your choice',
-    third: 'Signed copy of The Alchemist'
+    third: 'Signed copy of The Alchemist',
+    fourth: 'A BookQuest tote and bookmark set',
+    fifth: 'A year of audiobooks',
+    photoUrl: null
   },
   opensAt: '2026-08-01T09:00:00.000Z',
   readingDeadline: '2026-10-10T18:59:00.000Z',
@@ -115,5 +118,6 @@ export const questSummary = ({ quest, winner }: PastEdition): QuestSummary => ({
   bookAuthor: quest.book.author,
   coverUrl: quest.book.coverUrl,
   participantCount: quest.participantCount,
+  prizes: quest.prizes,
   winner
 });

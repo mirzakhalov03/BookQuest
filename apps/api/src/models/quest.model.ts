@@ -28,7 +28,11 @@ const prizesSchema = new Schema(
   {
     first: { type: String, default: null },
     second: { type: String, default: null },
-    third: { type: String, default: null }
+    third: { type: String, default: null },
+    fourth: { type: String, default: null },
+    fifth: { type: String, default: null },
+    /** Stored like `book.coverUrl`: a relative `/covers/:id` for our uploads. */
+    photoUrl: { type: String, default: null }
   },
   { _id: false }
 );

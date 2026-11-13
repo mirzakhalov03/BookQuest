@@ -62,9 +62,15 @@ function initialState(): MockState {
 
 let state: MockState | null = null;
 
-/** State saved before `bookRevealed` existed reads as revealed, like old database rows. */
+/** State saved before `bookRevealed` and the 4th/5th prizes existed reads like old database rows. */
+const NEW_PRIZE_FIELDS = { fourth: null, fifth: null, photoUrl: null };
+
 function withDefaults(saved: MockState): MockState {
-  const fill = (quest: StoredQuest): StoredQuest => ({ ...quest, bookRevealed: quest.bookRevealed ?? true });
+  const fill = (quest: StoredQuest): StoredQuest => ({
+    ...quest,
+    bookRevealed: quest.bookRevealed ?? true,
+    prizes: { ...NEW_PRIZE_FIELDS, ...quest.prizes }
+  });
   return { ...saved, quest: fill(saved.quest), archive: saved.archive.map((entry) => ({ ...entry, quest: fill(entry.quest) })) };
 }
 

@@ -81,9 +81,17 @@ export function coverIdFromUrl(url: string | null | undefined): string | null {
 
 /** Deletes uploads no quest references once they are old enough to be abandoned. Returns how many went. */
 export async function sweepOrphanCovers(now = Date.now()): Promise<number> {
-  const quests = await QuestModel.find({ 'book.coverUrl': { $type: 'string' } }, 'book.coverUrl').lean();
+  // Book covers and prize photos share the bucket, so both protect their files.
+  const quests = await QuestModel.find(
+    { $or: [{ 'book.coverUrl': { $type: 'string' } }, { 'prizes.photoUrl': { $type: 'string' } }] },
+    'book.coverUrl prizes.photoUrl'
+  ).lean();
   // Any origin counts, so a row saved under an old domain (not yet migrated) still protects its file.
-  const referenced = new Set(quests.map((quest) => COVER_ID_ANY_ORIGIN.exec(quest.book.coverUrl ?? '')?.[1]));
+  const referenced = new Set(
+    quests.flatMap((quest) =>
+      [quest.book?.coverUrl, quest.prizes?.photoUrl].map((url) => COVER_ID_ANY_ORIGIN.exec(url ?? '')?.[1])
+    )
+  );
 
   const stale = await coversBucket()
     .find({ uploadDate: { $lt: new Date(now - ORPHAN_AFTER_MS) } }, { projection: { _id: 1 } })

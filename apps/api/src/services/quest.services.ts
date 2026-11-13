@@ -1,6 +1,7 @@
 import type {
   AdminQuest,
   Book,
+  Prizes,
   CreateQuestPayload,
   CursorPage,
   Quest,
@@ -108,7 +109,8 @@ export async function createQuest(payload: CreateQuestPayload): Promise<AdminQue
     // Inserted inside the callback: a retried transaction must insert afresh, not reuse a rolled-back document.
     const quest = await withTransaction(async (session) => {
       const book = { ...fields.book, coverUrl: toStoredCoverUrl(fields.book.coverUrl) };
-      const [created] = await QuestModel.create([{ ...fields, book, isCurrent: false }], { session });
+      const prizes = fields.prizes && { ...fields.prizes, photoUrl: toStoredCoverUrl(fields.prizes.photoUrl) };
+      const [created] = await QuestModel.create([{ ...fields, book, prizes, isCurrent: false }], { session });
       if (!created) throw new Error('Quest insert returned no document.');
 
       if (makeCurrent) {
@@ -162,6 +164,15 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
       ? coverIdFromUrl(quest.book.coverUrl)
       : null;
 
+  const prizes =
+    payload.prizes && 'photoUrl' in payload.prizes
+      ? { ...payload.prizes, photoUrl: toStoredCoverUrl(payload.prizes.photoUrl) }
+      : payload.prizes;
+  const replacedPhotoId =
+    prizes && 'photoUrl' in prizes && prizes.photoUrl !== toStoredCoverUrl(quest.prizes?.photoUrl)
+      ? coverIdFromUrl(quest.prizes?.photoUrl)
+      : null;
+
   const update: Record<string, unknown> = {};
 
   for (const field of QUEST_DATE_FIELDS) {
@@ -173,7 +184,7 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
   for (const [key, value] of Object.entries(book ?? {})) {
     update[`book.${key}`] = value;
   }
-  for (const [key, value] of Object.entries(payload.prizes ?? {})) {
+  for (const [key, value] of Object.entries(prizes ?? {})) {
     update[`prizes.${key}`] = value;
   }
   if (payload.bookRevealed !== undefined) update.bookRevealed = payload.bookRevealed;
@@ -191,6 +202,7 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
 
   if (!updated) throw ApiError.notFound('No such quest.');
   if (replacedCoverId) await discardCover(replacedCoverId);
+  if (replacedPhotoId) await discardCover(replacedPhotoId);
   return toAdminQuestDto(updated);
 }
 
@@ -230,11 +242,7 @@ export function toQuestDto(quest: QuestDocument): Quest {
     bookRevealed: isBookRevealed(quest),
     // Withheld at the source: a `?` drawn over a cover already in the payload would leak it.
     book: isBookRevealed(quest) ? toBookDto(quest) : null,
-    prizes: {
-      first: quest.prizes?.first ?? null,
-      second: quest.prizes?.second ?? null,
-      third: quest.prizes?.third ?? null
-    },
+    prizes: toPrizesDto(quest),
     opensAt: quest.opensAt.toISOString(),
     readingDeadline: quest.readingDeadline.toISOString(),
     quizOpensAt: quest.quizOpensAt.toISOString(),
@@ -272,6 +280,7 @@ export function toQuestSummary(quest: QuestRow, winner: QuestSummary['winner']):
     bookAuthor: quest.book.author,
     coverUrl: toPublicCoverUrl(quest.book.coverUrl),
     participantCount: quest.participantCount,
+    prizes: toPrizesDto(quest),
     winner
   };
 }
@@ -279,6 +288,19 @@ export function toQuestSummary(quest: QuestRow, winner: QuestSummary['winner']):
 /* ── Internals ───────────────────────────────────────────────────────────── */
 
 const isBookRevealed = (quest: QuestDocument): boolean => quest.bookRevealed !== false;
+
+/** Missing places and photo on older rows read as null; no migration needed. */
+function toPrizesDto(quest: QuestDocument | QuestRow): Prizes {
+  const prizes = quest.prizes;
+  return {
+    first: prizes?.first ?? null,
+    second: prizes?.second ?? null,
+    third: prizes?.third ?? null,
+    fourth: prizes?.fourth ?? null,
+    fifth: prizes?.fifth ?? null,
+    photoUrl: toPublicCoverUrl(prizes?.photoUrl)
+  };
+}
 
 function toBookDto(quest: QuestDocument): Book {
   return {

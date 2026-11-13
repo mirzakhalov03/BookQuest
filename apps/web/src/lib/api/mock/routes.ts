@@ -515,7 +515,10 @@ function createQuest(context: Context): Result {
     prizes: {
       first: input.prizes?.first ?? null,
       second: input.prizes?.second ?? null,
-      third: input.prizes?.third ?? null
+      third: input.prizes?.third ?? null,
+      fourth: input.prizes?.fourth ?? null,
+      fifth: input.prizes?.fifth ?? null,
+      photoUrl: input.prizes?.photoUrl ?? null
     },
     opensAt: input.opensAt.toISOString(),
     readingDeadline: input.readingDeadline.toISOString(),

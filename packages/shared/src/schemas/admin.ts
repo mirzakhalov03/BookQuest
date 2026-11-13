@@ -19,10 +19,15 @@ const bookFields = {
   resources: z.array(bookResourceSchema).max(12)
 };
 
+const prizeText = z.string().trim().max(200).nullable();
+
 const prizeFields = {
-  first: z.string().trim().max(200).nullable(),
-  second: z.string().trim().max(200).nullable(),
-  third: z.string().trim().max(200).nullable()
+  first: prizeText,
+  second: prizeText,
+  third: prizeText,
+  fourth: prizeText,
+  fifth: prizeText,
+  photoUrl: z.string().url().nullable()
 };
 
 const questDateFields = {

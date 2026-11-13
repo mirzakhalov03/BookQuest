@@ -31,7 +31,11 @@ export type Book = z.infer<typeof bookSchema>;
 export const prizesSchema = z.object({
   first: z.string().nullable(),
   second: z.string().nullable(),
-  third: z.string().nullable()
+  third: z.string().nullable(),
+  fourth: z.string().nullable(),
+  fifth: z.string().nullable(),
+  /** One photo of all the prizes together; without it the page falls back to the podium. */
+  photoUrl: z.string().url().nullable()
 });
 
 export type Prizes = z.infer<typeof prizesSchema>;
@@ -80,6 +84,7 @@ export const questSummarySchema = z.object({
   bookAuthor: z.string(),
   coverUrl: z.string().nullable(),
   participantCount: z.number().int().nonnegative(),
+  prizes: prizesSchema,
   winner: z.object({ number: z.number().int(), fullName: z.string() }).nullable()
 });
 

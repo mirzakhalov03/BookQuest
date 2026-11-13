@@ -2,3 +2,4 @@ export * from './quest.js';
 export * from './avatar.js';
 export * from './cover.js';
 export * from './quiz.js';
+export * from './prizes.js';
