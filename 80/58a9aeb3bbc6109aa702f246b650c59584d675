@@ -1,0 +1,57 @@
+apps/web/src/components/BookLocked.tsx
+  s_ed86d784e7207d::t_700f91bc76f8c7 9,17
+apps/web/src/components/ui/Toggle.tsx
+  s_ed86d784e7207d::t_a014b3558c2783 1-51
+apps/web/src/features/admin/DashboardPage.tsx
+  s_ed86d784e7207d::t_99ca77c5c776a0 3-5,24,52,56,72-81,116
+apps/web/src/features/admin/broadcast/BroadcastPage.tsx
+  s_ed86d784e7207d::t_e1e2f35b0a2525 8,30
+apps/web/src/features/admin/broadcast/suggestions.ts
+  s_ed86d784e7207d::t_f56502ca9960bb 1,13
+apps/web/src/features/admin/quest/QuestEditorPage.tsx
+  s_ed86d784e7207d::t_508e48437629c2 3,74,85,92-96,180,182,185
+apps/web/src/features/admin/quest/changes.ts
+  s_ed86d784e7207d::t_286533c6efc9af 30,43
+apps/web/src/features/admin/quest/components/BookFieldsSection.tsx
+  s_ed86d784e7207d::t_805b1cd76b8230 4,26-32
+apps/web/src/features/admin/quest/components/QuestPreview.tsx
+  s_ed86d784e7207d::t_3c63fd55ee4fb4 5,20,28-48,66
+apps/web/src/features/admin/quest/components/ReviewChangesSheet.tsx
+  s_ed86d784e7207d::t_713757152956e8 13-15,19-27,40-45,60
+apps/web/src/features/admin/quest/nextEdition.ts
+  s_ed86d784e7207d::t_6a09fab20a80b0 3,31,51-57,84
+apps/web/src/features/admin/quest/questForm.ts
+  s_ed86d784e7207d::t_c0bb200c6a51bf 2,21-22,41-42,52,143
+apps/web/src/features/admin/quest/questFormSchema.ts
+  s_ed86d784e7207d::t_a5ad496d9ea97e 61
+apps/web/src/features/admin/quest/review.ts
+  s_ed86d784e7207d::t_3078b6037c202b 15-16,30-36
+apps/web/src/i18n/en/admin.ts
+  s_ed86d784e7207d::t_0857ef263fbff4 63
+apps/web/src/i18n/en/adminQuest.ts
+  s_ed86d784e7207d::t_6c54f6b3f5e9ec 37-38,140-146
+apps/web/src/i18n/ru/admin.ts
+  s_ed86d784e7207d::t_0b4ede0a0620f4 60
+apps/web/src/i18n/ru/adminQuest.ts
+  s_ed86d784e7207d::t_cf41f6385d0219 37-38,140-146
+apps/web/src/i18n/uz/admin.ts
+  s_ed86d784e7207d::t_fa10787df037c1 60
+apps/web/src/i18n/uz/adminQuest.ts
+  s_ed86d784e7207d::t_e053078512d815 36-37,139-145
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "8058a9aeb3bbc6109aa702f246b650c59584d675",
+  "prompts": {},
+  "sessions": {
+    "s_ed86d784e7207d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ee52d4a-0fa8-4bff-a7b1-1cb51196e16d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
