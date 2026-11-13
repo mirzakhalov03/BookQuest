@@ -46,7 +46,9 @@ export const questSchema = z.object({
   edition: z.number().int().positive(),
   year: z.number().int(),
   phase: z.enum(QUEST_PHASES),
-  book: bookSchema,
+  /** False while the admin keeps the book a surprise; `book` is then withheld entirely. */
+  bookRevealed: z.boolean(),
+  book: bookSchema.nullable(),
   prizes: prizesSchema,
   opensAt: z.string(),
   readingDeadline: z.string(),

@@ -16,8 +16,8 @@ export const PARTICIPANT_CAPACITY = PARTICIPANT_NUMBER_MAX - PARTICIPANT_NUMBER_
 export const CONTACT_METHODS = ['telegram', 'phone'] as const;
 export type ContactMethod = (typeof CONTACT_METHODS)[number];
 
-/** What a reading resource is, so the UI can pick an icon without parsing URLs. */
-export const BOOK_RESOURCE_KINDS = ['pdf', 'epub', 'audio', 'link'] as const;
+/** What a reading resource is, so the UI can pick an icon without parsing URLs. `store` = anywhere to buy or borrow it. */
+export const BOOK_RESOURCE_KINDS = ['pdf', 'epub', 'audio', 'link', 'store'] as const;
 export type BookResourceKind = (typeof BOOK_RESOURCE_KINDS)[number];
 
 /**

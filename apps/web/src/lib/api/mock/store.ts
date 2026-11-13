@@ -1,5 +1,5 @@
 import { PARTICIPANT_NUMBER_MIN } from '@bookquest/shared';
-import type { AdminQuest, Participant, QuizAdmin, Quest, QuestPhase, Role, SessionUser } from '@bookquest/shared';
+import type { AdminQuest, Book, Participant, QuizAdmin, Quest, QuestPhase, Role, SessionUser } from '@bookquest/shared';
 import { CURRENT_QUEST, PAST_EDITIONS, SESSION_USER, type PastEdition } from './fixtures';
 import { buildRoster } from './people';
 import { addMockMessage } from './interactions';
@@ -20,12 +20,15 @@ import { attemptFor, type MockAttempt, type MockQuizState } from './quiz-partici
 
 const STORAGE_KEY = 'bookquest.mock';
 
+/** The quest as the mock stores it: always with its book, like the database. `toPublicQuest` masks it. */
+export type StoredQuest = Omit<Quest, 'book'> & { book: Book };
+
 export interface MockState {
   token: string;
   expiresAt: string;
   /** `participant` stays null here — the roster is the single source for it. */
   user: SessionUser;
-  quest: Quest;
+  quest: StoredQuest;
   archive: PastEdition[];
   participants: Participant[];
   myParticipantId: string | null;
@@ -59,10 +62,16 @@ function initialState(): MockState {
 
 let state: MockState | null = null;
 
+/** State saved before `bookRevealed` existed reads as revealed, like old database rows. */
+function withDefaults(saved: MockState): MockState {
+  const fill = (quest: StoredQuest): StoredQuest => ({ ...quest, bookRevealed: quest.bookRevealed ?? true });
+  return { ...saved, quest: fill(saved.quest), archive: saved.archive.map((entry) => ({ ...entry, quest: fill(entry.quest) })) };
+}
+
 function load(): MockState {
   try {
     const raw = window.sessionStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as MockState;
+    if (raw) return withDefaults(JSON.parse(raw) as MockState);
   } catch {
     // Storage blocked or holding something else. A fresh world is fine; it
     // just will not survive the next reload.
@@ -97,9 +106,13 @@ export function updateState(mutate: (draft: MockState) => void): MockState {
  * The same derivation the API does: the phase is a function of the clock, and
  * the count is a function of the roster. Neither is ever stored.
  */
-export function readQuest(quest: Quest, participantCount: number): Quest {
+export function readQuest(quest: StoredQuest, participantCount: number): StoredQuest {
   return { ...quest, phase: resolvePhase(quest), participantCount };
 }
+
+/** Mirrors the API's `toQuestDto`: a hidden book never leaves the server. */
+export const toPublicQuest = (quest: StoredQuest): Quest =>
+  quest.bookRevealed ? quest : { ...quest, book: null };
 
 export function resolvePhase(quest: Quest, now = Date.now()): QuestPhase {
   if (now < Date.parse(quest.opensAt)) return 'upcoming';

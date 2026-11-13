@@ -59,6 +59,8 @@ const questSchema = new Schema(
     edition: { type: Number, required: true, unique: true },
     year: { type: Number, required: true },
     book: { type: bookSchema, required: true },
+    /** Off while the book is kept a surprise; the public DTO then withholds it. Absent on old rows = revealed. */
+    bookRevealed: { type: Boolean, default: true },
     prizes: { type: prizesSchema, default: () => ({}) },
 
     /* The phase is never stored. It is derived from these four dates, so the

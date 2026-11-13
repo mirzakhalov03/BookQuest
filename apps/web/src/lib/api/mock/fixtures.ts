@@ -1,4 +1,5 @@
-import type { Quest, QuestSummary, SessionUser } from '@bookquest/shared';
+import type { QuestSummary, SessionUser } from '@bookquest/shared';
+import type { StoredQuest } from './store';
 
 /**
  * The quests the mock serves, typed as the contract types.
@@ -32,11 +33,12 @@ export function objectId(seed: string): string {
 }
 
 /** `phase` and `participantCount` are recomputed on every read — see store.ts. */
-export const CURRENT_QUEST: Quest = {
+export const CURRENT_QUEST: StoredQuest = {
   id: '6aa00903500a1dd1adbc47cf',
   edition: 4,
   year: 2026,
   phase: 'reading',
+  bookRevealed: true,
   book: {
     title: 'The Alchemist',
     author: 'Paulo Coelho',
@@ -78,7 +80,7 @@ export const CURRENT_QUEST: Quest = {
  * alongside and folded into the `QuestSummary` the archive list returns.
  */
 export interface PastEdition {
-  quest: Quest;
+  quest: StoredQuest;
   winner: QuestSummary['winner'];
 }
 

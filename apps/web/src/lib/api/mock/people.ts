@@ -1,4 +1,5 @@
 import { certificateTier, formatPhone } from '@bookquest/shared';
+import type { StoredQuest } from './store';
 import type {
   CertificateData,
   Participant,
@@ -195,7 +196,7 @@ function certificateCode(edition: number, seed: string): string {
 /** A certificate is a view of participant + quest + result, never a stored copy. */
 export function buildCertificate(
   participant: Participant,
-  quest: Quest,
+  quest: StoredQuest,
   rank: number | null,
   finishedCount: number
 ): CertificateData {

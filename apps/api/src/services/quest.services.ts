@@ -1,5 +1,6 @@
 import type {
   AdminQuest,
+  Book,
   CreateQuestPayload,
   CursorPage,
   Quest,
@@ -58,6 +59,8 @@ export async function listPastQuests(options: {
 
   const quests = await QuestModel.find({
     isCurrent: false,
+    // A hidden book must never surface through the archive, even by accident.
+    bookRevealed: { $ne: false },
     ...(before === null ? {} : { edition: { $lt: before } })
   })
     .sort({ edition: -1 })
@@ -78,7 +81,7 @@ export async function listPastQuests(options: {
    Quest content is quest logic, so it lives here; the admin layer is only
    authorization and HTTP shape. */
 
-export async function createQuest(payload: CreateQuestPayload): Promise<Quest> {
+export async function createQuest(payload: CreateQuestPayload): Promise<AdminQuest> {
   const { makeCurrent, ...fields } = payload;
 
   const issues = findQuestDateIssues(
@@ -116,7 +119,8 @@ export async function createQuest(payload: CreateQuestPayload): Promise<Quest> {
       }
       return created;
     });
-    return toQuestDto(quest);
+    // Admin-facing: the new edition usually starts hidden, and the admin still needs its book.
+    return toAdminQuestDto(quest);
   } catch (error) {
     if (isDuplicateKeyError(error)) {
       throw ApiError.conflict(`Edition ${fields.edition} already exists.`, { reason: 'edition_exists' });
@@ -172,6 +176,7 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
   for (const [key, value] of Object.entries(payload.prizes ?? {})) {
     update[`prizes.${key}`] = value;
   }
+  if (payload.bookRevealed !== undefined) update.bookRevealed = payload.bookRevealed;
   if ('quizConfig' in payload) {
     const { quizConfig, quizSummary } = await buildQuizConfig(quest, payload.quizConfig ?? null);
     update.quizConfig = quizConfig;
@@ -222,18 +227,9 @@ export function toQuestDto(quest: QuestDocument): Quest {
     edition: quest.edition,
     year: quest.year,
     phase: resolvePhase(quest),
-    book: {
-      title: quest.book.title,
-      author: quest.book.author,
-      pages: quest.book.pages,
-      coverUrl: toPublicCoverUrl(quest.book.coverUrl),
-      description: quest.book.description ?? null,
-      resources: (quest.book.resources ?? []).map((resource) => ({
-        label: resource.label,
-        url: resource.url,
-        kind: resource.kind
-      }))
-    },
+    bookRevealed: isBookRevealed(quest),
+    // Withheld at the source: a `?` drawn over a cover already in the payload would leak it.
+    book: isBookRevealed(quest) ? toBookDto(quest) : null,
     prizes: {
       first: quest.prizes?.first ?? null,
       second: quest.prizes?.second ?? null,
@@ -256,6 +252,7 @@ export function toAdminQuestDto(quest: QuestDocument): AdminQuest {
   const config = quest.quizConfig;
   return {
     ...toQuestDto(quest),
+    book: toBookDto(quest),
     quizConfig: config
       ? {
           distribution: config.distribution,
@@ -280,6 +277,23 @@ export function toQuestSummary(quest: QuestRow, winner: QuestSummary['winner']):
 }
 
 /* ── Internals ───────────────────────────────────────────────────────────── */
+
+const isBookRevealed = (quest: QuestDocument): boolean => quest.bookRevealed !== false;
+
+function toBookDto(quest: QuestDocument): Book {
+  return {
+    title: quest.book.title,
+    author: quest.book.author,
+    pages: quest.book.pages,
+    coverUrl: toPublicCoverUrl(quest.book.coverUrl),
+    description: quest.book.description ?? null,
+    resources: (quest.book.resources ?? []).map((resource) => ({
+      label: resource.label,
+      url: resource.url,
+      kind: resource.kind
+    }))
+  };
+}
 
 /** One query for the winning results, one for their names — never N+1. */
 async function findWinners(questIds: string[]): Promise<Map<string, QuestSummary['winner']>> {

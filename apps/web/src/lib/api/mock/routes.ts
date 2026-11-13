@@ -40,6 +40,8 @@ import {
   getState,
   isRegistrationOpen,
   readQuest,
+  toPublicQuest,
+  type StoredQuest,
   readUser,
   resolvePhase,
   updateState,
@@ -114,7 +116,7 @@ function requireAdmin(context: Context): SessionUser {
   return user;
 }
 
-function requireCurrentQuest(): Quest {
+function requireCurrentQuest(): StoredQuest {
   const state = getState();
   if (!state.questRunning) {
     throw new MockError(404, 'not_found', 'No quest is running right now.');
@@ -209,13 +211,13 @@ function getQuestByEdition(context: Context): Result {
   const state = getState();
 
   if (state.questRunning && state.quest.edition === edition) {
-    return ok(readQuest(state.quest, state.participants.length));
+    return ok(toPublicQuest(readQuest(state.quest, state.participants.length)));
   }
 
   const past = state.archive.find((entry) => entry.quest.edition === edition);
   if (!past) throw new MockError(404, 'not_found', 'No such quest.');
 
-  return ok({ ...past.quest, phase: resolvePhase(past.quest) } satisfies Quest);
+  return ok(toPublicQuest({ ...past.quest, phase: resolvePhase(past.quest) }));
 }
 
 function register(context: Context): Result {
@@ -427,8 +429,9 @@ function updateQuest(context: Context): Result {
   const patch = parsed.data;
   const isCurrent = target.id === state.quest.id;
   const config = patch.quizConfig === undefined || !isCurrent ? undefined : mockQuizConfig(patch.quizConfig);
-  const merged: Quest = {
+  const merged: StoredQuest = {
     ...target,
+    ...(patch.bookRevealed === undefined ? {} : { bookRevealed: patch.bookRevealed }),
     book: { ...target.book, ...defined(patch.book) },
     prizes: { ...target.prizes, ...defined(patch.prizes) },
     ...isoDates(patch),
@@ -490,7 +493,7 @@ function mockQuizConfig(input: UpdateQuestPayload['quizConfig']): {
   };
 }
 
-const toAdminQuest = (quest: Quest): AdminQuest => ({
+const toAdminQuest = (quest: StoredQuest): AdminQuest => ({
   ...quest,
   quizConfig: quest.id === getState().quest.id ? (getState().quizConfig ?? null) : null
 });
@@ -502,11 +505,12 @@ function createQuest(context: Context): Result {
   if (!parsed.success) throw validationError(parsed.error.issues);
 
   const input = parsed.data;
-  const quest: Quest = {
+  const quest: StoredQuest = {
     id: objectId(`quest:new:${input.edition}`),
     edition: input.edition,
     year: input.year,
     phase: 'upcoming',
+    bookRevealed: input.bookRevealed,
     book: input.book,
     prizes: {
       first: input.prizes?.first ?? null,
@@ -544,14 +548,14 @@ function createQuest(context: Context): Result {
 
   if (input.makeCurrent) {
     switchCurrent(quest);
-    return created(readQuest(quest, 0));
+    return created(toAdminQuest(readQuest(quest, 0)));
   }
 
-  return created({ ...quest, phase: resolvePhase(quest) } satisfies Quest);
+  return created({ ...quest, phase: resolvePhase(quest), quizConfig: null } satisfies AdminQuest);
 }
 
 /** Swaps the current edition; the outgoing one joins the archive and the roster follows its edition. */
-function switchCurrent(target: Quest): void {
+function switchCurrent(target: StoredQuest): void {
   updateState((draft) => {
     const outgoing = draft.quest;
     draft.archive = [
@@ -677,7 +681,7 @@ const routes: Route[] = [
   { method: 'PATCH', path: '/auth/me', handle: updateMe },
 
   { method: 'GET', path: '/quests', handle: listQuests },
-  { method: 'GET', path: '/quests/current', handle: () => ok(requireCurrentQuest()) },
+  { method: 'GET', path: '/quests/current', handle: () => ok(toPublicQuest(requireCurrentQuest())) },
   {
     method: 'GET',
     path: '/quests/current/results',
@@ -874,7 +878,7 @@ function readInt(raw: string | null, fallback: number, min: number, max: number)
   return Math.min(Math.max(value, min), max);
 }
 
-function findQuestById(state: MockState, id: string): Quest | null {
+function findQuestById(state: MockState, id: string): StoredQuest | null {
   if (state.quest.id === id) return state.quest;
   return state.archive.find((entry) => entry.quest.id === id)?.quest ?? null;
 }

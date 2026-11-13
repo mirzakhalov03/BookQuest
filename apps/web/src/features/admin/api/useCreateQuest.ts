@@ -1,15 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { CreateQuestPayload, Quest } from '@bookquest/shared';
+import type { AdminQuest, CreateQuestPayload } from '@bookquest/shared';
 import { api } from '@/lib/api/client';
-import { questKeys } from '@/lib/api/quest';
 
 export function useCreateQuest() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreateQuestPayload) => api.post<Quest>('/admin/quests', payload),
-    onSuccess: (quest) => {
-      queryClient.setQueryData(questKeys.current(), quest);
+    mutationFn: (payload: CreateQuestPayload) => api.post<AdminQuest>('/admin/quests', payload),
+    onSuccess: () => {
+      // Not seeded into the public cache: the admin DTO carries a book the public quest may withhold.
       // A new edition changes nearly every screen: roster, results, archive, profile, stats.
       void queryClient.invalidateQueries();
     }

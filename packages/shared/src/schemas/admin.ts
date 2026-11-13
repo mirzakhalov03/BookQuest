@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { QuestPhase } from '../constants/quest.js';
 import { QUIZ_DISTRIBUTIONS } from '../constants/quiz.js';
-import { bookResourceSchema, questSchema } from './quest.js';
+import { bookResourceSchema, bookSchema, questSchema } from './quest.js';
 import { quizConfigInputSchema } from './quiz.js';
 
 /**
@@ -37,6 +37,7 @@ export const updateQuestSchema = z
   .strictObject({
     book: z.strictObject(bookFields).partial().optional(),
     prizes: z.strictObject(prizeFields).partial().optional(),
+    bookRevealed: z.boolean(),
     ...questDateFields,
     quizConfig: quizConfigInputSchema.nullable()
   })
@@ -57,6 +58,8 @@ export const createQuestSchema = z.strictObject({
     resources: bookFields.resources.default([])
   }),
   prizes: z.strictObject(prizeFields).partial().optional(),
+  // Launches are announcements, so a new edition starts with the book hidden.
+  bookRevealed: z.boolean().default(false),
   ...questDateFields,
   /** Swap the current edition in the same transaction, so "created but not live" can't happen. */
   makeCurrent: z.boolean().default(false)
@@ -64,8 +67,9 @@ export const createQuestSchema = z.strictObject({
 
 export type CreateQuestPayload = z.infer<typeof createQuestSchema>;
 
-/** The quest as the admin editor reads it: the public DTO plus the quiz setup, never the seed. */
+/** The quest as the admin editor reads it: the public DTO plus the quiz setup, never the seed. The book is always present. */
 export const adminQuestSchema = questSchema.extend({
+  book: bookSchema,
   quizConfig: z
     .object({
       distribution: z.enum(QUIZ_DISTRIBUTIONS),
