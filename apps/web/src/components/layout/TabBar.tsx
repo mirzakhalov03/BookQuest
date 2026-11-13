@@ -15,7 +15,7 @@ interface Tab {
 
 /**
  * The five destinations. Product knowledge stays limited to where the app goes
- * (spec §4 rule 3) — the one exception is the fourth slot, which follows the
+ * (spec §4 rule 3) — the one exception is the fourth slot (Quiz/Results), which follows the
  * quest's `resultsAt`: Quiz until results are published (review and late
  * states live there until then), then Results.
  */
@@ -27,11 +27,11 @@ function useTabs(): Tab[] {
 
   return [
     { to: '/', label: t.stage, icon: Sparkles },
+    { to: '/prizes', label: t.prizes, icon: Trophy, alsoMatches: '/quests/' },
     { to: '/book', label: t.book, icon: BookOpen },
     quizOver
       ? { to: '/results', label: t.results, icon: BarChart3 }
       : { to: '/quiz', label: t.quiz, icon: PencilLine },
-    { to: '/prizes', label: t.prizes, icon: Trophy, alsoMatches: '/quests/' },
     { to: '/me', label: t.profile, icon: User }
   ];
 }
