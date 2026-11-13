@@ -61,7 +61,8 @@ export const admin: typeof En = {
   dashboard: {
     bookHidden: 'Книга скрыта',
     loading: 'Читаем журнал…',
-    betweenEditions: 'Между сезонами ничего не проводится. Настройте следующий, когда будете готовы.',
+    betweenEditions:
+      'Между сезонами ничего не проводится. Настройте следующий, когда будете готовы.',
     startNext: 'Начать следующий сезон',
     statParticipants: 'Участники',
     statJoinedToday: 'Сегодня',
@@ -72,10 +73,7 @@ export const admin: typeof En = {
     resultsWait: (date) => `Итоги опубликуют ${date}. После этого можно начать следующий сезон.`,
     quickActions: 'Быстрые действия',
     actionQuizzes: 'Тесты',
-    actionCertificates: 'Сертификаты',
-    actionPosters: 'Афиши',
-    comingSoon: ', скоро',
-    soon: 'Скоро'
+    actionCertificates: 'Сертификаты'
   },
   participants: {
     title: 'Участники',
@@ -133,7 +131,8 @@ export const admin: typeof En = {
       resultsDate: 'Дата итогов',
       resultsDateText: (date) => `Тест закрыт. Итоги опубликуют ${date}.`,
       resultsOut: 'Итоги опубликованы',
-      resultsOutText: (title) => `Итоги по книге «${title}» опубликованы! Откройте BookQuest, чтобы узнать своё место.`
+      resultsOutText: (title) =>
+        `Итоги по книге «${title}» опубликованы! Откройте BookQuest, чтобы узнать своё место.`
     }
   },
   certificates: {
@@ -144,7 +143,12 @@ export const admin: typeof En = {
     unlocksAt: (date) => `Отправка откроется после публикации итогов, ${date}.`,
     readyToSend: 'Сертификаты готовы к отправке',
     title: 'Сертификаты',
-    tiers: { gold: '1-е место', silver: '2-е место', bronze: '3-е место', participant: 'Остальные участники' },
+    tiers: {
+      gold: '1-е место',
+      silver: '2-е место',
+      bronze: '3-е место',
+      participant: 'Остальные участники'
+    },
     sampleAlt: (tier) => `Образец сертификата: ${tier}`,
     sentToast: 'Сертификаты отправляются.',
     startFailed: 'Не удалось начать отправку.',
@@ -190,7 +194,9 @@ export const admin: typeof En = {
     range: { today: 'Сегодня', '7d': 'За 7 дней', '30d': 'За 30 дней', all: 'За всё время' },
     emptyTitle: (view, person, range) =>
       `${view === 'messages' ? 'Нет сообщений' : 'Нет активности'}${person ? ` от ${person}` : ''}${
-        range === 'all' ? '' : ` ${({ today: 'сегодня', '7d': 'за 7 дней', '30d': 'за 30 дней' } as const)[range]}`
+        range === 'all'
+          ? ''
+          : ` ${({ today: 'сегодня', '7d': 'за 7 дней', '30d': 'за 30 дней' } as const)[range]}`
       }`,
     narrowed: 'Поиск или фильтры сужают выборку.',
     switchToAll: 'Переключитесь на «Всё», чтобы видеть нажатия /start и кнопок.',

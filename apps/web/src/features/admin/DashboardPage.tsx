@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import { Link } from 'react-router';
-import { Award, CircleHelp, Image, Lock, type LucideIcon } from 'lucide-react';
+import { Award, CircleHelp, Lock, type LucideIcon } from 'lucide-react';
 import type { AdminQuest } from '@bookquest/shared';
 import { useAdminCurrentQuest } from './api/useAdminCurrentQuest';
 import { AdminScreen } from '@/layouts/AdminLayout';
@@ -103,11 +103,9 @@ function StatCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-// No `to` yet means the page isn't built: shown as "Soon" rather than linking to "Nothing here".
-const QUICK_ACTIONS: { to?: string; key: 'actionQuizzes' | 'actionCertificates' | 'actionPosters'; icon: LucideIcon }[] = [
+const QUICK_ACTIONS: { to: string; key: 'actionQuizzes' | 'actionCertificates'; icon: LucideIcon }[] = [
   { to: '/admin/quizzes', key: 'actionQuizzes', icon: CircleHelp },
-  { to: '/admin/certificates', key: 'actionCertificates', icon: Award },
-  { key: 'actionPosters', icon: Image }
+  { to: '/admin/certificates', key: 'actionCertificates', icon: Award }
 ];
 
 const TILE = 'flex min-w-0 flex-col items-center gap-2 rounded-box border px-2 py-4';
@@ -143,34 +141,17 @@ function NextSteps({ quest, now }: { quest: AdminQuest; now: Date }) {
     <section className="flex flex-col gap-3 rounded-box border border-[color:var(--rule)] p-4">
       <h2 className="type-label m-0">{t.quickActions}</h2>
       {content && <div className="flex flex-wrap items-center gap-3">{content}</div>}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        {QUICK_ACTIONS.map(({ to, key, icon: Icon }) =>
-          to ? (
-            <Link
-              key={key}
-              to={to}
-              className={`${TILE} border-amber/60 bg-ash-hi text-amber shadow-[0_2px_0_var(--color-void)] transition hover:bg-[color:var(--color-taupe-dim)]/30 active:translate-y-px active:shadow-none`}
-            >
-              <Icon className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
-              <span className="max-w-full truncate text-xs font-medium">{t[key]}</span>
-            </Link>
-          ) : (
-            <div
-              key={key}
-              aria-disabled="true"
-              className={`${TILE} border-dashed border-[color:var(--rule)] text-taupe`}
-            >
-              <Icon className="h-6 w-6 opacity-60" strokeWidth={1.75} aria-hidden="true" />
-              <span className="max-w-full truncate text-xs font-medium">
-                {t[key]}
-                <span className="sr-only">{t.comingSoon}</span>
-              </span>
-              <span aria-hidden="true" className="type-label text-[0.5625rem]">
-                {t.soon}
-              </span>
-            </div>
-          )
-        )}
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        {QUICK_ACTIONS.map(({ to, key, icon: Icon }) => (
+          <Link
+            key={key}
+            to={to}
+            className={`${TILE} border-amber/60 bg-ash-hi text-amber shadow-[0_2px_0_var(--color-void)] transition hover:bg-[color:var(--color-taupe-dim)]/30 active:translate-y-px active:shadow-none`}
+          >
+            <Icon className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
+            <span className="max-w-full truncate text-xs font-medium">{t[key]}</span>
+          </Link>
+        ))}
       </div>
     </section>
   );

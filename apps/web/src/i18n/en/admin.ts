@@ -75,10 +75,7 @@ export const admin = {
     resultsWait: (date: string) => `Results go out ${date}. The next edition can start after that.`,
     quickActions: 'Quick actions',
     actionQuizzes: 'Quizzes',
-    actionCertificates: 'Certificates',
-    actionPosters: 'Posters',
-    comingSoon: ', coming soon',
-    soon: 'Soon'
+    actionCertificates: 'Certificates'
   },
   participants: {
     title: 'Participants',
@@ -106,7 +103,8 @@ export const admin = {
     title: 'Message everyone',
     message: 'Message',
     placeholder: 'The quiz opens tomorrow at 18:00.',
-    reach: (people: string, telegram: string) => `Reaches ${people} people · ${telegram} on Telegram`,
+    reach: (people: string, telegram: string) =>
+      `Reaches ${people} people · ${telegram} on Telegram`,
     sendToEveryone: 'Send to everyone',
     confirmTitle: 'Send this to everyone?',
     sending: 'Sending…',
@@ -136,7 +134,8 @@ export const admin = {
       resultsDate: 'Results date',
       resultsDateText: (date: string) => `The quiz has closed. Results are published ${date}.`,
       resultsOut: 'Results are out',
-      resultsOutText: (title: string) => `Results for ${title} are out! Open BookQuest to see where you placed.`
+      resultsOutText: (title: string) =>
+        `Results for ${title} are out! Open BookQuest to see where you placed.`
     }
   },
   certificates: {
@@ -147,7 +146,12 @@ export const admin = {
     unlocksAt: (date: string) => `Sending unlocks when results are published, ${date}.`,
     readyToSend: 'Certificates are ready to send',
     title: 'Certificates',
-    tiers: { gold: '1st place', silver: '2nd place', bronze: '3rd place', participant: 'Everyone else' },
+    tiers: {
+      gold: '1st place',
+      silver: '2nd place',
+      bronze: '3rd place',
+      participant: 'Everyone else'
+    },
     sampleAlt: (tier: string) => `Sample certificate: ${tier}`,
     sentToast: 'Certificates on their way.',
     startFailed: 'Could not start sending.',
@@ -190,10 +194,17 @@ export const admin = {
     showOrganisers: 'Show organisers',
     stopOnly: (name: string) => `Stop showing only ${name}`,
     only: (name: string) => `Only ${name}`,
-    range: { today: 'Today', '7d': 'Last 7 days', '30d': 'Last 30 days', all: 'All time' } satisfies Record<RangePreset, string>,
+    range: {
+      today: 'Today',
+      '7d': 'Last 7 days',
+      '30d': 'Last 30 days',
+      all: 'All time'
+    } satisfies Record<RangePreset, string>,
     emptyTitle: (view: 'messages' | 'all', person: string | null, range: RangePreset) =>
       `No ${view === 'messages' ? 'messages' : 'activity'}${person ? ` from ${person}` : ''}${
-        range === 'all' ? '' : ` ${({ today: 'today', '7d': 'in the last 7 days', '30d': 'in the last 30 days' } as const)[range]}`
+        range === 'all'
+          ? ''
+          : ` ${({ today: 'today', '7d': 'in the last 7 days', '30d': 'in the last 30 days' } as const)[range]}`
       }`,
     narrowed: 'Search or filters are narrowing this down.',
     switchToAll: 'Switch to Everything to see /start taps and button presses too.',
@@ -214,7 +225,8 @@ export const admin = {
     noUsername: 'No @username: a reply from the bot is the only way to reach them.',
     firstSeen: (date: string) => `First seen ${date}`,
     lastSeen: (ago: string) => ` · Last seen ${ago}`,
-    interactions: (count: number, n: string) => ` · ${n} ${pluralEn(count, 'interaction', 'interactions')}`,
+    interactions: (count: number, n: string) =>
+      ` · ${n} ${pluralEn(count, 'interaction', 'interactions')}`,
     blockedBot: 'Blocked the bot',
     unblockedBot: 'Unblocked the bot',
     kinds: {

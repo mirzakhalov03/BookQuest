@@ -61,7 +61,8 @@ export const admin: typeof En = {
   dashboard: {
     bookHidden: 'Kitob yashirin',
     loading: 'Ro‘yxat o‘qilmoqda…',
-    betweenEditions: 'Mavsumlar orasida hech narsa o‘tkazilmayapti. Tayyor bo‘lganingizda keyingisini sozlang.',
+    betweenEditions:
+      'Mavsumlar orasida hech narsa o‘tkazilmayapti. Tayyor bo‘lganingizda keyingisini sozlang.',
     startNext: 'Keyingi mavsumni boshlash',
     statParticipants: 'Ishtirokchilar',
     statJoinedToday: 'Bugun qo‘shildi',
@@ -69,13 +70,11 @@ export const admin: typeof En = {
     statInProgress: 'Test jarayonida',
     quizOpen: (date) => `Test ochiq. Natijalar e’lon qilinadi: ${date}.`,
     viewResults: 'Natijalarni ko‘rish',
-    resultsWait: (date) => `Natijalar e’lon qilinadi: ${date}. Keyingi mavsumni shundan keyin boshlash mumkin.`,
+    resultsWait: (date) =>
+      `Natijalar e’lon qilinadi: ${date}. Keyingi mavsumni shundan keyin boshlash mumkin.`,
     quickActions: 'Tezkor amallar',
     actionQuizzes: 'Testlar',
-    actionCertificates: 'Sertifikatlar',
-    actionPosters: 'Afishalar',
-    comingSoon: ', tez orada',
-    soon: 'Tez orada'
+    actionCertificates: 'Sertifikatlar'
   },
   participants: {
     title: 'Ishtirokchilar',
@@ -133,7 +132,8 @@ export const admin: typeof En = {
       resultsDate: 'Natijalar sanasi',
       resultsDateText: (date) => `Test yopildi. Natijalar ${date} da e’lon qilinadi.`,
       resultsOut: 'Natijalar e’lon qilindi',
-      resultsOutText: (title) => `«${title}» bo‘yicha natijalar e’lon qilindi! O‘rningizni ko‘rish uchun BookQuestni oching.`
+      resultsOutText: (title) =>
+        `«${title}» bo‘yicha natijalar e’lon qilindi! O‘rningizni ko‘rish uchun BookQuestni oching.`
     }
   },
   certificates: {
@@ -144,7 +144,12 @@ export const admin: typeof En = {
     unlocksAt: (date) => `Natijalar e’lon qilinganda yuborish ochiladi: ${date}.`,
     readyToSend: 'Sertifikatlarni yuborish mumkin',
     title: 'Sertifikatlar',
-    tiers: { gold: '1-o‘rin', silver: '2-o‘rin', bronze: '3-o‘rin', participant: 'Qolgan ishtirokchilar' },
+    tiers: {
+      gold: '1-o‘rin',
+      silver: '2-o‘rin',
+      bronze: '3-o‘rin',
+      participant: 'Qolgan ishtirokchilar'
+    },
     sampleAlt: (tier) => `Sertifikat namunasi: ${tier}`,
     sentToast: 'Sertifikatlar yuborilmoqda.',
     startFailed: 'Yuborishni boshlab bo‘lmadi.',
@@ -189,7 +194,10 @@ export const admin: typeof En = {
     only: (name) => `Faqat ${name}`,
     range: { today: 'Bugun', '7d': 'Oxirgi 7 kun', '30d': 'Oxirgi 30 kun', all: 'Butun davr' },
     emptyTitle: (view, person, range) => {
-      const when = range === 'all' ? '' : `${({ today: 'Bugun', '7d': 'Oxirgi 7 kunda', '30d': 'Oxirgi 30 kunda' } as const)[range]} `;
+      const when =
+        range === 'all'
+          ? ''
+          : `${({ today: 'Bugun', '7d': 'Oxirgi 7 kunda', '30d': 'Oxirgi 30 kunda' } as const)[range]} `;
       const what = view === 'messages' ? 'xabar' : 'faollik';
       const text = `${when}${person ? `${person}dan ` : ''}${what} yo‘q`;
       return text.charAt(0).toUpperCase() + text.slice(1);
