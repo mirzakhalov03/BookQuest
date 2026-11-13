@@ -5,6 +5,7 @@ export const admin: typeof En = {
   sections: 'Admin bo‘limlari',
   backToStage: 'Bosh sahifaga qaytish',
   tabs: {
+    certificates: 'Sertifikatlar',
     dashboard: 'Asosiy',
     // Tab labels get ~11 characters on a phone; "Ishtirokchilar" would be cut off.
     participants: 'Kitobxonlar',
@@ -135,6 +136,12 @@ export const admin: typeof En = {
     }
   },
   certificates: {
+    loading: 'Sertifikatlar tayyorlanmoqda…',
+    noQuest: 'Avval bu yilgi kvestni yarating.',
+    placeholderNote: 'Vaqtinchalik dizayn: yakuniy dizayn tez orada.',
+    delivery: 'Yuborish',
+    unlocksAt: (date) => `Natijalar e’lon qilinganda yuborish ochiladi: ${date}.`,
+    readyToSend: 'Sertifikatlarni yuborish mumkin',
     title: 'Sertifikatlar',
     tiers: { gold: '1-o‘rin', silver: '2-o‘rin', bronze: '3-o‘rin', participant: 'Qolgan ishtirokchilar' },
     sampleAlt: (tier) => `Sertifikat namunasi: ${tier}`,

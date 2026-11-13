@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
+  Award,
   Home,
   LayoutDashboard,
   Users,
@@ -39,6 +40,7 @@ const PRIMARY_TABS: Tab[] = [
 
 const MORE_TABS: Tab[] = [
   { to: '/admin/results', key: 'results', icon: BarChart3 },
+  { to: '/admin/certificates', key: 'certificates', icon: Award },
   { to: '/admin/broadcast', key: 'broadcast', icon: Megaphone },
   { to: '/admin/messages', key: 'messages', icon: MessageSquare }
 ];

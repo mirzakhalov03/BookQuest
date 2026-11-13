@@ -9,6 +9,7 @@ export const admin = {
   sections: 'Admin sections',
   backToStage: 'Back to the stage',
   tabs: {
+    certificates: 'Certificates',
     dashboard: 'Dashboard',
     participants: 'Participants',
     quest: 'Quest',
@@ -138,6 +139,12 @@ export const admin = {
     }
   },
   certificates: {
+    loading: 'Laying out the certificates…',
+    noQuest: "Create this year's quest first.",
+    placeholderNote: 'Placeholder design: final artwork coming.',
+    delivery: 'Sending',
+    unlocksAt: (date: string) => `Sending unlocks when results are published, ${date}.`,
+    readyToSend: 'Certificates are ready to send',
     title: 'Certificates',
     tiers: { gold: '1st place', silver: '2nd place', bronze: '3rd place', participant: 'Everyone else' },
     sampleAlt: (tier: string) => `Sample certificate: ${tier}`,

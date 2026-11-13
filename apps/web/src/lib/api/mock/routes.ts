@@ -336,7 +336,8 @@ function certificateDelivery(context: Context): Result {
     pending: sent ? 0 : total,
     pendingReachable: sent ? 0 : reachable,
     startedAt: at,
-    completedAt: at
+    completedAt: at,
+    placeholderArt: true
   });
 }
 

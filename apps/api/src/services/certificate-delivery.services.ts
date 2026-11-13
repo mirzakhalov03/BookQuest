@@ -13,6 +13,7 @@ import { isDuplicateKeyError } from '../utils/mongo.js';
 import { createRateGate } from '../utils/rate-gate.js';
 import { sendTelegramPhoto } from '../utils/telegram-send.js';
 import { renderCertificatePng } from '../certificates/render.js';
+import { IS_PLACEHOLDER_ART } from '../certificates/template.js';
 import { requireCurrentQuestDocument } from './quest.services.js';
 import { ensureRanked } from './result.services.js';
 import { buildCertificateData, certificateFileName, countFinishers } from './certificate.services.js';
@@ -217,7 +218,8 @@ export async function getDeliveryStatus(): Promise<CertificateDelivery> {
     pending: row?.pending ?? 0,
     pendingReachable,
     startedAt: delivery?.startedAt.toISOString() ?? null,
-    completedAt: delivery?.completedAt?.toISOString() ?? null
+    completedAt: delivery?.completedAt?.toISOString() ?? null,
+    placeholderArt: IS_PLACEHOLDER_ART
   };
 }
 

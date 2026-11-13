@@ -11,3 +11,4 @@ export { QuizzesPage } from './quizzes/QuizzesPage';
 export { QuizEditorPage } from './quizzes/QuizEditorPage';
 export { QuizLivePage } from './quizzes/QuizLivePage';
 export { QuizPreviewPage } from './quizzes/QuizPreviewPage';
+export { CertificatesPage } from './certificates/CertificatesPage';

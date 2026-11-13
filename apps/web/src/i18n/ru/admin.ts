@@ -6,6 +6,7 @@ export const admin: typeof En = {
   sections: 'Разделы админки',
   backToStage: 'Вернуться на главную',
   tabs: {
+    certificates: 'Сертификаты',
     dashboard: 'Сводка',
     participants: 'Участники',
     quest: 'Конкурс',
@@ -135,6 +136,12 @@ export const admin: typeof En = {
     }
   },
   certificates: {
+    loading: 'Раскладываем сертификаты…',
+    noQuest: 'Сначала создайте квест этого года.',
+    placeholderNote: 'Временный дизайн: финальный макет скоро.',
+    delivery: 'Отправка',
+    unlocksAt: (date) => `Отправка откроется после публикации итогов, ${date}.`,
+    readyToSend: 'Сертификаты готовы к отправке',
     title: 'Сертификаты',
     tiers: { gold: '1-е место', silver: '2-е место', bronze: '3-е место', participant: 'Остальные участники' },
     sampleAlt: (tier) => `Образец сертификата: ${tier}`,

@@ -104,6 +104,7 @@ export const router = createBrowserRouter([
               { path: 'quizzes/:id', ...adminScreen('QuizEditorPage') },
               { path: 'quizzes/:id/preview', ...adminScreen('QuizPreviewPage') },
               { path: 'results', ...adminScreen('ResultsInspectionPage') },
+              { path: 'certificates', ...adminScreen('CertificatesPage') },
               { path: 'broadcast', ...adminScreen('BroadcastPage') },
               { path: 'messages', ...adminScreen('MessagesPage') }
             ]

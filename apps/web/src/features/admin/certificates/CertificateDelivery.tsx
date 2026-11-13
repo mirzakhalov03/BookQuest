@@ -1,22 +1,26 @@
 import { useState } from 'react';
-import { CERTIFICATE_TIERS, type CertificateDelivery } from '@bookquest/shared';
+import type { CertificateDelivery as DeliveryStatus } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
 import { Sheet } from '@/components/ui/Sheet';
 import { Rule } from '@/components/ui/Rule';
 import { ApiRequestError } from '@/lib/api/client';
-import { formatCount } from '@/lib/format';
+import { formatCount, formatLongDate } from '@/lib/format';
 import { useUiStore } from '@/stores/ui.store';
 import { useCertificateDelivery, useSendCertificates } from '../api/useCertificateDelivery';
-import { certificatePreviewUrl } from './previewUrl';
 import { useT } from '@/i18n';
 import { errorMessage } from '@/lib/api/errorMessage';
 
+interface CertificateDeliveryProps {
+  /** Results publish time; Send stays locked until then. */
+  resultsAt: string;
+}
+
 /**
- * On `/admin/results`: preview the four tiers, then send every finisher their
- * certificate (spec §5). Sending is explicit, never automatic: organisers look
- * at the final board before about a thousand people get something permanent.
+ * Send every finisher their certificate (spec §5). Sending is explicit, never
+ * automatic: organisers look at the final board before about a thousand people
+ * get something permanent.
  */
-export function CertificatesPanel() {
+export function CertificateDelivery({ resultsAt }: CertificateDeliveryProps) {
   const delivery = useCertificateDelivery();
   const send = useSendCertificates();
   const showToast = useUiStore((state) => state.showToast);
@@ -25,6 +29,7 @@ export function CertificatesPanel() {
   const t = admin.certificates;
   const status = delivery.data;
 
+  const published = new Date() >= new Date(resultsAt);
   const sending = status?.status === 'sending';
   const allDone = status !== undefined && status.total > 0 && status.pending === 0;
 
@@ -38,26 +43,15 @@ export function CertificatesPanel() {
 
   return (
     <section className="flex flex-col gap-3">
-      <p className="type-label m-0">{t.title}</p>
+      <h2 className="type-label m-0">{t.delivery}</h2>
       <Rule />
 
-      <div className="grid grid-cols-2 gap-3">
-        {CERTIFICATE_TIERS.map((tier) => (
-          <figure key={tier} className="m-0 flex flex-col gap-1">
-            <img
-              src={certificatePreviewUrl(tier)}
-              width={1123}
-              height={794}
-              loading="lazy"
-              alt={t.sampleAlt(t.tiers[tier])}
-              className="certificate-image"
-            />
-            <figcaption className="text-sm text-taupe">{t.tiers[tier]}</figcaption>
-          </figure>
-        ))}
-      </div>
-
-      {status && <DeliveryLine status={status} />}
+      {/* Before results there's nothing to send; say when that changes instead of a failing request. */}
+      {!published ? (
+        <p className="m-0 text-paper-dim">{t.unlocksAt(formatLongDate(resultsAt))}</p>
+      ) : (
+        status && <DeliveryLine status={status} />
+      )}
       {sending && status && (
         <progress
           className="h-2 w-full accent-gold"
@@ -70,7 +64,7 @@ export function CertificatesPanel() {
       <Button
         type="button"
         variant="gold"
-        disabled={!status || sending || allDone || send.isPending}
+        disabled={!published || !status || sending || allDone || send.isPending}
         onClick={() => setConfirming(true)}
       >
         {allDone ? t.allSent : sending ? t.sending : t.send}
@@ -99,7 +93,7 @@ export function CertificatesPanel() {
   );
 }
 
-function DeliveryLine({ status }: { status: CertificateDelivery }) {
+function DeliveryLine({ status }: { status: DeliveryStatus }) {
   const processed = status.total - status.pending;
   const t = useT().admin.certificates;
 

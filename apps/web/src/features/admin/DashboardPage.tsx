@@ -106,7 +106,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
 // No `to` yet means the page isn't built: shown as "Soon" rather than linking to "Nothing here".
 const QUICK_ACTIONS: { to?: string; key: 'actionQuizzes' | 'actionCertificates' | 'actionPosters'; icon: LucideIcon }[] = [
   { to: '/admin/quizzes', key: 'actionQuizzes', icon: CircleHelp },
-  { key: 'actionCertificates', icon: Award },
+  { to: '/admin/certificates', key: 'actionCertificates', icon: Award },
   { key: 'actionPosters', icon: Image }
 ];
 

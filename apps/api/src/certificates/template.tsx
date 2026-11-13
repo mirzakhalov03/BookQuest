@@ -7,6 +7,9 @@ import type { CertificateData, CertificateTier } from '@bookquest/shared';
  * fonts are only what render.ts loaded.
  */
 
+/** True until the organiser's artwork lands; the admin Certificates page shows a "placeholder" note. Delete with it. */
+export const IS_PLACEHOLDER_ART = true;
+
 const ACCENT: Record<CertificateTier, string> = {
   gold: '#C8A24A',
   silver: '#9AA3AD',

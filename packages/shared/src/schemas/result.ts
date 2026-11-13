@@ -94,7 +94,9 @@ export const certificateDeliverySchema = z.object({
   /** Of `pending`, how many can be DMed — for the confirm sheet. */
   pendingReachable: z.number().int().nonnegative(),
   startedAt: z.string().nullable(),
-  completedAt: z.string().nullable()
+  completedAt: z.string().nullable(),
+  /** The certificate design is still the placeholder, not the final artwork. */
+  placeholderArt: z.boolean()
 });
 
 export type CertificateDelivery = z.infer<typeof certificateDeliverySchema>;
