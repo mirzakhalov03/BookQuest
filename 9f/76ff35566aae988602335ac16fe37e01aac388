@@ -1,0 +1,25 @@
+apps/bot/src/handlers/feedback-group.ts
+  s_b0819a85d40058::t_2d51eeb40ea5a1 49-52
+apps/bot/src/handlers/feedback.ts
+  s_b0819a85d40058::t_ee3516c5179b70 31-35
+apps/bot/src/lib/relay.ts
+  s_b0819a85d40058::t_c81ee5ad4c27ca 9-13,18-22,35,40,49
+apps/bot/src/texts.ts
+  s_b0819a85d40058::t_a0dfa8423e6ca6 45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "9f76ff35566aae988602335ac16fe37e01aac388",
+  "prompts": {},
+  "sessions": {
+    "s_b0819a85d40058": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b7e2864-fd70-4a19-a6c2-69966ed3a2ce",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
