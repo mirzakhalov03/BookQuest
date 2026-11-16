@@ -12,12 +12,20 @@ export type SendOutcome =
  * The API holds the bot token, so sending never needs apps/bot. Never throws:
  * one bad recipient must not stop the rest of a fan-out.
  */
-export async function sendTelegramMessage(telegramUserId: string, text: string): Promise<SendOutcome> {
+export async function sendTelegramMessage(
+  telegramUserId: string,
+  text: string,
+  options: { html?: boolean } = {}
+): Promise<SendOutcome> {
   try {
     const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: telegramUserId, text }),
+      body: JSON.stringify({
+        chat_id: telegramUserId,
+        text,
+        ...(options.html ? { parse_mode: 'HTML', link_preview_options: { is_disabled: true } } : {})
+      }),
       // A hung connection would stall its worker; the timeout lands in the catch as one failed send.
       signal: AbortSignal.timeout(10_000)
     });

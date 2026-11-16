@@ -21,7 +21,15 @@ const envSchema = z.object({
   /** The Mini App's URL — what the "Open BookQuest" button opens. Telegram
       refuses a web_app button that isn't HTTPS, so in local dev this must be
       the tunnel URL, not localhost. */
-  WEB_APP_URL: z.string().url('WEB_APP_URL is required and must be a URL')
+  WEB_APP_URL: z.string().url('WEB_APP_URL is required and must be a URL'),
+
+  /** Organizers' group (feedback chat; apps/api posts sign-ups there too).
+      Optional so the bot can boot before it's known — it posts a group's ID
+      when added to it. */
+  ADMIN_CHAT_ID: z
+    .string()
+    .regex(/^-\d+$/, 'ADMIN_CHAT_ID must be a group ID (starts with -)')
+    .optional()
 });
 
 const parsed = envSchema.safeParse(process.env);

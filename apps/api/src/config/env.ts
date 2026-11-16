@@ -40,6 +40,8 @@ const envSchema = z.object({
 
   /** The entire admin model: a comma-separated allowlist of Telegram user ids. */
   ADMIN_TELEGRAM_IDS: z.string().default(''),
+  /** Organizers' Telegram group (shared with apps/bot) — new sign-ups are posted there. Unset = no alerts. */
+  ADMIN_CHAT_ID: z.string().regex(/^-\d+$/, 'ADMIN_CHAT_ID must be a group ID (starts with -)').optional(),
   /** Phone numbers that sign in as organisers — only with ADMIN_PASSWORD. */
   ADMIN_PHONE_NUMBERS: z.string().default(''),
   /** The organisers' shared password for the numbers above. */

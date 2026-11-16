@@ -1,14 +1,8 @@
-import { Markup, type Context } from 'telegraf';
-import { env } from '../config/env.js';
+import type { Context } from 'telegraf';
+import { feedbackEnabled, openAppKeyboard } from '../keyboards.js';
+import { TEXTS } from '../texts.js';
 
-/**
- * Everything the old bot's keyboard used to do now lives in the Mini App.
- * Any text that isn't /start gets pointed at the one button that matters,
- * rather than a dead command.
- */
+/** Any text no other handler claimed gets pointed at the one button that matters. */
 export async function handleFallback(ctx: Context): Promise<void> {
-  await ctx.reply(
-    'Everything happens inside the app now.',
-    Markup.inlineKeyboard([[Markup.button.webApp('📖 Open BookQuest', env.WEB_APP_URL)]])
-  );
+  await ctx.reply(feedbackEnabled ? TEXTS.fallbackWithFeedback : TEXTS.fallback, openAppKeyboard);
 }

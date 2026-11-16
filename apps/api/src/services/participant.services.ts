@@ -7,6 +7,7 @@ import type { UserDocument } from '../models/user.model.js';
 import { ApiError } from '../utils/api-error.js';
 import { isDuplicateKeyError } from '../utils/mongo.js';
 import { findCurrentQuestDocument, requireCurrentQuestDocument } from './quest.services.js';
+import { announceRegistration } from './registration-alerts.services.js';
 
 /**
  * Registration closes when the reading period ends — the same promise the
@@ -66,6 +67,9 @@ export async function registerParticipant(
   }
 
   await QuestModel.updateOne({ _id: quest._id }, { $inc: { participantCount: 1 } });
+
+  // Not awaited: a slow Telegram must not hold up the participant's confirmation.
+  void announceRegistration(participant, user);
 
   return toParticipantDto(participant);
 }
