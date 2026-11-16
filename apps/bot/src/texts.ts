@@ -42,6 +42,7 @@ export const TEXTS = {
   feedbackAnswerHeader: '💬 <b>BookQuest jamoasidan javob:</b>',
 
   // Feedback chat — what organizers see in the group. HTML.
+  feedbackNewMessageHeader: '💬 <b>Foydalanuvchidan yangi xabar:</b>',
   groupReplyButton: '↩️ Javob berish',
   // Every prompt starts with it — how a prompt forgotten across a restart is still recognised.
   groupPromptMarker: '✍️',

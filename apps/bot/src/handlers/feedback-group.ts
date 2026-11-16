@@ -46,13 +46,10 @@ feedbackGroup.on(message('reply_to_message'), async (ctx) => {
   }
 
   try {
-    await relay(
-      ctx.telegram,
-      userId,
-      ctx.message,
-      TEXTS.feedbackAnswerHeader,
-      feedbackKeyboard.reply_markup
-    );
+    await relay(ctx.telegram, userId, ctx.message, TEXTS.feedbackAnswerHeader, {
+      replyMarkup: feedbackKeyboard.reply_markup,
+      quote: true
+    });
     // The answer reopens the chat, so the participant can just write back.
     openFeedbackSession(userId);
     await react(ctx.telegram, ctx.chat.id, ctx.message.message_id);

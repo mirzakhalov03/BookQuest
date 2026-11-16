@@ -6,13 +6,20 @@ import { escapeHtml } from './html.js';
 const TEXT_LIMIT = 4096;
 const CAPTION_LIMIT = 1024;
 
-type ReplyMarkup = InlineKeyboardMarkup | ReplyKeyboardMarkup;
+type RelayOptions = {
+  replyMarkup?: InlineKeyboardMarkup | ReplyKeyboardMarkup;
+  /** Body in a Telegram quote block under the header. */
+  quote?: boolean;
+};
 
 const CAPTIONABLE = ['photo', 'video', 'animation', 'document', 'audio', 'voice'] as const;
 const isCaptionable = (msg: Message) => CAPTIONABLE.some((kind) => kind in msg);
 
-const withBody = (header: string, body: string | undefined) =>
-  body ? `${header}\n\n${escapeHtml(body)}` : header;
+function withBody(header: string, body: string | undefined, quote = false): string {
+  if (!body) return header;
+  const safe = escapeHtml(body);
+  return `${header}\n\n${quote ? `<blockquote>${safe}</blockquote>` : safe}`;
+}
 
 /**
  * Re-sends any message to another chat under an HTML header, in one message
@@ -25,12 +32,12 @@ export async function relay(
   toChatId: number | string,
   source: Message,
   header: string,
-  replyMarkup?: ReplyMarkup
+  { replyMarkup, quote }: RelayOptions = {}
 ): Promise<void> {
   const from = source.chat.id;
 
   if ('text' in source) {
-    const combined = withBody(header, source.text);
+    const combined = withBody(header, source.text, quote);
     if (combined.length <= TEXT_LIMIT) {
       await telegram.sendMessage(toChatId, combined, {
         parse_mode: 'HTML',
@@ -39,7 +46,7 @@ export async function relay(
       return;
     }
   } else if (isCaptionable(source)) {
-    const caption = withBody(header, 'caption' in source ? source.caption : undefined);
+    const caption = withBody(header, 'caption' in source ? source.caption : undefined, quote);
     if (caption.length <= CAPTION_LIMIT) {
       await telegram.copyMessage(toChatId, from, source.message_id, {
         caption,
