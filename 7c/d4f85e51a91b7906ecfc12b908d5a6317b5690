@@ -1,0 +1,65 @@
+.env.example
+  s_b0819a85d40058::t_7811c9d3888b7d 24-28
+apps/api/src/config/env.ts
+  s_b0819a85d40058::t_89607729c77030 43-44
+apps/api/src/services/participant.services.ts
+  s_b0819a85d40058::t_5d7383340330bd 10,71-73
+apps/api/src/services/registration-alerts.services.ts
+  s_b0819a85d40058::t_23c7b534ab0db9 1-29
+apps/api/src/utils/telegram-send.ts
+  s_b0819a85d40058::t_5c43645289d0ed 15-19,24-28
+apps/bot/src/bot.ts
+  s_b0819a85d40058::t_0c6dad9aaa5236 1,7-16,28-32,36-55
+apps/bot/src/config/env.ts
+  s_b0819a85d40058::t_e1aa6fcb1778fe 24-32
+apps/bot/src/handlers/feedback-group.ts
+  s_b0819a85d40058::t_68bef97520007f 1-68
+apps/bot/src/handlers/feedback.ts
+  s_b0819a85d40058::t_4b4894bd63a2f8 1-50
+apps/bot/src/handlers/group-added.ts
+  s_b0819a85d40058::t_88edf7967cc106 1-21
+apps/bot/src/keyboards.ts
+  s_b0819a85d40058::t_7d14cdfd7046a4 1-6,12-38
+apps/bot/src/lib/relay.ts
+  s_b0819a85d40058::t_90c3f3cad27f03 1-61
+apps/bot/src/texts.ts
+  s_b0819a85d40058::t_1b4b0ce74dc3c4 1-56
+apps/bot/src/handlers/about.ts
+  s_c5c800cd629834::t_efbe02e06cb9b8 1-55
+apps/api/src/utils/html.ts
+  s_b0819a85d40058::t_09301e91bd669f 1-3
+apps/bot/src/handlers/fallback.ts
+  s_b0819a85d40058::t_ce6ed1726c51b3 1-3,5,7
+apps/bot/src/handlers/start.ts
+  s_b0819a85d40058::t_644240823bd8f3 1,4-6,9-11,16-17,20-21
+apps/bot/src/lib/feedback-state.ts
+  s_b0819a85d40058::t_c7b7578f0fb92a 1-29
+apps/bot/src/lib/html.ts
+  s_b0819a85d40058::t_eae8be733b98b1 1-10
+apps/bot/src/lib/react.ts
+  s_b0819a85d40058::t_450036ff664378 1-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "7cd4f85e51a91b7906ecfc12b908d5a6317b5690",
+  "prompts": {},
+  "sessions": {
+    "s_b0819a85d40058": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b7e2864-fd70-4a19-a6c2-69966ed3a2ce",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_c5c800cd629834": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "50c37419-b6c4-4c3a-bb70-7ad98fb68fc3",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
