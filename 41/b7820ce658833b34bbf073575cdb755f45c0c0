@@ -1,0 +1,47 @@
+docs/TODO.md
+  s_a2836ae43a9405::t_800a5d33445b9a 5-8,12-13,17-25,28-30,33-49,52,54-58,60-61,65
+docs/superpowers/plans/2026-11-20-account-linking.md
+  s_a2836ae43a9405::t_3e7be371d1de75 1-108
+docs/superpowers/plans/2026-11-20-admin-ux-polish.md
+  s_a2836ae43a9405::t_04d249f3b9aacb 1-108
+docs/superpowers/plans/2026-11-20-book-sources-cards.md
+  s_a2836ae43a9405::t_fae09dcf36c088 1-91
+docs/superpowers/plans/2026-11-20-bot-refresh.md
+  s_a2836ae43a9405::t_a1d5a6dc1e19a9 1-76
+docs/superpowers/plans/2026-11-20-certificate-templates.md
+  s_a2836ae43a9405::t_d0056ed1b2e5f5 1-96
+docs/superpowers/plans/2026-11-20-prizes-poster-and-profile.md
+  s_a2836ae43a9405::t_0350ff8605350f 1-78
+docs/superpowers/plans/2026-11-20-refactor-and-optimization.md
+  s_a2836ae43a9405::t_feb0869f6744df 1-92
+docs/superpowers/specs/2026-11-20-account-linking-design.md
+  s_a2836ae43a9405::t_7823d702e36d0f 1-97
+docs/superpowers/specs/2026-11-20-admin-ux-polish-design.md
+  s_a2836ae43a9405::t_7696708e586f51 1-106
+docs/superpowers/specs/2026-11-20-book-sources-cards-design.md
+  s_a2836ae43a9405::t_500873c0440466 1-85
+docs/superpowers/specs/2026-11-20-bot-refresh-design.md
+  s_a2836ae43a9405::t_660a6123fe0375 1-87
+docs/superpowers/specs/2026-11-20-certificate-templates-design.md
+  s_a2836ae43a9405::t_d65613916468d1 1-74
+docs/superpowers/specs/2026-11-20-prizes-poster-and-profile-design.md
+  s_a2836ae43a9405::t_0c75aba032a338 1-61
+docs/superpowers/specs/2026-11-20-refactor-and-optimization-design.md
+  s_a2836ae43a9405::t_230aa50358f6d6 1-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "41b7820ce658833b34bbf073575cdb755f45c0c0",
+  "prompts": {},
+  "sessions": {
+    "s_a2836ae43a9405": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b97ad509-f90c-44df-b028-629768ad274a",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
