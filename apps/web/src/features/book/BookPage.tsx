@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { isNotFound } from '@/lib/api/client';
 import { errorMessage } from '@/lib/api/errorMessage';
 import { ExpandableText } from '@/components/ui/ExpandableText';
-import { ResourceList } from './components/ResourceList';
+import { SourceCards } from './components/SourceCards';
 import { BookLocked } from '@/components/BookLocked';
 import { useT } from '@/i18n';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
@@ -71,7 +71,7 @@ export function BookPage() {
         </section>
       )}
 
-      <ResourceList resources={quest.book.resources} />
+      <SourceCards book={quest.book} />
     </Screen>
   );
 }
