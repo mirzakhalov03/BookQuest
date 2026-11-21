@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from 'react-router';
+import { Outlet, ScrollRestoration, useLocation } from 'react-router';
 import { TabBar } from '@/components/layout/TabBar';
 import { PullIndicator } from '@/components/layout/PullIndicator';
 import { Toast } from '@/components/ui/Toast';
@@ -38,6 +38,8 @@ export function AppLayout() {
 
   return (
     <div className="relative flex min-h-dvh flex-col">
+      {/* New screens open at their headline; back/forward return to where the reader was. */}
+      <ScrollRestoration />
       <Atmosphere />
       <ChromeGuard />
 
