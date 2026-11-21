@@ -1,22 +1,16 @@
-import type { Prizes } from '@bookquest/shared';
-import { PrizePodium } from './PrizePodium';
+import { hasAnyPrize, type Prizes } from '@bookquest/shared';
+import { useT } from '@/i18n';
 import { PrizeList } from './PrizeList';
 import { PrizePhoto } from './PrizePhoto';
+import { PosterPlaceholder } from './PosterPlaceholder';
 
-/** With a photo: the photo, then every place as a list. Without: the podium, then 4th–5th as rows. */
+/** The poster (or its placeholder), then every announced place as a written list. */
 export function PrizeShowcase({ prizes, label }: { prizes: Prizes; label: string }) {
-  if (prizes.photoUrl) {
-    return (
-      <div className="flex flex-col gap-2">
-        <PrizePhoto src={prizes.photoUrl} label={label} />
-        <PrizeList prizes={prizes} from={1} />
-      </div>
-    );
-  }
+  const t = useT().prizes;
   return (
-    <div className="flex flex-col gap-1">
-      <PrizePodium prizes={prizes} />
-      <PrizeList prizes={prizes} from={4} />
+    <div className="flex flex-col gap-3">
+      {prizes.photoUrl ? <PrizePhoto src={prizes.photoUrl} label={label} /> : <PosterPlaceholder label={label} />}
+      {hasAnyPrize(prizes) ? <PrizeList prizes={prizes} /> : <p className="m-0 text-taupe">{t.notAnnounced}</p>}
     </div>
   );
 }

@@ -3,7 +3,8 @@ import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Button } from '@/components/ui/Button';
 import { useQuestArchive } from '@/lib/api/quest';
-import { QuestSummaryCard } from './QuestSummaryCard';
+import { useState } from 'react';
+import { PastQuestAccordion } from './PastQuestAccordion';
 import { useT } from '@/i18n';
 
 /** Every edition before the current one. `GET /quests` already leaves out the current one. */
@@ -41,6 +42,7 @@ interface PreviousQuestListProps {
 
 function PreviousQuestList({ editions, hasNextPage, isFetchingNextPage, onLoadMore }: PreviousQuestListProps) {
   const t = useT();
+  const [openId, setOpenId] = useState<string | null>(null);
   if (editions.length === 0) {
     return (
       <p className="py-4 text-taupe">
@@ -51,13 +53,16 @@ function PreviousQuestList({ editions, hasNextPage, isFetchingNextPage, onLoadMo
 
   return (
     <>
-      <ul className="flex flex-col">
+      <div className="flex flex-col">
         {editions.map((quest) => (
-          <li key={quest.id}>
-            <QuestSummaryCard quest={quest} />
-          </li>
+          <PastQuestAccordion
+            key={quest.id}
+            quest={quest}
+            open={openId === quest.id}
+            onToggle={() => setOpenId((current) => (current === quest.id ? null : quest.id))}
+          />
         ))}
-      </ul>
+      </div>
 
       {/* A button, not infinite scroll: a short list is easier to use this way. */}
       {hasNextPage && (

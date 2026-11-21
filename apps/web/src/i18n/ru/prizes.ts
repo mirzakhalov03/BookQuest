@@ -1,6 +1,8 @@
 import type { prizes as En } from '../en/prizes';
 
 export const prizes: typeof En = {
+  posterSoon: 'Постер с призами скоро появится',
+  fullEdition: 'Открыть выпуск целиком',
   prizesGiven: 'Вручённые призы: ',
   photoAlt: 'Все призы этого сезона вместе',
   label: 'Призы',

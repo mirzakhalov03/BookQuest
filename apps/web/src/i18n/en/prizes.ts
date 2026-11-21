@@ -1,4 +1,6 @@
 export const prizes = {
+  posterSoon: 'The prize poster is coming soon',
+  fullEdition: 'See the full edition',
   prizesGiven: 'Prizes given: ',
   photoAlt: 'All the prizes for this edition, together',
   label: 'Prizes',

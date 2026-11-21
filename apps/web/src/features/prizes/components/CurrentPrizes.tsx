@@ -3,7 +3,6 @@ import { isNotFound } from '@/lib/api/client';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
-import { hasAnyPrize } from '@bookquest/shared';
 import { PrizeShowcase } from './PrizeShowcase';
 import { useT } from '@/i18n';
 
@@ -27,7 +26,6 @@ export function CurrentPrizes() {
     return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
-  const hasPrizes = hasAnyPrize(quest.prizes);
   const edition = t.common.editionYear(quest.edition, quest.year);
 
   return (
@@ -37,11 +35,7 @@ export function CurrentPrizes() {
         <h1 className="type-display text-3xl text-paper">{t.prizes.upForWinners}</h1>
       </header>
 
-      {hasPrizes ? (
-        <PrizeShowcase prizes={quest.prizes} label={edition} />
-      ) : (
-        <p className="text-taupe">{t.prizes.notAnnounced}</p>
-      )}
+      <PrizeShowcase prizes={quest.prizes} label={edition} />
     </section>
   );
 }
