@@ -1,0 +1,49 @@
+apps/web/src/features/admin/quest/NewEditionPage.tsx
+  s_a2836ae43a9405::t_d250af924bbdb1 80-82
+apps/web/src/features/admin/quest/QuestEditorPage.tsx
+  s_a2836ae43a9405::t_1c36377775cd83 62-64
+apps/web/src/features/admin/quest/components/BookFieldsSection.tsx
+  s_a2836ae43a9405::t_05295bae22b79a 36-37,59
+apps/web/src/features/admin/quest/components/DateTimelineField.tsx
+  s_a2836ae43a9405::t_5de3b96f72f7c8 25,50-51
+apps/web/src/features/admin/quest/components/ResourceListEditor.tsx
+  s_a2836ae43a9405::t_253d6a8284cb8a 71
+apps/web/src/features/admin/quizzes/QuizEditorPage.tsx
+  s_a2836ae43a9405::t_badfacc5d4ce58 57-59
+apps/web/src/features/admin/quizzes/components/NewQuizSheet.tsx
+  s_a2836ae43a9405::t_a42df9b56b07f7 43
+apps/web/src/features/admin/quizzes/components/QuestionEditor.tsx
+  s_a2836ae43a9405::t_28312ce3871ad7 80,121
+apps/web/src/features/admin/quizzes/components/QuestionList.tsx
+  s_a2836ae43a9405::t_d2d827f08473bd 19,65-67,99-106,126,136,197,224
+apps/web/src/features/admin/quizzes/components/QuizDetailsSection.tsx
+  s_a2836ae43a9405::t_bf68c95d060168 22,30
+apps/web/src/i18n/en/adminQuest.ts
+  s_a2836ae43a9405::t_6d9c50c2faeff6 37-39,143
+apps/web/src/i18n/en/adminQuiz.ts
+  s_a2836ae43a9405::t_d824dd9dbb4392 19,49-52
+apps/web/src/i18n/ru/adminQuest.ts
+  s_a2836ae43a9405::t_19e24ac1d662dd 37-39,143
+apps/web/src/i18n/ru/adminQuiz.ts
+  s_a2836ae43a9405::t_91cf20b91e0995 19,49-52
+apps/web/src/i18n/uz/adminQuest.ts
+  s_a2836ae43a9405::t_f09b983399ed8d 36-38,142
+apps/web/src/i18n/uz/adminQuiz.ts
+  s_a2836ae43a9405::t_a639ac2029b1e5 18,48-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "750a5036e8d28d5664307a574aef2b0aa1fefc90",
+  "prompts": {},
+  "sessions": {
+    "s_a2836ae43a9405": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b97ad509-f90c-44df-b028-629768ad274a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
