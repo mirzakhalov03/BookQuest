@@ -113,12 +113,6 @@ export function getInitDataUserId(): string | null {
   return id == null ? null : String(id);
 }
 
-/** The Telegram client's language ("uz", "ru", "en-GB"…), or `null` outside Telegram. */
-export function getTelegramLanguageCode(): string | null {
-  const code = getTelegramWebApp()?.initDataUnsafe?.user?.language_code ?? getInitDataUser()?.language_code;
-  return typeof code === 'string' && code ? code : null;
-}
-
 /** Telegram's header back button; `null` on the web or old clients. Screens use `useTelegramBackButton`. */
 export function getTelegramBackButton(): TelegramBackButton | null {
   return getTelegramWebApp()?.BackButton ?? null;
