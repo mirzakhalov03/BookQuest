@@ -55,10 +55,9 @@ export const quiz: typeof En = {
   resultsOnDate: (date) => `Natijalar: ${date}.`,
   reviewAnswers: 'Javoblarni ko‘rish',
   closedTitle: 'Test yopildi.',
-  facts: (questions, duration) => `${questions} · jami ${duration}`,
   howItWorks: 'Test qanday o‘tadi',
-  rules: (questions) => [
-    `${questions ?? 'Savollar'} birma-bir beriladi.`,
+  rules: [
+    'Savollar ketma-ket, birma-bir beriladi.',
     'Har bir savolning o‘z taymeri bor. Vaqt tugasa, keyingi savolga o‘tiladi.',
     'Orqaga qaytib bo‘lmaydi: tasdiqlangan javob o‘zgarmaydi.',
     'Chiqib ketsangiz ham taymer to‘xtamaydi, shuning uchun avval tinch vaqt toping.'

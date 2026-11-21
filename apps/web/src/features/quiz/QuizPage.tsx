@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { formatLongDate } from '@/lib/format';
 import { useQuizOverview } from './api/useQuizOverview';
 import { OverviewCard } from './components/OverviewCard';
+import { RulesCard } from './components/RulesSheet';
 import { useT } from '@/i18n';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
@@ -92,6 +93,7 @@ function SignedOut({ quest }: { quest: Quest }) {
         <h1 className="type-display text-3xl text-paper">{t.comingTitle}</h1>
       </header>
       <Countdown label={t.opensIn} target={target} dateText={formatLongDate(quest.quizOpensAt)} onComplete={refreshQuest} />
+      <RulesCard />
       <Button to="/me" className="self-center">
         {t.signInToPlay}
       </Button>

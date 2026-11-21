@@ -3,8 +3,9 @@ import type { Quest, QuizOverview } from '@bookquest/shared';
 import { Button } from '@/components/ui/Button';
 import { Countdown } from '@/components/ui/Countdown';
 import { EmptyState } from '@/components/feedback/EmptyState';
-import { formatCount, formatDuration, formatLongDate } from '@/lib/format';
-import { RulesList } from './RulesSheet';
+import { formatCount, formatLongDate } from '@/lib/format';
+import { useT } from '@/i18n';
+import { RulesCard } from './RulesSheet';
 import { StartCta } from './StartCta';
 import { CompletionScreen } from './CompletionScreen';
 
@@ -17,66 +18,59 @@ interface OverviewCardProps {
 
 /** One primary card per overview state (§4.1). `results` never gets here: the page redirects. */
 export function OverviewCard({ overview, quest, onRefresh }: OverviewCardProps) {
+  const t = useT();
+  const q = t.quiz;
   const { state, window: quizWindow, quiz, attempt } = overview;
   const opensAt = useMemo(() => (quizWindow ? new Date(quizWindow.opensAt) : null), [quizWindow]);
 
   switch (state) {
     case 'no_quest':
     case 'results':
-      return <EmptyState title="No quiz scheduled" body="Check back once the next edition opens." />;
+      return <EmptyState title={q.noQuizTitle} body={t.common.checkBackNextEdition} />;
 
     case 'not_registered': {
       const closed = quest ? Date.now() >= Date.parse(quest.readingDeadline) : false;
       return (
-        <Card label="Quiz" title={closed ? 'Registration closed' : 'Register to take part'}>
-          {quizWindow && <p className="m-0 text-paper-dim">The quiz opens {formatLongDate(quizWindow.opensAt)}.</p>}
+        <Card label={q.label} title={closed ? q.registrationClosedTitle : q.registerTitle}>
+          {quizWindow && <p className="m-0 text-paper-dim">{q.quizOpensOn(formatLongDate(quizWindow.opensAt))}</p>}
           {closed ? (
-            <p className="m-0 text-taupe">Registration for this edition has ended. See you at the next one.</p>
+            <p className="m-0 text-taupe">{q.registrationEnded}</p>
           ) : (
             <Button to="/me" className="self-center">
-              Register to take part
+              {q.registerTitle}
             </Button>
           )}
         </Card>
       );
     }
 
+    // Before quiz day: only when it opens and how it works. The quiz itself stays a surprise.
     case 'not_configured':
-      return (
-        <Card label="Quiz" title="Questions are being prepared">
-          {opensAt && <Countdown label="Quiz opens in" target={opensAt} dateText={formatLongDate(opensAt)} onComplete={onRefresh} />}
-        </Card>
-      );
-
     case 'upcoming':
       return (
-        <Card label="Quiz" title={quiz?.title ?? 'Quiz day is coming'}>
-          {quiz?.description && <p className="m-0 max-w-prose text-paper-dim">{quiz.description}</p>}
-          {opensAt && <Countdown label="Quiz opens in" target={opensAt} dateText={formatLongDate(opensAt)} onComplete={onRefresh} />}
-          {quiz && <QuizFacts quiz={quiz} />}
-          <RulesCard quiz={quiz} />
+        <Card label={q.label} title={q.comingTitle}>
+          {opensAt && <Countdown label={q.opensIn} target={opensAt} dateText={formatLongDate(opensAt)} onComplete={onRefresh} />}
+          <RulesCard />
         </Card>
       );
 
     case 'open':
       return (
-        <Card label="Quiz" title={quiz?.title ?? 'The quiz'}>
+        <Card label={q.label} title={quiz?.title ?? q.theQuiz}>
           {quiz?.description && <p className="m-0 max-w-prose text-paper-dim">{quiz.description}</p>}
           {quizWindow && <StartCta window={quizWindow} quiz={quiz} onWindowChange={onRefresh} />}
-          <RulesCard quiz={quiz} />
+          <RulesCard />
         </Card>
       );
 
     case 'in_progress':
       return (
-        <Card label="Quiz in progress" title="Continue quiz">
+        <Card label={q.inProgressLabel} title={q.continueQuiz}>
           {attempt && (
-            <p className="m-0 text-paper-dim">
-              {formatCount(attempt.answered)} of {formatCount(attempt.total)} answered
-            </p>
+            <p className="m-0 text-paper-dim">{q.answeredOf(formatCount(attempt.answered), formatCount(attempt.total))}</p>
           )}
           <Button to="/quiz/play" className="self-center">
-            Continue quiz
+            {q.continueQuiz}
           </Button>
         </Card>
       );
@@ -86,16 +80,16 @@ export function OverviewCard({ overview, quest, onRefresh }: OverviewCardProps) 
 
     case 'missed':
       return (
-        <Card label="Quiz" title="The quiz has closed.">
-          {quizWindow && <p className="m-0 text-taupe">Results on {formatLongDate(quizWindow.resultsAt)}.</p>}
+        <Card label={q.label} title={q.closedTitle}>
+          {quizWindow && <p className="m-0 text-taupe">{q.resultsOnDate(formatLongDate(quizWindow.resultsAt))}</p>}
         </Card>
       );
 
     case 'voided':
       return (
-        <Card label="Quiz" title="Attempt withdrawn">
-          <p className="m-0 text-paper-dim">Your attempt was withdrawn by the organisers.</p>
-          {attempt?.voidReason && <p className="m-0 text-taupe">Reason: {attempt.voidReason}</p>}
+        <Card label={q.label} title={q.withdrawnTitle}>
+          <p className="m-0 text-paper-dim">{q.withdrawnBody}</p>
+          {attempt?.voidReason && <p className="m-0 text-taupe">{q.withdrawnReason(attempt.voidReason)}</p>}
         </Card>
       );
   }
@@ -110,22 +104,5 @@ function Card({ label, title, children }: { label: string; title: string; childr
       </header>
       {children}
     </section>
-  );
-}
-
-function QuizFacts({ quiz }: { quiz: NonNullable<QuizOverview['quiz']> }) {
-  return (
-    <p className="m-0 text-paper-dim">
-      {formatCount(quiz.questionCount)} questions · {formatDuration(quiz.totalSeconds * 1000)} in total
-    </p>
-  );
-}
-
-function RulesCard({ quiz }: { quiz: QuizOverview['quiz'] }) {
-  return (
-    <div className="rounded-box border border-paper/10 bg-ash/60 p-4 text-left">
-      <p className="type-label mb-3">How it works</p>
-      <RulesList quiz={quiz} />
-    </div>
   );
 }

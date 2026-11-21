@@ -64,7 +64,7 @@ export function StartCta({ window: quizWindow, quiz, onWindowChange }: StartCtaP
         </p>
       )}
       <Countdown label={t.closesIn} target={closesAt} dateText={formatLongDate(closesAt)} onComplete={onWindowChange} />
-      <RulesSheet open={rulesOpen} quiz={quiz} busy={start.isPending} onClose={() => setRulesOpen(false)} onReady={begin} />
+      <RulesSheet open={rulesOpen} busy={start.isPending} onClose={() => setRulesOpen(false)} onReady={begin} />
     </section>
   );
 }

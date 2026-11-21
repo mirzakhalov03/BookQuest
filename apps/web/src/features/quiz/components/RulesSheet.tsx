@@ -1,21 +1,17 @@
-import type { QuizOverview } from '@bookquest/shared';
 import { Sheet } from '@/components/ui/Sheet';
 import { Button } from '@/components/ui/Button';
-import { formatCount } from '@/lib/format';
 import { useT } from '@/i18n';
 
 interface RulesSheetProps {
   open: boolean;
-  quiz: NonNullable<QuizOverview['quiz']> | null;
   busy: boolean;
   onClose: () => void;
   onReady: () => void;
 }
 
 /** The four rules (§4.2 step 1), shared by the sheet and the rules card so the wording lives once. */
-export function RulesList({ quiz }: { quiz: RulesSheetProps['quiz'] }) {
-  const t = useT();
-  const rules = t.quiz.rules(quiz ? t.common.questions(quiz.questionCount, formatCount(quiz.questionCount)) : null);
+export function RulesList() {
+  const rules = useT().quiz.rules;
   return (
     <ol className="m-0 flex list-none flex-col gap-3 p-0">
       {rules.map((rule, i) => (
@@ -30,8 +26,19 @@ export function RulesList({ quiz }: { quiz: RulesSheetProps['quiz'] }) {
   );
 }
 
+/** The rules on the quiz page itself, before anyone presses start. */
+export function RulesCard() {
+  const t = useT().quiz;
+  return (
+    <div className="rounded-box border border-paper/10 bg-ash/60 p-4 text-left">
+      <p className="type-label mb-3">{t.howItWorks}</p>
+      <RulesList />
+    </div>
+  );
+}
+
 /** One confirm step before the clock starts: the only friction, and it stops an accidental start. */
-export function RulesSheet({ open, quiz, busy, onClose, onReady }: RulesSheetProps) {
+export function RulesSheet({ open, busy, onClose, onReady }: RulesSheetProps) {
   const t = useT().quiz;
   return (
     <Sheet
@@ -49,7 +56,7 @@ export function RulesSheet({ open, quiz, busy, onClose, onReady }: RulesSheetPro
         </>
       }
     >
-      <RulesList quiz={quiz} />
+      <RulesList />
     </Sheet>
   );
 }

@@ -54,10 +54,9 @@ export const quiz = {
   resultsOnDate: (date: string) => `Results on ${date}.`,
   reviewAnswers: 'Review answers',
   closedTitle: 'The quiz has closed.',
-  facts: (questions: string, duration: string) => `${questions} · ${duration} in total`,
   howItWorks: 'How it works',
-  rules: (questions: string | null) => [
-    `${questions ?? 'A set of questions'}, one at a time.`,
+  rules: [
+    'Questions come one at a time, in order.',
     'Each question has its own timer. When it runs out, the quiz moves on.',
     'No going back: a confirmed answer is final.',
     'The timer keeps running if you leave, so find a quiet moment first.'
