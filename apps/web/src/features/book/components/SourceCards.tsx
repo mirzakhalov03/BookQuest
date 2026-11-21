@@ -3,7 +3,7 @@ import { ChevronRight } from 'lucide-react';
 import { SOURCE_CARDS, type Book, type SourceCard } from '@bookquest/shared';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
-import { CARD_ACCENT, CARD_ICON, resourcesFor } from './cardConfig';
+import { CARD_ACCENT, CARD_ICON, SELF_CONTAINED, resourcesFor } from './cardConfig';
 import { SourceSheet } from './SourceSheet';
 
 /** The four ways to get the book. An empty one stays visible but dimmed, so readers know it's coming. */
@@ -18,7 +18,8 @@ export function SourceCards({ book }: { book: Book }) {
         {SOURCE_CARDS.map((card) => {
           const count = resourcesFor(book, card).length;
           const Icon = CARD_ICON[card];
-          const empty = count === 0;
+          // Admin-written steps or self-contained defaults are worth opening even without links.
+          const empty = count === 0 && !SELF_CONTAINED.has(card) && !book.guides[card];
           return (
             <li key={card}>
               <button
@@ -42,7 +43,9 @@ export function SourceCards({ book }: { book: Book }) {
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="font-medium text-paper">{t[card].title}</span>
                   <span className="text-sm text-taupe">{t[card].hint}</span>
-                  <span className="text-xs text-taupe-dim">{empty ? t.empty : t.places(count)}</span>
+                  {(empty || count > 0) && (
+                    <span className="text-xs text-taupe-dim">{empty ? t.empty : t.places(count)}</span>
+                  )}
                 </span>
                 {!empty && (
                   <ChevronRight

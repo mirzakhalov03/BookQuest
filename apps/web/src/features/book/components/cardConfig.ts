@@ -18,3 +18,6 @@ export const CARD_ACCENT: Record<SourceCard, string> = {
 
 export const resourcesFor = (book: Book, card: SourceCard): BookResource[] =>
   book.resources.filter((resource) => SOURCE_CARD_KINDS[card].includes(resource.kind));
+
+// Cards whose steps stand on their own (an app to install), so they open even with no links.
+export const SELF_CONTAINED: ReadonlySet<SourceCard> = new Set(['ebook']);

@@ -9,8 +9,8 @@ export const book: typeof En = {
     linksHeading: 'Havolalar',
     ebook: {
       title: 'Elektron kitob',
-      hint: 'Telefon yoki noutbukda o‘qing',
-      steps: ['Quyidan formatni tanlang: PDF hamma joyda ochiladi, EPUB o‘qish ilovalari uchun qulay.', 'Brauzer yoki o‘qish ilovasida oching.', 'Qayerda to‘xtaganingizni belgilab qo‘ying.']
+      hint: 'Hilol eBook ilovasida bepul',
+      steps: ['App Store yoki Play Market’dan «Hilol eBook» ilovasini yuklab oling va o‘rnating.', 'Ilova ichida kitob nomini qidiring.', 'Kitobni bepul oling va o‘qing.']
     },
     movie: {
       title: 'Film',

@@ -7,8 +7,8 @@ export const book = {
     linksHeading: 'Links',
     ebook: {
       title: 'E-book',
-      hint: 'Read on your phone or laptop',
-      steps: ['Pick a format below: PDF opens anywhere, EPUB suits reader apps.', 'Open it in your browser or a reader app.', 'Bookmark where you stop so the quiz finds you ready.']
+      hint: 'Free in the Hilol eBook app',
+      steps: ['Download and install “Hilol eBook” from the App Store or Google Play.', 'Search for the book’s title in the app.', 'Get the book and read it for free.']
     },
     movie: {
       title: 'Movie',
