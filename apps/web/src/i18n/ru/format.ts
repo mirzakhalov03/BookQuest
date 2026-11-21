@@ -10,5 +10,6 @@ export const format: typeof En = {
   days: 'Дни',
   hours: 'Часы',
   minutes: 'Минуты',
-  seconds: 'Секунды'
+  seconds: 'Секунды',
+  manualDates: null
 };

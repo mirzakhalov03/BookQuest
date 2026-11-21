@@ -1,3 +1,9 @@
+/** Hand-written dates for a language whose `Intl` month names some devices lack; `null` = trust `Intl`. */
+export type ManualDates = {
+  long: (day: number, month: number, year: number) => string;
+  short: (day: number, month: number) => string;
+};
+
 export const format = {
   justNow: 'just now',
   minutesAgo: (n: number) => `${n} min ago`,
@@ -8,5 +14,6 @@ export const format = {
   days: 'Days',
   hours: 'Hours',
   minutes: 'Minutes',
-  seconds: 'Seconds'
+  seconds: 'Seconds',
+  manualDates: null as ManualDates | null
 };

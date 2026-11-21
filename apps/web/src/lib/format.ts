@@ -47,12 +47,16 @@ const toDate = (value: string | Date) => (typeof value === 'string' ? new Date(v
  */
 export function formatLongDate(value: string | Date): string {
   const date = toDate(value);
-  return `${formatter('date').format(date)}, ${formatter('time').format(date)}`;
+  return `${formatDate(date)}, ${formatter('time').format(date)}`;
 }
 
 /** "14 December 2026" — a date that is a fact on a document (a certificate's issue date), not a moment. */
 export function formatDate(value: string | Date): string {
-  return formatter('date').format(toDate(value));
+  const date = toDate(value);
+  const manual = getT().format.manualDates;
+  return manual
+    ? manual.long(date.getDate(), date.getMonth(), date.getFullYear())
+    : formatter('date').format(date);
 }
 
 /** "27/09/26, 22:16" — a timestamp in a dense list, where the month name costs too much width. */
@@ -76,7 +80,9 @@ export function formatTimeAgo(value: string | Date, now = new Date()): string {
 
 /** "5 Apr" — a date inside a one-line summary, where year and time are noise. */
 export function formatShortDate(value: string | Date): string {
-  return formatter('shortDate').format(toDate(value));
+  const date = toDate(value);
+  const manual = getT().format.manualDates;
+  return manual ? manual.short(date.getDate(), date.getMonth()) : formatter('shortDate').format(date);
 }
 
 /** "1,204" — a quantity, so it gets thousands separators. Readers, questions, marks. */
