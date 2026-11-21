@@ -1,6 +1,7 @@
 import { Screen } from '@/components/layout/Screen';
 import { CurrentPrizes } from './components/CurrentPrizes';
-import { PreviousQuests } from './components/PreviousQuests';
+// Hidden for now; restore with the line in the JSX below.
+// import { PreviousQuests } from './components/PreviousQuests';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
 /**
@@ -12,7 +13,7 @@ export function PrizesPage() {
   return (
     <Screen className="gap-10">
       <CurrentPrizes />
-      <PreviousQuests />
+      {/* <PreviousQuests /> */}
     </Screen>
   );
 }
