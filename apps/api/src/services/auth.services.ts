@@ -24,6 +24,13 @@ import {
   upsertUserFromTelegramProfile
 } from './user.services.js';
 
+/** Every Telegram proof fails the same way: logged with its reason, refused with one message. */
+function requireVerified<T extends { ok: true }>(result: T | { ok: false; reason: string }, context: string): T {
+  if (result.ok) return result;
+  logger.warn({ reason: result.reason }, context);
+  throw ApiError.unauthorized('That Telegram sign-in could not be verified.', 'telegram_unverified');
+}
+
 const INCORRECT_CREDENTIALS = 'Incorrect phone number or password.';
 const DEFAULT_ADMIN_NAME = 'Organiser';
 
@@ -59,12 +66,7 @@ export async function issueSession(user: UserDocument): Promise<Session> {
 
 /** POST /api/v1/auth/telegram — the Mini App's `initData` exchange. */
 export async function authenticateWithTelegram(initData: string): Promise<Session> {
-  const verified = verifyInitData(initData);
-
-  if (!verified.ok) {
-    logger.warn({ reason: verified.reason }, 'Rejected Telegram initData');
-    throw ApiError.unauthorized('That Telegram sign-in could not be verified.', 'telegram_unverified');
-  }
+  const verified = requireVerified(verifyInitData(initData), 'Rejected Telegram initData');
 
   const user = await upsertUserFromTelegramProfile(verified.profile);
   return issueSession(user);
@@ -74,12 +76,7 @@ export async function authenticateWithTelegram(initData: string): Promise<Sessio
 export async function authenticateWithTelegramWidget(
   payload: TelegramWidgetAuthPayload
 ): Promise<Session> {
-  const verified = verifyLoginWidget(payload);
-
-  if (!verified.ok) {
-    logger.warn({ reason: verified.reason }, 'Rejected Telegram widget sign-in');
-    throw ApiError.unauthorized('That Telegram sign-in could not be verified.', 'telegram_unverified');
-  }
+  const verified = requireVerified(verifyLoginWidget(payload), 'Rejected Telegram widget sign-in');
 
   const user = await upsertUserFromTelegramProfile(verified.profile);
   return issueSession(user);
@@ -125,12 +122,7 @@ export async function linkTelegram(
   user: UserDocument,
   payload: TelegramWidgetAuthPayload
 ): Promise<Session> {
-  const verified = verifyLoginWidget(payload);
-
-  if (!verified.ok) {
-    logger.warn({ reason: verified.reason }, 'Rejected Telegram widget sign-in');
-    throw ApiError.unauthorized('That Telegram sign-in could not be verified.', 'telegram_unverified');
-  }
+  const verified = requireVerified(verifyLoginWidget(payload), 'Rejected Telegram widget sign-in');
 
   return issueSession(await linkTelegramToUser(user, verified.profile));
 }
