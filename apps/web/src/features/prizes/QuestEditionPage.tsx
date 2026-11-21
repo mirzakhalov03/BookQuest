@@ -128,7 +128,7 @@ function PrizesSection({ quest }: { quest: Quest }) {
   return (
     <section className="flex flex-col gap-2">
       <p className="type-label">{t.prizes.label}</p>
-      <PrizeShowcase prizes={quest.prizes} label={t.common.editionYear(quest.edition, quest.year)} />
+      <PrizeShowcase prizes={quest.prizes} label={t.common.editionYear(quest.edition, quest.year)} awaitingPoster={false} />
     </section>
   );
 }
