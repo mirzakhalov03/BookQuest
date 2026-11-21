@@ -51,11 +51,12 @@ export function looksLikeMashing(word: string): boolean {
   return w.length >= 5 && vowelCount / w.length < 0.18;
 }
 
-/** "sofia   karimova" -> "Sofia Karimova", "o'brien" -> "O'Brien" */
+/** "sofia   karimova" -> "Sofia Karimova", "sug'diyona" -> "Sug'diyona", "ali-xon" -> "Ali-Xon" */
 export function titleCaseWord(word: string): string {
+  // Apostrophes are not boundaries: in Uzbek they belong to the letter (o', g').
   return word
     .toLowerCase()
-    .replace(/(^|[-'’])(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toUpperCase())
+    .replace(/(^|-)(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toUpperCase())
     .replace(/^Mc(\p{L})/u, (_, ch: string) => 'Mc' + ch.toUpperCase());
 }
 
