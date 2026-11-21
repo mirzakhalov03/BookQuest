@@ -19,5 +19,8 @@ export const CARD_ACCENT: Record<SourceCard, string> = {
 export const resourcesFor = (book: Book, card: SourceCard): BookResource[] =>
   book.resources.filter((resource) => SOURCE_CARD_KINDS[card].includes(resource.kind));
 
-// Cards whose steps stand on their own (an app to install), so they open even with no links.
-export const SELF_CONTAINED: ReadonlySet<SourceCard> = new Set(['ebook']);
+/** The cards readers see, in order. Audio isn't offered for now; its data stays so it can return. */
+export const SHOWN_CARDS: readonly SourceCard[] = ['ebook', 'movie', 'offline'];
+
+// Cards whose steps stand on their own (an app to install, shops to ask), so they open even with no links.
+export const SELF_CONTAINED: ReadonlySet<SourceCard> = new Set(['ebook', 'offline']);

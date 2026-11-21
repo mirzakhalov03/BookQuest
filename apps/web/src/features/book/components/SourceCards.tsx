@@ -1,9 +1,9 @@
 import { useState, type CSSProperties } from 'react';
 import { ChevronRight } from 'lucide-react';
-import { SOURCE_CARDS, type Book, type SourceCard } from '@bookquest/shared';
+import type { Book, SourceCard } from '@bookquest/shared';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
-import { CARD_ACCENT, CARD_ICON, SELF_CONTAINED, resourcesFor } from './cardConfig';
+import { CARD_ACCENT, CARD_ICON, SELF_CONTAINED, SHOWN_CARDS, resourcesFor } from './cardConfig';
 import { SourceSheet } from './SourceSheet';
 
 /** The four ways to get the book. An empty one stays visible but dimmed, so readers know it's coming. */
@@ -14,8 +14,8 @@ export function SourceCards({ book }: { book: Book }) {
   return (
     <section className="flex flex-col gap-3">
       <h2 className="type-label m-0">{t.heading}</h2>
-      <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2">
-        {SOURCE_CARDS.map((card) => {
+      <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 lg:grid-cols-3">
+        {SHOWN_CARDS.map((card) => {
           const count = resourcesFor(book, card).length;
           const Icon = CARD_ICON[card];
           // Admin-written steps or self-contained defaults are worth opening even without links.

@@ -4,7 +4,7 @@ import { TextArea } from '@/components/ui/TextArea';
 import { Toggle } from '@/components/ui/Toggle';
 import type { QuestFormState } from '../questForm';
 import { ImagePicker } from './ImagePicker';
-import { SOURCE_CARDS } from '@bookquest/shared';
+import { SHOWN_CARDS } from '@/features/book/components/cardConfig';
 import { useT } from '@/i18n';
 
 interface BookFieldsSectionProps {
@@ -80,7 +80,7 @@ export function BookFieldsSection({ onCoverUploadingChange }: BookFieldsSectionP
       <fieldset className="m-0 flex flex-col gap-4 border-0 p-0">
         <legend className="type-label mb-1">{t.cardSteps}</legend>
         <p className="m-0 -mt-2 text-sm text-taupe">{t.cardStepsHint}</p>
-        {SOURCE_CARDS.map((card) => (
+        {SHOWN_CARDS.map((card) => (
           <TextArea
             key={card}
             label={bookCards[card].title}

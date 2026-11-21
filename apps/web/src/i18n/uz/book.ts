@@ -24,8 +24,8 @@ export const book: typeof En = {
     },
     offline: {
       title: 'Do‘kondan sotib olish',
-      hint: 'HilolNashr hamkorlari va do‘konlari',
-      steps: ['Quyidagi ro‘yxatdan do‘konni tanlang.', 'Kitobni nomi va muallifi bo‘yicha so‘rang.', 'Chekni saqlab qo‘ying: ba’zi hamkorlar nuqsonli nusxani almashtirib beradi.']
+      hint: 'Hilol Nashr, Qamar va boshqa kitob do‘konlari',
+      steps: ['Hilol Nashr yoki Qamar do‘koniga, yoki yaqiningizdagi istalgan kitob do‘koniga boring.', 'Kitobni nomi va muallifi bo‘yicha so‘rang.', 'Mavjud bo‘lmasa, buyurtma qilib berishlarini so‘rang.']
     }
   },
   leavingTitle: 'BookQuest’dan chiqish',

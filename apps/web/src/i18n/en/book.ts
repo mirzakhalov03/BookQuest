@@ -22,8 +22,8 @@ export const book = {
     },
     offline: {
       title: 'Buy offline',
-      hint: 'HilolNashr partners and shops',
-      steps: ['Choose a shop from the list below.', 'Ask for the book by its title and author.', 'Keep the receipt: some partners swap a damaged copy.']
+      hint: 'Hilol Nashr, Qamar and other bookshops',
+      steps: ['Visit a Hilol Nashr or Qamar store, or any bookshop near you.', 'Ask for the book by its title and author.', 'Not in stock? Ask them to order it for you.']
     }
   },
   leavingTitle: 'Leaving BookQuest',
