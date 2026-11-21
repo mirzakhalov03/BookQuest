@@ -9,13 +9,11 @@ import type {
 } from '@bookquest/shared';
 import { objectId } from './fixtures';
 import goldArt from '@/assets/certificates/gold.svg?no-inline';
-import silverArt from '@/assets/certificates/silver.svg?no-inline';
-import bronzeArt from '@/assets/certificates/bronze.svg?no-inline';
 import participantArt from '@/assets/certificates/participant.svg?no-inline';
 
 // The real API renders a PNG; the mock can't run satori, so each tier gets a labelled stand-in.
 // ?no-inline: a data: URI would break Download, which appends ?download=1.
-const MOCK_ART = { gold: goldArt, silver: silverArt, bronze: bronzeArt, participant: participantArt } as const;
+const MOCK_ART = { winner: goldArt, participant: participantArt } as const;
 
 /**
  * The people in the mock: name/contact generation for whoever registers

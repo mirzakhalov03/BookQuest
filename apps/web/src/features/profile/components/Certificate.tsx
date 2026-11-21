@@ -61,7 +61,7 @@ export function Certificate({ data }: { data: CertificateData }) {
           alt={t.profile.certificateAlt(data.fullName, data.questYear, data.placing ? t.common.place(data.placing) : null)}
           className="certificate-image"
         />
-        <figcaption className="cert-chip">{t.profile.tiers[data.tier]}</figcaption>
+        <figcaption className="cert-chip">{data.placing ? t.common.place(data.placing) : t.profile.tiers[data.tier]}</figcaption>
       </figure>
       <div className="flex flex-wrap gap-2">
         {inTelegram ? (

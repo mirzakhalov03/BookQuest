@@ -146,9 +146,7 @@ export const admin: typeof En = {
     readyToSend: 'Сертификаты готовы к отправке',
     title: 'Сертификаты',
     tiers: {
-      gold: '1-е место',
-      silver: '2-е место',
-      bronze: '3-е место',
+      winner: 'Победители · 1–5 места',
       participant: 'Остальные участники'
     },
     sampleAlt: (tier) => `Образец сертификата: ${tier}`,

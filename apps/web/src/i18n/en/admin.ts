@@ -149,9 +149,7 @@ export const admin = {
     readyToSend: 'Certificates are ready to send',
     title: 'Certificates',
     tiers: {
-      gold: '1st place',
-      silver: '2nd place',
-      bronze: '3rd place',
+      winner: 'Winners · 1st–5th',
       participant: 'Everyone else'
     },
     sampleAlt: (tier: string) => `Sample certificate: ${tier}`,

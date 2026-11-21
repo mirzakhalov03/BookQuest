@@ -147,9 +147,7 @@ export const admin: typeof En = {
     readyToSend: 'Sertifikatlarni yuborish mumkin',
     title: 'Sertifikatlar',
     tiers: {
-      gold: '1-o‘rin',
-      silver: '2-o‘rin',
-      bronze: '3-o‘rin',
+      winner: 'G‘oliblar · 1–5-o‘rin',
       participant: 'Qolgan ishtirokchilar'
     },
     sampleAlt: (tier) => `Sertifikat namunasi: ${tier}`,

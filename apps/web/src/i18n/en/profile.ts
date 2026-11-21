@@ -5,7 +5,7 @@ export const profile = {
   certTeaser: 'Finish the quiz to earn your certificate',
   certResultsOn: (date: string) => `Results on ${date}`,
   certMissed: "You didn't finish this edition. See you next time",
-  tiers: { gold: 'Gold', silver: 'Silver', bronze: 'Bronze', participant: 'Participant' } satisfies Record<CertificateTier, string>,
+  tiers: { winner: 'Winner', participant: 'Participant' } satisfies Record<CertificateTier, string>,
   verifyCode: (code: string) => `Verify code ${code}`,
   meetMascot: 'Meet your mascot! Tap to change it',
   loading: 'Finding your number…',

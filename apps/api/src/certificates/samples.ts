@@ -15,12 +15,11 @@ const BASE: Omit<CertificateData, 'fullName' | 'placing' | 'tier'> = {
 
 /** Fixed on purpose: a public preview that accepted a name would be a forgery tool. */
 export const CERTIFICATE_SAMPLES = {
-  gold: { ...BASE, fullName: 'Sofia Karimova', placing: 1, tier: 'gold' },
-  silver: { ...BASE, fullName: 'Aziz Rahimov', placing: 2, tier: 'silver' },
-  bronze: { ...BASE, fullName: 'Malika Yusupova', placing: 3, tier: 'bronze' },
+  winner1: { ...BASE, fullName: 'Sofia Karimova', placing: 1, tier: 'winner' },
+  winner4: { ...BASE, fullName: 'Aziz Rahimov', placing: 4, tier: 'winner' },
   participant: { ...BASE, fullName: 'Bobur Tursunov', placing: null, tier: 'participant' },
   long: { ...BASE, fullName: 'Muhammadabdulaziz Abdurakhmonova', placing: null, tier: 'participant' },
-  cyrillic: { ...BASE, fullName: 'Дилноза Абдуллаева', placing: 1, tier: 'gold' }
+  cyrillic: { ...BASE, fullName: 'Дилноза Абдуллаева', placing: 1, tier: 'winner' }
 } satisfies Record<string, CertificateData>;
 
 export type CertificateSampleKey = keyof typeof CERTIFICATE_SAMPLES;

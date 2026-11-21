@@ -106,9 +106,7 @@
   transform: none;
   opacity: 1;
 }
-.cert-frame[data-tier='gold'] { --tier: var(--color-gold-soft); }
-.cert-frame[data-tier='silver'] { --tier: #cdc6bb; }
-.cert-frame[data-tier='bronze'] { --tier: #c98a55; }
+.cert-frame[data-tier='winner'] { --tier: var(--color-gold-soft); }
 
 .cert-chip {
   position: absolute;

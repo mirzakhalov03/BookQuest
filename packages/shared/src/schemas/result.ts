@@ -24,18 +24,20 @@ export const questResultsSchema = z.object({
 
 export type QuestResults = z.infer<typeof questResultsSchema>;
 
-export const CERTIFICATE_TIERS = ['gold', 'silver', 'bronze', 'participant'] as const;
+/** Two designs: one for the prize places (1st–5th, rank printed on it), one for every other finisher. */
+export const CERTIFICATE_TIERS = ['winner', 'participant'] as const;
 export type CertificateTier = (typeof CERTIFICATE_TIERS)[number];
-export type CertificatePlacing = 1 | 2 | 3;
+export type CertificatePlacing = 1 | 2 | 3 | 4 | 5;
 
-const PODIUM_TIERS: Record<CertificatePlacing, CertificateTier> = { 1: 'gold', 2: 'silver', 3: 'bronze' };
+const isPlacing = (rank: number | null): rank is CertificatePlacing =>
+  rank !== null && Number.isInteger(rank) && rank >= 1 && rank <= 5;
 
 /** The one place a rank becomes a certificate tier, so the API and the web mock can never disagree. */
 export function certificateTier(rank: number | null): {
   placing: CertificatePlacing | null;
   tier: CertificateTier;
 } {
-  if (rank === 1 || rank === 2 || rank === 3) return { placing: rank, tier: PODIUM_TIERS[rank] };
+  if (isPlacing(rank)) return { placing: rank, tier: 'winner' };
   return { placing: null, tier: 'participant' };
 }
 
@@ -63,7 +65,7 @@ export const certificateDataSchema = z.object({
   bookTitle: z.string(),
   bookAuthor: z.string(),
   /** 1–3 for the podium, null for everyone else. Full ranks stay on the leaderboard. */
-  placing: z.union([z.literal(1), z.literal(2), z.literal(3)]).nullable(),
+  placing: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]).nullable(),
   tier: z.enum(CERTIFICATE_TIERS),
   /** How many finished — for copy like "among 412 readers"; the design may not use it. */
   finishedCount: z.number().int().nonnegative(),

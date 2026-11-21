@@ -5,7 +5,7 @@ export const profile: typeof En = {
   certTeaser: 'Пройдите тест, чтобы получить сертификат',
   certResultsOn: (date) => `Итоги ${date}`,
   certMissed: 'Вы не завершили этот сезон. До встречи в следующем',
-  tiers: { gold: 'Золото', silver: 'Серебро', bronze: 'Бронза', participant: 'Участник' },
+  tiers: { winner: 'Победитель', participant: 'Участник' },
   verifyCode: (code) => `Код проверки ${code}`,
   meetMascot: 'Знакомьтесь, ваш талисман! Нажмите, чтобы сменить',
   loading: 'Ищем ваш номер…',

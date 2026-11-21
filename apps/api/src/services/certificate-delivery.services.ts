@@ -22,8 +22,8 @@ import { buildCertificateData, certificateFileName, countFinishers } from './cer
 const CONCURRENCY = 10;
 const MAX_PER_SECOND = 25;
 
-const ORDINAL = { 1: '1st', 2: '2nd', 3: '3rd' } as const;
-const MEDAL = { 1: '🥇', 2: '🥈', 3: '🥉' } as const;
+const ORDINAL = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: '5th' } as const;
+const MEDAL = { 1: '🥇', 2: '🥈', 3: '🥉', 4: '🏅', 5: '🏅' } as const;
 
 type SendError = 'blocked' | 'failed' | 'no_telegram';
 

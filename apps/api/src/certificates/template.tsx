@@ -11,13 +11,11 @@ import type { CertificateData, CertificateTier } from '@bookquest/shared';
 export const IS_PLACEHOLDER_ART = true;
 
 const ACCENT: Record<CertificateTier, string> = {
-  gold: '#C8A24A',
-  silver: '#9AA3AD',
-  bronze: '#B87344',
+  winner: '#C8A24A',
   participant: '#E2632A'
 };
 
-const ORDINAL = { 1: '1st', 2: '2nd', 3: '3rd' } as const;
+const ORDINAL = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: '5th' } as const;
 
 // Satori can't auto-fit text, so the name steps down by length.
 function nameSize(name: string): number {
