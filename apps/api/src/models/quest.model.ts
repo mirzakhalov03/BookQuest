@@ -18,7 +18,13 @@ const bookSchema = new Schema(
     pages: { type: Number, required: true, min: 1 },
     coverUrl: { type: String, default: null },
     description: { type: String, default: null },
-    resources: { type: [bookResourceSchema], default: [] }
+    resources: { type: [bookResourceSchema], default: [] },
+    guides: {
+      ebook: { type: String, default: null },
+      movie: { type: String, default: null },
+      audio: { type: String, default: null },
+      offline: { type: String, default: null }
+    }
   },
   { _id: false }
 );

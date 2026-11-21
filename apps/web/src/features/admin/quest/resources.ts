@@ -14,6 +14,8 @@ const STORE_HOSTS = ['asaxiy.uz', 'book.uz', 'kitobxon.com', 'uzum.uz', 'amazon.
 
 const AUDIO_HOSTS = ['audible.', 'storytel.', 'soundcloud.com', 'podcasts.apple.com', 'open.spotify.com', 'music.youtube.com'];
 
+const VIDEO_HOSTS = ['youtube.com', 'youtu.be', 'vimeo.com', 'kinopoisk.', 'netflix.com'];
+
 /** A best guess the admin can still change — it only saves them picking from a list. */
 export function inferKind(url: string): BookResourceKind {
   let parsed: URL;
@@ -28,6 +30,7 @@ export function inferKind(url: string): BookResourceKind {
   if (/\.(mp3|m4a|m4b|aac|ogg)$/.test(path) || AUDIO_HOSTS.some((host) => parsed.hostname.includes(host))) {
     return 'audio';
   }
+  if (VIDEO_HOSTS.some((host) => parsed.hostname.includes(host))) return 'video';
   if (STORE_HOSTS.some((host) => parsed.hostname.includes(host)) || path.startsWith('/maps')) return 'store';
   return 'link';
 }
@@ -48,6 +51,8 @@ export function defaultLabel(kind: BookResourceKind, url: string): string {
       return 'EPUB';
     case 'audio':
       return getT().adminQuest.resources.audiobook;
+    case 'video':
+      return getT().adminQuest.resources.movie;
     case 'link':
     case 'store':
       return hostnameOf(url);

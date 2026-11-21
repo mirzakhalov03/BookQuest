@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BOOK_RESOURCE_KINDS, QUEST_PHASES } from '../constants/quest.js';
+import { BOOK_GUIDE_MAX, BOOK_RESOURCE_KINDS, QUEST_PHASES } from '../constants/quest.js';
 import { QUIZ_RESULTS_BUFFER_MS } from '../constants/quiz.js';
 
 // `.url()` alone admits javascript: and data: links, which participants would tap. A regex because shared has no URL global in its types.
@@ -13,13 +13,26 @@ export const bookResourceSchema = z.object({
 
 export type BookResource = z.infer<typeof bookResourceSchema>;
 
+const guideText = z.string().trim().max(BOOK_GUIDE_MAX).nullable();
+
+/** Steps shown in each card's sheet; null = the app's default steps for that card. */
+export const bookGuidesSchema = z.object({
+  ebook: guideText,
+  movie: guideText,
+  audio: guideText,
+  offline: guideText
+});
+
+export type BookGuides = z.infer<typeof bookGuidesSchema>;
+
 export const bookSchema = z.object({
   title: z.string(),
   author: z.string(),
   pages: z.number().int().positive(),
   coverUrl: z.string().url().nullable(),
   description: z.string().nullable(),
-  resources: z.array(bookResourceSchema)
+  resources: z.array(bookResourceSchema),
+  guides: bookGuidesSchema
 });
 
 export type Book = z.infer<typeof bookSchema>;

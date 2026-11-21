@@ -1,6 +1,6 @@
 import type { CreateQuestPayload, Prizes, Quest } from '@bookquest/shared';
 import { defaultDates, plusOneYear } from '../dates';
-import { formDates, toPrizeForm, toPrizes, toResources, trimmedOrNull, type QuestFormState } from './questForm';
+import { formDates, toGuides, toPrizeForm, toPrizes, toResources, trimmedOrNull, type QuestFormState } from './questForm';
 
 export interface EditionDraft {
   edition: number;
@@ -15,7 +15,8 @@ const EMPTY_BOOK: QuestFormState['book'] = {
   pages: '',
   coverUrl: '',
   description: '',
-  resources: []
+  resources: [],
+  guides: { ebook: '', movie: '', audio: '', offline: '' }
 };
 
 /**
@@ -74,7 +75,8 @@ export function buildCreatePayload(edition: number, values: QuestFormState): Cre
       pages: Number(values.book.pages),
       coverUrl: trimmedOrNull(values.book.coverUrl),
       description: trimmedOrNull(values.book.description),
-      resources: toResources(values.book.resources)
+      resources: toResources(values.book.resources),
+      guides: toGuides(values.book.guides)
     },
     prizes: toPrizes(values.prizes),
     bookRevealed: values.bookRevealed,

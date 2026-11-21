@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { QuestPhase } from '../constants/quest.js';
 import { QUIZ_DISTRIBUTIONS } from '../constants/quiz.js';
-import { bookResourceSchema, bookSchema, questSchema } from './quest.js';
+import { bookGuidesSchema, bookResourceSchema, bookSchema, questSchema } from './quest.js';
 import { quizConfigInputSchema } from './quiz.js';
 
 /**
@@ -16,7 +16,8 @@ const bookFields = {
   pages: z.number().int().positive().max(20_000),
   coverUrl: z.string().url().nullable(),
   description: z.string().trim().max(4000).nullable(),
-  resources: z.array(bookResourceSchema).max(12)
+  resources: z.array(bookResourceSchema).max(12),
+  guides: bookGuidesSchema
 };
 
 const prizeText = z.string().trim().max(200).nullable();
@@ -60,7 +61,8 @@ export const createQuestSchema = z.strictObject({
     ...bookFields,
     coverUrl: bookFields.coverUrl.default(null),
     description: bookFields.description.default(null),
-    resources: bookFields.resources.default([])
+    resources: bookFields.resources.default([]),
+    guides: bookFields.guides.default({ ebook: null, movie: null, audio: null, offline: null })
   }),
   prizes: z.strictObject(prizeFields).partial().optional(),
   // Launches are announcements, so a new edition starts with the book hidden.

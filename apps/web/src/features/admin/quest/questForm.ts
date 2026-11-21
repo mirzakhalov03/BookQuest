@@ -1,5 +1,5 @@
-import { PRIZE_PLACES, QUEST_DATE_FIELDS, type PrizePlaceKey } from '@bookquest/shared';
-import type { AdminQuest, Book, BookResource, Prizes, QuestDates, UpdateQuestPayload } from '@bookquest/shared';
+import { PRIZE_PLACES, QUEST_DATE_FIELDS, SOURCE_CARDS, type PrizePlaceKey, type SourceCard } from '@bookquest/shared';
+import type { AdminQuest, Book, BookGuides, BookResource, Prizes, QuestDates, UpdateQuestPayload } from '@bookquest/shared';
 import { toDateTimeLocalInput } from '@/lib/format';
 import { quizConfigChanged, type QuizConfigForm } from './quizConfig';
 
@@ -17,6 +17,7 @@ export interface QuestFormState {
     coverUrl: string;
     description: string;
     resources: ResourceDraft[];
+    guides: Record<SourceCard, string>;
   };
   /** Off keeps the book a secret from readers. */
   bookRevealed: boolean;
@@ -47,7 +48,8 @@ export function toFormState(quest: AdminQuest): QuestFormState {
       pages: String(quest.book.pages),
       coverUrl: quest.book.coverUrl ?? '',
       description: quest.book.description ?? '',
-      resources: quest.book.resources.map((resource) => ({ ...resource }))
+      resources: quest.book.resources.map((resource) => ({ ...resource })),
+      guides: toGuideForm(quest.book.guides)
     },
     bookRevealed: quest.bookRevealed,
     prizes: toPrizeForm(quest.prizes),
@@ -144,6 +146,8 @@ export function buildQuestPatch(initial: AdminQuest, form: QuestFormState): Upda
   const description = trimmedOrNull(form.book.description);
   if (description !== initial.book.description) book.description = description;
   const resources = toResources(form.book.resources);
+  const guides = toGuides(form.book.guides);
+  if (JSON.stringify(guides) !== JSON.stringify(initial.book.guides)) book.guides = guides;
   if (JSON.stringify(resources) !== JSON.stringify(initial.book.resources)) {
     book.resources = resources;
   }
@@ -171,4 +175,13 @@ export function buildQuestPatch(initial: AdminQuest, form: QuestFormState): Upda
   }
 
   return Object.keys(patch).length > 0 ? patch : null;
+}
+
+export function toGuideForm(guides: BookGuides): Record<SourceCard, string> {
+  return Object.fromEntries(SOURCE_CARDS.map((card) => [card, guides[card] ?? ''])) as Record<SourceCard, string>;
+}
+
+/** Blank steps mean "use the app's defaults". */
+export function toGuides(form: Record<SourceCard, string>): BookGuides {
+  return Object.fromEntries(SOURCE_CARDS.map((card) => [card, trimmedOrNull(form[card])])) as BookGuides;
 }

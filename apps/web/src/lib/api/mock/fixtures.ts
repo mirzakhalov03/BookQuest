@@ -58,8 +58,10 @@ export const CURRENT_QUEST: StoredQuest = {
         kind: 'epub'
       },
       { label: 'Audiobook (Uzbek)', url: 'https://t.me/bookquest_uz/128', kind: 'audio' },
+      { label: 'The film on YouTube', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', kind: 'video' },
       { label: 'Reading guide', url: 'https://t.me/bookquest_uz/131', kind: 'link' }
-    ]
+    ],
+    guides: { ebook: '1. Pick PDF or EPUB below.\n2. Open it in any reader app.\n3. Bookmark where you stop.', movie: null, audio: null, offline: null }
   },
   prizes: {
     first: 'AirPods Pro 2',

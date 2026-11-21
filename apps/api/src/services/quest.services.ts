@@ -313,7 +313,13 @@ function toBookDto(quest: QuestDocument): Book {
       label: resource.label,
       url: resource.url,
       kind: resource.kind
-    }))
+    })),
+    guides: {
+      ebook: quest.book.guides?.ebook ?? null,
+      movie: quest.book.guides?.movie ?? null,
+      audio: quest.book.guides?.audio ?? null,
+      offline: quest.book.guides?.offline ?? null
+    }
   };
 }
 

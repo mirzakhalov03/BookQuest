@@ -1,7 +1,9 @@
 import { z } from 'zod';
 import {
+  BOOK_GUIDE_MAX,
   BOOK_RESOURCE_KINDS,
   PRIZE_PLACES,
+  SOURCE_CARDS,
   QUIZ_DISTRIBUTIONS,
   QUIZ_GROUP_COUNTS,
   findQuestDateIssues,
@@ -63,7 +65,8 @@ export const questFormSchema = z
             kind: z.enum(BOOK_RESOURCE_KINDS)
           })
         )
-        .max(12)
+        .max(12),
+      guides: z.record(z.enum(SOURCE_CARDS), z.string().refine((value) => value.trim().length <= BOOK_GUIDE_MAX, msg((t) => t.guideTooLong)))
     }),
     bookRevealed: z.boolean(),
     prizes: z.object({

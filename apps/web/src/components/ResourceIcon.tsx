@@ -1,4 +1,4 @@
-import { FileText, BookOpen, Headphones, Link2, Store } from 'lucide-react';
+import { FileText, BookOpen, Clapperboard, Headphones, Link2, Store } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { BookResourceKind } from '@bookquest/shared';
 
@@ -12,7 +12,8 @@ export const RESOURCE_ICONS: Record<BookResourceKind, LucideIcon> = {
   epub: BookOpen,
   audio: Headphones,
   link: Link2,
-  store: Store
+  store: Store,
+  video: Clapperboard
 };
 
 export function ResourceIcon({ kind, className = 'h-5 w-5' }: { kind: BookResourceKind; className?: string }) {
