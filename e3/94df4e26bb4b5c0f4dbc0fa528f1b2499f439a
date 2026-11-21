@@ -1,0 +1,33 @@
+apps/api/src/services/auth.services.ts
+  s_a2836ae43a9405::t_199d856c56aea7 121-122,127,135
+apps/api/src/services/user.services.ts
+  s_a2836ae43a9405::t_28833375fa958c 8,97-99,106
+apps/web/src/features/profile/components/ConnectTelegram.tsx
+  s_a2836ae43a9405::t_a6d7239ee059ce 9,26,38-42,45
+apps/web/src/i18n/en/profile.ts
+  s_a2836ae43a9405::t_ac84bd1386a03e 4
+apps/web/src/i18n/ru/profile.ts
+  s_a2836ae43a9405::t_7aaa71ae73b5c8 4
+apps/web/src/i18n/uz/profile.ts
+  s_a2836ae43a9405::t_7dccb29cdabbb1 4
+apps/web/src/lib/auth/authApi.ts
+  s_a2836ae43a9405::t_fc7c49fdb68007 88-92
+apps/api/src/services/account-merge.services.ts
+  s_a2836ae43a9405::t_9dcff6555ee47b 1-93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "e394df4e26bb4b5c0f4dbc0fa528f1b2499f439a",
+  "prompts": {},
+  "sessions": {
+    "s_a2836ae43a9405": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b97ad509-f90c-44df-b028-629768ad274a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
