@@ -39,6 +39,8 @@ export const adminQuest: typeof En = {
     author: 'Muallif',
     pages: 'Sahifalar',
     description: 'Tavsif',
+    cardSteps: 'Kartadagi qadamlar',
+    cardStepsHint: 'Kitob sahifasidagi har bir kartada ko‘rinadigan qadamlar. Bo‘sh qoldirsangiz, ko‘rsatilgan standart qadamlar chiqadi. Har qatorga bitta qadam.',
     descriptionPlaceholder: 'Cho‘pon yigit bor narsasini tashlab yo‘lga chiqadi…',
     cover: 'Muqova',
     coverAlt: 'Kitob muqovasi',

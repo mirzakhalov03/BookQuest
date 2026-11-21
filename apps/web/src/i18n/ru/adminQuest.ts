@@ -40,6 +40,8 @@ export const adminQuest: typeof En = {
     author: 'Автор',
     pages: 'Страниц',
     description: 'Описание',
+    cardSteps: 'Шаги на карточках',
+    cardStepsHint: 'Шаги на каждой карточке страницы книги. Оставьте пустым — будут показаны стандартные. Один шаг на строку.',
     descriptionPlaceholder: 'Юный пастух оставляет всё, что знал…',
     cover: 'Обложка',
     coverAlt: 'Обложка книги',

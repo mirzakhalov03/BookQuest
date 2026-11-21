@@ -40,6 +40,8 @@ export const adminQuest = {
     author: 'Author',
     pages: 'Pages',
     description: 'Description',
+    cardSteps: 'Card steps',
+    cardStepsHint: 'Steps readers see on each Book page card. Leave blank to use the defaults shown, one step per line.',
     descriptionPlaceholder: 'A shepherd boy leaves everything he knows…',
     cover: 'Cover',
     coverAlt: 'Book cover',

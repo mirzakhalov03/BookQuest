@@ -21,10 +21,10 @@ export interface ImagePickerLabels {
 }
 
 const SHAPES = {
-  // A book cover, beside a short field.
-  cover: { wrap: 'shrink-0', box: 'aspect-[2/3] w-32', maxSide: 1000 },
+  // A book cover, beside a short field. Larger and finer than the thumbnail: the Home stage draws it big on retina screens.
+  cover: { wrap: 'shrink-0', box: 'aspect-[2/3] w-32', maxSide: 1600, quality: 0.9 },
   // A full-width photo, e.g. all the prizes together.
-  wide: { wrap: 'flex-1', box: 'aspect-[4/3] w-full max-w-md', maxSide: 1600 }
+  wide: { wrap: 'flex-1', box: 'aspect-[4/3] w-full max-w-md', maxSide: 1600, quality: 0.82 }
 } as const;
 
 interface ImagePickerProps {
@@ -59,7 +59,7 @@ export function ImagePicker({
   const [preview, setPreview] = useState<string | null>(null);
   const showToast = useUiStore((state) => state.showToast);
   const { common, errors, adminQuest } = useT();
-  const { wrap, box, maxSide } = SHAPES[shape];
+  const { wrap, box, maxSide, quality } = SHAPES[shape];
   const [isViewing, setIsViewing] = useState(false);
 
   // The server's verdict on the saved cover arrives as a field error; surface it like the rest.
@@ -84,7 +84,7 @@ export function ImagePicker({
     }
 
     // Size is checked after shrinking, so a big phone photo is fine; the API enforces the same cap.
-    const file = await downscaleImage(picked, maxSide);
+    const file = await downscaleImage(picked, maxSide, quality);
     if (file.size > COVER_MAX_BYTES) {
       showToast(errors.reasons.cover_too_large);
       return;

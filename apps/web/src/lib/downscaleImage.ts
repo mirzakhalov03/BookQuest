@@ -11,7 +11,7 @@ function encode(canvas: HTMLCanvasElement, type: string, quality: number): Promi
  * show ~200px wide, so a phone photo would otherwise cost megabytes on Home.
  * Falls back to the original when the browser can't decode it; the server still validates.
  */
-export async function downscaleImage(file: File, maxSide = DEFAULT_MAX_SIDE): Promise<File> {
+export async function downscaleImage(file: File, maxSide = DEFAULT_MAX_SIDE, quality = WEBP_QUALITY): Promise<File> {
   let bitmap: ImageBitmap;
   try {
     bitmap = await createImageBitmap(file);
@@ -31,7 +31,7 @@ export async function downscaleImage(file: File, maxSide = DEFAULT_MAX_SIDE): Pr
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
 
   // Browsers that can't encode WebP silently return PNG, which is larger; use JPEG there (on white, it has no alpha).
-  let blob = await encode(canvas, 'image/webp', WEBP_QUALITY);
+  let blob = await encode(canvas, 'image/webp', quality);
   if (blob?.type !== 'image/webp') {
     context.globalCompositeOperation = 'destination-over';
     context.fillStyle = '#fff';
