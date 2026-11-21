@@ -1,0 +1,25 @@
+apps/bot/README.md
+  s_a2836ae43a9405::t_928cbebae63ba1 1-17
+apps/bot/src/bot.ts
+  s_a2836ae43a9405::t_7fc4ad4e5770cb 18,30
+apps/bot/src/handlers/start.ts
+  s_a2836ae43a9405::t_a6567352a676e0 9,29
+apps/bot/src/lib/menu-button.ts
+  s_a2836ae43a9405::t_51ed35864ae71d 1-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "311eaf1a5ba042b28646f66d134bf145a61eec0e",
+  "prompts": {},
+  "sessions": {
+    "s_a2836ae43a9405": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b97ad509-f90c-44df-b028-629768ad274a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
