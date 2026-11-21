@@ -1,0 +1,35 @@
+apps/web/src/features/registration/components/RegistrationForm.tsx
+  s_a2836ae43a9405::t_ab7d4214a0b72d 4,13,58-60,118-123,148-152,157-158,170-174,241-266
+apps/web/src/i18n/en/auth.ts
+  s_a2836ae43a9405::t_dcaf1ab6262f3e 4
+apps/web/src/i18n/en/registration.ts
+  s_a2836ae43a9405::t_178271a9b22e8b 17-21
+apps/web/src/i18n/ru/auth.ts
+  s_a2836ae43a9405::t_4a6e9570094610 6
+apps/web/src/i18n/ru/registration.ts
+  s_a2836ae43a9405::t_ec48b5ead60be2 18-22
+apps/web/src/i18n/uz/auth.ts
+  s_a2836ae43a9405::t_89a07ed0dfefac 6
+apps/web/src/i18n/uz/registration.ts
+  s_a2836ae43a9405::t_457bb6ea65e8fe 18-22
+apps/web/src/lib/auth/AuthScreen.tsx
+  s_a2836ae43a9405::t_ade68a4db917cb 2,19-22,46-51,61
+apps/web/src/lib/auth/TelegramCodeLogin.tsx
+  s_a2836ae43a9405::t_13805fe936e823 28,32-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "ee1dedb078f1fd8733de62bd207e482ba98d37ea",
+  "prompts": {},
+  "sessions": {
+    "s_a2836ae43a9405": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b97ad509-f90c-44df-b028-629768ad274a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
