@@ -1,0 +1,19 @@
+apps/web/src/styles/base.css
+  s_a2836ae43a9405::t_54935cb1ce691b 154,157
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "c1c58d0d7febe6211e3ffebbf95c5fc71b681338",
+  "prompts": {},
+  "sessions": {
+    "s_a2836ae43a9405": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b97ad509-f90c-44df-b028-629768ad274a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
