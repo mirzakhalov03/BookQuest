@@ -1,3 +1,4 @@
+import type { Types } from 'mongoose';
 import type { AdminStats, ContactMethod, Paginated, Participant } from '@bookquest/shared';
 import { ParticipantModel, type ParticipantRow } from '../models/participant.model.js';
 import { QuizAttemptModel } from '../models/quiz-attempt.model.js';
@@ -33,6 +34,24 @@ export interface ParticipantQuery {
  * organiser opens this screen — which is exactly why the route is behind
  * requireAdmin and the public participant view is not this shape.
  */
+const normalise = (value: string) => value.trim().replace(/\s+/g, ' ').toLowerCase();
+
+/** Ids on this page that share a name and contact with another entry in the quest — how a double sign-up looks. */
+async function findPossibleDuplicates(questId: Types.ObjectId, page: ParticipantRow[]): Promise<Set<string>> {
+  if (page.length === 0) return new Set();
+  const twins = await ParticipantModel.find(
+    { quest: questId, 'contact.value': { $in: page.map((row) => row.contact.value) } },
+    '_id fullName contact'
+  )
+    .collation({ locale: 'en', strength: 2 })
+    .lean();
+  const key = (row: { fullName: string; contact: { value: string } }) =>
+    `${normalise(row.fullName)}|${normalise(row.contact.value)}`;
+  const counts = new Map<string, number>();
+  for (const row of twins) counts.set(key(row), (counts.get(key(row)) ?? 0) + 1);
+  return new Set(page.filter((row) => (counts.get(key(row)) ?? 0) > 1).map((row) => String(row._id)));
+}
+
 export async function listParticipants(query: ParticipantQuery): Promise<Paginated<Participant>> {
   const quest = query.questId
     ? await QuestModel.findById(query.questId)
@@ -67,8 +86,9 @@ export async function listParticipants(query: ParticipantQuery): Promise<Paginat
     ParticipantModel.countDocuments(filter)
   ]);
 
+  const duplicates = await findPossibleDuplicates(quest._id, participants);
   return {
-    items: participants.map(toParticipantDto),
+    items: participants.map((row) => ({ ...toParticipantDto(row), possibleDuplicate: duplicates.has(String(row._id)) })),
     page: query.page,
     limit: query.limit,
     total

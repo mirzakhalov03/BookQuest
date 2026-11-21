@@ -54,7 +54,9 @@ export const participantSchema = z.object({
   fullName: z.string(),
   contact: contactSchema,
   questId: z.string(),
-  registeredAt: z.string()
+  registeredAt: z.string(),
+  /** Admin roster only: another entry in this quest has the same name and contact. */
+  possibleDuplicate: z.boolean().optional()
 });
 
 export type Participant = z.infer<typeof participantSchema>;

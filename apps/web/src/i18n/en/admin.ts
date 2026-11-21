@@ -78,6 +78,8 @@ export const admin = {
     actionCertificates: 'Certificates'
   },
   participants: {
+    duplicate: 'Possible duplicate',
+    duplicateHint: 'Same name and contact as another entry: likely one person who signed up twice.',
     title: 'Participants',
     searchAria: 'Search participants',
     searchPlaceholder: 'Name, number or contact',

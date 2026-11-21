@@ -76,6 +76,8 @@ export const admin: typeof En = {
     actionCertificates: 'Сертификаты'
   },
   participants: {
+    duplicate: 'Возможный дубль',
+    duplicateHint: 'То же имя и контакт, что у другой записи: вероятно, один человек зарегистрировался дважды.',
     title: 'Участники',
     searchAria: 'Поиск участников',
     searchPlaceholder: 'Имя, номер или контакт',

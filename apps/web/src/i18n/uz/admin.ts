@@ -77,6 +77,8 @@ export const admin: typeof En = {
     actionCertificates: 'Sertifikatlar'
   },
   participants: {
+    duplicate: 'Takror bo‘lishi mumkin',
+    duplicateHint: 'Ism va aloqa boshqa yozuv bilan bir xil: ehtimol bir kishi ikki marta ro‘yxatdan o‘tgan.',
     title: 'Ishtirokchilar',
     searchAria: 'Ishtirokchilarni qidirish',
     searchPlaceholder: 'Ism, raqam yoki aloqa',

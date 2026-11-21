@@ -30,7 +30,10 @@ export function ParticipantsTable({ participants }: { participants: Participant[
             </div>
             {/* Shares a line when it fits; otherwise the contact wraps below, still right-aligned. */}
             <div className="flex flex-wrap items-center justify-between gap-x-3">
-              <p className="text-paper">{participant.fullName}</p>
+              <p className="text-paper">
+                {participant.fullName}
+                {participant.possibleDuplicate && <DuplicateChip />}
+              </p>
               <ContactLink contact={participant.contact} />
             </div>
           </li>
@@ -53,7 +56,10 @@ export function ParticipantsTable({ participants }: { participants: Participant[
                 <td className="py-2 pr-3">
                   <ParticipantNumeral hash value={participant.number} className="type-display text-base text-gold" />
                 </td>
-                <td className="py-2 pr-3 text-paper">{participant.fullName}</td>
+                <td className="py-2 pr-3 text-paper">
+                  {participant.fullName}
+                  {participant.possibleDuplicate && <DuplicateChip />}
+                </td>
                 <td className="py-2 pr-3 text-paper-dim">
                   <ContactLink contact={participant.contact} />
                 </td>
@@ -64,5 +70,14 @@ export function ParticipantsTable({ participants }: { participants: Participant[
         </table>
       </div>
     </>
+  );
+}
+
+function DuplicateChip() {
+  const t = useT().admin.participants;
+  return (
+    <span title={t.duplicateHint} className="ml-2 rounded-full border border-amber/40 px-2 py-0.5 align-middle text-xs text-amber">
+      {t.duplicate}
+    </span>
   );
 }
