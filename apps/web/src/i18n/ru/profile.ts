@@ -7,7 +7,7 @@ export const profile: typeof En = {
   certMissed: 'Вы не завершили этот сезон. До встречи в следующем',
   tiers: { winner: 'Победитель', participant: 'Участник' },
   verifyCode: (code) => `Код проверки ${code}`,
-  meetMascot: 'Знакомьтесь, ваш талисман! Нажмите, чтобы сменить',
+  meetMascot: 'Талисман можно сменить — нажмите на него',
   loading: 'Ищем ваш номер…',
   readerFallback: 'Читатель',
   registrationClosed: 'Регистрация в этом сезоне закрыта. До встречи в следующем!',

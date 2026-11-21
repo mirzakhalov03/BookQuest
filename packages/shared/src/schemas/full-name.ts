@@ -51,13 +51,11 @@ export function looksLikeMashing(word: string): boolean {
   return w.length >= 5 && vowelCount / w.length < 0.18;
 }
 
-/** "sofia   karimova" -> "Sofia Karimova", "sug'diyona" -> "Sug'diyona", "ali-xon" -> "Ali-Xon" */
+/** "sofia   karimova" -> "Sofia Karimova", "sug'diyona" -> "Sug'diyona" */
 export function titleCaseWord(word: string): string {
-  // Apostrophes are not boundaries: in Uzbek they belong to the letter (o', g').
-  return word
-    .toLowerCase()
-    .replace(/(^|-)(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toUpperCase())
-    .replace(/^Mc(\p{L})/u, (_, ch: string) => 'Mc' + ch.toUpperCase());
+  // Only the first letter: in Uzbek an apostrophe belongs to its letter (o', g'), it doesn't start a new part.
+  const lower = word.toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
 }
 
 /** Stable ids for each failure, so clients can say it in their own language. */
@@ -84,7 +82,7 @@ export function parseFullName(raw: string): FullNameResult {
 
   if (!value) return fail('missing', 'Your name goes on the certificate — add it here.');
   if (/\d/.test(value)) return fail('digits', 'Names don’t have numbers in them.');
-  if (/[^\p{L}\s'’-]/u.test(value)) return fail('characters', 'Letters, hyphens and apostrophes only.');
+  if (/[^\p{L}\s'’ʻʼ`]/u.test(value)) return fail('characters', 'Letters and apostrophes only.');
 
   const words = value.split(' ').filter(Boolean);
 

@@ -23,7 +23,7 @@ export const home: typeof En = {
   youAreParticipant: (n) => `Siz ${n}-ishtirokchisiz`,
   registrationClosed: 'Ro‘yxatdan o‘tish yopildi',
   registrationClosedSub: 'O‘qish davri tugashi bilan ro‘yxatdan o‘tish yopildi',
-  join: 'BookQuestga qo‘shilish',
+  join: 'BookQuestga ro‘yxatdan o‘tish',
   joinSub: 'Ro‘yxatdan o‘tish o‘qish davri tugaguncha davom etadi',
   speedCounts: 'Tezlik ham aniqlik kabi muhim.',
   quizSummary: (questions, minutes) => `${questions} · taxminan ${minutes} daqiqa`

@@ -18,6 +18,8 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   shakeToken?: number;
   /** Content on the label's line — the prototype puts the contact-method Switch here. */
   head?: ReactNode;
+  /** Sits right after the label text, e.g. an `InfoTip` explaining why we ask. */
+  labelExtra?: ReactNode;
   /** Keeps the label for screen readers only — for rows that already show it, like the date timeline. */
   hideLabel?: boolean;
   className?: string;
@@ -74,7 +76,7 @@ export function statusFor(message?: string): { status: FieldStatus | undefined; 
  * DOM directly.
  */
 export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
-  { id, label, message, status, shakeToken = 0, head, hideLabel = false, className = '', ...inputProps },
+  { id, label, message, status, shakeToken = 0, head, labelExtra, hideLabel = false, className = '', ...inputProps },
   ref
 ) {
   const autoId = useId();
@@ -103,21 +105,25 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
   }, [shakeToken]);
 
   const borderClass = INPUT_BORDER[status ?? 'neutral'];
+  const labelNode = (
+    <label htmlFor={fieldId} className={hideLabel ? 'sr-only' : 'type-label'}>
+      {label}
+    </label>
+  );
   const msgClass = MSG[status ?? 'neutral'];
 
   return (
     <div className={`grid gap-[0.4rem] ${className}`}>
-      {head ? (
+      {head || labelExtra ? (
         <div className="flex items-baseline justify-between gap-4">
-          <label htmlFor={fieldId} className={hideLabel ? 'sr-only' : 'type-label'}>
-            {label}
-          </label>
+          <span className="flex items-center gap-2">
+            {labelNode}
+            {labelExtra}
+          </span>
           {head}
         </div>
       ) : (
-        <label htmlFor={fieldId} className={hideLabel ? 'sr-only' : 'type-label'}>
-          {label}
-        </label>
+        labelNode
       )}
 
       <input

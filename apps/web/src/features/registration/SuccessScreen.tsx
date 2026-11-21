@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/Button';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { haptic } from '@/lib/telegram';
 import { formatParticipantNumber } from '@/lib/format';
+import { useAuth } from '@/lib/auth/useAuth';
+import { Avatar } from '@/features/profile/components/Avatar';
+import { Sparkles } from '@/features/profile/components/Sparkles';
 import { useRevealHandoffStore } from './revealHandoff.store';
 import { useT } from '@/i18n';
 
@@ -23,6 +26,8 @@ export function SuccessScreen() {
   const navigate = useNavigate();
   const t = useT().registration;
   const number = usePeekAndClearRevealNumber();
+  // Every account gets a random mascot on creation; null only if they chose initials.
+  const avatar = useAuth().user?.avatar ?? null;
 
   // The one celebratory buzz in the app (plan Phase 2). Guarded on `number`
   // so the redirect-away render below never fires it for a direct visit.
@@ -36,7 +41,7 @@ export function SuccessScreen() {
 
   return (
     <div className="view--success flex flex-1 flex-col">
-      <div className="success">
+      <div className={`success ${avatar ? 'success--with-mascot' : ''}`}>
         <div className="success__beam" aria-hidden="true" />
 
         {/* `/me/welcome`'s one heading — `.success__hail`'s look comes
@@ -65,10 +70,20 @@ export function SuccessScreen() {
           ))}
         </p>
 
+        {avatar && (
+          <div className="success__mascot">
+            <span className="relative">
+              <Sparkles />
+              <Avatar name="" avatar={avatar} className="mascot__img w-[clamp(5rem,24vw,7rem)]" />
+            </span>
+            <p className="success__mascot-caption">{t.meetMascot}</p>
+          </div>
+        )}
+
         <p className="success__keep">{t.keepNumber}</p>
 
         <Button
-          className="group animate-[view-in_560ms_var(--ease-out-quest)_1.45s_both]"
+          className="success__cta group"
           onClick={() => navigate('/me')}
         >
           <span>{t.seeProfile}</span>

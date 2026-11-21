@@ -7,6 +7,7 @@ import type { ContactMethod } from '@bookquest/shared';
 import { Field, type FieldStatus } from '@/components/ui/Field';
 import { Switch } from '@/components/ui/Switch';
 import { Button } from '@/components/ui/Button';
+import { InfoTip } from '@/components/ui/InfoTip';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { ApiRequestError } from '@/lib/api/client';
 import { errorMessage, fieldErrorMessage } from '@/lib/api/errorMessage';
@@ -46,9 +47,14 @@ export function RegistrationForm() {
   const setMethod = useContactMethodStore((state) => state.setMethod);
   const setRevealNumber = useRevealHandoffStore((state) => state.setNumber);
   const register = useRegister();
+  const { user, signOut } = useAuth();
+  // Their own Telegram handle, so a Telegram sign-in doesn't have to type it again.
+  const ownHandle = user?.telegramUserId && user.username ? `@${user.username}` : null;
+  const startingContact = (next: ContactMethod): FieldState =>
+    next === 'telegram' && ownHandle ? { value: ownHandle } : EMPTY_FIELD;
 
   const [name, setName] = useState<FieldState>(EMPTY_FIELD);
-  const [contact, setContact] = useState<FieldState>(EMPTY_FIELD);
+  const [contact, setContact] = useState<FieldState>(() => startingContact(method));
   const [nameShake, setNameShake] = useState(0);
   const [contactShake, setContactShake] = useState(0);
   // Field-less rejections — a closed quest, a contact already claimed by
@@ -57,7 +63,6 @@ export function RegistrationForm() {
   const [formError, setFormError] = useState<string | null>(null);
   // Set when the typed Telegram handle already joined from its own account.
   const [joinedAs, setJoinedAs] = useState<string | null>(null);
-  const { signOut } = useAuth();
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   const contactInputRef = useRef<HTMLInputElement>(null);
@@ -110,9 +115,8 @@ export function RegistrationForm() {
   function handleMethodChange(next: ContactMethod) {
     setMethod(next);
     haptic('select');
-    // A fresh field for a fresh format, matching the prototype: reinterpreting
-    // "@sofia" as a phone number (or the reverse) helps nobody.
-    setContact(EMPTY_FIELD);
+    // A fresh field for a fresh format: reinterpreting "@sofia" as a phone number (or the reverse) helps nobody.
+    setContact(startingContact(next));
   }
 
   function signInInstead(handle: string) {
@@ -193,6 +197,7 @@ export function RegistrationForm() {
       <Field
         ref={nameInputRef}
         label={t.auth.fullName}
+        labelExtra={<InfoTip label={t.registration.whyAsk}>{t.registration.whyName}</InfoTip>}
         name="fullname"
         autoComplete="name"
         spellCheck={false}
@@ -210,6 +215,7 @@ export function RegistrationForm() {
       <Field
         ref={contactInputRef}
         label={t.registration.howWeReachYou}
+        labelExtra={<InfoTip label={t.registration.whyAsk}>{t.registration.whyContact}</InfoTip>}
         name="contact"
         head={
           <Switch

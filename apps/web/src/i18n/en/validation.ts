@@ -4,7 +4,7 @@ export const validation = {
   fullName: {
     missing: 'Your name goes on the certificate — add it here.',
     digits: 'Names don’t have numbers in them.',
-    characters: 'Letters, hyphens and apostrophes only.',
+    characters: 'Letters and apostrophes only.',
     one_word: 'Please enter your first and last name.',
     too_many_words: 'First and last name is enough — two words.',
     too_short: 'Both names need at least two letters.',

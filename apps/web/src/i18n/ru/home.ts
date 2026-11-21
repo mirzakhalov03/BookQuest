@@ -24,7 +24,7 @@ export const home: typeof En = {
   youAreParticipant: (n) => `Вы участник №${n}`,
   registrationClosed: 'Регистрация закрыта',
   registrationClosedSub: 'Регистрация закрылась вместе с периодом чтения',
-  join: 'Участвовать в BookQuest',
+  join: 'Зарегистрироваться в BookQuest',
   joinSub: 'Регистрация открыта до конца периода чтения',
   speedCounts: 'Скорость важна не меньше точности.',
   // Genitive after «около»: около 1 минуты, около 3 минут, около 5 минут.

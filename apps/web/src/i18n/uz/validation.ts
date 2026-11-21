@@ -4,7 +4,7 @@ export const validation: typeof En = {
   fullName: {
     missing: 'Ismingiz sertifikatga yoziladi — shu yerga kiriting.',
     digits: 'Ismda raqam bo‘lmaydi.',
-    characters: 'Faqat harflar, chiziqcha va apostrof.',
+    characters: 'Faqat harflar va apostrof (‘) ishlatiladi.',
     one_word: 'Ism va familiyangizni kiriting.',
     too_many_words: 'Ism va familiya yetarli — ikki so‘z.',
     too_short: 'Ism ham, familiya ham kamida ikki harfdan iborat bo‘lsin.',

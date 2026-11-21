@@ -21,20 +21,23 @@ export const TEXTS = {
   guideButton: '🧭 Qanday ishtirok etaman?',
   // HTML.
   guide: [
-    '<b>🧭 BookQuest’da ishtirok etish</b>',
+    '<b>🧭 BookQuest’da qanday ishtirok etiladi</b>',
     '',
-    '<b>1. Ilovani oching.</b> «📖 BookQuestni ochish» tugmasini bosing — bot ichida mini-app ochiladi.',
+    '<b>1. Botni ishga tushiring.</b> @bookquest_bot ga kiring va /start buyrug‘ini bering.',
     '',
-    '<b>2. Ro‘yxatdan o‘ting.</b> O‘rningizni band qiling va ishtirokchi raqamingizni oling. ' +
-      'Ro‘yxatdan o‘tish o‘qish davri tugaguncha ochiq.',
+    '<b>2. Ilovani oching.</b> «📖 BookQuestni ochish» tugmasini bosing — mini-app shu yerning o‘zida ochiladi.',
     '',
-    '<b>3. Kitobni o‘qing.</b> Kitob sahifasida uni qayerdan topish mumkinligi ko‘rsatilgan: ' +
-      'PDF, audio yoki do‘konlar.',
+    '<b>3. Ro‘yxatdan o‘ting.</b> «BookQuestga ro‘yxatdan o‘tish» tugmasini bosing, ism-familiyangiz va ' +
+      'Telegram username yoki telefon raqamingizni kiriting. Shundan so‘ng ishtirokchi raqamingizni olasiz. ' +
+      'Ro‘yxatdan o‘tish o‘qish muddati tugaguncha ochiq.',
     '',
-    '<b>4. Testni topshiring.</b> Test qachon ochilishi ilova bosh sahifasida ko‘rsatiladi. ' +
-      'G‘oliblarni aniqlik va tezlik belgilaydi.',
+    '<b>4. Kitobni o‘qing.</b> Ilovadagi «Kitob» bo‘limida kitob haqida ma’lumot, uni qayerdan ' +
+      'xarid qilish mumkinligi, elektron shakli va YouTube’dagi videosiga havolalar bor.',
     '',
-    '<b>5. Natijalar.</b> G‘oliblar sovrinlarni oladi, testni yakunlagan har bir ishtirokchiga ' +
+    '<b>5. Testni topshiring.</b> Test qachon ochilishi ilovaning bosh sahifasida ko‘rsatiladi. ' +
+      'G‘oliblarni to‘g‘ri javoblar soni va tezlik belgilaydi ⏱',
+    '',
+    '<b>6. Natijalar.</b> G‘oliblar sovrinlarni oladi, testni yakunlagan har bir ishtirokchiga ' +
       'sertifikat beriladi 🎓',
     '',
     'Savollar bo‘lsa — «💬 Savol va takliflar» tugmasi orqali bizga yozing.'

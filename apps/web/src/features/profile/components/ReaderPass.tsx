@@ -1,8 +1,9 @@
-import { useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 import { Pencil } from 'lucide-react';
 import type { AvatarId } from '@bookquest/shared';
 import { ParticipantNumeral } from '@/components/ui/ParticipantNumeral';
 import { Avatar } from './Avatar';
+import { Sparkles } from './Sparkles';
 import { AvatarPicker } from './AvatarPicker';
 import { useMascotGreeting } from '../useMascotGreeting';
 import { useT } from '@/i18n';
@@ -106,16 +107,5 @@ export function ReaderPass({
         current={avatar}
       />
     </>
-  );
-}
-
-/** The first hello's burst: six motes flung out from behind the mascot. */
-function Sparkles() {
-  return (
-    <span className="mascot__sparkles" aria-hidden="true">
-      {[0, 1, 2, 3, 4, 5].map((index) => (
-        <span key={index} style={{ '--i': index } as CSSProperties} />
-      ))}
-    </span>
   );
 }

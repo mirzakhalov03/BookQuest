@@ -219,3 +219,110 @@
   text-wrap: balance;
   animation: title-rise 720ms var(--ease-out-quest) both;
 }
+
+/* ── The home "register" CTA: a slow ripple and a nudging arrow say "start here" ── */
+
+.btn--beckon {
+  position: relative;
+  isolation: isolate;
+}
+.btn--beckon::before,
+.btn--beckon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgb(226 99 42 / 0.55);
+  animation: beckon-ripple 2.4s var(--ease-soft) infinite;
+  pointer-events: none;
+}
+/* Second ring trails the first, so the pulse reads as a breath, not a blink. */
+.btn--beckon::after {
+  animation-delay: 0.8s;
+}
+@keyframes beckon-ripple {
+  0% { box-shadow: 0 0 0 0 rgb(226 99 42 / 0.5); }
+  70%, 100% { box-shadow: 0 0 0 14px rgb(226 99 42 / 0); }
+}
+.btn--beckon svg {
+  animation: beckon-arrow 2.4s var(--ease-soft) infinite;
+}
+@keyframes beckon-arrow {
+  0%, 55%, 100% { transform: translateX(0); }
+  68% { transform: translateX(5px); }
+  80% { transform: translateX(1px); }
+  88% { transform: translateX(3px); }
+}
+
+/* ── "Why we ask" bubble ── */
+
+.info-tip {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 0.5rem);
+  left: -0.75rem;
+  width: max-content;
+  max-width: min(17rem, calc(100vw - 3rem));
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-box);
+  background: var(--color-gold-soft);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: normal;
+  text-transform: none;
+  text-align: left;
+  box-shadow: 0 12px 28px -12px rgb(10 7 5 / 0.8);
+  animation: info-tip-in 200ms var(--ease-out-quest) both;
+}
+/* Arrow points up at the icon. */
+.info-tip::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: calc(0.75rem + 8px);
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+@keyframes info-tip-in {
+  from { opacity: 0; transform: translateY(-4px); }
+}
+
+/* ── Success: the mascot arrives once the number has landed ── */
+
+.success__mascot {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+.success__mascot .mascot__img {
+  transform-origin: 50% 100%;
+  animation: mascot-hello 1.2s var(--ease-out-quest) 1.15s both;
+}
+.success__mascot .mascot__sparkles span {
+  animation-delay: 1.55s;
+}
+.success__mascot-caption {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-gold-soft);
+  animation: view-in 560ms var(--ease-out-quest) 1.6s both;
+}
+
+
+/* The page's closing beats; they wait for the mascot when there is one. */
+.success__cta {
+  animation: view-in 560ms var(--ease-out-quest) 1.45s both;
+}
+.success--with-mascot .success__keep {
+  animation-delay: 1.85s;
+}
+.success--with-mascot .success__cta {
+  animation-delay: 2.05s;
+}

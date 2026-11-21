@@ -23,7 +23,7 @@ export const home = {
   youAreParticipant: (n: string) => `You're participant ${n}`,
   registrationClosed: 'Registration has closed',
   registrationClosedSub: 'Registration closed when the reading period ended',
-  join: 'Join BookQuest',
+  join: 'Register for BookQuest',
   joinSub: 'Registration closes when the reading period ends',
   speedCounts: 'Speed counts as much as accuracy.',
   quizSummary: (questions: string, minutes: number) => `${questions} · about ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`

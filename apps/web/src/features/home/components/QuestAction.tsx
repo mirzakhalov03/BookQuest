@@ -79,7 +79,9 @@ export function QuestAction({ quest }: QuestActionProps) {
   // Not registered, registration still open. `/me` handles signing in first when needed.
   return (
     <Act>
-      <PrimaryButton onClick={() => go('/me')}>{t.home.join}</PrimaryButton>
+      <PrimaryButton beckon onClick={() => go('/me')}>
+        {t.home.join}
+      </PrimaryButton>
       <p className="act__sub">{t.home.joinSub}</p>
     </Act>
   );
@@ -98,10 +100,13 @@ function Act({ children }: { children: ReactNode }) {
 
 function PrimaryButton({
   variant = 'primary',
+  beckon = false,
   onClick,
   children
 }: {
   variant?: 'primary' | 'gold';
+  /** Pulses to draw the eye — only for the first thing a newcomer should tap. */
+  beckon?: boolean;
   onClick: () => void;
   children: ReactNode;
 }) {
@@ -109,7 +114,7 @@ function PrimaryButton({
     // The prototype's `.btn--wide { width: min(100%, 22rem) }` — full width on
     // a narrow phone, capped once `.act` (100% of the unconstrained `.home`)
     // gets wide enough that an edge-to-edge button would look like a banner.
-    <Button variant={variant} className="group w-full max-w-[22rem]" onClick={onClick}>
+    <Button variant={variant} className={`group w-full max-w-[22rem] ${beckon ? 'btn--beckon' : ''}`} onClick={onClick}>
       <span>{children}</span>
       <ArrowIcon />
     </Button>

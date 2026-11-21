@@ -7,7 +7,7 @@ export const profile = {
   certMissed: "You didn't finish this edition. See you next time",
   tiers: { winner: 'Winner', participant: 'Participant' } satisfies Record<CertificateTier, string>,
   verifyCode: (code: string) => `Verify code ${code}`,
-  meetMascot: 'Meet your mascot! Tap to change it',
+  meetMascot: 'You can change your mascot — tap it to pick another',
   loading: 'Finding your number…',
   readerFallback: 'Reader',
   registrationClosed: 'Registration for this edition has closed. See you at the next one.',

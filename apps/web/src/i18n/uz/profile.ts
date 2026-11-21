@@ -7,7 +7,7 @@ export const profile: typeof En = {
   certMissed: 'Bu mavsumni yakunlamadingiz. Keyingi safar ko‘rishguncha',
   tiers: { winner: 'G‘olib', participant: 'Ishtirokchi' },
   verifyCode: (code) => `Tekshirish kodi ${code}`,
-  meetMascot: 'Bu sizning maskotingiz! Almashtirish uchun bosing',
+  meetMascot: 'Maskotingizni almashtirishingiz mumkin — ustiga bosing',
   loading: 'Raqamingiz qidirilmoqda…',
   readerFallback: 'Kitobxon',
   registrationClosed: 'Bu mavsum uchun ro‘yxatdan o‘tish yopildi. Keyingi mavsumda ko‘rishguncha!',
