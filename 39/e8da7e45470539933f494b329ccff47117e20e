@@ -1,0 +1,23 @@
+apps/api/package.json
+  s_85a0515f1cb785::t_11961ef97ed087 21
+apps/api/src/scripts/fix-apostrophe-names.ts
+  s_85a0515f1cb785::t_e3436f7803101a 1-73
+packages/shared/src/schemas/full-name.ts
+  s_85a0515f1cb785::t_89a7e8859929d0 54,56,59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "39e8da7e45470539933f494b329ccff47117e20e",
+  "prompts": {},
+  "sessions": {
+    "s_85a0515f1cb785": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc04e644-a5b1-4a83-a416-13183c3015ec",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
