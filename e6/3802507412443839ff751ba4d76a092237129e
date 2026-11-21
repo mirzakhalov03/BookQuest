@@ -1,0 +1,21 @@
+apps/api/src/validators/admin.validators.ts
+  s_85a0515f1cb785::t_683025877794dd 19-20
+apps/web/src/features/admin/ParticipantsPage.tsx
+  s_85a0515f1cb785::t_e865aa3f954339 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "e63802507412443839ff751ba4d76a092237129e",
+  "prompts": {},
+  "sessions": {
+    "s_85a0515f1cb785": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc04e644-a5b1-4a83-a416-13183c3015ec",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
