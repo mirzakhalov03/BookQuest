@@ -115,14 +115,14 @@ export const admin: typeof En = {
     sent: 'Yuborilganlar',
     outboxLoading: 'Yuborilganlar ochilmoqda…',
     nothingSent: 'Hali hech narsa yuborilmagan.',
-    onTelegram: (sent, total) => ` · Telegramda ${total} tadan ${sent} ta`,
-    statusSending: (telegram) => `Yuborilmoqda${telegram}`,
-    statusSent: (n, telegram) => `${n} kishiga yetdi${telegram}`,
-    statusInterrupted: (telegram) => `To‘xtab qoldi${telegram}`,
+    colSent: 'Yuborilgan',
+    colMessage: 'Xabar',
+    colReached: 'Yetdi',
+    colTelegram: 'Telegram',
+    colStatus: 'Holat',
+    statusLabel: { sending: 'Yuborilmoqda', sent: 'Yuborildi', interrupted: 'To‘xtab qoldi' },
+    telegramTitle: (sent, total) => `Telegramda ${total} tadan ${sent} ta xabar yetkazildi`,
     suggestions: {
-      announce: 'Boshlanishini e’lon qilish',
-      announceText: (year, opens, title, author) =>
-        `BookQuest ${year} ${opens} da boshlanadi. Bu yilgi kitob — ${author}, «${title}». Qo‘shilish uchun BookQuestni oching!`,
       quizDates: 'Test sanalari',
       quizDatesText: (opens, closes) =>
         `Taqvimingizga belgilang: test ${opens} da ochiladi va ${closes} da yopiladi. Faqat bitta urinish, shuning uchun qulay vaqtni tanlang!`,

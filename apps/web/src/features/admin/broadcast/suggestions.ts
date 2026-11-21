@@ -11,17 +11,13 @@ const DAY_MS = 86_400_000;
 
 /** Starting points from the quest's own dates, so the facts in a broadcast are never retyped by hand. */
 export function broadcastSuggestions(quest: AdminQuest, now: Date): Suggestion[] {
-  const { title, author } = quest.book;
+  const { title } = quest.book;
   const t = getT().admin.broadcast.suggestions;
 
   switch (quest.phase) {
     case 'upcoming':
-      return [
-        {
-          label: t.announce,
-          message: t.announceText(quest.year, formatLongDate(quest.opensAt), title, author)
-        }
-      ];
+      // Nothing canned before opening: the launch is announced by hand.
+      return [];
     case 'reading': {
       const left = Date.parse(quest.readingDeadline) - now.getTime();
       const quizDates = {

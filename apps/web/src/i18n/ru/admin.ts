@@ -114,14 +114,14 @@ export const admin: typeof En = {
     sent: 'Отправленные',
     outboxLoading: 'Открываем отправленные…',
     nothingSent: 'Пока ничего не отправлено.',
-    onTelegram: (sent, total) => ` · в Telegram ${sent} из ${total}`,
-    statusSending: (telegram) => `Отправляется${telegram}`,
-    statusSent: (n, telegram) => `Доставлено: ${n}${telegram}`,
-    statusInterrupted: (telegram) => `Прервано${telegram}`,
+    colSent: 'Отправлено',
+    colMessage: 'Сообщение',
+    colReached: 'Охват',
+    colTelegram: 'Telegram',
+    colStatus: 'Статус',
+    statusLabel: { sending: 'Отправляется', sent: 'Отправлено', interrupted: 'Прервано' },
+    telegramTitle: (sent, total) => `В Telegram доставлено ${sent} из ${total}`,
     suggestions: {
-      announce: 'Объявить открытие',
-      announceText: (year, opens, title, author) =>
-        `BookQuest ${year} открывается ${opens}. Книга этого года — «${title}», ${author}. Откройте BookQuest, чтобы участвовать!`,
       quizDates: 'Даты теста',
       quizDatesText: (opens, closes) =>
         `Отметьте в календаре: тест откроется ${opens} и закроется ${closes}. Попытка одна, так что выберите удобный момент!`,

@@ -117,14 +117,14 @@ export const admin = {
     sent: 'Sent',
     outboxLoading: 'Opening the outbox…',
     nothingSent: 'Nothing sent yet.',
-    onTelegram: (sent: string, total: string) => ` · ${sent} of ${total} on Telegram`,
-    statusSending: (telegram: string) => `Sending${telegram}`,
-    statusSent: (n: string, telegram: string) => `Reached ${n}${telegram}`,
-    statusInterrupted: (telegram: string) => `Interrupted${telegram}`,
+    colSent: 'Sent',
+    colMessage: 'Message',
+    colReached: 'Reached',
+    colTelegram: 'Telegram',
+    colStatus: 'Status',
+    statusLabel: { sending: 'Sending', sent: 'Sent', interrupted: 'Interrupted' },
+    telegramTitle: (sent: string, total: string) => `${sent} of ${total} Telegram messages delivered`,
     suggestions: {
-      announce: 'Announce the opening',
-      announceText: (year: number, opens: string, title: string, author: string) =>
-        `BookQuest ${year} opens on ${opens}. This year's book is ${title} by ${author}. Open BookQuest to join!`,
       quizDates: 'Quiz dates',
       quizDatesText: (opens: string, closes: string) =>
         `Mark your calendar: the quiz opens ${opens} and closes ${closes}. One attempt, so pick your moment!`,
