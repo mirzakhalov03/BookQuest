@@ -1,0 +1,27 @@
+apps/web/src/features/book/components/SourceCards.tsx
+  s_a2836ae43a9405::t_da37842415da68 6,21-22,46-48
+apps/web/src/features/book/components/cardConfig.ts
+  s_a2836ae43a9405::t_0ad5d48c65c72d 21-23
+apps/web/src/i18n/en/book.ts
+  s_a2836ae43a9405::t_2c05016acbacf7 10-11
+apps/web/src/i18n/ru/book.ts
+  s_a2836ae43a9405::t_64dcb290e7b786 12-13
+apps/web/src/i18n/uz/book.ts
+  s_a2836ae43a9405::t_59beaf0ede2054 12-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "5308ef66c8c6eefbb36ae7765d8be4ebdec9729d",
+  "prompts": {},
+  "sessions": {
+    "s_a2836ae43a9405": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b97ad509-f90c-44df-b028-629768ad274a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
