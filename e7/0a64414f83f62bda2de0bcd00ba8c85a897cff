@@ -1,0 +1,61 @@
+apps/bot/src/texts.ts
+  s_85a0515f1cb785::t_266dfa1bcc386c 24,26,28,30-32,34-35,37-40
+apps/web/src/components/ui/Field.tsx
+  s_85a0515f1cb785::t_31a2976e9456ec 21-22,79,108-112,117,119-122,126
+apps/web/src/features/home/components/QuestAction.tsx
+  s_85a0515f1cb785::t_22ee869458f0fe 82-84,103,108-109,117
+apps/web/src/features/profile/components/ReaderPass.tsx
+  s_85a0515f1cb785::t_21f52c09ecfc53 1,6
+apps/web/src/features/profile/components/Sparkles.tsx
+  s_85a0515f1cb785::t_022c2e96a37a36 1-12
+apps/web/src/features/registration/SuccessScreen.tsx
+  s_85a0515f1cb785::t_c010eecaec463e 7-9,29-30,44,73-82,86
+apps/web/src/features/registration/components/RegistrationForm.tsx
+  s_85a0515f1cb785::t_0f281876bcd6aa 10,50-54,57,118-119,200,218
+apps/web/src/i18n/en/home.ts
+  s_85a0515f1cb785::t_b067b885026c7e 26
+apps/web/src/i18n/en/profile.ts
+  s_85a0515f1cb785::t_d9a44b4bc5b763 10
+apps/web/src/i18n/en/registration.ts
+  s_85a0515f1cb785::t_e194c57da8bd15 10,16-20
+apps/web/src/i18n/en/validation.ts
+  s_85a0515f1cb785::t_e6bd57980d2b43 7
+apps/web/src/i18n/ru/home.ts
+  s_85a0515f1cb785::t_12e228f58a5cc8 27
+apps/web/src/i18n/ru/profile.ts
+  s_85a0515f1cb785::t_306767aa28cb9f 10
+apps/web/src/i18n/ru/registration.ts
+  s_85a0515f1cb785::t_f25927cf618798 11,17-21
+apps/web/src/i18n/ru/validation.ts
+  s_85a0515f1cb785::t_12f5cd92955726 7
+apps/web/src/i18n/uz/home.ts
+  s_85a0515f1cb785::t_543b49ed293a33 26
+apps/web/src/i18n/uz/profile.ts
+  s_85a0515f1cb785::t_eb5959bee277f4 10
+apps/web/src/i18n/uz/registration.ts
+  s_85a0515f1cb785::t_47f5f15c228b7a 11,17-21
+apps/web/src/i18n/uz/validation.ts
+  s_85a0515f1cb785::t_d3890c6d73fc5f 7
+apps/web/src/styles/register.css
+  s_85a0515f1cb785::t_e02408f93146bb 222-328
+packages/shared/src/schemas/full-name.ts
+  s_85a0515f1cb785::t_4c2beb3ec9740e 54,56-58,85
+apps/web/src/components/ui/InfoTip.tsx
+  s_85a0515f1cb785::t_78926946de8354 1-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "e70a64414f83f62bda2de0bcd00ba8c85a897cff",
+  "prompts": {},
+  "sessions": {
+    "s_85a0515f1cb785": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc04e644-a5b1-4a83-a416-13183c3015ec",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
