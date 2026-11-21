@@ -16,8 +16,8 @@ export const adminParticipantQuery = z.object({
   q: z.string().trim().max(80).optional(),
   questId: objectId.optional(),
   contactMethod: z.enum(CONTACT_METHODS).optional(),
-  sort: z.enum(['number', 'name', 'registered']).default('number'),
-  order: z.enum(['asc', 'desc']).default('asc'),
+  sort: z.enum(['number', 'name', 'registered']).default('registered'),
+  order: z.enum(['asc', 'desc']).default('desc'),
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(200).default(50)
 });

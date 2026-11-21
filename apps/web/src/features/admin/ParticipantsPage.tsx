@@ -26,7 +26,7 @@ export function ParticipantsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState(() => searchParams.get('q') ?? '');
   const query = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
-  const [sort, setSort] = useState<ParticipantSort>({ field: 'number', order: 'asc' });
+  const [sort, setSort] = useState<ParticipantSort>({ field: 'registered', order: 'desc' });
   const participants = useAdminParticipants({
     q: query,
     limit: LIMIT,
