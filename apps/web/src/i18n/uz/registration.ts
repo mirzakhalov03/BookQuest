@@ -15,5 +15,9 @@ export const registration: typeof En = {
   contactMethod: 'Aloqa usuli',
   claiming: 'O‘rningiz band qilinmoqda…',
   claim: 'O‘rnimni band qilish',
-  numberNote: 'Raqamingiz reytingda, test varaqangizda va sertifikatingizda ko‘rsatiladi.'
+  numberNote: 'Raqamingiz reytingda, test varaqangizda va sertifikatingizda ko‘rsatiladi.',
+  alreadyJoinedTitle: 'Siz Telegram orqali allaqachon qo‘shilgansiz',
+  alreadyJoinedBody: (handle: string) => `${handle} bu tanlovda Telegram orqali ishtirok etmoqda. Bitta raqam saqlanishi uchun Telegram kodi orqali kiring.`,
+  signInInstead: 'Telegram orqali kirish',
+  notYou: 'Bu siz emasmi? Davom etish'
 };

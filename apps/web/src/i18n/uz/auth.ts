@@ -3,6 +3,7 @@ import type { auth as En } from '../en/auth';
 export const auth: typeof En = {
   tabNew: 'Ro‘yxatdan o‘tish',
   tabRegistered: 'Kirish',
+  alreadyInTelegram: 'Telegram orqali qo‘shilganmisiz? Kirish',
   tabsAria: 'Ro‘yxatdan o‘tish yoki kirish',
   heroNewTitle: 'Qatnashing va sovrin yuting',
   heroBackLabel: 'To‘xtagan joyingizdan davom etish uchun kiring.',

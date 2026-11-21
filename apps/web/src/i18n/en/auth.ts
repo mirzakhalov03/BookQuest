@@ -1,6 +1,7 @@
 export const auth = {
   tabNew: 'New here',
   tabRegistered: "I'm registered",
+  alreadyInTelegram: 'Joined in Telegram already? Sign in instead',
   tabsAria: 'Register or log in',
   heroNewTitle: 'Register to win the prizes',
   heroBackLabel: 'Log in to pick up where you left off.',

@@ -14,5 +14,9 @@ export const registration = {
   contactMethod: 'Contact method',
   claiming: 'Claiming your place…',
   claim: 'Claim your place',
-  numberNote: 'Your number goes on the leaderboard, your quiz sheet and your certificate.'
+  numberNote: 'Your number goes on the leaderboard, your quiz sheet and your certificate.',
+  alreadyJoinedTitle: 'You’ve already joined in Telegram',
+  alreadyJoinedBody: (handle: string) => `${handle} is already in this quest from Telegram. Sign in with a Telegram code to use that account, so you keep one number.`,
+  signInInstead: 'Sign in with Telegram',
+  notYou: 'Not you? Continue anyway'
 };

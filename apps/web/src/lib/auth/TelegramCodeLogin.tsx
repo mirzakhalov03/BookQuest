@@ -25,11 +25,13 @@ const RESEND_COOLDOWN_MS = 60_000;
  * Passwordless web login for Telegram-made accounts: identify, then type the
  * code the bot sent. Two steps in one component because they share the challenge.
  */
-export function TelegramCodeLogin() {
+export function TelegramCodeLogin({ defaultIdentifier }: { defaultIdentifier?: string } = {}) {
   const queryClient = useQueryClient();
   const t = useT();
   const [challenge, setChallenge] = useState<TelegramCodeChallenge | null>(null);
-  const [identifier, setIdentifier] = useState<FieldState>(EMPTY_FIELD);
+  const [identifier, setIdentifier] = useState<FieldState>(
+    defaultIdentifier ? { value: defaultIdentifier } : EMPTY_FIELD
+  );
   const [code, setCode] = useState<FieldState>(EMPTY_FIELD);
   const [codeShake, setCodeShake] = useState(0);
   const [formError, setFormError] = useState<string | null>(null);

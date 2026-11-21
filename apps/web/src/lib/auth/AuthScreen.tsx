@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { Screen } from '@/components/layout/Screen';
 import { HeroBanner } from '@/components/HeroBanner';
 import { Switch } from '@/components/ui/Switch';
@@ -15,7 +16,10 @@ type Tab = 'new' | 'registered';
  */
 export function AuthScreen() {
   const t = useT();
-  const [tab, setTab] = useState<Tab>('new');
+  // `?signin=@handle`: sent here from a duplicate sign-up, straight to the code form.
+  const [params] = useSearchParams();
+  const signinHandle = params.get('signin');
+  const [tab, setTab] = useState<Tab>(signinHandle ? 'registered' : 'new');
   const tabs = [
     { value: 'new', label: t.auth.tabNew },
     { value: 'registered', label: t.auth.tabRegistered }
@@ -39,7 +43,12 @@ export function AuthScreen() {
       <div className="mx-auto grid w-full max-w-[30rem] gap-8">
         <Switch aria-label={t.auth.tabsAria} options={tabs} value={tab} onChange={selectTab} />
 
-        {tab === 'new' && <PhoneAuthForm key="signup" mode="signup" />}
+        {tab === 'new' && (
+          <>
+            <PhoneAuthForm key="signup" mode="signup" />
+            <SwapLink onClick={() => selectTab('registered')}>{t.auth.alreadyInTelegram}</SwapLink>
+          </>
+        )}
 
         {tab === 'registered' &&
           (withPassword ? (
@@ -49,7 +58,7 @@ export function AuthScreen() {
             </>
           ) : (
             <>
-              <TelegramCodeLogin />
+              <TelegramCodeLogin defaultIdentifier={signinHandle ?? undefined} />
               <SwapLink onClick={() => setWithPassword(true)}>{t.auth.usePassword}</SwapLink>
             </>
           ))}

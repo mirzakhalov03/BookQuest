@@ -3,6 +3,7 @@ import type { auth as En } from '../en/auth';
 export const auth: typeof En = {
   tabNew: 'Регистрация',
   tabRegistered: 'Вход',
+  alreadyInTelegram: 'Уже участвуете через Telegram? Войти',
   tabsAria: 'Регистрация или вход',
   heroNewTitle: 'Участвуйте и выигрывайте призы',
   heroBackLabel: 'Войдите, чтобы продолжить с того же места.',

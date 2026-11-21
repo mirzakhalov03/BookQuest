@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate } from 'react-router';
+import { useAuth } from '@/lib/auth/useAuth';
 import { groupUzbek, parseFullName, parsePhoneNumber, parseTelegramUsername } from '@bookquest/shared';
 import type { ContactMethod } from '@bookquest/shared';
 import { Field, type FieldStatus } from '@/components/ui/Field';
@@ -9,7 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { ArrowIcon } from '@/components/ui/ArrowIcon';
 import { ApiRequestError } from '@/lib/api/client';
 import { errorMessage, fieldErrorMessage } from '@/lib/api/errorMessage';
-import { haptic } from '@/lib/telegram';
+import { haptic, isInsideTelegram } from '@/lib/telegram';
 import { useContactMethodStore } from '@/stores/contactMethod.store';
 import { useRegister } from '../api/useRegister';
 import { useRevealHandoffStore } from '../revealHandoff.store';
@@ -54,6 +55,9 @@ export function RegistrationForm() {
   // someone else — belong to neither input, so they get their own line
   // rather than being pinned to a field they aren't about (spec §6).
   const [formError, setFormError] = useState<string | null>(null);
+  // Set when the typed Telegram handle already joined from its own account.
+  const [joinedAs, setJoinedAs] = useState<string | null>(null);
+  const { signOut } = useAuth();
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   const contactInputRef = useRef<HTMLInputElement>(null);
@@ -111,6 +115,12 @@ export function RegistrationForm() {
     setContact(EMPTY_FIELD);
   }
 
+  function signInInstead(handle: string) {
+    signOut();
+    // The guard swaps this route for the auth screen, which reads these to open on the code form.
+    navigate(`?signin=${encodeURIComponent(handle)}`, { replace: true });
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setFormError(null);
@@ -135,11 +145,17 @@ export function RegistrationForm() {
 
     haptic('action');
 
+    await submit(false);
+  }
+
+  async function submit(confirmNotDuplicate: boolean) {
+    setFormError(null);
     try {
       const participant = await register.mutateAsync({
         fullName: name.value,
         contactMethod: method,
-        contactValue: contact.value
+        contactValue: contact.value,
+        confirmNotDuplicate
       });
       setRevealNumber(participant.number);
       navigate('/me/welcome');
@@ -148,6 +164,11 @@ export function RegistrationForm() {
 
       if (!(error instanceof ApiRequestError)) {
         setFormError(errorMessage(error));
+        return;
+      }
+
+      if (error.reason === 'already_registered_elsewhere') {
+        setJoinedAs(contact.value.trim());
         return;
       }
 
@@ -216,6 +237,32 @@ export function RegistrationForm() {
         <span>{register.isPending ? t.registration.claiming : t.registration.claim}</span>
         <ArrowIcon />
       </Button>
+
+      {joinedAs && (
+        <div role="alert" className="flex flex-col gap-3 rounded-box border border-[color:var(--rule)] bg-ash p-4">
+          <p className="m-0 font-medium text-paper">{t.registration.alreadyJoinedTitle}</p>
+          <p className="m-0 text-sm text-paper-dim">{t.registration.alreadyJoinedBody(joinedAs)}</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {/* Inside Telegram you're already that account's sibling session; signing in elsewhere means nothing. */}
+            {!isInsideTelegram() && (
+              <Button type="button" onClick={() => signInInstead(joinedAs)}>
+                {t.registration.signInInstead}
+              </Button>
+            )}
+            <button
+              type="button"
+              className="type-label text-taupe transition-colors hover:text-paper-dim"
+              disabled={register.isPending}
+              onClick={() => {
+                setJoinedAs(null);
+                void submit(true);
+              }}
+            >
+              {t.registration.notYou}
+            </button>
+          </div>
+        </div>
+      )}
 
       {formError && (
         <p role="alert" className="m-0 text-sm text-error">
