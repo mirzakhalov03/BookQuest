@@ -15,6 +15,7 @@ import { feedbackGroup } from './handlers/feedback-group.js';
 import { handleGroupAdded } from './handlers/group-added.js';
 import { feedbackEnabled, GUIDE_ACTION } from './keyboards.js';
 import { TEXTS } from './texts.js';
+import { syncDefaultMenuButton } from './lib/menu-button.js';
 import { recordInteractionMiddleware } from './middlewares/record-interaction.js';
 import { flushInteractions } from './lib/interaction-recorder.js';
 
@@ -26,10 +27,7 @@ async function start(): Promise<void> {
   // Clears the old bot's "/" command menu. Idempotent — safe on every boot.
   await bot.telegram.setMyCommands([]);
 
-  // The menu button's URL is stored by Telegram, not read from env, so re-sync it or it keeps a stale tunnel.
-  await bot.telegram.setChatMenuButton({
-    menuButton: { type: 'web_app', text: TEXTS.menuButton, web_app: { url: env.WEB_APP_URL } }
-  });
+  await syncDefaultMenuButton(bot.telegram);
 
   // First: logging sees every update, matched or not.
   bot.use(recordInteractionMiddleware);

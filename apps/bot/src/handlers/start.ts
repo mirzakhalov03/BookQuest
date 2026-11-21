@@ -6,6 +6,7 @@ import { closeFeedbackSession } from '../lib/feedback-state.js';
 import { escapeHtml } from '../lib/html.js';
 import { mainKeyboard, startKeyboard } from '../keyboards.js';
 import { TEXTS } from '../texts.js';
+import { syncChatMenuButton } from '../lib/menu-button.js';
 
 /** Season poster in `apps/bot/assets/`; swap the file each season. */
 const POSTER = 'season/poster.jpg';
@@ -25,6 +26,7 @@ export async function handleStart(ctx: Context): Promise<void> {
   // /start is the reset: it re-sends the main keyboard, so the feedback chat ends with it.
   closeFeedbackSession(ctx.from.id);
   await upsertUser(toBotUserUpsertPayload(ctx.from));
+  if (ctx.chat) await syncChatMenuButton(ctx.telegram, ctx.chat.id);
 
   await ctx.reply(TEXTS.welcome(escapeHtml(ctx.from.first_name)), {
     parse_mode: 'HTML',
