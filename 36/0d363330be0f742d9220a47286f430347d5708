@@ -1,0 +1,33 @@
+apps/web/src/features/home/components/Book3D.tsx
+  s_d6d40a0d871f67::t_04c29dd1161fc6 6-7,22,25,28
+apps/web/src/features/home/components/SealedTome.tsx
+  s_d6d40a0d871f67::t_4f7dff153ff92a 1-70
+apps/web/src/features/home/hooks/useBookRig.ts
+  s_d6d40a0d871f67::t_66eb1625600b3f 1-194
+apps/web/src/styles/index.css
+  s_d6d40a0d871f67::t_38b9f81a04fe92 5
+apps/web/src/styles/stage.css
+  s_d6d40a0d871f67::t_32d9735ba4eda3 614-615
+apps/web/src/styles/tome.css
+  s_d6d40a0d871f67::t_8cad559bda52a1 1-605
+apps/web/src/features/home/components/BookStage.tsx
+  s_d6d40a0d871f67::t_5939dc9a74061e 5,7-8,16-20,22,27-33,40
+apps/web/src/features/home/hooks/useTomeFx.ts
+  s_d6d40a0d871f67::t_ca19bc5349389d 1-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "360d363330be0f742d9220a47286f430347d5708",
+  "prompts": {},
+  "sessions": {
+    "s_d6d40a0d871f67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1e77ac10-3a9e-4c4f-b6e6-032932161cdc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
