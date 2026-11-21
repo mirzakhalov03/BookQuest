@@ -15,7 +15,7 @@ const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').match
  * lands, and the knock when it's tapped (hop, seal flash, rays flare, burst).
  * Imperative and DOM-only — sparks are throwaway nodes animated with WAAPI.
  */
-export function useTomeFx(enabled: boolean) {
+export function useTomeFx() {
   const sparksRef = useRef<HTMLDivElement>(null);
   const swayRef = useRef<HTMLDivElement>(null);
   const sealRef = useRef<HTMLDivElement>(null);
@@ -57,7 +57,7 @@ export function useTomeFx(enabled: boolean) {
   );
 
   useEffect(() => {
-    if (!enabled || reducedMotion()) return;
+    if (reducedMotion()) return;
     const landing = window.setTimeout(() => burst(LANDING_SPARKS), LANDING_AT_MS);
     const embers = window.setInterval(() => {
       const layer = sparksRef.current?.getBoundingClientRect();
@@ -71,7 +71,7 @@ export function useTomeFx(enabled: boolean) {
       window.clearTimeout(landing);
       window.clearInterval(embers);
     };
-  }, [enabled, burst, spark]);
+  }, [burst, spark]);
 
   /** The tap: the rig has already kicked the spring; this is everything around it. */
   const knock = useCallback(() => {

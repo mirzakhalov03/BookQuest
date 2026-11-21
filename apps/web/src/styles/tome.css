@@ -11,14 +11,6 @@
  */
 
 :root {
-  --tome-d: calc(var(--book-w) * 0.16);
-  --tome-b: calc(var(--book-w) * 0.024); /* board thickness */
-  --tome-o: calc(var(--book-w) * 0.02); /* boards overhang the pages by this */
-  --tome-rw: calc(var(--book-w) * 0.085); /* ribbon width */
-  --tome-ry: calc(var(--book-h) * -0.04); /* horizontal ribbon, from centre */
-  --tome-lift: 1px; /* ribbon above the board */
-  --tome-tile: calc(var(--book-w) * 0.2);
-
   --leather-hi: #5a1a0b;
   --leather: #3a0f06;
   --leather-lo: #200703;
@@ -35,6 +27,27 @@
 }
 
 /* ── Motion wrappers ─────────────────────────────────────────────── */
+
+/* The tome's own box: hover zone, perspective, and the stacking context its
+   rays sit behind the book in. Its own perspective, because a parent's
+   (Home's `.bookwrap`) would be flattened at this element. */
+/* Geometry is derived here, not on :root, so a local `--book-w` (as on `/book`) resizes all of it. */
+.tome-stage {
+  --book-h: calc(var(--book-w) * 1.47);
+  --tome-d: calc(var(--book-w) * 0.16);
+  --tome-b: calc(var(--book-w) * 0.024); /* board thickness */
+  --tome-o: calc(var(--book-w) * 0.02); /* boards overhang the pages by this */
+  --tome-rw: calc(var(--book-w) * 0.085); /* ribbon width */
+  --tome-ry: calc(var(--book-h) * -0.04); /* horizontal ribbon, from centre */
+  --tome-lift: 1px; /* ribbon above the board */
+  --tome-tile: calc(var(--book-w) * 0.2);
+  position: relative;
+  width: var(--book-w);
+  height: var(--book-h);
+  perspective: 1400px;
+  perspective-origin: 50% 40%;
+  isolation: isolate;
+}
 
 /* Slow idle sway, so the light keeps finding the foil when nobody touches it. */
 .tome-sway {
@@ -525,7 +538,7 @@
 
 /* ── Aura: light escaping round the book ─────────────────────────── */
 
-/* Inside `.bookwrap`, behind the book, so it floats with it. */
+/* Behind the book, inside `.tome-stage`'s stacking context. */
 .tome-aura {
   position: absolute;
   left: 50%;
@@ -582,7 +595,7 @@
 
 .tome-sparks {
   position: absolute;
-  inset: -20% -30% 0;
+  inset: -45% -70% -10%;
   z-index: 3;
   pointer-events: none;
 }

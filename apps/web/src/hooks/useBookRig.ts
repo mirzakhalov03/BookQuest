@@ -42,7 +42,6 @@ interface BookRigOptions {
  * `--footprint`) from a rAF spring, so a frame never touches React state.
  */
 export function useBookRig<Zone extends HTMLElement, Rig extends HTMLElement>(
-  enabled: boolean,
   { onTap }: BookRigOptions = {}
 ) {
   const zoneRef = useRef<Zone>(null);
@@ -56,7 +55,7 @@ export function useBookRig<Zone extends HTMLElement, Rig extends HTMLElement>(
   useEffect(() => {
     const zone = zoneRef.current;
     const rig = rigRef.current;
-    if (!enabled || !zone || !rig) return;
+    if (!zone || !rig) return;
 
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const canHover = !reduced && matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -179,8 +178,6 @@ export function useBookRig<Zone extends HTMLElement, Rig extends HTMLElement>(
 
     return () => {
       stop();
-      // Hand back a book at rest, e.g. when the hidden book is revealed.
-      for (const prop of ['--spin', '--lean', '--glare', '--footprint']) zone.style.removeProperty(prop);
       rig.removeEventListener('pointerdown', onDown);
       rig.removeEventListener('pointermove', onDragMove);
       rig.removeEventListener('pointerup', onUp);
@@ -188,7 +185,7 @@ export function useBookRig<Zone extends HTMLElement, Rig extends HTMLElement>(
       zone.removeEventListener('pointermove', onHover);
       zone.removeEventListener('pointerleave', onLeave);
     };
-  }, [enabled]);
+  }, []);
 
   return { zoneRef, rigRef };
 }
