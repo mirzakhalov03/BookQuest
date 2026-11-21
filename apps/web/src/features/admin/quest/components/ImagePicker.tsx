@@ -24,7 +24,9 @@ const SHAPES = {
   // A book cover, beside a short field. Larger and finer than the thumbnail: the Home stage draws it big on retina screens.
   cover: { wrap: 'shrink-0', box: 'aspect-[2/3] w-32', maxSide: 1600, quality: 0.9 },
   // A full-width photo, e.g. all the prizes together.
-  wide: { wrap: 'flex-1', box: 'aspect-[4/3] w-full max-w-md', maxSide: 1600, quality: 0.82 }
+  wide: { wrap: 'flex-1', box: 'aspect-[4/3] w-full max-w-md', maxSide: 1600, quality: 0.82 },
+  // Certificate artwork: A4 landscape, kept above the 2246px the renderer draws at.
+  certificate: { wrap: 'flex-1', box: 'aspect-[1123/794] w-full', maxSide: 2600, quality: 0.92 }
 } as const;
 
 interface ImagePickerProps {

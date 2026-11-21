@@ -4,7 +4,9 @@ import { useAdminCurrentQuest } from '../api/useAdminCurrentQuest';
 import { useCertificateDelivery } from '../api/useCertificateDelivery';
 import { AdminQuery } from '../components/AdminQuery';
 import { AdminPageHeader } from '../components/AdminPageHeader';
+import { CERTIFICATE_TIERS } from '@bookquest/shared';
 import { CertificateDelivery } from './CertificateDelivery';
+import { DesignCard } from './DesignCard';
 import { PREVIEW_SAMPLES, certificatePreviewUrl } from './previewUrl';
 import { useT } from '@/i18n';
 import { errorMessage } from '@/lib/api/errorMessage';
@@ -29,15 +31,24 @@ export function CertificatesPage() {
       {(data) => (
         <AdminScreen className="max-w-4xl">
           <AdminPageHeader title={t.title} />
-          {delivery.data?.placeholderArt && <p className="m-0 text-sm text-amber">{t.placeholderNote}</p>}
+          <section className="flex flex-col gap-3">
+            <h2 className="type-label m-0">{t.designs}</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {CERTIFICATE_TIERS.map((tier) => (
+                <DesignCard key={tier} quest={data} tier={tier} />
+              ))}
+            </div>
+          </section>
 
+          <h2 className="type-label m-0">{t.previews}</h2>
+          {delivery.data?.placeholderArt && <p className="m-0 text-sm text-amber">{t.placeholderNote}</p>}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {PREVIEW_SAMPLES.map((sample) => {
               const caption = sample.placing ? `${t.tiers.winner} · ${common.place(sample.placing)}` : t.tiers.participant;
               return (
                 <figure key={sample.key} className="m-0 flex flex-col gap-1.5">
                   <img
-                    src={certificatePreviewUrl(sample)}
+                    src={certificatePreviewUrl(sample, `${data.certificateDesigns.winner ?? ''}${data.certificateDesigns.participant ?? ''}`.slice(-24))}
                     width={1123}
                     height={794}
                     loading="lazy"
