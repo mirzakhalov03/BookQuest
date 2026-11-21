@@ -148,10 +148,8 @@ function CertificateSection() {
       <p className="type-label m-0">{t.certificates}</p>
       {data ? (
         <Certificate data={data} />
-      ) : resultsOut ? (
-        <p className="m-0 text-taupe">{t.certMissed}</p>
       ) : (
-        <CertificateTeaser resultsAt={quest?.resultsAt ?? null} />
+        <CertificateTeaser resultsAt={quest?.resultsAt ?? null} missed={resultsOut} />
       )}
     </section>
   );
