@@ -1,0 +1,19 @@
+apps/web/src/styles/base.css
+  s_4d231f23b4eddd::t_114f7b07934b31 15-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "27fd30344db85e2be0d1fdaac03ac02964cdd640",
+  "prompts": {},
+  "sessions": {
+    "s_4d231f23b4eddd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f42df2a4-3e46-4aba-aada-10007dfb6d0d",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
