@@ -1,0 +1,31 @@
+apps/web/src/features/quiz/QuizPage.tsx
+  s_85a0515f1cb785::t_9f84264326b811 16,96
+apps/web/src/features/quiz/components/RulesSheet.tsx
+  s_85a0515f1cb785::t_cc1891ac721efa 13-14,29-39,41,59
+apps/web/src/features/quiz/components/StartCta.tsx
+  s_85a0515f1cb785::t_e654f5912f9e4d 67
+apps/web/src/i18n/en/quiz.ts
+  s_85a0515f1cb785::t_37596383e44848 58-59
+apps/web/src/i18n/ru/quiz.ts
+  s_85a0515f1cb785::t_4375fb336ca8a4 59-60
+apps/web/src/i18n/uz/quiz.ts
+  s_85a0515f1cb785::t_effaeef5882dba 59-60
+apps/web/src/features/quiz/components/OverviewCard.tsx
+  s_85a0515f1cb785::t_f088e3920136d5 6-8,21-22,29,34-35,37,40,47,51-53,59,62,68,70,73,83-84,90-92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "9084eb8e2be4608efd02ddb317539f35afa01224",
+  "prompts": {},
+  "sessions": {
+    "s_85a0515f1cb785": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc04e644-a5b1-4a83-a416-13183c3015ec",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
