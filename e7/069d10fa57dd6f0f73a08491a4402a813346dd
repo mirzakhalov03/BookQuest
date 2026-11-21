@@ -1,0 +1,21 @@
+apps/web/src/features/prizes/QuestEditionPage.tsx
+  s_a2836ae43a9405::t_259c50ec9de123 131
+apps/web/src/features/prizes/components/PrizeShowcase.tsx
+  s_a2836ae43a9405::t_5c9631c7efd701 7-13,15,19-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "e7069d10fa57dd6f0f73a08491a4402a813346dd",
+  "prompts": {},
+  "sessions": {
+    "s_a2836ae43a9405": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b97ad509-f90c-44df-b028-629768ad274a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
