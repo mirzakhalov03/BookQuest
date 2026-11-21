@@ -1,0 +1,29 @@
+apps/web/src/components/SealedTome.tsx
+  s_d6d40a0d871f67::t_94fec4bdf1c510 1-3,26-29,31,33-35,37-70,74-75
+apps/web/src/features/home/components/BookStage.tsx
+  s_d6d40a0d871f67::t_e546953e29f159 2,15,20-28
+apps/web/src/hooks/useBookRig.ts
+  s_d6d40a0d871f67::t_c57140501db0f4 58,188
+apps/web/src/hooks/useTomeFx.ts
+  s_d6d40a0d871f67::t_b708fcc6f3310c 18,60,74
+apps/web/src/styles/tome.css
+  s_d6d40a0d871f67::t_da16c988d61b34 31-51,541,598
+apps/web/src/components/BookLocked.tsx
+  s_d6d40a0d871f67::t_0fd4cb95ea4263 2,5-6,11,13-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "137f15e3e337506bf13572bc1e39ad8acb42bb46",
+  "prompts": {},
+  "sessions": {
+    "s_d6d40a0d871f67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1e77ac10-3a9e-4c4f-b6e6-032932161cdc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
