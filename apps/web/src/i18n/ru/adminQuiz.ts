@@ -16,6 +16,7 @@ export const adminQuiz: typeof En = {
   difficulty: { easy: 'Лёгкий', medium: 'Средний', hard: 'Сложный' },
   edition: (n) => `${n}-й сезон`,
   library: {
+    titlePlaceholder: 'напр. Финал: вторая дверь',
     eyebrow: 'Библиотека',
     title: 'Тесты',
     live: 'Онлайн',
@@ -45,6 +46,10 @@ export const adminQuiz: typeof En = {
     create: 'Создать'
   },
   editor: {
+    titlePlaceholder: 'напр. Финал: вторая дверь',
+    descriptionPlaceholder: 'Заметка для организаторов: какие главы, кто составил…',
+    questionPlaceholder: 'Кто открывает вторую дверь и почему?',
+    explanationPlaceholder: 'Показывается после теста: страница или строка, которая всё решает.',
     lockedBanner: 'Заблокирован — участники уже начали этот тест. Ключ ответа всё ещё можно исправить (под каждым вопросом).',
     stale: 'Кто-то другой сохранил этот тест. Обновите, чтобы увидеть его версию',
     loading: 'Открываем тест…',
@@ -68,8 +73,6 @@ export const adminQuiz: typeof En = {
     voided: 'Аннулирован',
     needsAttention: 'Требует внимания',
     dragAria: (n) => `Перетащить вопрос ${n}`,
-    moveUpAria: (n) => `Поднять вопрос ${n}`,
-    moveDownAria: (n) => `Опустить вопрос ${n}`,
     typeAria: 'Тип вопроса',
     typeTrueFalse: 'Верно / Неверно',
     typeMcq: 'С вариантами',

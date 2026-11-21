@@ -16,6 +16,7 @@ export const adminQuiz = {
   difficulty: { easy: 'Easy', medium: 'Medium', hard: 'Hard' } satisfies Record<QuestionDifficulty, string>,
   edition: (n: number) => `Edition ${n}`,
   library: {
+    titlePlaceholder: 'e.g. Final round: the second door',
     eyebrow: 'Library',
     title: 'Quizzes',
     live: 'Live',
@@ -45,6 +46,10 @@ export const adminQuiz = {
     create: 'Create'
   },
   editor: {
+    titlePlaceholder: 'e.g. Final round: the second door',
+    descriptionPlaceholder: 'A note for organisers: which chapters it covers, who wrote it…',
+    questionPlaceholder: 'Who opens the second door, and why?',
+    explanationPlaceholder: 'Shown after the quiz: the page or line that settles it.',
     lockedBanner: 'Locked — participants have started this quiz. You can still correct an answer key (below each question).',
     stale: 'Someone else saved this quiz. Reload to see their version',
     loading: 'Opening the quiz…',
@@ -68,8 +73,6 @@ export const adminQuiz = {
     voided: 'Voided',
     needsAttention: 'Needs attention',
     dragAria: (n: number) => `Drag question ${n}`,
-    moveUpAria: (n: number) => `Move question ${n} up`,
-    moveDownAria: (n: number) => `Move question ${n} down`,
     typeAria: 'Question type',
     typeTrueFalse: 'True / False',
     typeMcq: 'Multiple choice',

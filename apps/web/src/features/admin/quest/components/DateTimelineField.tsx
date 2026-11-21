@@ -22,7 +22,7 @@ export function DateTimelineField({ savedDates }: DateTimelineFieldProps) {
     control,
     setValue,
     trigger,
-    formState: { errors }
+    formState: { errors, isSubmitted }
   } = useFormContext<QuestFormState>();
   const { admin, adminQuest } = useT();
   const t = adminQuest.dates;
@@ -47,8 +47,8 @@ export function DateTimelineField({ savedDates }: DateTimelineFieldProps) {
     for (const k of QUEST_DATE_FIELDS) {
       if (next[k] !== dates[k]) setValue(`dates.${k}`, next[k], { shouldDirty: true });
     }
-    // Ordering errors can land on a date the user didn't touch, so re-check all five.
-    void trigger(DATE_PATHS);
+    // Ordering errors can land on a date the user didn't touch, so re-check all five — once errors are showing at all.
+    if (isSubmitted) void trigger(DATE_PATHS);
   };
 
   const parsed = Object.fromEntries(QUEST_DATE_FIELDS.map((key) => [key, parseLocal(dates[key])])) as Record<

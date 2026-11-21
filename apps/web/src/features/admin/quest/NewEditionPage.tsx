@@ -77,7 +77,9 @@ function NewEditionForm({ source }: { source: LatestQuest }) {
   const form = useForm<QuestFormState>({
     resolver: zodResolver(questFormSchema),
     defaultValues: draft.values,
-    mode: 'onChange'
+    // Quiet until the first save attempt, then live as fields get fixed.
+    mode: 'onSubmit',
+    reValidateMode: 'onChange'
   });
   const { handleSubmit, setError, formState } = form;
   const [payload, setPayload] = useState<CreateQuestPayload | null>(null);

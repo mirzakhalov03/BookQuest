@@ -59,7 +59,9 @@ function QuestEditorForm({ quest }: { quest: AdminQuest }) {
   const form = useForm<QuestFormState>({
     resolver: zodResolver(questFormSchema),
     defaultValues: toFormState(quest),
-    mode: 'onChange'
+    // Quiet until the first save attempt, then live as fields get fixed.
+    mode: 'onSubmit',
+    reValidateMode: 'onChange'
   });
   const { handleSubmit, reset, setError, formState } = form;
   const [formError, setFormError] = useState<string | null>(null);

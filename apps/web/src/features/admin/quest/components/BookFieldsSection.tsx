@@ -33,8 +33,8 @@ export function BookFieldsSection({ onCoverUploadingChange }: BookFieldsSectionP
           <Toggle checked={field.value} onChange={field.onChange} label={t.revealLabel} hint={t.revealHint} />
         )}
       />
-      <Field label={t.title} {...register('book.title')} {...statusFor(e?.title?.message)} />
-      <Field label={t.author} {...register('book.author')} {...statusFor(e?.author?.message)} />
+      <Field label={t.title} placeholder={t.titlePlaceholder} {...register('book.title')} {...statusFor(e?.title?.message)} />
+      <Field label={t.author} placeholder={t.authorPlaceholder} {...register('book.author')} {...statusFor(e?.author?.message)} />
       <Controller
         control={control}
         name="book.coverUrl"
@@ -56,6 +56,7 @@ export function BookFieldsSection({ onCoverUploadingChange }: BookFieldsSectionP
             aside={
               <Field
                 label={t.pages}
+                placeholder={t.pagesPlaceholder}
                 className="max-w-32"
                 type="number"
                 inputMode="numeric"

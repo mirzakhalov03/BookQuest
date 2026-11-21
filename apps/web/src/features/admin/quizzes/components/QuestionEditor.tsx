@@ -77,6 +77,7 @@ export function QuestionEditor({ index, issues, onRemove, locked, voided, onCorr
         />
         <TextArea
           label={t.question}
+          placeholder={t.questionPlaceholder}
           rows={3}
           {...register(`${base}.prompt`)}
           head={<CharCount length={question.prompt.length} max={QUIZ_TEXT_LIMITS.prompt} />}
@@ -117,6 +118,7 @@ export function QuestionEditor({ index, issues, onRemove, locked, voided, onCorr
         </div>
         <TextArea
           label={t.explanation}
+          placeholder={t.explanationPlaceholder}
           rows={2}
           {...register(`${base}.explanation`, { setValueAs: (v: string | null) => (v ? v : null) })}
           head={<CharCount length={question.explanation?.length ?? 0} max={QUIZ_TEXT_LIMITS.explanation} />}

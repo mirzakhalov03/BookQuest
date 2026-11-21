@@ -19,6 +19,7 @@ export function QuizDetailsSection() {
     <section className="flex flex-col gap-2">
       <Field
         label={t.title}
+        placeholder={t.titlePlaceholder}
         maxLength={QUIZ_TEXT_LIMITS.title}
         {...register('title')}
         status={errors.title ? 'bad' : undefined}
@@ -26,6 +27,7 @@ export function QuizDetailsSection() {
       />
       <TextArea
         label={t.description}
+        placeholder={t.descriptionPlaceholder}
         rows={3}
         {...register('description', { setValueAs: (v: string | null) => (v ? v : null) })}
         head={<CharCount length={description?.length ?? 0} max={QUIZ_TEXT_LIMITS.description} />}

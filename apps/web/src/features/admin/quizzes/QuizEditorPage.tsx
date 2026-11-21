@@ -54,7 +54,9 @@ function QuizEditorForm({ quiz, reload }: { quiz: QuizAdmin; reload: () => Promi
   const form = useForm<QuizFormState>({
     resolver: zodResolver(saveQuizSchema),
     defaultValues: toQuizFormState(quiz),
-    mode: 'onChange'
+    // Quiet until the first save attempt, then live as fields get fixed.
+    mode: 'onSubmit',
+    reValidateMode: 'onChange'
   });
   const { handleSubmit, reset, setError, getValues, formState } = form;
   const navigate = useNavigate();

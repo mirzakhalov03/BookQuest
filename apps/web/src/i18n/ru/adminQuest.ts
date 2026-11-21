@@ -34,6 +34,9 @@ export const adminQuest: typeof En = {
   tabs: { book: 'Книга', resources: 'Материалы', prizes: 'Призы', dates: 'Даты', quiz: 'Тест' },
   hasErrors: 'Есть ошибки',
   book: {
+    titlePlaceholder: 'Минувшие дни',
+    authorPlaceholder: 'Абдулла Кадыри',
+    pagesPlaceholder: '320',
     revealLabel: 'Показывать книгу читателям',
     revealHint: 'Выключено: читатели видят обложку с ?, а страница книги закрыта. Чтобы книга оставалась сюрпризом до анонса.',
     title: 'Название',
@@ -137,6 +140,7 @@ export const adminQuest: typeof En = {
     windowDetail: (window, needed) => `Окно теста — ${window}, а сам тест длится ${needed}.`
   },
   resources: {
+    labelPlaceholder: 'напр. Asaxiy, PDF, аудиокнига на узбекском',
     invalidUrl: 'Вставьте полную ссылку, начинающуюся с https://',
     empty: 'Материалов для чтения пока нет. Вставьте ссылку на PDF, аудиокнигу или магазин.',
     untitled: 'Без названия',

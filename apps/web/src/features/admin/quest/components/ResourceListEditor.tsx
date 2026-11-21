@@ -68,7 +68,7 @@ export function ResourceListEditor() {
                 </button>
 
                 <div hidden={!isOpen} className="grid gap-3 pb-3 pt-1 sm:grid-cols-[1fr_2fr_8rem]">
-                  <Field label={t.label} {...register(`book.resources.${index}.label`)} {...statusFor(rowErrors?.label?.message)} />
+                  <Field label={t.label} placeholder={t.labelPlaceholder} {...register(`book.resources.${index}.label`)} {...statusFor(rowErrors?.label?.message)} />
                   <Field
                     label={t.url}
                     type="url"

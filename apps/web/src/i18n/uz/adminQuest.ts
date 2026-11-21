@@ -33,6 +33,9 @@ export const adminQuest: typeof En = {
   tabs: { book: 'Kitob', resources: 'Manbalar', prizes: 'Sovrinlar', dates: 'Sanalar', quiz: 'Test' },
   hasErrors: 'Xatolar bor',
   book: {
+    titlePlaceholder: 'O‘tkan kunlar',
+    authorPlaceholder: 'Abdulla Qodiriy',
+    pagesPlaceholder: '320',
     revealLabel: 'Kitobni o‘quvchilarga ko‘rsatish',
     revealHint: 'O‘chiq: o‘quvchilar ? muqovani ko‘radi va Kitob sahifasi yopiq turadi. E’lon qilguningizcha kitobni sir saqlash uchun.',
     title: 'Nomi',
@@ -136,6 +139,7 @@ export const adminQuest: typeof En = {
     windowDetail: (window, needed) => `Test oynasi ${window}, test esa ${needed} davom etadi.`
   },
   resources: {
+    labelPlaceholder: 'masalan: Asaxiy, PDF, o‘zbekcha audiokitob',
     invalidUrl: 'https:// bilan boshlanadigan to‘liq havolani joylang',
     empty: 'Hali o‘qish manbalari yo‘q. PDF, audiokitob yoki do‘kon havolasini joylang.',
     untitled: 'Nomsiz',

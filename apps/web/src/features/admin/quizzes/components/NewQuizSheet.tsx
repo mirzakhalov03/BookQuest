@@ -40,6 +40,7 @@ export function NewQuizSheet({ open, onClose }: { open: boolean; onClose: () => 
       <form onSubmit={(e) => void submit(e)} noValidate className="flex flex-col gap-3">
         <Field
           label={t.titleField}
+          placeholder={t.titlePlaceholder}
           value={title}
           maxLength={QUIZ_TEXT_LIMITS.title}
           autoFocus

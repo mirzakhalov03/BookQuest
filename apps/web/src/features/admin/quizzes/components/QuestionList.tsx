@@ -16,7 +16,7 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { AlertTriangle, ArrowDown, ArrowUp, ChevronDown, GripVertical, Plus } from 'lucide-react';
+import { AlertTriangle, ChevronDown, GripVertical, Plus } from 'lucide-react';
 import { findQuizIssues, quizShape, type QuizQuestion } from '@bookquest/shared';
 import { formatQuizDuration } from '../format';
 import { newQuestion, type QuizFormState } from '../quizForm';
@@ -62,6 +62,9 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
   });
   const [questions, settings] = useWatch({ control, name: ['questions', 'settings'] });
   const [openId, setOpenId] = useState<string | null>(null);
+  // Questions added this session stay quiet until a save attempt; saved ones that are broken show it straight away.
+  const [freshIds, setFreshIds] = useState<ReadonlySet<string>>(() => new Set());
+  const showIssues = (questionId: string) => submitCount > 0 || !freshIds.has(questionId);
   const issues = localizeQuizIssues(findQuizIssues({ questions, settings }));
   const t = useT().adminQuiz.editor;
   const shape = quizShape({ questions, settings });
@@ -93,6 +96,14 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
     const next = newQuestion(all[all.length - 1]);
     append(next);
     setOpenId(next.id);
+    setFreshIds((ids) => new Set(ids).add(next.id));
+    // Next frame, once the row exists: bring it to the middle of the screen and start typing.
+    requestAnimationFrame(() => {
+      const row = document.getElementById(`q-${next.id}`);
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      row?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+      row?.querySelector<HTMLElement>('textarea, input')?.focus({ preventScroll: true });
+    });
   }
 
   return (
@@ -112,7 +123,7 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
             {t.shuffledNote}
           </p>
         )}
-        {issues?.questions && fields.length === 0 && (
+        {issues?.questions && fields.length === 0 && submitCount > 0 && (
           <p className="m-0 text-sm text-amber">{issues.questions}</p>
         )}
 
@@ -122,15 +133,13 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
               {fields.map((field, index) => {
                 const question = questions[index];
                 if (!question) return null;
-                const rowIssues = issuesFor(issues, index);
+                const rowIssues = showIssues(question.id) ? issuesFor(issues, index) : {};
                 return (
                   <SortableRow
                     key={field.id}
                     id={field.id}
                     index={index}
-                    count={fields.length}
                     question={question}
-                    defaultTime={settings.defaultTimeLimitSec}
                     hasError={
                       Boolean(errors.questions?.[index]) || Object.keys(rowIssues).length > 0
                     }
@@ -138,7 +147,6 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
                     locked={locked}
                     voided={voidedIds.includes(question.id)}
                     onToggle={() => setOpenId(openId === field.id ? null : field.id)}
-                    onMove={(to) => move(index, to)}
                   >
                     <QuestionEditor
                       index={index}
@@ -177,31 +185,25 @@ export function QuestionList({ locked, raised, dock, voidedIds, onCorrect }: Que
 interface SortableRowProps {
   id: string;
   index: number;
-  count: number;
   question: QuizQuestion;
-  defaultTime: number;
   hasError: boolean;
   open: boolean;
   locked: boolean;
   voided: boolean;
   onToggle: () => void;
-  onMove: (to: number) => void;
   children: ReactNode;
 }
 
-/** Collapsed header per §5.2: number, type, first line, difficulty dot, time, error badge. */
+/** Collapsed header: number, type, first line, difficulty dot, error badge. Reordering is drag (or keyboard drag). */
 function SortableRow({
   id,
   index,
-  count,
   question,
-  defaultTime,
   hasError,
   open,
   locked,
   voided,
   onToggle,
-  onMove,
   children
 }: SortableRowProps) {
   const {
@@ -213,13 +215,13 @@ function SortableRow({
     transition,
     isDragging
   } = useSortable({ id, disabled: locked });
-  const seconds = question.timeLimitSec ?? defaultTime;
   const { adminQuiz } = useT();
   const t = adminQuiz.editor;
 
   return (
     <li
       ref={setNodeRef}
+      id={`q-${question.id}`}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={`rounded-box border bg-[color:var(--color-ash)] ${
         isDragging ? 'relative z-10 border-amber/60 shadow-lg' : 'border-[color:var(--rule)]'
@@ -261,7 +263,6 @@ function SortableRow({
             aria-label={adminQuiz.difficulty[question.difficulty]}
             className={`h-2 w-2 shrink-0 rounded-full ${DIFFICULTY_DOT[question.difficulty]}`}
           />
-          <span className="shrink-0 text-xs tabular-nums text-taupe">{seconds}s</span>
           {hasError && (
             <AlertTriangle aria-label={t.needsAttention} className="h-4 w-4 shrink-0 text-error" />
           )}
@@ -269,24 +270,6 @@ function SortableRow({
             className={`h-4 w-4 shrink-0 text-taupe transition-transform ${open ? 'rotate-180' : ''}`}
             aria-hidden
           />
-        </button>
-        <button
-          type="button"
-          aria-label={t.moveUpAria(index + 1)}
-          disabled={locked || index === 0}
-          onClick={() => onMove(index - 1)}
-          className={ROW_BUTTON}
-        >
-          <ArrowUp className="h-4 w-4" aria-hidden />
-        </button>
-        <button
-          type="button"
-          aria-label={t.moveDownAria(index + 1)}
-          disabled={locked || index === count - 1}
-          onClick={() => onMove(index + 1)}
-          className={ROW_BUTTON}
-        >
-          <ArrowDown className="h-4 w-4" aria-hidden />
         </button>
       </div>
       {open && children}

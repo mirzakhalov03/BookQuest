@@ -34,6 +34,9 @@ export const adminQuest = {
   tabs: { book: 'Book', resources: 'Resources', prizes: 'Prizes', dates: 'Dates', quiz: 'Quiz' },
   hasErrors: 'Has errors',
   book: {
+    titlePlaceholder: 'O‘tkan kunlar',
+    authorPlaceholder: 'Abdulla Qodiriy',
+    pagesPlaceholder: '320',
     revealLabel: 'Show the book to readers',
     revealHint: 'Off: readers see a ? cover and the Book page stays locked. Use it to keep the book a surprise until you announce it.',
     title: 'Title',
@@ -137,6 +140,7 @@ export const adminQuest = {
     windowDetail: (window: string, needed: string) => `The window is ${window} but the quiz takes ${needed}.`
   },
   resources: {
+    labelPlaceholder: 'e.g. Asaxiy, the PDF, Uzbek audiobook',
     invalidUrl: 'Paste a full link, starting with https://',
     empty: 'No reading resources yet. Paste a link to a PDF, an audiobook or a shop.',
     untitled: 'Untitled',

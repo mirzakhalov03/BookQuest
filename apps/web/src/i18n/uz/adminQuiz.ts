@@ -15,6 +15,7 @@ export const adminQuiz: typeof En = {
   difficulty: { easy: 'Oson', medium: 'O‘rtacha', hard: 'Qiyin' },
   edition: (n) => `${n}-mavsum`,
   library: {
+    titlePlaceholder: 'masalan: Final bosqich — ikkinchi eshik',
     eyebrow: 'To‘plam',
     title: 'Testlar',
     live: 'Jonli',
@@ -44,6 +45,10 @@ export const adminQuiz: typeof En = {
     create: 'Yaratish'
   },
   editor: {
+    titlePlaceholder: 'masalan: Final bosqich — ikkinchi eshik',
+    descriptionPlaceholder: 'Tashkilotchilar uchun izoh: qaysi boblar, kim tuzgan…',
+    questionPlaceholder: 'Ikkinchi eshikni kim ochadi va nega?',
+    explanationPlaceholder: 'Testdan keyin ko‘rsatiladi: javobni tasdiqlovchi sahifa yoki satr.',
     lockedBanner: 'Qulflangan — ishtirokchilar bu testni boshlagan. Javob kalitini baribir tuzatish mumkin (har bir savol ostida).',
     stale: 'Bu testni boshqa kishi saqladi. Uning versiyasini ko‘rish uchun yangilang',
     loading: 'Test ochilmoqda…',
@@ -67,8 +72,6 @@ export const adminQuiz: typeof En = {
     voided: 'Bekor qilingan',
     needsAttention: 'E’tibor talab qiladi',
     dragAria: (n) => `${n}-savolni sudrash`,
-    moveUpAria: (n) => `${n}-savolni yuqoriga`,
-    moveDownAria: (n) => `${n}-savolni pastga`,
     typeAria: 'Savol turi',
     typeTrueFalse: 'To‘g‘ri / Noto‘g‘ri',
     typeMcq: 'Variantli',
