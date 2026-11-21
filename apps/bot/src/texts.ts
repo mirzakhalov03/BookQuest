@@ -59,7 +59,7 @@ export const TEXTS = {
     '<b><a href="https://t.me/vokhabov27">Abdulahad Vokhabov</a></b> — Tashkilotchi',
     '<b><a href="https://t.me/Ibn_Makhmood">Muzaffar Ortiqov</a></b> — Maslahatchi va homiy</blockquote>',
     '',
-    '🌐 <a href="https://bookquest.uz">bookquest.uz</a>'
+    '🤖 <a href="https://t.me/bookquest_bot">@bookquest_bot</a>'
   ].join('\n'),
 
   // Feedback chat — what the participant sees.
