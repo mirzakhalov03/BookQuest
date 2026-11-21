@@ -85,8 +85,8 @@ export function QuizConfigSection({ quest, lockMessage, onGoTo }: QuizConfigSect
       .filter((quiz) => quiz.id === current || !config?.quizIds.includes(quiz.id))
       .map((quiz) => ({
         value: quiz.id,
-        label: t.quizOption(
-          quiz.title,
+        label: quiz.title,
+        hint: t.quizHint(
           common.questions(quiz.questionCount, String(quiz.questionCount)),
           formatQuizDuration(quiz.totalSeconds),
           quiz.isComplete

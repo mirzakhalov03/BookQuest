@@ -1,6 +1,7 @@
 import type { common as En } from '../en/common';
 
 export const common: typeof En = {
+  choose: 'Tanlang…',
   appTagline: 'Bitta kitob. Bitta muddat. Bitta test.',
   tryAgain: 'Qayta urinish',
   backToStart: 'Bosh sahifaga',

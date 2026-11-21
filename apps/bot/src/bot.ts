@@ -5,6 +5,7 @@ import { logger } from './config/logger.js';
 import { handleStart } from './handlers/start.js';
 import { handleFallback } from './handlers/fallback.js';
 import { handleAbout } from './handlers/about.js';
+import { handleGuide } from './handlers/guide.js';
 import {
   handleFeedbackClose,
   handleFeedbackMessage,
@@ -12,7 +13,7 @@ import {
 } from './handlers/feedback.js';
 import { feedbackGroup } from './handlers/feedback-group.js';
 import { handleGroupAdded } from './handlers/group-added.js';
-import { feedbackEnabled } from './keyboards.js';
+import { feedbackEnabled, GUIDE_ACTION } from './keyboards.js';
 import { TEXTS } from './texts.js';
 import { recordInteractionMiddleware } from './middlewares/record-interaction.js';
 import { flushInteractions } from './lib/interaction-recorder.js';
@@ -37,6 +38,8 @@ async function start(): Promise<void> {
   // below, or Telegraf would run both for the same message.
   const privateChat = new Composer<Context>();
   privateChat.start(handleStart);
+  privateChat.hears(TEXTS.guideButton, handleGuide);
+  privateChat.action(GUIDE_ACTION, handleGuide);
   privateChat.hears(TEXTS.aboutButton, handleAbout);
   if (feedbackEnabled) {
     privateChat.hears(TEXTS.feedbackButton, handleFeedbackOpen);

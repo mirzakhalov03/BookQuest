@@ -105,8 +105,8 @@ export const adminQuest: typeof En = {
     loadingQuizzes: 'Testlar yuklanmoqda…',
     libraryFailed: 'Testlar to‘plamini yuklab bo‘lmadi.',
     chooseQuiz: 'Testni tanlang…',
-    quizOption: (title, questions, duration, complete) =>
-      `${title} · ${questions} · ${duration}${complete ? '' : ' · tugallanmagan'}`,
+    quizHint: (questions: string, duration: string, complete: boolean) =>
+      `${questions} · ${duration}${complete ? '' : ' · tugallanmagan'}`,
     splitRandom: 'Saqlanganda tasodifiy teng bo‘linadi',
     locksWhen: 'Birinchi ishtirokchi boshlaganda qulflanadi.',
     none: 'Yo‘q',

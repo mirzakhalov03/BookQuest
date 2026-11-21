@@ -1,11 +1,45 @@
 /** Every word the bot says. Uzbek only by design; the Mini App owns multilingual. HTML where noted. */
 export const TEXTS = {
-  welcome:
-    'BookQuestga xush kelibsiz! 📚\n\n' +
-    'Har yili o‘tkaziladigan kitobxonlik musobaqasi — kitobni tanlang, o‘qing, testni topshiring. ' +
-    'G‘oliblarni tezlik va aniqlik belgilaydi, oxirigacha yetgan har bir ishtirokchi esa ' +
-    'sertifikat oladi.',
-  getStarted: 'Boshlash uchun quyidagi tugmani bosing.',
+  // HTML; the name arrives already escaped.
+  welcome: (name: string) => `Assalomu alaykum, <b>${name}</b>! 👋 BookQuestga xush kelibsiz.`,
+
+  // HTML; the poster's caption, so keep under 1024 chars.
+  season: [
+    '<b>📚 Book Quest 3.0</b> — 3-mavsum boshlandi!',
+    '',
+    'Kitob o‘qing va VR headset, smartwatch, powerbank, AirPods hamda Ibrat Academy Gold ' +
+      'vaucherini yutib oling — yana ustiga istalgan kitobingizni tanlaysiz 🎁',
+    '',
+    '<blockquote><b>Shartlari oddiy:</b>',
+    '1. Ro‘yxatdan o‘ting ✍️',
+    '2. Kitobni tugating 📖',
+    '3. Testda tez va yuqori ball oling 🏆</blockquote>',
+    '',
+    'Ro‘yxatdan o‘tish ham, test ham — hammasi bitta ilovada. Boshlash uchun quyidagi tugmani bosing 👇'
+  ].join('\n'),
+
+  guideButton: '🧭 Qanday ishtirok etaman?',
+  // HTML.
+  guide: [
+    '<b>🧭 BookQuest’da ishtirok etish</b>',
+    '',
+    '<b>1. Ilovani oching.</b> «📖 BookQuestni ochish» tugmasini bosing — bot ichida mini-app ochiladi.',
+    '',
+    '<b>2. Ro‘yxatdan o‘ting.</b> O‘rningizni band qiling va ishtirokchi raqamingizni oling. ' +
+      'Ro‘yxatdan o‘tish o‘qish davri tugaguncha ochiq.',
+    '',
+    '<b>3. Kitobni o‘qing.</b> Kitob sahifasida uni qayerdan topish mumkinligi ko‘rsatilgan: ' +
+      'PDF, audio yoki do‘konlar.',
+    '',
+    '<b>4. Testni topshiring.</b> Test qachon ochilishi ilova bosh sahifasida ko‘rsatiladi. ' +
+      'G‘oliblarni aniqlik va tezlik belgilaydi.',
+    '',
+    '<b>5. Natijalar.</b> G‘oliblar sovrinlarni oladi, testni yakunlagan har bir ishtirokchiga ' +
+      'sertifikat beriladi 🎓',
+    '',
+    'Savollar bo‘lsa — «💬 Savol va takliflar» tugmasi orqali bizga yozing.'
+  ].join('\n'),
+
   openApp: '📖 BookQuestni ochish',
   menuButton: 'Ochish',
   fallback: 'Hammasi endi ilova ichida.',

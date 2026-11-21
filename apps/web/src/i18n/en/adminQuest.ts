@@ -106,8 +106,8 @@ export const adminQuest = {
     loadingQuizzes: 'Loading quizzes…',
     libraryFailed: 'Couldn’t load the quiz library.',
     chooseQuiz: 'Choose a quiz…',
-    quizOption: (title: string, questions: string, duration: string, complete: boolean) =>
-      `${title} · ${questions} · ${duration}${complete ? '' : ' · incomplete'}`,
+    quizHint: (questions: string, duration: string, complete: boolean) =>
+      `${questions} · ${duration}${complete ? '' : ' · incomplete'}`,
     splitRandom: 'Split evenly at random when saved',
     locksWhen: 'Locks when the first participant starts.',
     none: 'None',

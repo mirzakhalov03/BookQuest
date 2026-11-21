@@ -2,6 +2,7 @@ import { pluralEn } from '../plural';
 import { ordinalEn, ordinalWordEn } from './ordinal';
 
 export const common = {
+  choose: 'Choose…',
   appTagline: 'One book. One deadline. One quiz.',
   tryAgain: 'Try again',
   backToStart: 'Back to start',

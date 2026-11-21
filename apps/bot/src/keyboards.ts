@@ -10,12 +10,14 @@ export const feedbackEnabled = Boolean(env.ADMIN_CHAT_ID);
  * tap from typing. Add each new label here, and use it from here.
  */
 export const REPLY_KEYBOARD_LABELS: ReadonlySet<string> = new Set<string>([
+  TEXTS.guideButton,
   TEXTS.aboutButton,
   TEXTS.feedbackButton,
   TEXTS.feedbackExitButton
 ]);
 
 export const mainKeyboard = Markup.keyboard([
+  [TEXTS.guideButton],
   feedbackEnabled ? [TEXTS.aboutButton, TEXTS.feedbackButton] : [TEXTS.aboutButton]
 ])
   .resize()
@@ -29,6 +31,14 @@ export const feedbackKeyboard = Markup.keyboard([[TEXTS.feedbackExitButton]])
 // Inline, never a reply-keyboard web_app button: those launches carry no initData, which sign-in needs.
 export const openAppKeyboard = Markup.inlineKeyboard([
   [Markup.button.webApp(TEXTS.openApp, env.WEB_APP_URL)]
+]);
+
+export const GUIDE_ACTION = 'guide';
+
+// Under the /start poster: the main action, plus a guided next step for anyone not ready to open it yet.
+export const startKeyboard = Markup.inlineKeyboard([
+  [Markup.button.webApp(TEXTS.openApp, env.WEB_APP_URL)],
+  [Markup.button.callback(TEXTS.guideButton, GUIDE_ACTION)]
 ]);
 
 export const FEEDBACK_REPLY_ACTION = /^fb:(\d+)$/;

@@ -133,3 +133,15 @@ input::-webkit-date-and-time-value {
 :root[data-hidden] *::after {
   animation-play-state: paused !important;
 }
+
+/* Custom Select's popover: a short fade and drop. */
+.select-pop {
+  animation: select-pop 150ms var(--ease-out-quest, ease-out);
+}
+@keyframes select-pop {
+  from { opacity: 0; translate: 0 -4px; }
+  to { opacity: 1; translate: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .select-pop { animation: none; }
+}

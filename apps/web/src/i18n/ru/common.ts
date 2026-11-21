@@ -2,6 +2,7 @@ import type { common as En } from '../en/common';
 import { pluralRu } from '../plural';
 
 export const common: typeof En = {
+  choose: 'Выберите…',
   appTagline: 'Одна книга. Один срок. Один тест.',
   tryAgain: 'Повторить',
   backToStart: 'На главную',

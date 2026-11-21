@@ -106,8 +106,8 @@ export const adminQuest: typeof En = {
     loadingQuizzes: 'Загружаем тесты…',
     libraryFailed: 'Не удалось загрузить библиотеку тестов.',
     chooseQuiz: 'Выберите тест…',
-    quizOption: (title, questions, duration, complete) =>
-      `${title} · ${questions} · ${duration}${complete ? '' : ' · не готов'}`,
+    quizHint: (questions: string, duration: string, complete: boolean) =>
+      `${questions} · ${duration}${complete ? '' : ' · не готов'}`,
     splitRandom: 'При сохранении поровну и случайно',
     locksWhen: 'Блокируется, когда первый участник начнёт тест.',
     none: 'Нет',
