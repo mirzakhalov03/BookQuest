@@ -85,13 +85,11 @@ export async function loginWithPhone(payload: PhoneLoginPayload): Promise<Sessio
   return session;
 }
 
-/**
- * Attaches a Telegram identity to the current session. No `storeToken` —
- * unlike the other sign-in calls, this doesn't issue a new session, it just
- * returns the updated `SessionUser` for the caller to write into the cache.
- */
-export async function linkTelegram(payload: TelegramWidgetAuthPayload): Promise<SessionUser> {
-  return api.post<SessionUser>('/auth/telegram/link', payload);
+/** Attaches (or merges) a Telegram identity. A new session comes back: a merge can change who you are. */
+export async function linkTelegram(payload: TelegramWidgetAuthPayload): Promise<Session> {
+  const session = await api.post<Session>('/auth/telegram/link', payload);
+  storeToken(session);
+  return session;
 }
 
 /** Asks the bot to send a login code to whoever the identifier resolves to. */

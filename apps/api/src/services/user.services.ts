@@ -5,6 +5,7 @@ import { UserModel, type UserDocument } from '../models/user.model.js';
 import type { TelegramProfile } from '../utils/telegram.js';
 import { ApiError } from '../utils/api-error.js';
 import { isDuplicateKeyError } from '../utils/mongo.js';
+import { mergeUsers } from './account-merge.services.js';
 
 const BCRYPT_COST = 12;
 
@@ -93,20 +94,16 @@ export function findUserByPhone(phoneNumber: string): Promise<UserDocument | nul
 }
 
 /**
- * Attaches a Telegram identity to an already-authenticated user. Throws 409
- * if that Telegram id is already claimed by a *different* account — this is
- * an attach, never a merge.
+ * Attaches a Telegram identity to an already-authenticated user. When that Telegram id
+ * already has its own account, both identities are now proven, so the two merge and the
+ * Telegram account survives — the caller must re-issue the session for the returned user.
  */
 export async function linkTelegramToUser(
   user: UserDocument,
   profile: TelegramProfile
 ): Promise<UserDocument> {
   const claimedBy = await UserModel.findOne({ telegramUserId: profile.telegramUserId });
-  if (claimedBy && claimedBy.id !== user.id) {
-    throw ApiError.conflict('That Telegram account is already connected to a different user.', {
-      reason: 'telegram_in_use'
-    });
-  }
+  if (claimedBy && claimedBy.id !== user.id) return mergeUsers(claimedBy, user);
 
   user.telegramUserId = profile.telegramUserId;
   user.username = profile.username;

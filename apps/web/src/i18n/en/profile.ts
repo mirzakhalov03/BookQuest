@@ -1,6 +1,7 @@
 import type { CertificateTier } from '@bookquest/shared';
 
 export const profile = {
+  accountsLinked: 'Done — your Telegram is connected and your accounts are one.',
   certTeaser: 'Finish the quiz to earn your certificate',
   certResultsOn: (date: string) => `Results on ${date}`,
   certMissed: "You didn't finish this edition. See you next time",

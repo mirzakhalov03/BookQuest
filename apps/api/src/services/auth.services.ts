@@ -118,14 +118,13 @@ export async function authenticateWithPhone(payload: PhoneLoginPayload): Promise
 }
 
 /**
- * POST /auth/telegram/link. Unlike the other three, this doesn't issue a new
- * session — the caller is already signed in — it just returns the updated
- * `SessionUser` so the client can refresh its cache.
+ * POST /auth/telegram/link. Returns a fresh session: after a merge the surviving
+ * account is a different user, so the caller's old token names an account that's gone.
  */
 export async function linkTelegram(
   user: UserDocument,
   payload: TelegramWidgetAuthPayload
-): Promise<SessionUser> {
+): Promise<Session> {
   const verified = verifyLoginWidget(payload);
 
   if (!verified.ok) {
@@ -133,8 +132,7 @@ export async function linkTelegram(
     throw ApiError.unauthorized('That Telegram sign-in could not be verified.', 'telegram_unverified');
   }
 
-  const linked = await linkTelegramToUser(user, verified.profile);
-  return toSessionUser(linked);
+  return issueSession(await linkTelegramToUser(user, verified.profile));
 }
 
 export async function toSessionUser(user: UserDocument): Promise<SessionUser> {

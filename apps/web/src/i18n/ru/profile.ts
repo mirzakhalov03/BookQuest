@@ -1,6 +1,7 @@
 import type { profile as En } from '../en/profile';
 
 export const profile: typeof En = {
+  accountsLinked: 'Готово — Telegram подключён, аккаунты объединены.',
   certTeaser: 'Пройдите тест, чтобы получить сертификат',
   certResultsOn: (date) => `Итоги ${date}`,
   certMissed: 'Вы не завершили этот сезон. До встречи в следующем',

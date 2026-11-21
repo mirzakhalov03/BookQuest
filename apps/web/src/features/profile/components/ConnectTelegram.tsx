@@ -6,6 +6,7 @@ import { errorMessage } from '@/lib/api/errorMessage';
 import { authKeys } from '@/lib/auth/useAuth';
 import { linkTelegram } from '@/lib/auth/authApi';
 import { useT } from '@/i18n';
+import { useUiStore } from '@/stores/ui.store';
 
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME;
 
@@ -22,6 +23,7 @@ export function ConnectTelegram() {
   const queryClient = useQueryClient();
   const [state, setState] = useState<State>('idle');
   const t = useT().profile;
+  const showToast = useUiStore((state) => state.showToast);
   const [linkError, setLinkError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -33,14 +35,14 @@ export function ConnectTelegram() {
     window.onTelegramAuth = (payload: TelegramWidgetAuthPayload) => {
       setState('linking');
       void linkTelegram(payload)
-        .then((user) => {
-          queryClient.setQueryData(authKeys.me(), user);
+        .then((session) => {
+          queryClient.setQueryData(authKeys.me(), session.user);
+          // A merge may have moved the participant, certificate and notifications: refetch it all.
+          void queryClient.invalidateQueries();
+          showToast(t.accountsLinked);
         })
         .catch((error: unknown) => {
-          // Most likely real failure: this Telegram account is already the
-          // Mini App identity of a different user — the server says so
-          // ("already connected to a different user"), and "try again"
-          // would be wrong advice for that case.
+          // The server's message is the useful part (e.g. both accounts took the quiz).
           setLinkError(error instanceof ApiRequestError ? errorMessage(error) : null);
           setState('error');
         });
