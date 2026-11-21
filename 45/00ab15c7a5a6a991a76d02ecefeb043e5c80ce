@@ -1,0 +1,35 @@
+apps/api/src/services/duplicate-guard.services.ts
+  s_a2836ae43a9405::t_113a27ec39ffe0 1-31
+apps/api/src/services/login-code.services.ts
+  s_a2836ae43a9405::t_3000a8eae4e664 17
+apps/api/src/services/participant.services.ts
+  s_a2836ae43a9405::t_036ed3f94ec93a 11-12,40-48
+apps/api/src/utils/mask.ts
+  s_a2836ae43a9405::t_aba0bb42a4ddbe 1-4
+apps/web/src/i18n/en/errors.ts
+  s_a2836ae43a9405::t_41902b7be03c6c 23-24
+apps/web/src/i18n/ru/errors.ts
+  s_a2836ae43a9405::t_eff60cba947060 21-22
+apps/web/src/i18n/uz/errors.ts
+  s_a2836ae43a9405::t_fd83d3b7d894ca 21-22
+apps/web/src/lib/api/mock/routes.ts
+  s_a2836ae43a9405::t_c40436f7138c17 244-248
+packages/shared/src/schemas/participant.ts
+  s_a2836ae43a9405::t_a1ae0ce11960c9 19-21,42-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "4500ab15c7a5a6a991a76d02ecefeb043e5c80ce",
+  "prompts": {},
+  "sessions": {
+    "s_a2836ae43a9405": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b97ad509-f90c-44df-b028-629768ad274a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
