@@ -1,0 +1,19 @@
+apps/bot/src/texts.ts
+  s_a2836ae43a9405::t_164e33b3239df3 62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "58f98663e5f3ba2e504cf23656121147860e680a",
+  "prompts": {},
+  "sessions": {
+    "s_a2836ae43a9405": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b97ad509-f90c-44df-b028-629768ad274a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
