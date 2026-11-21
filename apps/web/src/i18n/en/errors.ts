@@ -20,6 +20,8 @@ export const errors = {
   /** Keyed by the API's `reason`; only consulted outside English. */
   reasons: {
     registration_closed: 'Registration for this year has closed.',
+    already_registered_elsewhere: 'That Telegram account has already joined.',
+    merge_conflict: 'Both accounts already took the quiz. Message us and we’ll sort it out.',
     already_registered: "You're already registered for this quest.",
     quest_full: 'This year’s quest is full.',
     phone_in_use: 'That phone number is already in use.',

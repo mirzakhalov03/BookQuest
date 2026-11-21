@@ -16,7 +16,9 @@ export const registerParticipantSchema = z
   .object({
     fullName: z.string(),
     contactMethod: z.enum(CONTACT_METHODS),
-    contactValue: z.string()
+    contactValue: z.string(),
+    /** "Not you?": the person confirmed a matching Telegram account isn't theirs. */
+    confirmNotDuplicate: z.boolean().optional()
   })
   .transform((input, ctx) => {
     const name = parseFullName(input.fullName);
@@ -37,7 +39,8 @@ export const registerParticipantSchema = z
 
     return {
       fullName: name.value,
-      contact: { method: input.contactMethod, value: contact.value }
+      contact: { method: input.contactMethod, value: contact.value },
+      confirmNotDuplicate: input.confirmNotDuplicate ?? false
     };
   });
 

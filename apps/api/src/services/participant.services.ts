@@ -8,6 +8,8 @@ import { ApiError } from '../utils/api-error.js';
 import { isDuplicateKeyError } from '../utils/mongo.js';
 import { findCurrentQuestDocument, requireCurrentQuestDocument } from './quest.services.js';
 import { announceRegistration } from './registration-alerts.services.js';
+import { findTelegramOwnerOfContact } from './duplicate-guard.services.js';
+import { maskUsername } from '../utils/mask.js';
 
 /**
  * Registration closes when the reading period ends — the same promise the
@@ -33,6 +35,15 @@ export async function registerParticipant(
     throw ApiError.conflict(`You are already registered as participant ${already.number}.`, {
       reason: 'already_registered'
     });
+  }
+
+  if (!payload.confirmNotDuplicate) {
+    const owner = await findTelegramOwnerOfContact(quest._id, payload.contact, user._id);
+    if (owner) {
+      throw ApiError.conflict(`${maskUsername(owner.username)} has already joined in Telegram.`, {
+        reason: 'already_registered_elsewhere'
+      });
+    }
   }
 
   /* Allocated before the insert and never returned to the pool. A gap in the

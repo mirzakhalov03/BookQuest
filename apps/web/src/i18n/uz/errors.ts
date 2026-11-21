@@ -18,6 +18,8 @@ export const errors: typeof En = {
   },
   reasons: {
     registration_closed: 'Bu yilgi ro‘yxatdan o‘tish yakunlangan.',
+    already_registered_elsewhere: 'Bu Telegram akkaunti allaqachon qo‘shilgan.',
+    merge_conflict: 'Ikkala akkaunt ham testni topshirgan. Bizga yozing, hal qilamiz.',
     already_registered: 'Siz bu tanlovga allaqachon ro‘yxatdan o‘tgansiz.',
     quest_full: 'Bu yilgi tanlovda bo‘sh o‘rin qolmadi.',
     phone_in_use: 'Bu telefon raqami allaqachon band.',

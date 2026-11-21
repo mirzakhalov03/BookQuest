@@ -14,6 +14,7 @@ import { UserModel, type UserDocument } from '../models/user.model.js';
 import { ApiError } from '../utils/api-error.js';
 import { sendTelegramMessage } from '../utils/telegram-send.js';
 import { issueSession } from './auth.services.js';
+import { maskUsername } from '../utils/mask.js';
 import { findCurrentQuestDocument } from './quest.services.js';
 
 const CODE_TTL_MS = 10 * 60_000;
@@ -101,10 +102,6 @@ async function resolveLoginUser(identifier: string): Promise<UserDocument & { te
     throw new ApiError(404, 'not_found', CANNOT_SEND, { identifier: CANNOT_SEND }, 'cannot_send_code');
   }
   return user as UserDocument & { telegramUserId: string };
-}
-
-function maskUsername(username: string | null | undefined): string {
-  return username ? `@${username.slice(0, 3)}…` : 'your Telegram';
 }
 
 /** Wrong guesses across all of the user's codes in the last 24h. A successful guess isn't one. */

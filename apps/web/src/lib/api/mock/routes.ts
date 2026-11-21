@@ -241,6 +241,11 @@ function register(context: Context): Result {
     );
   }
 
+  // Stands in for a verified Telegram account that already joined.
+  if (!parsed.data.confirmNotDuplicate && parsed.data.contact.value.toLowerCase() === '@taken_tg') {
+    throw new MockError(409, 'conflict', '@tak… has already joined in Telegram.', undefined, 'already_registered_elsewhere');
+  }
+
   const taken = state.participants.find(
     (entry) => entry.contact.value.toLowerCase() === parsed.data.contact.value.toLowerCase()
   );

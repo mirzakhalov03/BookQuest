@@ -18,6 +18,8 @@ export const errors: typeof En = {
   },
   reasons: {
     registration_closed: 'Регистрация в этом году закрыта.',
+    already_registered_elsewhere: 'Этот аккаунт Telegram уже участвует.',
+    merge_conflict: 'Оба аккаунта уже прошли тест. Напишите нам — разберёмся.',
     already_registered: 'Вы уже зарегистрированы в этом конкурсе.',
     quest_full: 'Мест в конкурсе этого года больше нет.',
     phone_in_use: 'Этот номер телефона уже используется.',
