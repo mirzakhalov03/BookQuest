@@ -26,24 +26,23 @@ interface Tab {
 }
 
 /**
- * Daily destinations stay on the bar; the rest live behind "More" so five
- * slots fit a 360px phone without labels ellipsising. Styled with the same
- * `.tabbar`/`.tab` classes as the participant `TabBar`, but its own component:
- * that one is locked to the participant side's five destinations (spec §4 rule 3).
+ * Daily destinations stay on the bar; on phones the rest live behind "More" so
+ * five slots fit a 360px screen. From 1024px every section sits on the bar.
+ * Styled with the participant `TabBar`'s `.tabbar`/`.tab` classes but its own
+ * component: that one is locked to the participant side's five destinations.
  */
-const PRIMARY_TABS: Tab[] = [
-  { to: '/admin', key: 'dashboard', icon: LayoutDashboard },
-  { to: '/admin/participants', key: 'participants', icon: Users },
-  { to: '/admin/quest', key: 'quest', icon: BookOpen },
-  { to: '/admin/quizzes', key: 'quizzes', icon: ListChecks }
+const TABS: (Tab & { primary: boolean })[] = [
+  { to: '/admin', key: 'dashboard', icon: LayoutDashboard, primary: true },
+  { to: '/admin/participants', key: 'participants', icon: Users, primary: true },
+  { to: '/admin/quest', key: 'quest', icon: BookOpen, primary: true },
+  { to: '/admin/quizzes', key: 'quizzes', icon: ListChecks, primary: true },
+  { to: '/admin/results', key: 'results', icon: BarChart3, primary: false },
+  { to: '/admin/certificates', key: 'certificates', icon: Award, primary: false },
+  { to: '/admin/broadcast', key: 'broadcast', icon: Megaphone, primary: false },
+  { to: '/admin/messages', key: 'messages', icon: MessageSquare, primary: false }
 ];
 
-const MORE_TABS: Tab[] = [
-  { to: '/admin/results', key: 'results', icon: BarChart3 },
-  { to: '/admin/certificates', key: 'certificates', icon: Award },
-  { to: '/admin/broadcast', key: 'broadcast', icon: Megaphone },
-  { to: '/admin/messages', key: 'messages', icon: MessageSquare }
-];
+const MORE_TABS = TABS.filter((tab) => !tab.primary);
 
 /**
  * The admin shell — plan Phase 4: "the same product seen from behind, not a
@@ -105,12 +104,12 @@ function AdminTabBar() {
   return (
     <>
       <nav className="tabbar" aria-label={t.sections}>
-        {PRIMARY_TABS.map(({ to, key, icon: Icon }) => (
+        {TABS.map(({ to, key, icon: Icon, primary }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/admin'}
-            className={({ isActive }) => (isActive ? 'tab is-on' : 'tab')}
+            className={({ isActive }) => `tab${isActive ? ' is-on' : ''}${primary ? '' : ' tab--wide-only'}`}
           >
             <Icon className="tab__icon" aria-hidden="true" />
             <span>{t.tabs[key]}</span>
@@ -118,7 +117,7 @@ function AdminTabBar() {
         ))}
         <button
           type="button"
-          className={inMore ? 'tab is-on' : 'tab'}
+          className={`tab tab--narrow-only${inMore ? ' is-on' : ''}`}
           aria-haspopup="dialog"
           aria-expanded={moreOpen}
           onClick={() => setMoreOpen(true)}
