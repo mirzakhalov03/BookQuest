@@ -1,0 +1,21 @@
+apps/api/src/services/auth.services.ts
+  s_a2836ae43a9405::t_2198cdf825ba1b 27-33,69,79,125
+docs/audits/2026-11-refactor-audit.md
+  s_a2836ae43a9405::t_c6e64710e7c1a0 1-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "e45ceb08ff406f2c58a554d943050b8c2685ad0f",
+  "prompts": {},
+  "sessions": {
+    "s_a2836ae43a9405": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b97ad509-f90c-44df-b028-629768ad274a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
