@@ -71,6 +71,11 @@ const questSchema = new Schema(
     book: { type: bookSchema, required: true },
     /** Off while the book is kept a surprise; the public DTO then withholds it. Absent on old rows = revealed. */
     bookRevealed: { type: Boolean, default: true },
+    /** Uploaded certificate artwork, stored like covers (`/covers/:id` paths). Null = placeholder art. */
+    certificateDesigns: {
+      winner: { type: String, default: null },
+      participant: { type: String, default: null }
+    },
     prizes: { type: prizesSchema, default: () => ({}) },
 
     /* The phase is never stored. It is derived from these four dates, so the

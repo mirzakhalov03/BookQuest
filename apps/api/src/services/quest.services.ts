@@ -9,7 +9,7 @@ import type {
   QuestSummary,
   UpdateQuestPayload
 } from '@bookquest/shared';
-import { QUEST_DATE_FIELDS, findQuestDateIssues } from '@bookquest/shared';
+import { QUEST_DATE_FIELDS, findQuestDateIssues, type CertificateTier } from '@bookquest/shared';
 import { QuestModel, type QuestDocument, type QuestRow } from '../models/quest.model.js';
 import { ResultModel } from '../models/result.model.js';
 import { ApiError } from '../utils/api-error.js';
@@ -173,7 +173,16 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
       ? coverIdFromUrl(quest.prizes?.photoUrl)
       : null;
 
+  const designs = Object.entries(payload.certificateDesigns ?? {}).map(
+    ([tier, url]) => [tier, toStoredCoverUrl(url)] as const
+  );
+  const replacedDesignIds = designs
+    .filter(([tier, url]) => url !== toStoredCoverUrl(quest.certificateDesigns?.[tier as CertificateTier]))
+    .map(([tier]) => coverIdFromUrl(quest.certificateDesigns?.[tier as CertificateTier]))
+    .filter((id): id is string => id !== null);
+
   const update: Record<string, unknown> = {};
+  for (const [tier, url] of designs) update[`certificateDesigns.${tier}`] = url;
 
   for (const field of QUEST_DATE_FIELDS) {
     const value = payload[field];
@@ -203,6 +212,7 @@ export async function updateQuest(questId: string, payload: UpdateQuestPayload):
   if (!updated) throw ApiError.notFound('No such quest.');
   if (replacedCoverId) await discardCover(replacedCoverId);
   if (replacedPhotoId) await discardCover(replacedPhotoId);
+  for (const id of replacedDesignIds) await discardCover(id);
   return toAdminQuestDto(updated);
 }
 
@@ -261,6 +271,10 @@ export function toAdminQuestDto(quest: QuestDocument): AdminQuest {
   return {
     ...toQuestDto(quest),
     book: toBookDto(quest),
+    certificateDesigns: {
+      winner: toPublicCoverUrl(quest.certificateDesigns?.winner),
+      participant: toPublicCoverUrl(quest.certificateDesigns?.participant)
+    },
     quizConfig: config
       ? {
           distribution: config.distribution,

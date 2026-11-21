@@ -8,7 +8,7 @@ import type { CertificateData } from '@bookquest/shared';
 import { CertificateTemplate } from './template.js';
 
 /** Bump whenever template.tsx changes: it's part of every cache key and ETag. */
-export const TEMPLATE_VERSION = 1;
+export const TEMPLATE_VERSION = 2;
 
 const WIDTH = 1123;
 const HEIGHT = 794;
@@ -79,14 +79,21 @@ async function qrDataUri(url: string): Promise<string> {
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
 }
 
+/** An uploaded design: its file id keys the cache, so replacing the art re-renders everything. */
+export interface CertificateBackground {
+  id: string;
+  dataUri: string;
+}
+
 export async function renderCertificatePng(
   data: CertificateData,
-  options: { sample?: boolean } = {}
+  options: { sample?: boolean; background?: CertificateBackground | null } = {}
 ): Promise<{ png: Buffer; etag: string }> {
   const sample = options.sample ?? false;
+  const background = options.background ?? null;
   // The data is part of the key, so a corrected name re-renders without anyone invalidating anything.
   const etag = createHash('sha256')
-    .update(JSON.stringify({ v: TEMPLATE_VERSION, sample, data }))
+    .update(JSON.stringify({ v: TEMPLATE_VERSION, sample, data, design: background?.id ?? null }))
     .digest('base64url')
     .slice(0, 27);
 
@@ -98,7 +105,12 @@ export async function renderCertificatePng(
   }
 
   const png = await withRenderSlot(async () => {
-    const element = CertificateTemplate({ data, qrDataUri: await qrDataUri(data.verifyUrl), sample });
+    const element = CertificateTemplate({
+      data,
+      qrDataUri: await qrDataUri(data.verifyUrl),
+      sample,
+      backgroundDataUri: background?.dataUri ?? null
+    });
     const svg = await satori(element, { width: WIDTH, height: HEIGHT, fonts: FONTS });
     // renderAsync rasterises on the libuv pool; the sync Resvg render blocks the event loop ~350 ms.
     const rendered = await renderAsync(svg, {

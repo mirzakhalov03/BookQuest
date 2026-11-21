@@ -1,14 +1,13 @@
 import type { CertificateData, CertificateTier } from '@bookquest/shared';
+import { ArtworkTemplate } from './artwork.js';
 
 /*
- * PLACEHOLDER — the organiser's design replaces this file (spec §8); bump
- * TEMPLATE_VERSION in render.ts when it does. Satori rules: every element with
+ * The built-in placeholder design, used for a tier until its artwork is uploaded
+ * (then `artwork.tsx` draws the text over it). Bump TEMPLATE_VERSION in render.ts on change. Satori rules: every element with
  * more than one child needs display:flex; inline styles only; no CSS grid;
  * fonts are only what render.ts loaded.
  */
 
-/** True until the organiser's artwork lands; the admin Certificates page shows a "placeholder" note. Delete with it. */
-export const IS_PLACEHOLDER_ART = true;
 
 const ACCENT: Record<CertificateTier, string> = {
   winner: '#C8A24A',
@@ -29,9 +28,43 @@ interface TemplateProps {
   data: CertificateData;
   qrDataUri: string;
   sample: boolean;
+  /** The uploaded artwork for this tier; without it, the placeholder below. */
+  backgroundDataUri?: string | null;
 }
 
-export function CertificateTemplate({ data, qrDataUri, sample }: TemplateProps) {
+function SampleMark() {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 300,
+        left: 0,
+        width: 1095,
+        boxSizing: 'border-box',
+        display: 'flex',
+        justifyContent: 'center',
+        fontSize: 140,
+        fontWeight: 800,
+        color: 'rgba(226, 99, 42, 0.14)',
+        transform: 'rotate(-18deg)'
+      }}
+    >
+      SAMPLE
+    </div>
+  );
+}
+
+export function CertificateTemplate({ data, qrDataUri, sample, backgroundDataUri }: TemplateProps) {
+  if (backgroundDataUri) {
+    return (
+      <ArtworkTemplate
+        data={data}
+        qrDataUri={qrDataUri}
+        backgroundDataUri={backgroundDataUri}
+        watermark={sample ? <SampleMark /> : null}
+      />
+    );
+  }
   const accent = ACCENT[data.tier];
   const issued = new Date(data.issuedAt).toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -104,25 +137,7 @@ export function CertificateTemplate({ data, qrDataUri, sample }: TemplateProps) 
         </div>
       </div>
 
-      {sample && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 300,
-            left: 0,
-            width: 1095,
-            boxSizing: 'border-box',
-            display: 'flex',
-            justifyContent: 'center',
-            fontSize: 140,
-            fontWeight: 800,
-            color: 'rgba(226, 99, 42, 0.14)',
-            transform: 'rotate(-18deg)'
-          }}
-        >
-          SAMPLE
-        </div>
-      )}
+      {sample && <SampleMark />}
     </div>
   );
 }

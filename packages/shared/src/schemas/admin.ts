@@ -22,6 +22,14 @@ const bookFields = {
 
 const prizeText = z.string().trim().max(200).nullable();
 
+/** The two uploaded certificate artworks (our own upload URLs); null = the built-in placeholder art. */
+export const certificateDesignsSchema = z.object({
+  winner: z.string().url().nullable(),
+  participant: z.string().url().nullable()
+});
+
+export type CertificateDesigns = z.infer<typeof certificateDesignsSchema>;
+
 const prizeFields = {
   first: prizeText,
   second: prizeText,
@@ -44,6 +52,7 @@ export const updateQuestSchema = z
     book: z.strictObject(bookFields).partial().optional(),
     prizes: z.strictObject(prizeFields).partial().optional(),
     bookRevealed: z.boolean(),
+    certificateDesigns: certificateDesignsSchema.partial(),
     ...questDateFields,
     quizConfig: quizConfigInputSchema.nullable()
   })
@@ -77,6 +86,7 @@ export type CreateQuestPayload = z.infer<typeof createQuestSchema>;
 /** The quest as the admin editor reads it: the public DTO plus the quiz setup, never the seed. The book is always present. */
 export const adminQuestSchema = questSchema.extend({
   book: bookSchema,
+  certificateDesigns: certificateDesignsSchema,
   quizConfig: z
     .object({
       distribution: z.enum(QUIZ_DISTRIBUTIONS),

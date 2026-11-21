@@ -12,8 +12,7 @@ import { ApiError } from '../utils/api-error.js';
 import { isDuplicateKeyError } from '../utils/mongo.js';
 import { createRateGate } from '../utils/rate-gate.js';
 import { sendTelegramPhoto } from '../utils/telegram-send.js';
-import { renderCertificatePng } from '../certificates/render.js';
-import { IS_PLACEHOLDER_ART } from '../certificates/template.js';
+import { renderWithDesign } from './certificate-design.services.js';
 import { requireCurrentQuestDocument } from './quest.services.js';
 import { ensureRanked } from './result.services.js';
 import { buildCertificateData, certificateFileName, countFinishers } from './certificate.services.js';
@@ -117,7 +116,7 @@ async function deliver(quest: QuestDocument): Promise<void> {
     if (!user?.telegramUserId) return finish(result._id, 'no_telegram');
     if (user.dmBlockedAt) return finish(result._id, 'blocked');
 
-    const { png } = await renderCertificatePng(data);
+    const { png } = await renderWithDesign(data, quest.certificateDesigns);
     const photo = { png, fileName: certificateFileName(data) };
     const button = { text: 'Open in BookQuest', webAppUrl: `${webAppUrl}/me` };
 
@@ -219,7 +218,8 @@ export async function getDeliveryStatus(): Promise<CertificateDelivery> {
     pendingReachable,
     startedAt: delivery?.startedAt.toISOString() ?? null,
     completedAt: delivery?.completedAt?.toISOString() ?? null,
-    placeholderArt: IS_PLACEHOLDER_ART
+    // Either tier still on the built-in art.
+    placeholderArt: !quest.certificateDesigns?.winner || !quest.certificateDesigns?.participant
   };
 }
 

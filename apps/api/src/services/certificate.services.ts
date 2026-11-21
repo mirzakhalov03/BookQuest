@@ -6,9 +6,9 @@ import { QuestModel } from '../models/quest.model.js';
 import type { UserDocument } from '../models/user.model.js';
 import { publicApiUrl, webAppUrl } from '../config/env.js';
 import { ApiError } from '../utils/api-error.js';
-import { renderCertificatePng } from '../certificates/render.js';
+import { renderWithDesign } from './certificate-design.services.js';
 import { CERTIFICATE_SAMPLES, type CertificateSampleKey } from '../certificates/samples.js';
-import { requireCurrentQuestDocument } from './quest.services.js';
+import { findCurrentQuestDocument, requireCurrentQuestDocument } from './quest.services.js';
 import { requireParticipantForUser } from './participant.services.js';
 import { ensureRanked, requirePublished } from './result.services.js';
 
@@ -56,6 +56,10 @@ export async function getCertificateForUser(user: UserDocument): Promise<Certifi
 
 /** Any edition: a 2025 certificate must still verify in 2027. Holding the code is the permission. */
 export async function getCertificateByCode(raw: string): Promise<CertificateData> {
+  return (await loadByCode(raw)).data;
+}
+
+async function loadByCode(raw: string) {
   const code = normalizeCertificateCode(raw);
   const notFound = () => ApiError.notFound('We couldn’t find a certificate with this code.', { reason: 'certificate_not_found' });
   if (!code) throw notFound();
@@ -70,16 +74,18 @@ export async function getCertificateByCode(raw: string): Promise<CertificateData
   ]);
   if (!participant || !quest) throw notFound();
 
-  return buildCertificateData({ result, participant, quest, finishedCount });
+  return { data: buildCertificateData({ result, participant, quest, finishedCount }), designs: quest.certificateDesigns };
 }
 
 export async function getCertificateImage(raw: string) {
-  const data = await getCertificateByCode(raw);
-  return { ...(await renderCertificatePng(data)), data };
+  const { data, designs } = await loadByCode(raw);
+  return { ...(await renderWithDesign(data, designs)), data };
 }
 
-export function getSampleImage(key: CertificateSampleKey) {
-  return renderCertificatePng(CERTIFICATE_SAMPLES[key], { sample: true });
+/** Samples wear the current quest's uploaded designs, so the admin previews what readers will get. */
+export async function getSampleImage(key: CertificateSampleKey) {
+  const quest = await findCurrentQuestDocument();
+  return renderWithDesign(CERTIFICATE_SAMPLES[key], quest?.certificateDesigns, { sample: true });
 }
 
 /** Named by code, not by person: response headers are logged, and names never go in logs. */

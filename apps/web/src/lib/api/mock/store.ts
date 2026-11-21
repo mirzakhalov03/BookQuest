@@ -1,5 +1,5 @@
 import { PARTICIPANT_NUMBER_MIN } from '@bookquest/shared';
-import type { AdminQuest, Book, Participant, QuizAdmin, Quest, QuestPhase, Role, SessionUser } from '@bookquest/shared';
+import type { AdminQuest, Book, Participant, QuizAdmin, Quest, QuestPhase, Role, SessionUser, CertificateDesigns } from '@bookquest/shared';
 import { CURRENT_QUEST, PAST_EDITIONS, SESSION_USER, type PastEdition } from './fixtures';
 import { buildRoster } from './people';
 import { addMockMessage } from './interactions';
@@ -21,7 +21,7 @@ import { attemptFor, type MockAttempt, type MockQuizState } from './quiz-partici
 const STORAGE_KEY = 'bookquest.mock';
 
 /** The quest as the mock stores it: always with its book, like the database. `toPublicQuest` masks it. */
-export type StoredQuest = Omit<Quest, 'book'> & { book: Book };
+export type StoredQuest = Omit<Quest, 'book'> & { book: Book; certificateDesigns?: CertificateDesigns };
 
 export interface MockState {
   token: string;

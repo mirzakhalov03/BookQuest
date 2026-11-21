@@ -439,6 +439,7 @@ function updateQuest(context: Context): Result {
     ...target,
     ...(patch.bookRevealed === undefined ? {} : { bookRevealed: patch.bookRevealed }),
     book: { ...target.book, ...defined(patch.book) },
+    certificateDesigns: { ...NO_DESIGNS, ...target.certificateDesigns, ...patch.certificateDesigns },
     prizes: { ...target.prizes, ...defined(patch.prizes) },
     ...isoDates(patch),
     ...(config === undefined ? {} : { quiz: config.quiz })
@@ -499,8 +500,11 @@ function mockQuizConfig(input: UpdateQuestPayload['quizConfig']): {
   };
 }
 
+const NO_DESIGNS = { winner: null, participant: null };
+
 const toAdminQuest = (quest: StoredQuest): AdminQuest => ({
   ...quest,
+  certificateDesigns: quest.certificateDesigns ?? NO_DESIGNS,
   quizConfig: quest.id === getState().quest.id ? (getState().quizConfig ?? null) : null
 });
 
@@ -560,7 +564,7 @@ function createQuest(context: Context): Result {
     return created(toAdminQuest(readQuest(quest, 0)));
   }
 
-  return created({ ...quest, phase: resolvePhase(quest), quizConfig: null } satisfies AdminQuest);
+  return created({ ...quest, phase: resolvePhase(quest), certificateDesigns: NO_DESIGNS, quizConfig: null } satisfies AdminQuest);
 }
 
 /** Swaps the current edition; the outgoing one joins the archive and the roster follows its edition. */
