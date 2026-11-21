@@ -1,11 +1,10 @@
 import type { Book } from '@bookquest/shared';
 import { BookCover } from '@/components/BookCover';
-import { MysteryCover } from '@/components/MysteryCover';
 import { useT } from '@/i18n';
 
 interface Book3DProps {
-  /** `null` while the admin keeps the book a secret. */
-  book: Book | null;
+  /** The revealed book. While it's a secret, the stage shows `SealedTome` instead. */
+  book: Book;
 }
 
 /**
@@ -20,13 +19,13 @@ export function Book3D({ book }: Book3DProps) {
     <div
       className="book"
       role="img"
-      aria-label={book ? t.home.bookAria(book.title, book.author) : t.book.mysteryLabel}
+      aria-label={t.home.bookAria(book.title, book.author)}
     >
       <div className="book__face book__cover">
-        {book ? <BookCover title={book.title} author={book.author} coverUrl={book.coverUrl} /> : <MysteryCover />}
+        <BookCover title={book.title} author={book.author} coverUrl={book.coverUrl} />
       </div>
       <div className="book__face book__spine">
-        <span className="book__spinetext">{book ? book.title : '?'}</span>
+        <span className="book__spinetext">{book.title}</span>
       </div>
       <div className="book__face book__edge" />
       <div className="book__face book__top" />

@@ -1,0 +1,605 @@
+/**
+ * The sealed tome — the Home stage's book while the admin keeps it a secret.
+ *
+ * A leather hardcover tied with a gold ribbon and sealed, with light leaking
+ * from the page block. Same face technique as the real book in `stage.css`
+ * (and the same TRAPs: the tilt stays positive, the spine stays brighter than
+ * the cover), but its own namespace, so the revealed book is untouched.
+ *
+ * `--spin`, `--lean`, `--glare` (-1…1) and `--footprint` are written by
+ * `useBookRig`; `useTomeFx` drives the sparks, the knock and the seal flash.
+ */
+
+:root {
+  --tome-d: calc(var(--book-w) * 0.16);
+  --tome-b: calc(var(--book-w) * 0.024); /* board thickness */
+  --tome-o: calc(var(--book-w) * 0.02); /* boards overhang the pages by this */
+  --tome-rw: calc(var(--book-w) * 0.085); /* ribbon width */
+  --tome-ry: calc(var(--book-h) * -0.04); /* horizontal ribbon, from centre */
+  --tome-lift: 1px; /* ribbon above the board */
+  --tome-tile: calc(var(--book-w) * 0.2);
+
+  --leather-hi: #5a1a0b;
+  --leather: #3a0f06;
+  --leather-lo: #200703;
+  --tome-gold-lo: #7a5420;
+  --tome-gold: #c9a14c;
+  --tome-gold-hi: #f3dc9b;
+  --tome-glow: 255 196 110;
+
+  /* Girih: an eight-point star lattice, the pattern of Uzbek tilework and bindings. */
+  --girih: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.1'%3E%3Crect x='14' y='14' width='20' height='20'/%3E%3Crect x='14' y='14' width='20' height='20' transform='rotate%2845 24 24%29'/%3E%3Cpath d='M24 0V9.9M24 38.1V48M0 24H9.9M38.1 24H48M0 0L14 14M48 0L34 14M0 48L14 34M48 48L34 34'/%3E%3C/g%3E%3C/svg%3E");
+  --girih-pressed: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='rgba%2810%2C2%2C0%2C0.55%29' stroke-width='1.1'%3E%3Crect x='14' y='14' width='20' height='20'/%3E%3Crect x='14' y='14' width='20' height='20' transform='rotate%2845 24 24%29'/%3E%3Cpath d='M24 0V9.9M24 38.1V48M0 24H9.9M38.1 24H48M0 0L14 14M48 0L34 14M0 48L14 34M48 48L34 34'/%3E%3C/g%3E%3C/svg%3E");
+  --tome-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0l3.1 4.6 5.4-1.1-1.1 5.4L24 12l-4.6 3.1 1.1 5.4-5.4-1.1L12 24l-3.1-4.6-5.4 1.1 1.1-5.4L0 12l4.6-3.1-1.1-5.4 5.4 1.1z'/%3E%3C/svg%3E");
+  --leather-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E");
+}
+
+/* ── Motion wrappers ─────────────────────────────────────────────── */
+
+/* Slow idle sway, so the light keeps finding the foil when nobody touches it. */
+.tome-sway {
+  transform-style: preserve-3d;
+  animation: tome-sway 9s ease-in-out 1.6s infinite;
+}
+@keyframes tome-sway {
+  0%,
+  100% {
+    transform: rotateY(-5deg);
+  }
+  50% {
+    transform: rotateY(6deg);
+  }
+}
+
+/* Drag/hover rotation. Its own element because `tome-enter` fills `.tome`'s transform. */
+.book-rig {
+  transform-style: preserve-3d;
+  transform: rotateX(var(--lean, 0deg)) rotateY(var(--spin, 0deg));
+  cursor: grab;
+  /* Vertical swipes still scroll the page; horizontal ones turn the book. */
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+.book-rig:active {
+  cursor: grabbing;
+}
+
+.tome {
+  position: relative;
+  width: var(--book-w);
+  height: var(--book-h);
+  transform-style: preserve-3d;
+  user-select: none;
+  -webkit-user-select: none;
+  transform: rotateY(var(--book-tilt)) rotateX(var(--book-pitch));
+  animation: tome-enter 1.6s var(--ease-out-quest) 100ms both;
+}
+/* Swings round from behind. No opacity here: it would flatten `preserve-3d`. */
+@keyframes tome-enter {
+  from {
+    transform: rotateY(-200deg) rotateX(var(--book-pitch)) scale(0.85);
+  }
+}
+
+/* Every face: centred on the book, pushed out by (--fx, --fy, --fz), turned by --rot. */
+.tome__face {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--fw);
+  height: var(--fh);
+  transform: translate(-50%, -50%) translate3d(var(--fx, 0px), var(--fy, 0px), var(--fz, 0px)) var(--rot, rotate(0));
+  backface-visibility: hidden;
+}
+
+/* ── Leather boards ──────────────────────────────────────────────── */
+
+.tome__leather {
+  overflow: hidden;
+  background:
+    var(--leather-grain),
+    radial-gradient(120% 80% at 20% 10%, rgb(255 170 90 / 0.14), transparent 60%),
+    linear-gradient(158deg, var(--leather-hi), var(--leather) 50%, var(--leather-lo));
+  background-size:
+    160px 160px,
+    auto,
+    auto;
+}
+.tome__cover {
+  --fw: var(--book-w);
+  --fh: var(--book-h);
+  --fz: calc(var(--tome-d) / 2);
+  border-radius: 2px 5px 5px 2px;
+  box-shadow: 0 22px 50px -18px rgb(0 0 0 / 0.9);
+}
+.tome__back {
+  --fw: var(--book-w);
+  --fh: var(--book-h);
+  --fz: calc(var(--tome-d) / -2);
+  --rot: rotateY(180deg);
+  border-radius: 5px 2px 2px 5px;
+}
+
+/* Blind-embossed: the pattern always faintly pressed into the leather. */
+.tome__emboss {
+  position: absolute;
+  inset: 0;
+  background: var(--girih-pressed) center / var(--tome-tile) var(--tome-tile);
+  opacity: 0.55;
+}
+/* The same pattern in gold foil, lit only where the light band crosses it. */
+.tome__foil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    104deg,
+    transparent 38%,
+    var(--tome-gold-lo) 43%,
+    var(--tome-gold-hi) 48.5%,
+    #fff6dc 50%,
+    var(--tome-gold-hi) 51.5%,
+    var(--tome-gold-lo) 57%,
+    transparent 62%
+  );
+  background-size: 260% 100%;
+  background-position: calc(80% - var(--glare, 0) * 90%) 0;
+  -webkit-mask: var(--girih) center / var(--tome-tile) var(--tome-tile);
+  mask: var(--girih) center / var(--tome-tile) var(--tome-tile);
+  opacity: 0.85;
+}
+/* A gilt double rule that vignettes the pattern toward the edges. */
+.tome__frame {
+  position: absolute;
+  inset: calc(var(--book-w) * 0.06);
+  border: 1px solid rgb(226 190 120 / 0.55);
+  box-shadow:
+    0 0 0 3px transparent,
+    0 0 0 4px rgb(226 190 120 / 0.28),
+    inset 0 0 calc(var(--book-w) * 0.12) rgb(20 5 2 / 0.75);
+}
+/* The hinge groove pressed in just off the spine. */
+.tome__hinge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--book-w) * 0.04);
+  width: calc(var(--book-w) * 0.035);
+  background: linear-gradient(90deg, rgb(0 0 0 / 0.35), rgb(0 0 0 / 0.08) 40%, rgb(255 238 214 / 0.14) 60%, transparent);
+}
+/* Turned round, the back's spine edge is on its right. */
+.tome__back .tome__hinge {
+  left: auto;
+  right: calc(var(--book-w) * 0.04);
+  transform: scaleX(-1);
+}
+/* Stage light: bright at the hinge, dark at the fore-edge, plus a band that slides with the turn. */
+.tome__sheen {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(102deg, rgb(255 236 202 / 0.16) 0%, transparent 26%, transparent 62%, rgb(0 0 0 / 0.5) 100%),
+    linear-gradient(104deg, transparent 40%, rgb(255 244 226 / 0.14) 48%, transparent 58%);
+  background-size:
+    100% 100%,
+    260% 100%;
+  background-position:
+    0 0,
+    calc(80% - var(--glare, 0) * 90%) 0;
+  background-repeat: no-repeat;
+}
+.tome__backmark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10%;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-stretch: 115%;
+  font-size: calc(var(--book-w) * 0.07);
+  color: rgb(0 0 0 / 0.35);
+  text-shadow: 0 1px 0 rgb(255 220 180 / 0.16);
+}
+
+/* TRAP 2 (stage.css): the spine faces the spotlight, so it stays brighter than the cover. */
+.tome__spine {
+  --fw: var(--tome-d);
+  --fh: var(--book-h);
+  --fx: calc(var(--book-w) / -2);
+  --rot: rotateY(-90deg);
+  border-radius: 4px 0 0 4px;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 0.4) 0%, transparent 28%, rgb(255 226 190 / 0.22) 70%, rgb(0 0 0 / 0.2) 100%),
+    var(--leather-grain),
+    linear-gradient(180deg, #742410, #44130a);
+  background-size:
+    auto,
+    160px 160px,
+    auto;
+}
+/* Raised bands, as on a hand-bound spine. */
+.tome__spine::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 13%, rgb(255 220 170 / 0.28) 13.6%, rgb(0 0 0 / 0.35) 15.4%, transparent 16%),
+    linear-gradient(180deg, transparent 22%, rgb(255 220 170 / 0.28) 22.6%, rgb(0 0 0 / 0.35) 24.4%, transparent 25%),
+    linear-gradient(180deg, transparent 75%, rgb(255 220 170 / 0.28) 75.6%, rgb(0 0 0 / 0.35) 77.4%, transparent 78%),
+    linear-gradient(180deg, transparent 84%, rgb(255 220 170 / 0.28) 84.6%, rgb(0 0 0 / 0.35) 86.4%, transparent 87%);
+}
+.tome__star {
+  position: absolute;
+  left: 50%;
+  width: calc(var(--tome-d) * 0.42);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: linear-gradient(135deg, var(--tome-gold-hi), var(--tome-gold) 50%, var(--tome-gold-lo));
+  -webkit-mask: var(--tome-star) center / contain no-repeat;
+  mask: var(--tome-star) center / contain no-repeat;
+}
+.tome__star--head {
+  top: 19.2%;
+}
+.tome__star--tail {
+  top: 81%;
+}
+
+/* ── Page block, lit from inside ─────────────────────────────────── */
+
+.tome__pages {
+  --pw: calc(var(--book-w) - var(--tome-o) - var(--tome-b));
+  --pd: calc(var(--tome-d) - var(--tome-b) * 2);
+  overflow: hidden;
+}
+.tome__pages::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(closest-side, rgb(255 236 180 / 0.95), rgb(var(--tome-glow) / 0.35) 55%, transparent);
+  mix-blend-mode: screen;
+  animation: tome-inner-light 3.6s ease-in-out infinite;
+}
+@keyframes tome-inner-light {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.tome__pages--fore {
+  --fw: var(--pd);
+  --fh: calc(var(--book-h) - var(--tome-o) * 2);
+  --fx: calc(var(--book-w) / 2 - var(--tome-o));
+  --rot: rotateY(90deg);
+  background:
+    linear-gradient(90deg, rgb(60 20 5 / 0.55), transparent 22%, transparent 78%, rgb(60 20 5 / 0.5)),
+    repeating-linear-gradient(90deg, rgb(150 100 40 / 0.18) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(150 100 40 / 0.12) 0 1px, transparent 1px 7px),
+    linear-gradient(180deg, #e9c98a, #fbe3a8 50%, #e9c98a);
+}
+.tome__pages--top,
+.tome__pages--bottom {
+  --fw: var(--pw);
+  --fh: var(--pd);
+  --fx: calc((var(--tome-b) - var(--tome-o)) / 2);
+}
+.tome__pages--top {
+  --fy: calc(var(--book-h) / -2 + var(--tome-o));
+  --rot: rotateX(90deg);
+  background:
+    linear-gradient(180deg, rgb(60 20 5 / 0.45), transparent 24%, transparent 76%, rgb(60 20 5 / 0.4)),
+    repeating-linear-gradient(180deg, rgb(150 100 40 / 0.16) 0 1px, transparent 1px 3px),
+    linear-gradient(90deg, #f1d79c, #fff0c4 60%, #ecd096);
+}
+.tome__pages--bottom {
+  --fy: calc(var(--book-h) / 2 - var(--tome-o));
+  --rot: rotateX(-90deg);
+  background:
+    repeating-linear-gradient(180deg, rgb(150 100 40 / 0.18) 0 1px, transparent 1px 3px),
+    #d9b877;
+}
+
+/* ── Board edges: front (f), back (b) and spine (s), top/bottom/fore ── */
+
+.tome__edge {
+  --zf: calc(var(--tome-d) / 2 - var(--tome-b) / 2);
+}
+.tome__edge--ft,
+.tome__edge--bt,
+.tome__edge--fb,
+.tome__edge--bb {
+  --fw: var(--book-w);
+  --fh: var(--tome-b);
+}
+.tome__edge--ft,
+.tome__edge--bt {
+  --fy: calc(var(--book-h) / -2);
+  --rot: rotateX(90deg);
+  background: #5a1c0c;
+}
+.tome__edge--fb,
+.tome__edge--bb {
+  --fy: calc(var(--book-h) / 2);
+  --rot: rotateX(-90deg);
+  background: var(--leather-lo);
+}
+.tome__edge--ff,
+.tome__edge--bf {
+  --fw: var(--tome-b);
+  --fh: var(--book-h);
+  --fx: calc(var(--book-w) / 2);
+  --rot: rotateY(90deg);
+  background: #2c0b04;
+}
+.tome__edge--ft,
+.tome__edge--fb,
+.tome__edge--ff {
+  --fz: var(--zf);
+}
+.tome__edge--bt,
+.tome__edge--bb,
+.tome__edge--bf {
+  --fz: calc(var(--zf) * -1);
+}
+.tome__edge--st,
+.tome__edge--sb {
+  --fw: var(--tome-b);
+  --fh: var(--tome-d);
+  --fx: calc(var(--book-w) / -2 + var(--tome-b) / 2);
+  background: #6a2010;
+}
+.tome__edge--st {
+  --fy: calc(var(--book-h) / -2);
+  --rot: rotateX(90deg);
+}
+.tome__edge--sb {
+  --fy: calc(var(--book-h) / 2);
+  --rot: rotateX(-90deg);
+}
+
+/* ── Ribbon: one band round each axis, holding it shut from every side ── */
+
+.tome__ribbon {
+  background: linear-gradient(
+    var(--across),
+    var(--tome-gold-lo),
+    var(--tome-gold) 22%,
+    var(--tome-gold-hi) 42%,
+    #fff3cf 50%,
+    var(--tome-gold) 66%,
+    var(--tome-gold-lo)
+  );
+  box-shadow: 0 0 0 0.5px rgb(30 10 3 / 0.5);
+}
+/* Satin: a long highlight that slides along the ribbon as the book turns. */
+.tome__ribbon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(var(--along), transparent 30%, rgb(255 250 235 / 0.55) 48%, transparent 66%);
+  mix-blend-mode: soft-light;
+}
+.tome__ribbon--v {
+  --across: 90deg;
+  --along: 180deg;
+}
+.tome__ribbon--v::after {
+  background-size: 100% 300%;
+  background-position: 0 calc(50% + var(--glare, 0) * 80%);
+}
+.tome__ribbon--h {
+  --across: 180deg;
+  --along: 90deg;
+}
+.tome__ribbon--h::after {
+  background-size: 300% 100%;
+  background-position: calc(50% - var(--glare, 0) * 80%) 0;
+}
+.tome__ribbon--v-front,
+.tome__ribbon--v-back {
+  --fw: var(--tome-rw);
+  --fh: calc(var(--book-h) + 1px);
+}
+.tome__ribbon--v-front {
+  --fz: calc(var(--tome-d) / 2 + var(--tome-lift));
+}
+.tome__ribbon--v-back {
+  --fz: calc(var(--tome-d) / -2 - var(--tome-lift));
+  --rot: rotateY(180deg);
+}
+.tome__ribbon--v-top,
+.tome__ribbon--v-bottom {
+  --fw: var(--tome-rw);
+  --fh: calc(var(--tome-d) + var(--tome-lift) * 2);
+}
+.tome__ribbon--v-top {
+  --fy: calc(var(--book-h) / -2 - var(--tome-lift));
+  --rot: rotateX(90deg);
+}
+.tome__ribbon--v-bottom {
+  --fy: calc(var(--book-h) / 2 + var(--tome-lift));
+  --rot: rotateX(-90deg);
+}
+.tome__ribbon--h-front,
+.tome__ribbon--h-back {
+  --fw: calc(var(--book-w) + 1px);
+  --fh: var(--tome-rw);
+  --fy: var(--tome-ry);
+}
+.tome__ribbon--h-front {
+  --fz: calc(var(--tome-d) / 2 + var(--tome-lift));
+}
+.tome__ribbon--h-back {
+  --fz: calc(var(--tome-d) / -2 - var(--tome-lift));
+  --rot: rotateY(180deg);
+}
+.tome__ribbon--h-fore,
+.tome__ribbon--h-spine {
+  --fw: calc(var(--tome-d) + var(--tome-lift) * 2);
+  --fh: var(--tome-rw);
+  --fy: var(--tome-ry);
+}
+.tome__ribbon--h-fore {
+  --fx: calc(var(--book-w) / 2 + var(--tome-lift));
+  --rot: rotateY(90deg);
+}
+.tome__ribbon--h-spine {
+  --fx: calc(var(--book-w) / -2 - var(--tome-lift));
+  --rot: rotateY(-90deg);
+}
+
+/* ── The seal: a gold medallion standing proud of the board ───────── */
+
+.tome__seal-rim,
+.tome__seal {
+  --fw: calc(var(--book-w) * 0.44);
+  --fh: var(--fw);
+  --fy: var(--tome-ry);
+  border-radius: 50%;
+}
+/* The coin's edge: a darker disc just behind, which shows as a rim when it turns. */
+.tome__seal-rim {
+  --fz: calc(var(--tome-d) / 2 + var(--tome-lift) + 1px);
+  background: radial-gradient(circle, #6b4818 60%, #3a2509);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.55);
+}
+.tome__seal {
+  --fz: calc(var(--tome-d) / 2 + var(--book-w) * 0.03);
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at calc(38% + var(--glare, 0) * 30%) 30%, rgb(255 250 230 / 0.9), transparent 34%),
+    radial-gradient(
+      circle,
+      transparent 66%,
+      rgb(60 35 10 / 0.55) 67%,
+      transparent 69%,
+      transparent 79%,
+      rgb(255 240 200 / 0.5) 80%,
+      transparent 82%
+    ),
+    radial-gradient(circle at 40% 34%, var(--tome-gold-hi), var(--tome-gold) 58%, var(--tome-gold-lo));
+  box-shadow:
+    inset 0 2px 2px rgb(255 248 220 / 0.6),
+    inset 0 -3px 6px rgb(60 35 10 / 0.6),
+    0 0 calc(var(--book-w) * 0.14) rgb(var(--tome-glow) / 0.45);
+  transition:
+    box-shadow 500ms var(--ease-soft),
+    filter 500ms var(--ease-soft);
+}
+.tome__seal.is-flash {
+  filter: brightness(1.45);
+  box-shadow:
+    inset 0 2px 2px rgb(255 248 220 / 0.6),
+    inset 0 -3px 6px rgb(60 35 10 / 0.6),
+    0 0 calc(var(--book-w) * 0.5) rgb(var(--tome-glow) / 0.9);
+  transition-duration: 80ms;
+}
+.tome__seal-pattern {
+  position: absolute;
+  inset: 9%;
+  border-radius: 50%;
+  background: rgb(90 55 15 / 0.6);
+  -webkit-mask: var(--girih) center / 22% 22%;
+  mask: var(--girih) center / 22% 22%;
+  opacity: 0.35;
+}
+.tome__mark {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: calc(var(--book-w) * 0.27);
+  font-weight: 800;
+  font-stretch: 125%;
+  line-height: 1;
+  color: #4a2a0a;
+  text-shadow:
+    0 1px 0 rgb(255 240 200 / 0.6),
+    0 -1px 0 rgb(40 20 5 / 0.4);
+  /* Optical centring: the glyph's dot sits low. */
+  translate: 0 -4%;
+}
+
+/* ── Aura: light escaping round the book ─────────────────────────── */
+
+/* Inside `.bookwrap`, behind the book, so it floats with it. */
+.tome-aura {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: calc(var(--book-w) * 3.6);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  z-index: -1;
+  pointer-events: none;
+}
+.tome-aura__rays,
+.tome-aura__core {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+}
+.tome-aura__rays {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgb(var(--tome-glow) / 0) 0deg 6deg,
+    rgb(var(--tome-glow) / 0.13) 8.5deg,
+    rgb(var(--tome-glow) / 0) 11deg 17deg
+  );
+  -webkit-mask: radial-gradient(closest-side, transparent 16%, #000 28%, rgb(0 0 0 / 0.5) 55%, transparent 100%);
+  mask: radial-gradient(closest-side, transparent 16%, #000 28%, rgb(0 0 0 / 0.5) 55%, transparent 100%);
+  filter: blur(2px);
+  animation:
+    tome-rays-turn 80s linear infinite,
+    tome-breathe 6s ease-in-out infinite;
+}
+.tome-aura__core {
+  inset: 22%;
+  background: radial-gradient(closest-side, rgb(var(--tome-glow) / 0.42), rgb(226 99 42 / 0.12) 55%, transparent);
+  filter: blur(14px);
+  animation: tome-breathe 3.6s ease-in-out infinite;
+}
+@keyframes tome-rays-turn {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes tome-breathe {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ── Sparks ──────────────────────────────────────────────────────── */
+
+.tome-sparks {
+  position: absolute;
+  inset: -20% -30% 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.tome-spark {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #fff1c8;
+  box-shadow: 0 0 6px 1px rgb(var(--tome-glow) / 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tome-sway,
+  .tome-aura__rays,
+  .tome-aura__core,
+  .tome__pages::after {
+    animation: none;
+  }
+}

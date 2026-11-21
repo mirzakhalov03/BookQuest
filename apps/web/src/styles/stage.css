@@ -611,7 +611,8 @@
   bottom: -14px;
   width: 118%;
   height: 30px;
-  transform: translateX(-50%);
+  /* --footprint: how wide the hidden book stands as it turns (`useBookRig`); 1 otherwise. */
+  transform: translateX(-50%) scaleX(var(--footprint, 1));
   background: radial-gradient(closest-side, rgba(0, 0, 0, 0.85), transparent 76%);
   filter: blur(9px);
   z-index: -1;
