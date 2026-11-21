@@ -77,6 +77,7 @@ export const admin: typeof En = {
   },
   participants: {
     duplicate: 'Возможный дубль',
+    previously: (handles) => `ранее: ${handles}`,
     duplicateHint: 'То же имя и контакт, что у другой записи: вероятно, один человек зарегистрировался дважды.',
     title: 'Участники',
     searchAria: 'Поиск участников',

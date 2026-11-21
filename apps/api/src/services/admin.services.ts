@@ -9,7 +9,7 @@ import { ApiError } from '../utils/api-error.js';
 import { escapeRegex } from '../utils/regex.js';
 import { startOfDayIn } from '../utils/time-zone.js';
 import { requireCurrentQuestDocument, resolvePhase } from './quest.services.js';
-import { toParticipantDto } from './participant.services.js';
+import { toAdminParticipantDto } from './participant.services.js';
 
 const SORT_FIELDS = { number: 'number', name: 'fullName', registered: 'createdAt' } as const;
 
@@ -70,6 +70,8 @@ export async function listParticipants(query: ParticipantQuery): Promise<Paginat
     filter.$or = [
       { fullName: { $regex: escapeRegex(term), $options: 'i' } },
       { 'contact.value': { $regex: escapeRegex(term), $options: 'i' } },
+      // An old handle still finds them after a rename.
+      { 'previousContacts.value': { $regex: escapeRegex(term), $options: 'i' } },
       // Phones are stored grouped ("+998 90 123 45 67"); let any separators sit between typed digits. Digits need no escaping.
       ...(digits.length >= 4 ? [{ 'contact.value': { $regex: digits.split('').join('\\D*'), $options: 'i' } }] : []),
       ...(Number.isInteger(asNumber) ? [{ number: asNumber }] : [])
@@ -88,7 +90,7 @@ export async function listParticipants(query: ParticipantQuery): Promise<Paginat
 
   const duplicates = await findPossibleDuplicates(quest._id, participants);
   return {
-    items: participants.map((row) => ({ ...toParticipantDto(row), possibleDuplicate: duplicates.has(String(row._id)) })),
+    items: participants.map((row) => ({ ...toAdminParticipantDto(row), possibleDuplicate: duplicates.has(String(row._id)) })),
     page: query.page,
     limit: query.limit,
     total

@@ -79,6 +79,7 @@ export const admin = {
   },
   participants: {
     duplicate: 'Possible duplicate',
+    previously: (handles: string) => `previously ${handles}`,
     duplicateHint: 'Same name and contact as another entry: likely one person who signed up twice.',
     title: 'Participants',
     searchAria: 'Search participants',

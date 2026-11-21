@@ -35,6 +35,7 @@ export function ParticipantsTable({ participants }: { participants: Participant[
                 {participant.possibleDuplicate && <DuplicateChip />}
               </p>
               <ContactLink contact={participant.contact} />
+              <PreviousContacts handles={participant.previousContacts} />
             </div>
           </li>
         ))}
@@ -62,6 +63,7 @@ export function ParticipantsTable({ participants }: { participants: Participant[
                 </td>
                 <td className="py-2 pr-3 text-paper-dim">
                   <ContactLink contact={participant.contact} />
+                  <PreviousContacts handles={participant.previousContacts} />
                 </td>
                 <td className="py-2 pr-3 text-taupe-dim">{formatCompactDate(participant.registeredAt)}</td>
               </tr>
@@ -80,4 +82,11 @@ function DuplicateChip() {
       {t.duplicate}
     </span>
   );
+}
+
+/** Handles this contact had before a Telegram rename, newest first: the trail back to the same person. */
+function PreviousContacts({ handles }: { handles?: string[] }) {
+  const t = useT().admin.participants;
+  if (!handles?.length) return null;
+  return <p className="m-0 mt-0.5 text-xs text-taupe-dim">{t.previously([...handles].reverse().join(', '))}</p>;
 }

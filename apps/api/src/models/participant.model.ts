@@ -24,6 +24,11 @@ const participantSchema = new Schema(
     },
     fullName: { type: String, required: true, trim: true },
     contact: { type: contactSchema, required: true },
+    /** What `contact` said before a Telegram rename replaced it. Kept so a winner stays traceable. */
+    previousContacts: {
+      type: [new Schema({ value: { type: String, required: true }, replacedAt: { type: Date, required: true } }, { _id: false })],
+      default: []
+    },
     quest: { type: Schema.Types.ObjectId, ref: 'Quest', required: true },
 
     /** Identity. Replaces the loose telegramUserId string this used to carry. */
@@ -37,6 +42,9 @@ participantSchema.index({ quest: 1, number: 1 }, { unique: true });
 
 // The real rule: one registration per person per quest.
 participantSchema.index({ quest: 1, user: 1 }, { unique: true });
+
+// Every Telegram sign-in looks up the reader's registrations to keep their handle current.
+participantSchema.index({ user: 1 });
 
 /* Deliberately NOT unique. Contact is reachability, not identity — a unique
    index here wrongly blocks two family members sharing a phone number. */

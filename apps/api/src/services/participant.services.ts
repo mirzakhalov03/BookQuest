@@ -1,3 +1,4 @@
+import type { Types } from 'mongoose';
 import type { Participant, ParticipantPublic, RegisterParticipantPayload } from '@bookquest/shared';
 import { PARTICIPANT_NUMBER_MAX, PARTICIPANT_NUMBER_MIN } from '@bookquest/shared';
 import { ParticipantModel, type ParticipantDocument, type ParticipantRow } from '../models/participant.model.js';
@@ -10,6 +11,7 @@ import { findCurrentQuestDocument, requireCurrentQuestDocument } from './quest.s
 import { announceRegistration } from './registration-alerts.services.js';
 import { findTelegramOwnerOfContact } from './duplicate-guard.services.js';
 import { maskUsername } from '../utils/mask.js';
+import { escapeRegex } from '../utils/regex.js';
 
 /**
  * Registration closes when the reading period ends — the same promise the
@@ -80,7 +82,7 @@ export async function registerParticipant(
   await QuestModel.updateOne({ _id: quest._id }, { $inc: { participantCount: 1 } });
 
   // Not awaited: a slow Telegram must not hold up the participant's confirmation.
-  void announceRegistration(participant, user);
+  void announceRegistration(participant);
 
   return toParticipantDto(participant);
 }
@@ -130,6 +132,34 @@ export function toParticipantDto(participant: ParticipantRow): Participant {
   };
 }
 
+/** The roster's view: adds what only organisers need. */
+export function toAdminParticipantDto(participant: ParticipantRow): Participant {
+  const previous = participant.previousContacts ?? [];
+  return { ...toParticipantDto(participant), ...(previous.length > 0 && { previousContacts: previous.map((c) => c.value) }) };
+}
+
 export function toParticipantPublicDto(participant: ParticipantRow): ParticipantPublic {
   return { number: participant.number, fullName: participant.fullName };
+}
+
+/**
+ * Telegram registrations always show the reader's current handle; whatever it replaced moves
+ * to `previousContacts`, so nothing is lost. No handle on the account: leave the record alone.
+ */
+export async function syncTelegramContact(userId: Types.ObjectId, username: string | null | undefined): Promise<void> {
+  if (!username) return;
+  const current = `@${username}`;
+  const stale = await ParticipantModel.find({
+    user: userId,
+    'contact.method': 'telegram',
+    // Telegram handles are case-insensitive, so a case-only difference isn't a change.
+    'contact.value': { $not: new RegExp(`^${escapeRegex(current)}$`, 'i') }
+  });
+
+  const replacedAt = new Date();
+  for (const participant of stale) {
+    participant.previousContacts.push({ value: participant.contact.value, replacedAt });
+    participant.contact.value = current;
+    await participant.save();
+  }
 }

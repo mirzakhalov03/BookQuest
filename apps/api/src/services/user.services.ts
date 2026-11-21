@@ -6,6 +6,8 @@ import type { TelegramProfile } from '../utils/telegram.js';
 import { ApiError } from '../utils/api-error.js';
 import { isDuplicateKeyError } from '../utils/mongo.js';
 import { mergeUsers } from './account-merge.services.js';
+import { syncTelegramContact } from './participant.services.js';
+import { logger } from '../config/logger.js';
 
 const BCRYPT_COST = 12;
 
@@ -19,7 +21,7 @@ const BCRYPT_COST = 12;
 export async function upsertUserFromTelegramProfile(
   profile: TelegramProfile
 ): Promise<UserDocument> {
-  return UserModel.findOneAndUpdate(
+  const user = await UserModel.findOneAndUpdate(
     { telegramUserId: profile.telegramUserId },
     {
       $set: {
@@ -34,6 +36,8 @@ export async function upsertUserFromTelegramProfile(
     },
     { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
   );
+  await keepContactCurrent(user);
+  return user;
 }
 
 /** POST /auth/register. Throws 409 if the phone number is already in use. */
@@ -123,6 +127,7 @@ export async function linkTelegramToUser(
     throw error;
   }
 
+  await keepContactCurrent(user);
   return user;
 }
 
@@ -135,4 +140,13 @@ export async function updateProfile(
   user.set('avatar', update.avatar);
   await user.save();
   return user;
+}
+
+/** Never blocks a sign-in: a stale handle is a cosmetic problem, a failed sign-in isn't. */
+async function keepContactCurrent(user: UserDocument): Promise<void> {
+  try {
+    await syncTelegramContact(user._id, user.username);
+  } catch (error) {
+    logger.warn({ err: error, userId: user.id }, 'Could not sync Telegram contact');
+  }
 }
